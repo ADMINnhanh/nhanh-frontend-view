@@ -1,0 +1,22 @@
+html {
+  --z-index-error: 9999;
+  --z-index-contextMenu: 9998;
+  --z-index-keyboard-popup: 9998; // 键盘快捷键面板
+
+  /* --z-index-popup: 50+; 交由 src\components\popups\popups.ts 控制 */
+
+  --z-index-task-list: 49; // 任务列表
+}
+
+// html {
+//   @zindexarr:  **;
+//   @length: length(@zindexarr);
+
+//   .loop(@index,@count) when(@index<@length + 1) {
+//     @name: extract(@zindexarr, @index);
+//     @value: @index + @count;
+//     --z-index-@{name}: @value;
+//     .loop(@index+1,@count);
+//   }
+//   .loop(1,10);
+// }
