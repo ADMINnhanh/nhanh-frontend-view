@@ -331,10 +331,7 @@ function drawSecondaryEditBox() {
 }
 /** 绘制背景 */
 function drawBackground() {
-  const { clientWidth, clientHeight, dom, ctx } = commonParams;
-
-  dom.width = clientWidth;
-  dom.height = clientHeight;
+  const { clientWidth, clientHeight, ctx } = commonParams;
 
   const { left, top, width, height } = handleImg(clientWidth, clientHeight);
   ctx.drawImage(img, left, top, width, height);
@@ -346,6 +343,10 @@ function drawFullList() {
   if (!dom || !ctx) return;
 
   const { clientWidth, clientHeight } = dom;
+
+  dom.width = clientWidth;
+  dom.height = clientHeight;
+
   const { x, y } = dom.getBoundingClientRect();
   const { left, top, width, height } = handleImg(clientWidth, clientHeight);
 

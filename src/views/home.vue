@@ -116,7 +116,7 @@ const collapsed = ref(false);
           :options="menuOptions"
         />
       </n-layout-sider>
-      <n-layout>
+      <n-layout class="router-view">
         <router-view></router-view>
       </n-layout>
     </n-layout>
@@ -160,8 +160,14 @@ const collapsed = ref(false);
   .n-layout {
     height: 100px;
     flex-grow: 1;
-    .n-layout {
+    .n-layout.router-view {
       height: 100%;
+      :deep(.n-layout-scroll-container) {
+        width: 100%;
+        height: 100%;
+        padding: 10px;
+        display: flex;
+      }
     }
   }
 }

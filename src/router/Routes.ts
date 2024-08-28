@@ -35,6 +35,17 @@ const canvasRoutes: RouteRecordRaw2 = {
       },
       component: () => import("@/views/canvas/YOLOFormatAnnotator/index.vue"),
     },
+    {
+      path: "3DBase",
+      name: "3D Base",
+      meta: {
+        name: {
+          zhCN: "3D 基础",
+          enUS: "3D Base",
+        },
+      },
+      component: () => import("@/views/canvas/3D Base/index.vue"),
+    },
   ],
 };
 
