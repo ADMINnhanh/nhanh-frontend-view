@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import "@/assets/style/color.ts";
-import "@/assets/style/size.ts";
+import "@/assets/style/color";
+import "@/assets/style/size";
 
 import "@/utils/windows";
 import "@/utils/shortcutKey";
