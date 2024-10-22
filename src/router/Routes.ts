@@ -1,4 +1,5 @@
 import svgGather from "@/assets/icon/gather";
+import { FishOutline } from "@vicons/ionicons5";
 import type { Component } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
@@ -13,8 +14,9 @@ type RouteRecordRaw2 = RouteRecordRaw & {
   children?: RouteRecordRaw2[];
 };
 
+/** 画布 */
 const canvasRoutes: RouteRecordRaw2 = {
-  path: "/canvas",
+  path: "canvas",
   name: "canvas",
   meta: {
     icon: svgGather("canvas"),
@@ -36,15 +38,41 @@ const canvasRoutes: RouteRecordRaw2 = {
       component: () => import("@/views/canvas/YOLOFormatAnnotator/index.vue"),
     },
     {
-      path: "3DBase",
-      name: "3D Base",
+      path: "BasicWebGL",
+      name: "BasicWebGL",
       meta: {
         name: {
-          zhCN: "3D 基础",
-          enUS: "3D Base",
+          zhCN: "初识 WebGL",
+          enUS: "Basic WebGL",
         },
       },
-      component: () => import("@/views/canvas/3D Base/index.vue"),
+      component: () => import("@/views/canvas/Basic WebGL/index.vue"),
+    },
+  ],
+};
+
+/** 解乏 */
+const relaxRouting: RouteRecordRaw2 = {
+  path: "relax",
+  name: "relax",
+  meta: {
+    icon: FishOutline,
+    name: {
+      zhCN: "解乏小组件",
+      enUS: "Relax Widget",
+    },
+  },
+  children: [
+    {
+      path: "Bounce",
+      name: "Bounce",
+      meta: {
+        name: {
+          zhCN: "弹跳球",
+          enUS: "Bounce",
+        },
+      },
+      component: () => import("@/views/relax/Bounce/index.vue"),
     },
   ],
 };
@@ -61,5 +89,5 @@ function addRedirect(item: RouteRecordRaw2[]) {
 }
 
 /** 集合 */
-const Routes = addRedirect([canvasRoutes]);
+const Routes = addRedirect([canvasRoutes, relaxRouting]);
 export default Routes;

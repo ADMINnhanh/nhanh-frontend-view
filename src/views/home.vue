@@ -64,6 +64,7 @@ const menuOptions = computed<MenuOption[]>(() => {
       };
       if (item.meta.icon) i.icon = renderIcon(item.meta.icon);
       if (item.children) i.children = generateMenu(item.children);
+
       return i;
     });
   }
