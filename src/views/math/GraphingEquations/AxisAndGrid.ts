@@ -6,14 +6,14 @@ const color = computed(() => {
   const theme = Settings.value.theme;
   if (theme === "light")
     return {
-      axis: "#333",
+      axis: "#222",
       grid: "#666",
       innerGrid: "#e5e5e5",
     };
   return {
     axis: "#aeaeae",
-    grid: "#656565",
-    innerGrid: "#454545",
+    grid: "#666",
+    innerGrid: "#272727",
   };
 });
 /** 绘制网格 */
