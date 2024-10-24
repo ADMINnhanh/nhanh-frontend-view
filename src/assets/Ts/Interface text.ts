@@ -25,6 +25,9 @@ const zhCN = {
       },
     },
   },
+  404: {
+    goHome: "前往首页",
+  },
 } as const;
 
 const enUS = {
@@ -50,6 +53,9 @@ const enUS = {
         ],
       },
     },
+  },
+  404: {
+    goHome: "Go Home",
   },
 } as const;
 
