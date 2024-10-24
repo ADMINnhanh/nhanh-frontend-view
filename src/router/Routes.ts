@@ -15,7 +15,7 @@ type CustomRouteRecord = RouteRecordRaw & {
 };
 
 /** 画布 */
-const canvasRoutes: CustomRouteRecord = {
+const canvas: CustomRouteRecord = {
   path: "canvas",
   name: "canvas",
   meta: {
@@ -46,7 +46,7 @@ const canvasRoutes: CustomRouteRecord = {
           enUS: "Basic WebGL",
         },
       },
-      component: () => import("@/views/canvas/Basic WebGL/index.vue"),
+      component: () => import("@/views/canvas/BasicWebGL/index.vue"),
     },
   ],
 };
@@ -77,7 +77,33 @@ const relaxRouting: CustomRouteRecord = {
   ],
 };
 
-const AllRoute = [canvasRoutes, relaxRouting];
+/** 数学 */
+const math: CustomRouteRecord = {
+  path: "math",
+  name: "math",
+  meta: {
+    icon: SvgGather("Math"),
+    name: {
+      zhCN: "数学",
+      enUS: "Math",
+    },
+  },
+  children: [
+    {
+      path: "GraphingEquations",
+      name: "GraphingEquations",
+      meta: {
+        name: {
+          zhCN: "图形方程",
+          enUS: "GraphingEquations",
+        },
+      },
+      component: () => import("@/views/math/GraphingEquations/index.vue"),
+    },
+  ],
+};
+
+const AllRoute = [canvas, relaxRouting, math];
 
 /** 路由重名检测 */
 function CheckPath(item: CustomRouteRecord[]) {

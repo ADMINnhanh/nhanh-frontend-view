@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Close } from "@vicons/ionicons5";
-// import { NIcon, NEllipsis, NSpace } from "naive-ui";
+import { NIcon, NEllipsis, NSpace } from "naive-ui";
 
 interface EmitType {
   (e: "Closure"): void;

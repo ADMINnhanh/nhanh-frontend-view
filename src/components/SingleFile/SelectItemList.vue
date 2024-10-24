@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NButton, NIcon } from "naive-ui";
 import { ChevronBack, ChevronForward } from "@vicons/ionicons5";
-import Scroll from "@/components/SingleFile/Scroll.vue";
+import Scroll from "@/components/singleFile/Scroll.vue";
 import { computed, ref } from "vue";
 import { _GenerateUUID, _Schedule } from "nhanh-pure-function";
 

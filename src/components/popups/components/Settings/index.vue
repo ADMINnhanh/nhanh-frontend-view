@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Scroll from "@/components/SingleFile/Scroll.vue";
+import Scroll from "@/components/singleFile/Scroll.vue";
 import { NTabs, NTabPane, NIcon, NSelect, NButton, NSpace } from "naive-ui";
 import SetItem from "./setItem.vue";
 import { _CloseOnOutsideClick } from "nhanh-pure-function";
-import { Close, Sync, Add } from "@vicons/ionicons5";
+import { Sync, Add } from "@vicons/ionicons5";
 import {
   Settings,
   SetOptions,
@@ -16,6 +16,7 @@ import {
 import { InterfaceText } from "@/assets/Ts/Interface text";
 import { computed, ref } from "vue";
 import SvgGather from "@/assets/icon/gather";
+import Popup from "@/components/layout/Popup.vue";
 
 interface EmitType {
   (e: "Closure"): void;
@@ -43,13 +44,8 @@ const interfaceText = computed(() => {
 </script>
 
 <template>
-  <section class="Settings center-positioning">
-    <header>
-      {{ interfaceText.header }}
-      <div class="clickable" @click="Closure">
-        <NIcon size="22" :component="Close" />
-      </div>
-    </header>
+  <Popup class="Settings center-positioning" @closure="Closure">
+    <template #header>{{ interfaceText.header }}</template>
     <NTabs ref="tabsRef" v-model:value="tabsValue" :animated="true">
       <n-tab-pane :name="interfaceText.tabs[0].name">
         <Scroll>
@@ -116,35 +112,13 @@ const interfaceText = computed(() => {
         </Scroll>
       </n-tab-pane>
     </NTabs>
-  </section>
+  </Popup>
 </template>
 
 <style lang="less" scoped>
 .Settings {
   --width: 550px;
   --height: 700px;
-  color: var(--text-color);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  border-radius: var(--border-color-radius);
-  padding: var(--popup-padding);
-  background: var(--background-color);
-  border: 1px solid var(--border-color);
-  box-shadow: 0px 12px 24px 0px var(--box-shadow);
-
-  header {
-    font-size: 20px;
-    color: var(--text-color-focus);
-    margin-bottom: 10px;
-    position: relative;
-    .clickable {
-      height: 100%;
-      position: absolute;
-      right: 0;
-      top: 0;
-    }
-  }
   .n-tabs {
     flex-grow: 1;
     display: flex;

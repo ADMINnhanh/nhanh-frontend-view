@@ -276,6 +276,7 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   justify-content: space-between;
+  border-radius: 5px;
 
   .info {
     width: 400px;
