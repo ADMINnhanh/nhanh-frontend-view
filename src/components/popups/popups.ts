@@ -36,7 +36,7 @@ let zIndex: number = ZINDEX;
 export const PopupItems = ref<PopupConfig[]>([]);
 
 /** 添加弹窗 dataTs 应当是全新对象 */
-export function addPopup(parmas: AddPopupParams): number {
+export function AddPopup(parmas: AddPopupParams): number {
   if (!AllComponent[parmas.componentName])
     window.$CustomizeError(`没有名为: ${parmas.componentName} 的组件`);
 
@@ -62,26 +62,26 @@ export function addPopup(parmas: AddPopupParams): number {
 
   //  触发 transition 动画
   requestAnimationFrame(() => {
-    setPopupConfig({ zIndex: data.zIndex, show: true });
+    SetPopupConfig({ zIndex: data.zIndex, show: true });
   });
 
   //  由于zIndex的唯一性,返回其作为后续操作的标识符
   return zIndex;
 }
 /** 删除弹窗 */
-export function deletePopup(zIndex: number) {
+export function DeletePopup(zIndex: number) {
   const itemIndex = PopupItems.value.findIndex((item) => item.zIndex == zIndex);
   if (itemIndex != -1) PopupItems.value.splice(itemIndex, 1);
   //   关闭所有弹窗时复位层级
   if (PopupItems.value.length == 0) zIndex = ZINDEX;
 }
 /** 根据 zIndex 获取对应弹窗配置  */
-export function getPopupConfig(zIndex: number) {
+export function GetPopupConfig(zIndex: number) {
   return PopupItems.value.find((item) => item.zIndex == zIndex);
 }
 /** 设置属性 data 应当是全新对象  */
-export function setPopupConfig(parmas: SetPopupParams) {
-  const item = getPopupConfig(parmas.zIndex);
+export function SetPopupConfig(parmas: SetPopupParams) {
+  const item = GetPopupConfig(parmas.zIndex);
 
   if (item) {
     const keys = Object.keys(parmas).filter((key) => key != "zIndex");
@@ -91,7 +91,7 @@ export function setPopupConfig(parmas: SetPopupParams) {
 }
 
 /** 提升弹窗样式的层级 (多个弹窗共存时，被点击弹窗应当位于顶层) */
-export function promotePopupLevel(dataZIndex: number) {
+export function PromotePopupLevel(dataZIndex: number) {
   const dom = document.querySelector(
     `[data-zindex="${dataZIndex}"]`
   ) as HTMLElement;
@@ -101,7 +101,7 @@ export function promotePopupLevel(dataZIndex: number) {
 }
 
 // 检查元素是否在视口内
-function isElementInViewport(
+function IsElementInViewport(
   el: HTMLElement,
   minDisplaySize?: { width?: number; height?: number }
 ) {
@@ -123,20 +123,20 @@ function isElementInViewport(
 }
 
 /** 组件默认是可复用的，若希望组件是唯一的可使用本方法 */
-export function addUniqueModal(parmas: AddPopupParams) {
+export function AddUniqueModal(parmas: AddPopupParams) {
   const item = PopupItems.value.find(
     (item) => item.componentName == parmas.componentName
   );
 
   if (item) {
-    setPopupConfig({ ...parmas, zIndex: item.zIndex, show: true });
-    promotePopupLevel(item.zIndex);
+    SetPopupConfig({ ...parmas, zIndex: item.zIndex, show: true });
+    PromotePopupLevel(item.zIndex);
     const dom = document.querySelector(
       `[data-zindex="${item.zIndex}"]`
     ) as HTMLElement;
     if (dom) {
       /** 不在可视范围内 */
-      if (!isElementInViewport(dom, { width: 100, height: 100 })) {
+      if (!IsElementInViewport(dom, { width: 100, height: 100 })) {
         const rect = dom.getBoundingClientRect();
         const viewHeight =
           window.innerHeight || document.documentElement.clientHeight;
@@ -157,6 +157,6 @@ export function addUniqueModal(parmas: AddPopupParams) {
       setTimeout(() => dom.classList.remove("lookHere"), 1000);
     }
   } else {
-    addPopup(parmas);
+    AddPopup(parmas);
   }
 }

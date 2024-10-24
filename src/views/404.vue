@@ -5,15 +5,15 @@ import { ref } from "vue";
 /** 倒计时 */
 const count = ref(11);
 
-function loop() {
+function Loop() {
   count.value--;
   if (count.value > 0) {
-    setTimeout(loop, 1000);
+    setTimeout(Loop, 1000);
   } else {
     router.push("/");
   }
 }
-loop();
+Loop();
 </script>
 
 <template>

@@ -9,7 +9,7 @@ type PropsType = {
 const Props = defineProps<PropsType>();
 
 const listBoxHeaderRef = ref();
-function updateListBoxHeader() {
+function UpdateListBoxHeader() {
   const dom = listBoxHeaderRef.value as HTMLElement;
   if (dom) {
     const scrollDom = dom.closest(".moduls-scroll") as HTMLElement;
@@ -19,7 +19,7 @@ function updateListBoxHeader() {
     );
   }
 }
-requestAnimationFrame(updateListBoxHeader);
+requestAnimationFrame(UpdateListBoxHeader);
 
 const ListBoxStyle = computed(() => {
   const style = {} as any;

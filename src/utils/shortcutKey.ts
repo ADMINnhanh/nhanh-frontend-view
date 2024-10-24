@@ -1,5 +1,5 @@
 import { Settings } from "@/components/popups/components/Settings";
-import { addUniqueModal } from "@/components/popups/popups";
+import { AddUniqueModal } from "@/components/popups/popups";
 import { computed } from "vue";
 
 const AllKey = [
@@ -168,13 +168,13 @@ const defaultShortcutKeys: DefaultShortcutKey[] = [
       enUS: "Open Settings",
     },
     callback: () =>
-      addUniqueModal({
+      AddUniqueModal({
         componentName: "Settings",
       }),
   },
 ];
 /** 重复快捷键检测 */
-function detectShortcutConflict() {
+function DetectShortcutConflict() {
   const logArr: string[] = [];
   const conflictSet = new Set();
   defaultShortcutKeys.forEach(({ shortcutKey }) => {
@@ -190,7 +190,7 @@ function detectShortcutConflict() {
   if (conflictArr.length > 0)
     window.$CustomizeError(`快捷键冲突: ${conflictArr.join(" ; ")}`);
 }
-detectShortcutConflict();
+DetectShortcutConflict();
 
 export const ShortcutKeys = computed(() => {
   return defaultShortcutKeys.map((item) => {
@@ -207,14 +207,14 @@ export const ShortcutKeys = computed(() => {
 });
 
 const Keys = new Set();
-function isDialogPresent() {
+function IsDialogPresent() {
   return !!document.querySelector("body .n-modal-container");
 }
 
 document.addEventListener("keydown", (event) => {
   // console.log(`你按下了👉${event.key}👈`);
 
-  if (isDialogPresent()) return;
+  if (IsDialogPresent()) return;
   Keys.add(event.key);
 
   const success = ShortcutKeys.value.map((item) => {

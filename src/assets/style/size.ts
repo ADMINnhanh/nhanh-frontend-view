@@ -1,4 +1,4 @@
-import { injectStyle } from "@/utils/vueMethod";
+import { InjectStyle } from "@/utils/vueMethod";
 
 const size = {
   "text-size": "14px",
@@ -13,4 +13,4 @@ const size = {
   "button-border-radius": "5px",
 };
 
-injectStyle(size);
+InjectStyle(size);

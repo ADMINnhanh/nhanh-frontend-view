@@ -14,9 +14,9 @@ const emits = defineEmits<EmitsType>();
 
 const ScrollDom = ref<HTMLElement>();
 
-function hasVerticalScrollbar() {
+function HasVerticalScrollbar() {
   const scrollDom = ScrollDom.value;
-  function mergeDuplicateCode() {
+  function MergeDuplicateCode() {
     if (scrollDom) {
       const paddingRight =
         scrollDom.clientHeight < scrollDom.scrollHeight
@@ -32,16 +32,16 @@ function hasVerticalScrollbar() {
     }
   }
   if (!scrollDom) {
-    requestAnimationFrame(hasVerticalScrollbar);
+    requestAnimationFrame(HasVerticalScrollbar);
   } else {
-    mergeDuplicateCode();
+    MergeDuplicateCode();
     if (Props.dynamic) {
-      const observer = new ResizeObserver(mergeDuplicateCode);
+      const observer = new ResizeObserver(MergeDuplicateCode);
       observer.observe(scrollDom);
     }
   }
 }
-hasVerticalScrollbar();
+HasVerticalScrollbar();
 
 const onScroll = _ScrollEndListener((trigger) =>
   emits("bottomReached", trigger)

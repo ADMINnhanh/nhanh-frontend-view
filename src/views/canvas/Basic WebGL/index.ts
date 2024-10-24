@@ -41,20 +41,20 @@ let commonParams: {
 export const canvas = ref<HTMLCanvasElement>();
 
 /** 绘画线 */
-function drawLine() {}
+function DrawLine() {}
 /** 绘画圆锥 */
-function drawCone() {}
+function DrawCone() {}
 
 /** 坐标轴的坐标 */
-function axisPoint() {}
+function AxisPoint() {}
 /** 绘画坐标轴 */
-function drawAxis() {}
+function DrawAxis() {}
 
 /** 初始化着色器程序 */
-function initShader() {}
+function InitShader() {}
 
 /** 初始化通用参数 */
-function initCommonParams() {
+function InitCommonParams() {
   const dom = canvas.value as HTMLCanvasElement;
   const gl = dom.getContext("webgl");
   if (!dom || !gl) {
@@ -78,7 +78,7 @@ function initCommonParams() {
   });
 }
 /** 绘制汇总 */
-export function drawFullList() {
-  const newCommonParams = initCommonParams();
+export function DrawFullList() {
+  const newCommonParams = InitCommonParams();
   if (!newCommonParams) return;
 }

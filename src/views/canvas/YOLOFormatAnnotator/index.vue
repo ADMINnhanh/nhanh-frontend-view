@@ -35,7 +35,7 @@ import img2 from "./2.avif";
 import { TrashBinOutline } from "@vicons/ionicons5";
 import JSZip from "jszip";
 import { _GenerateUUID } from "nhanh-pure-function";
-import { hideGlobalLoading, showGlobalLoading } from "@/stores/globalLoading";
+import { HideGlobalLoading, ShowGlobalLoading } from "@/stores/globalLoading";
 
 type FileList = {
   src: string;
@@ -126,7 +126,7 @@ function deleteBoxType(name: string) {
 /** 导出 */
 async function exportFile() {
   const loadingId = "yolo8FormatAnnotator";
-  showGlobalLoading(loadingId, "导出中...");
+  ShowGlobalLoading(loadingId, "导出中...");
 
   if (fileList.value.length == 0)
     return window.$message.warning("没有图片可导出~");
@@ -176,7 +176,7 @@ async function exportFile() {
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     })
-    .finally(() => hideGlobalLoading(loadingId));
+    .finally(() => HideGlobalLoading(loadingId));
 }
 
 window.addEventListener("mousemove", handleMouseMove);

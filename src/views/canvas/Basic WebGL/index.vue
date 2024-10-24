@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { canvas, drawFullList } from ".";
+import { canvas, DrawFullList } from ".";
 
-requestAnimationFrame(drawFullList);
+requestAnimationFrame(DrawFullList);
 </script>
 
 <template>

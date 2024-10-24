@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NSpin } from "naive-ui";
-import Scroll from "@/components/Scroll.vue";
+import Scroll from "@/components/SingleFile/Scroll.vue";
 
 interface PropsType {
   bottomReached?: (...args: any[]) => any;

@@ -10,21 +10,21 @@ export const NSpinValue = computed(() => {
     .join("");
   return { show, description };
 });
-export function showGlobalLoading(key: string, text?: string) {
+export function ShowGlobalLoading(key: string, text?: string) {
   if (GlobalLoading.value.has(key))
     console.error("全局 loading 的 key 重名了， key : " + key);
   GlobalLoading.value.set(key, text ?? "");
 }
-export function hideGlobalLoading(key: string) {
+export function HideGlobalLoading(key: string) {
   GlobalLoading.value.delete(key);
 }
 
 /** 使用示例 */
-// showGlobalLoading("q", "测试测试");
-// showGlobalLoading("w", "哈哈哈哈");
+// ShowGlobalLoading("q", "测试测试");
+// ShowGlobalLoading("w", "哈哈哈哈");
 // setTimeout(() => {
-//   hideGlobalLoading("q");
+//   HideGlobalLoading("q");
 //   setTimeout(() => {
-//     hideGlobalLoading("w");
+//     HideGlobalLoading("w");
 //   }, 3000);
 // }, 3000);

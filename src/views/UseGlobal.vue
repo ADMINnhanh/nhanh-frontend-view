@@ -7,9 +7,9 @@ import "@/utils/shortcutKey";
 
 import Popups from "@/components/popups/index.vue";
 
-// import { addUniqueModal } from "@/components/popups/popups";
+// import { AddUniqueModal } from "@/components/popups/popups";
 // setTimeout(() => {
-//   addUniqueModal({
+//   AddUniqueModal({
 //     componentName: "Settings",
 //   });
 // }, 1000);

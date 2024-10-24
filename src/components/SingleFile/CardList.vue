@@ -23,7 +23,7 @@ const itemStyle = ref({
   "--margin-bottom": Props.marginBottom,
 });
 
-function changeItemWidth() {
+function ChangeItemWidth() {
   const dom = listBoxRef.value as HTMLElement;
   if (!dom) return;
 
@@ -40,7 +40,7 @@ function changeItemWidth() {
 
     const countSet = new Set();
 
-    function loop(count: number) {
+    function Loop(count: number) {
       const offsetWidth =
         width - (count * minWidth + (count - 1) * marginBottom);
 
@@ -53,24 +53,24 @@ function changeItemWidth() {
             itemStyle.value["--width"] = w;
           } else {
             countSet.add(count);
-            loop(Math.floor(width / minWidth));
+            Loop(Math.floor(width / minWidth));
           }
         } else {
           itemStyle.value["--width"] = w;
         }
       } else if (offsetWidth < 0) {
-        loop(count - 1);
+        Loop(count - 1);
       } else {
         itemStyle.value["--width"] = minWidth;
       }
     }
-    loop(count);
+    Loop(count);
   }
 }
-requestAnimationFrame(changeItemWidth);
-window.addEventListener("resize", changeItemWidth);
+requestAnimationFrame(ChangeItemWidth);
+window.addEventListener("resize", ChangeItemWidth);
 onUnmounted(() => {
-  window.removeEventListener("resize", changeItemWidth);
+  window.removeEventListener("resize", ChangeItemWidth);
 });
 </script>
 

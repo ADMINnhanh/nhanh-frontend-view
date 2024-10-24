@@ -1,4 +1,4 @@
-import svgGather from "@/assets/icon/gather";
+import SvgGather from "@/assets/icon/gather";
 import { ShortcutKeys, type ShortcutKey } from "@/utils/shortcutKey";
 import { NSpace, NTag } from "naive-ui";
 import { computed, h, ref, toRaw } from "vue";
@@ -13,7 +13,7 @@ const defaultSettings: SettingsType = {
 export const Settings = ref<SettingsType>(
   OldSettings ? JSON.parse(OldSettings) : defaultSettings
 );
-export function setOptions() {
+export function SetOptions() {
   const options = JSON.stringify(toRaw(Settings.value));
   localStorage.setItem("Settings", options);
 }
@@ -69,14 +69,14 @@ export const shortcutKeysList = computed(() => {
 });
 
 /** 使用默认快捷键 */
-export function setDefaultShortcutKey(id: number) {
+export function SetDefaultShortcutKey(id: number) {
   Settings.value.customShortcutKeys = Settings.value.customShortcutKeys.filter(
     (key) => key.id != id
   );
-  setOptions();
+  SetOptions();
 }
 /** 自定义快捷键 */
-export function setCustomShortcutKey(item: (typeof shortcutKeysList.value)[0]) {
+export function SetCustomShortcutKey(item: (typeof shortcutKeysList.value)[0]) {
   const newKeys = ref<string[]>([]);
 
   const title = () => {
@@ -109,15 +109,15 @@ export function setCustomShortcutKey(item: (typeof shortcutKeysList.value)[0]) {
     ]);
   };
   /** 按键事件 */
-  function keyUp(e: KeyboardEvent) {
+  const keyUp = (e: KeyboardEvent) => {
     e.preventDefault();
     newKeys.value.push(e.key);
-  }
+  };
   /** 捕获事件 */
   window.addEventListener("keydown", keyUp);
   window.$dialog.success({
     title,
-    icon: () => svgGather("Edit"),
+    icon: () => SvgGather("Edit"),
     content,
     positiveText: Settings.value.language == "zhCN" ? "保存" : "Save",
     negativeText: Settings.value.language == "zhCN" ? "取消" : "Cancel",
@@ -143,7 +143,7 @@ export function setCustomShortcutKey(item: (typeof shortcutKeysList.value)[0]) {
             id: item.id,
             shortcutKey: newKeys.value as any,
           });
-          setOptions();
+          SetOptions();
           return true;
         }
       } else {

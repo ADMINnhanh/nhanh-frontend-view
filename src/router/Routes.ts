@@ -1,9 +1,9 @@
-import svgGather from "@/assets/icon/gather";
+import SvgGather from "@/assets/icon/gather";
 import { FishOutline } from "@vicons/ionicons5";
 import type { Component } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
-type RouteRecordRaw2 = RouteRecordRaw & {
+type CustomRouteRecord = RouteRecordRaw & {
   meta: {
     icon?: Component;
     name: {
@@ -11,15 +11,15 @@ type RouteRecordRaw2 = RouteRecordRaw & {
       enUS: string;
     };
   };
-  children?: RouteRecordRaw2[];
+  children?: CustomRouteRecord[];
 };
 
 /** 画布 */
-const canvasRoutes: RouteRecordRaw2 = {
+const canvasRoutes: CustomRouteRecord = {
   path: "canvas",
   name: "canvas",
   meta: {
-    icon: svgGather("canvas"),
+    icon: SvgGather("canvas"),
     name: {
       zhCN: "Canvas 绘画",
       enUS: "Canvas Drawing",
@@ -52,7 +52,7 @@ const canvasRoutes: RouteRecordRaw2 = {
 };
 
 /** 解乏 */
-const relaxRouting: RouteRecordRaw2 = {
+const relaxRouting: CustomRouteRecord = {
   path: "relax",
   name: "relax",
   meta: {
@@ -77,17 +77,34 @@ const relaxRouting: RouteRecordRaw2 = {
   ],
 };
 
+const AllRoute = [canvasRoutes, relaxRouting];
+
+/** 路由重名检测 */
+function CheckPath(item: CustomRouteRecord[]) {
+  const pathList: string[] = [];
+  item.forEach((item) => {
+    if (pathList.includes(item.path)) {
+      throw new Error(`路由重名：${item.path}`);
+    }
+    pathList.push(item.path);
+    if (item.children && item.children.length > 0) {
+      CheckPath(item.children);
+    }
+  });
+}
+CheckPath(AllRoute);
+
 /** 添加重定向 */
-function addRedirect(item: RouteRecordRaw2[]) {
+function AddRedirect(item: CustomRouteRecord[]) {
   return item.map((item) => {
     if (!item.component && item.children) {
       item.redirect = { name: item.children[0].name };
-      item.children = addRedirect(item.children);
+      item.children = AddRedirect(item.children);
     }
     return item;
   });
 }
 
 /** 集合 */
-const Routes = addRedirect([canvasRoutes, relaxRouting]);
+const Routes = AddRedirect(AllRoute);
 export default Routes;

@@ -25,7 +25,7 @@ const positionOld = { x: 0, y: 0 };
 const time = 1000 * 1.2;
 let moveId = "";
 /** 继续移动 */
-function continueMove(id: string) {
+function ContinueMove(id: string) {
   /** 方向 */
   const direction = {
     x: positionOld.x < x.value ? 1 : -1,
@@ -58,7 +58,7 @@ function continueMove(id: string) {
 }
 
 /** 鼠标按下 */
-function mousedown(payload: MouseEvent) {
+function Mousedown(payload: MouseEvent) {
   document.body.classList.add("no-select");
   pressed.value = true;
   moveId = "";
@@ -66,7 +66,8 @@ function mousedown(payload: MouseEvent) {
   y.value = payload.clientY;
 }
 /** 鼠标松开 */
-function mouseup(payload: MouseEvent) {
+function Mouseup(payload: MouseEvent) {
+  if (!pressed.value) return;
   document.body.classList.remove("no-select");
   pressed.value = false;
 
@@ -74,10 +75,10 @@ function mouseup(payload: MouseEvent) {
   y.value = payload.clientY;
 
   moveId = _GenerateUUID();
-  continueMove(moveId);
+  ContinueMove(moveId);
 }
 /** 鼠标移动 */
-function mousemove(payload: MouseEvent) {
+function Mousemove(payload: MouseEvent) {
   if (!pressed.value) return;
   speed.value.x = Math.abs(payload.clientX - x.value);
   speed.value.y = Math.abs(payload.clientY - y.value);
@@ -94,16 +95,16 @@ function mousemove(payload: MouseEvent) {
   y.value = payload.clientY;
 }
 
-window.addEventListener("mouseup", mouseup);
-window.addEventListener("mousemove", mousemove);
+window.addEventListener("mouseup", Mouseup);
+window.addEventListener("mousemove", Mousemove);
 onUnmounted(() => {
-  window.removeEventListener("mouseup", mouseup);
-  window.removeEventListener("mousemove", mousemove);
+  window.removeEventListener("mouseup", Mouseup);
+  window.removeEventListener("mousemove", Mousemove);
 });
 </script>
 
 <template>
-  <div class="speed-nhanh" @mousedown="mousedown">
+  <div class="speed-nhanh" @mousedown="Mousedown">
     <img
       src="/nhanh.ico"
       alt=""
@@ -116,7 +117,7 @@ onUnmounted(() => {
 .speed-nhanh {
   width: 100%;
   height: 100%;
-  background-color: aquamarine;
+  background-color: var(--active-hover);
   img {
     position: relative;
     width: 100px;

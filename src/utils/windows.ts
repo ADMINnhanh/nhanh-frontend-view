@@ -12,6 +12,14 @@ import {
 } from "naive-ui";
 import { Settings } from "@/components/popups/components/Settings/index";
 
+import hljs from "highlight.js/lib/core";
+import javascript from "highlight.js/lib/languages/javascript";
+import json from "highlight.js/lib/languages/json";
+import xml from "highlight.js/lib/languages/xml";
+hljs.registerLanguage("javascript", javascript);
+hljs.registerLanguage("json", json);
+hljs.registerLanguage("xml", xml);
+
 const ThemeOverrides: GlobalThemeOverrides = {
   common: {},
 };
@@ -20,13 +28,13 @@ export const configProviderPropsRef = computed<ConfigProviderProps>(() => ({
   "theme-overrides": ThemeOverrides,
   locale: Settings.value.language == "enUS" ? enUS : zhCN,
   "date-locale": Settings.value.language == "enUS" ? dateEnUS : dateZhCN,
+  hljs,
 }));
 const { message, notification, dialog, loadingBar, modal } = createDiscreteApi(
   ["message", "dialog", "notification", "loadingBar", "modal"],
-  {
-    configProviderProps: configProviderPropsRef,
-  }
+  { configProviderProps: configProviderPropsRef }
 );
+
 window.$message = message;
 window.$notification = notification;
 window.$dialog = dialog;
@@ -37,7 +45,7 @@ window.$CustomizeError = function (message: string, error?: any) {
   error && console.error(error);
   const err = () => {
     window.$message.warning(message);
-    throw new Error(message);
+    if (import.meta.env.DEV) throw new Error(message);
   };
   if (!window.$message?.warning) setTimeout(err, 50);
   else err();

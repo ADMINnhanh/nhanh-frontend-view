@@ -16,18 +16,18 @@ const AllComponent = (function (gather) {
 
 export default AllComponent;
 
-export function enhancedCloseOnOutsideClick(
+export function EnhancedCloseOnOutsideClick(
   clickableSelector: string[],
   callback: Function,
   zIndex: number
 ) {
-  function isClickAllowed(event: MouseEvent) {
+  const isClickAllowed = (event: MouseEvent) => {
     const target = event.target as HTMLElement;
     if (target) {
       const popup = target.closest(".popups-gather >*") as HTMLElement | null;
       if (!popup) return;
       if (Number(popup.dataset.zindex) > zIndex) return true;
     }
-  }
+  };
   _CloseOnOutsideClick(clickableSelector, callback, { isClickAllowed });
 }

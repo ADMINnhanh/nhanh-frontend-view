@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import {
   PopupItems,
-  deletePopup,
-  setPopupConfig,
+  DeletePopup,
+  SetPopupConfig,
 } from "@/components/popups/popups";
 
 // 隐藏弹窗
-function closure(zIndex: number) {
-  setPopupConfig({ zIndex, show: false });
+function Closure(zIndex: number) {
+  SetPopupConfig({ zIndex, show: false });
 }
 // 在弹窗隐藏后删除该弹窗
-function dele(zIndex: number) {
+function Dele(zIndex: number) {
   let data = PopupItems.value.find((item) => item.zIndex == zIndex);
-  if (data && !data.show) deletePopup(zIndex);
+  if (data && !data.show) DeletePopup(zIndex);
 }
 </script>
 
@@ -22,12 +22,12 @@ function dele(zIndex: number) {
       v-for="item in PopupItems"
       :key="item.zIndex"
       :name="item.transition"
-      @after-leave="dele(item.zIndex)"
+      @after-leave="Dele(item.zIndex)"
     >
       <component
         v-show="item.show"
         :is="item.component"
-        @closure="closure(item.zIndex)"
+        @Closure="Closure(item.zIndex)"
         :style="{ zIndex: item.zIndex }"
         :zIndex="item.zIndex"
         :data-zIndex="item.zIndex"

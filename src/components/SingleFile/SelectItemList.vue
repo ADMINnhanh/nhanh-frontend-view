@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NButton, NIcon } from "naive-ui";
 import { ChevronBack, ChevronForward } from "@vicons/ionicons5";
-import Scroll from "@/components/Scroll.vue";
+import Scroll from "@/components/SingleFile/Scroll.vue";
 import { computed, ref } from "vue";
 import { _GenerateUUID, _Schedule } from "nhanh-pure-function";
 
@@ -28,7 +28,7 @@ const canBack = computed(() => {
 const isMoving = ref(false);
 
 const id = "id-" + _GenerateUUID();
-function moveSrcoll() {
+function MoveSrcoll() {
   const scrollDom = document.querySelector(
     `#` + id + ` .scroll >div`
   ) as HTMLElement;
@@ -42,7 +42,10 @@ function moveSrcoll() {
     /** 富裕宽高 */
     const RichSize = 50;
 
-    function changeScroll(trigger: "vertical" | "horizontal", offset: number) {
+    const changeScroll = (
+      trigger: "vertical" | "horizontal",
+      offset: number
+    ) => {
       isMoving.value = true;
       /** 已移动距离 */
       let moved = 0;
@@ -66,9 +69,8 @@ function moveSrcoll() {
 
         if (schedule == 1) isMoving.value = false;
       }, 300);
-    }
-
-    function vertical() {
+    };
+    const vertical = () => {
       /** 存于上侧 */
       const isTop = activatedRect.y - RichSize < srcollRect.y;
       /** 存于下侧 */
@@ -87,8 +89,8 @@ function moveSrcoll() {
           RichSize;
         changeScroll("vertical", offset);
       }
-    }
-    function horizontal() {
+    };
+    const horizontal = () => {
       /** 存于左侧 */
       const isLeft = activatedRect.x - RichSize < srcollRect.x;
 
@@ -109,13 +111,13 @@ function moveSrcoll() {
 
         changeScroll("horizontal", offset);
       }
-    }
+    };
 
     props.trigger == "vertical" ? vertical() : horizontal();
   }
 }
 /** 前进或后退 */
-function nextOrBack(type: "next" | "back") {
+function NextOrBack(type: "next" | "back") {
   const activatedIndex = props.list.findIndex((item) => item.activated);
   if (activatedIndex == -1) {
     props.list[0].activated = true;
@@ -126,14 +128,14 @@ function nextOrBack(type: "next" | "back") {
     props.list[activatedIndex - 1].activated = true;
     props.list[activatedIndex].activated = false;
   }
-  requestAnimationFrame(moveSrcoll);
+  requestAnimationFrame(MoveSrcoll);
 }
 
-function itemClickEvent(item: any) {
+function ItemClickEvent(item: any) {
   props.list.forEach((listItem) => {
     listItem.activated = listItem.id == item.id ? !listItem.activated : false;
   });
-  requestAnimationFrame(moveSrcoll);
+  requestAnimationFrame(MoveSrcoll);
 }
 </script>
 
@@ -146,7 +148,7 @@ function itemClickEvent(item: any) {
       ghost
       class="before"
       :disabled="!canBack"
-      @click="nextOrBack('back')"
+      @click="NextOrBack('back')"
     >
       <NIcon size="20" :component="ChevronBack" />
     </NButton>
@@ -155,7 +157,7 @@ function itemClickEvent(item: any) {
         v-for="item in props.list"
         :key="item.id"
         :class="['item', item.activated && 'activated']"
-        @click="itemClickEvent(item)"
+        @click="ItemClickEvent(item)"
       >
         <slot :item="item"></slot>
       </div>
@@ -171,7 +173,7 @@ function itemClickEvent(item: any) {
       ghost
       class="after"
       :disabled="!canNext"
-      @click="nextOrBack('next')"
+      @click="NextOrBack('next')"
     >
       <NIcon size="20" :component="ChevronForward" />
     </NButton>

@@ -1,32 +1,32 @@
 <script setup lang="ts">
-import Scroll from "@/components/Scroll.vue";
+import Scroll from "@/components/SingleFile/Scroll.vue";
 import { NTabs, NTabPane, NIcon, NSelect, NButton, NSpace } from "naive-ui";
 import SetItem from "./setItem.vue";
 import { _CloseOnOutsideClick } from "nhanh-pure-function";
 import { Close, Sync, Add } from "@vicons/ionicons5";
 import {
   Settings,
-  setOptions,
+  SetOptions,
   languageOptions,
   themeOptions,
   shortcutKeysList,
-  setDefaultShortcutKey,
-  setCustomShortcutKey,
+  SetDefaultShortcutKey,
+  SetCustomShortcutKey,
 } from ".";
 import { InterfaceText } from "@/assets/Ts/Interface text";
 import { computed, ref } from "vue";
-import svgGather from "@/assets/icon/gather";
+import SvgGather from "@/assets/icon/gather";
 
 interface EmitType {
-  (e: "closure"): void;
+  (e: "Closure"): void;
 }
 const Emit = defineEmits<EmitType>();
 
-function closure() {
-  setOptions();
-  Emit("closure");
+function Closure() {
+  SetOptions();
+  Emit("Closure");
 }
-_CloseOnOutsideClick([".Settings.center-positioning"], closure);
+_CloseOnOutsideClick([".Settings.center-positioning"], Closure);
 
 const tabsValue = ref();
 const tabsRef = ref();
@@ -46,7 +46,7 @@ const interfaceText = computed(() => {
   <section class="Settings center-positioning">
     <header>
       {{ interfaceText.header }}
-      <div class="clickable" @click="closure">
+      <div class="clickable" @click="Closure">
         <NIcon size="22" :component="Close" />
       </div>
     </header>
@@ -87,12 +87,12 @@ const interfaceText = computed(() => {
                   <NButton
                     quaternary
                     :disabled="!item.isCustom"
-                    @click="setDefaultShortcutKey(item.id)"
+                    @click="SetDefaultShortcutKey(item.id)"
                   >
                     <NIcon size="20" :component="Sync" />
                   </NButton>
-                  <NButton quaternary @click="setCustomShortcutKey(item)">
-                    <NIcon size="20" :component="svgGather('Edit')" />
+                  <NButton quaternary @click="SetCustomShortcutKey(item)">
+                    <NIcon size="20" :component="SvgGather('Edit')" />
                   </NButton>
                 </NSpace>
                 <NSpace>

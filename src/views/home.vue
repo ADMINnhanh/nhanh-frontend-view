@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {
   Settings,
-  setOptions,
+  SetOptions,
   themeOptions,
 } from "@/components/popups/components/Settings/index";
-import { addUniqueModal } from "@/components/popups/popups";
+import { AddUniqueModal } from "@/components/popups/popups";
 import router from "@/router";
 import Routes from "@/router/Routes";
 import { SettingsOutline } from "@vicons/ionicons5";
@@ -26,48 +26,48 @@ const themeText = computed(
 );
 
 /** 切换语言 */
-function changeLanguage() {
+function ChangeLanguage() {
   if (Settings.value.language == "zhCN") {
     Settings.value.language = "enUS";
   } else {
     Settings.value.language = "zhCN";
   }
-  setOptions();
+  SetOptions();
 }
 /** 切换主题 */
-function changeTheme() {
+function ChangeTheme() {
   if (Settings.value.theme == "light") {
     Settings.value.theme = "dark";
   } else {
     Settings.value.theme = "light";
   }
-  setOptions();
+  SetOptions();
 }
 /** 打开设置 */
-function openSettings() {
-  addUniqueModal({
+function OpenSettings() {
+  AddUniqueModal({
     componentName: "Settings",
   });
 }
 
-function renderIcon(icon: Component) {
+function RenderIcon(icon: Component) {
   return () => h(NIcon, null, { default: () => h(icon) });
 }
 const menuOptions = computed<MenuOption[]>(() => {
   const language = Settings.value.language;
   /** 生成菜单 */
-  function generateMenu(item: typeof Routes) {
+  const generateMenu = (item: typeof Routes) => {
     return item.map((item) => {
       const i: MenuOption = {
         label: item.meta.name[language],
         key: item.name as string,
       };
-      if (item.meta.icon) i.icon = renderIcon(item.meta.icon);
+      if (item.meta.icon) i.icon = RenderIcon(item.meta.icon);
       if (item.children) i.children = generateMenu(item.children);
 
       return i;
     });
-  }
+  };
   return generateMenu(Routes);
 });
 const activeKey = computed({
@@ -89,11 +89,11 @@ const collapsed = ref(false);
         你好啊你好
       </div>
       <NSpace>
-        <NButton quaternary @click="changeLanguage">{{
+        <NButton quaternary @click="ChangeLanguage">{{
           Settings.language == "zhCN" ? "English" : "中文"
         }}</NButton>
-        <NButton quaternary @click="changeTheme">{{ themeText }}</NButton>
-        <NButton quaternary @click="openSettings"
+        <NButton quaternary @click="ChangeTheme">{{ themeText }}</NButton>
+        <NButton quaternary @click="OpenSettings"
           ><NIcon size="20" :component="SettingsOutline"
         /></NButton>
       </NSpace>

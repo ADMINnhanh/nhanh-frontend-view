@@ -1,5 +1,5 @@
 /** 向 html 节点注入 css 变量 */
-export function injectStyle(style: { [key: string]: string }) {
+export function InjectStyle(style: { [key: string]: string }) {
   const html = document.querySelector("html");
   if (!html) return;
   for (const key in style) {

@@ -1,12 +1,12 @@
 import { Settings } from "@/components/popups/components/Settings/index";
-import { injectStyle } from "@/utils/vueMethod";
+import { InjectStyle } from "@/utils/vueMethod";
 import { watch } from "vue";
 
 const publicCss = {
   "border-radius": "3px",
   "n-spin-background-color": "#535353",
 };
-injectStyle(publicCss);
+InjectStyle(publicCss);
 
 const light = {
   "active-hover": "rgba(24, 160, 88, 0.1)",
@@ -34,10 +34,6 @@ const dark = {
 
 watch(
   () => Settings.value.theme,
-  (theme) => {
-    injectStyle(theme === "light" ? light : dark);
-  },
-  {
-    immediate: true,
-  }
+  (theme) => InjectStyle(theme === "light" ? light : dark),
+  { immediate: true }
 );
