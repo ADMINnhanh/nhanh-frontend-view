@@ -18,7 +18,7 @@ const color = computed(() => {
 });
 /** 绘制网格 */
 function DrawGrid() {
-  const { ctx, width, height, centent, gridSize } = baseData;
+  const { ctx, width, height, centent, gridSize } = baseData.value!;
 
   const grid_size = gridSize.size;
   const inner_grid_size = grid_size / 5;
@@ -77,7 +77,7 @@ function DrawGrid() {
 
 /** 坐标轴 */
 function DrawAxis() {
-  const { ctx, width, height, centent } = baseData;
+  const { ctx, width, height, centent } = baseData.value!;
 
   /** 绘制x和y轴 */
   const drawAxis = (moveTo: [number, number], lineTo: [number, number]) => {
