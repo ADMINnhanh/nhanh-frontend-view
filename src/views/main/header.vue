@@ -5,7 +5,12 @@ import {
   themeOptions,
 } from "@/components/popups/components/Settings/index";
 import { AddUniqueModal } from "@/components/popups/popups";
-import { SettingsOutline, Contract, Expand } from "@vicons/ionicons5";
+import {
+  SettingsOutline,
+  Contract,
+  Expand,
+  LogoGithub,
+} from "@vicons/ionicons5";
 import { NButton, NSpace, NIcon } from "naive-ui";
 import { computed, onUnmounted, ref } from "vue";
 
@@ -63,6 +68,11 @@ function onFullScreen() {
 onFullScreen();
 window.addEventListener("resize", onFullScreen);
 onUnmounted(() => window.removeEventListener("resize", onFullScreen));
+
+/** 前往 GitHub */
+function GotoGitHub() {
+  window.open("https://github.com/ADMINnhanh/Hello-Front-End-Vision", "_blank");
+}
 </script>
 
 <template>
@@ -73,17 +83,20 @@ onUnmounted(() => window.removeEventListener("resize", onFullScreen));
     </div>
     <NSpace>
       <NButton quaternary @click="toggleFullScreen">
-        <template #icon
-          ><NIcon :component="isFullScreen ? Contract : Expand" />
+        <template #icon>
+          <NIcon :component="isFullScreen ? Contract : Expand" />
         </template>
       </NButton>
+      <NButton quaternary @click="ChangeTheme">{{ themeText }}</NButton>
       <NButton quaternary @click="ChangeLanguage">{{
         Settings.language == "zhCN" ? "English" : "中文"
       }}</NButton>
-      <NButton quaternary @click="ChangeTheme">{{ themeText }}</NButton>
-      <NButton quaternary @click="OpenSettings"
-        ><NIcon size="20" :component="SettingsOutline"
-      /></NButton>
+      <NButton quaternary @click="GotoGitHub">
+        <template #icon><NIcon :component="LogoGithub" /></template>
+      </NButton>
+      <NButton quaternary @click="OpenSettings">
+        <template #icon><NIcon :component="SettingsOutline" /></template>
+      </NButton>
     </NSpace>
   </header>
 </template>
