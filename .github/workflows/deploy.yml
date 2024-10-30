@@ -8,13 +8,19 @@ jobs:
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
- 
-      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+
+      # 确保进入项目根目录，避免路径重复
+      - name: Set up working directory
+        run: |
+          cd nhanh-frontend-view
+
+      - name: Install and Build 🔧
         run: |
           npm ci
           npm run build
- 
+        working-directory: nhanh-frontend-view # 指定正确的项目路径
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: dist # The folder the action should deploy.
+          folder: nhanh-frontend-view/dist # 指定正确的构建文件夹路径
