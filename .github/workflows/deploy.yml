@@ -1,15 +1,23 @@
 name: Build and Deploy
-on: [push]
+
+on:
+  push:
+    branches:
+      - main # 可选，确保只在特定分支上触发
+
 permissions:
   contents: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[publish]') # 只有当提交消息包含 '[publish]' 时才执行
+
     steps:
       - name: Checkout 🛎️
         uses: actions/checkout@v4
 
-      - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+      - name: Install and Build 🔧
         run: |
           npm ci
           npm run build
