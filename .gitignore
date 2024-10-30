@@ -30,5 +30,4 @@ coverage
 
 *.tsbuildinfo
 
-[core]
-    ignorecase = false
+desktop.ini
