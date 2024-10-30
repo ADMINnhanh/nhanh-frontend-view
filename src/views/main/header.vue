@@ -71,7 +71,7 @@ onUnmounted(() => window.removeEventListener("resize", onFullScreen));
 
 /** 前往 GitHub */
 function GotoGitHub() {
-  window.open("https://github.com/ADMINnhanh/Hello-Front-End-Vision", "_blank");
+  window.open("https://github.com/ADMINnhanh/nhanh-frontend-view", "_blank");
 }
 </script>
 
