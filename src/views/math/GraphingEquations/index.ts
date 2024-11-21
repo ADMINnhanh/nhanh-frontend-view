@@ -112,6 +112,20 @@ class DataGather extends Style {
       });
     }
   }
+
+  getMousePositionOnAxis() {
+    const { canvas, centent } = this;
+    const rect = canvas.getBoundingClientRect();
+    const x = -(centent.x - (mousePosition.x - rect.left));
+    const y = centent.y - (mousePosition.y - rect.top);
+    return { x, y };
+  }
+  getAxisPointValue(x: number, y: number) {
+    const { gridSize } = this;
+    const xV = (x / gridSize.size) * gridSize.count;
+    const yV = (y / gridSize.size) * gridSize.count;
+    return { xV, yV };
+  }
 }
 
 class UpdateData extends DataGather {
@@ -134,17 +148,38 @@ class UpdateData extends DataGather {
   updateScale(scaleOffset: number | boolean, isReset?: boolean) {
     if (!isReset && this.isAuto) this.isAuto = false;
 
+    const mousePoint = this.getMousePositionOnAxis();
+
     const { cycle, delta, gridSize, scale } = this;
+
+    console.log(gridSize.size);
 
     if (typeof scaleOffset === "boolean")
       scaleOffset = scaleOffset ? delta : -delta;
     this.scale += scaleOffset;
 
-    let size = (Math.abs(this.scale - 1) % (cycle * delta)) / delta;
-    size = Math.round(this.scale < 1 ? cycle - size : size);
+    /** size */ {
+      let size = (Math.abs(this.scale - 1) % (cycle * delta)) / delta;
+      size = Math.round(this.scale < 1 ? cycle - size : size);
+      gridSize.size =
+        (size / cycle) * (gridSize.max - gridSize.min) + gridSize.min;
+    }
 
-    gridSize.size =
-      (size / cycle) * (gridSize.max - gridSize.min) + gridSize.min;
+    /** count */ {
+      let count = gridSize.count;
+      if (this.scale > 1) {
+        count /= Math.pow(2, Math.floor((this.scale - 1) / (cycle * delta)));
+      } else if (this.scale < 1) {
+        count *= Math.pow(
+          2,
+          Math.ceil(Math.abs(this.scale - 1) / (cycle * delta)) + 1
+        );
+      }
+      gridSize.count = count;
+    }
+
+    console.log(gridSize.size);
+    console.log(mousePoint.x * scaleOffset, mousePoint.y * scaleOffset);
 
     this.redraw();
   }
@@ -165,7 +200,7 @@ class UpdateData extends DataGather {
 class QuickMethod extends UpdateData {
   reset() {
     this.isAuto = true;
-    const time = 1000;
+    const time = 300;
     const waitResetData = {
       offset: { ...this.offset },
       scale: this.scale - 1,

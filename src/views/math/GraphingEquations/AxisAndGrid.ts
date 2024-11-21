@@ -108,11 +108,6 @@ function DrawAxisText() {
   }
 
   let count = gridSize.count;
-  if (scale > 1) {
-    count /= Math.pow(2, Math.floor((scale - 1) / (cycle * delta)));
-  } else if (scale < 1) {
-    count *= Math.pow(2, Math.ceil(Math.abs(scale - 1) / (cycle * delta)) + 1);
-  }
 
   const grid_size = gridSize.size;
 
