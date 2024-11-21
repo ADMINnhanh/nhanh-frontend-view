@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { baseData, Init } from ".";
+import { graphingEquations, Init } from ".";
 import { MouseInCanvas, MouseOutCanvas, MouseDown } from "./Event";
 import { NButton, NIcon, NSpace, NButtonGroup, NText } from "naive-ui";
 import { Add, Home, Remove } from "@vicons/ionicons5";
@@ -17,6 +17,9 @@ const buttonApi = computed(() => {
   return {
     color: theme === "dark" ? "#666" : "#ededed",
     "text-color": theme === "dark" ? "#ededed" : "#666",
+    style: {
+      "--n-color-hover": theme === "dark" ? "rgba(126, 126, 126, 1)" : "#fff",
+    },
   };
 });
 </script>
@@ -33,14 +36,14 @@ const buttonApi = computed(() => {
     <div class="button-box">
       <NSpace vertical>
         <NButtonGroup vertical>
-          <NButton :="buttonApi" @click="baseData?.updateScale(0.1)"
+          <NButton :="buttonApi" @click="graphingEquations?.updateScale(0.1)"
             ><template #icon><NIcon :component="Add" /></template
           ></NButton>
-          <NButton :="buttonApi" @click="baseData?.updateScale(-0.1)"
+          <NButton :="buttonApi" @click="graphingEquations?.updateScale(-0.1)"
             ><template #icon><NIcon :component="Remove" /></template
           ></NButton>
         </NButtonGroup>
-        <NButton :="buttonApi" @click="baseData?.reset()"
+        <NButton :="buttonApi" @click="graphingEquations?.reset()"
           ><template #icon><NIcon :component="Home" /></template
         ></NButton>
       </NSpace>
@@ -70,6 +73,7 @@ const buttonApi = computed(() => {
   canvas {
     flex-grow: 1;
     width: 100px;
+    cursor: grab;
   }
   .button-box {
     position: absolute;

@@ -1,18 +1,16 @@
 import { Settings } from "@/components/popups/components/Settings";
 import { computed } from "vue";
-import { baseData } from ".";
+import { graphingEquations } from ".";
 
 const color = computed(() => {
   const theme = Settings.value.theme;
   if (theme === "light")
     return {
-      text: "#222",
       axis: "#222",
       grid: "#666",
       innerGrid: "#e5e5e5",
     };
   return {
-    text: "#aeaeae",
     axis: "#aeaeae",
     grid: "#666",
     innerGrid: "#272727",
@@ -20,7 +18,7 @@ const color = computed(() => {
 });
 /** 绘制网格 */
 function DrawGrid() {
-  const { ctx, width, height, centent, gridSize, scale } = baseData.value!;
+  const { ctx, width, height, centent, gridSize } = graphingEquations.value!;
 
   const grid_size = gridSize.size;
   const inner_grid_size = grid_size / 5;
@@ -44,7 +42,8 @@ function DrawGrid() {
     const startX =
       centent.x % grid_size > 0
         ? centent.x % grid_size
-        : grid_size - (centent.x % grid_size);
+        : grid_size + (centent.x % grid_size);
+
     for (let index = 0; index * grid_size + startX <= width; index++) {
       drawOuterGrid(
         [index * grid_size + startX, 0],
@@ -58,7 +57,8 @@ function DrawGrid() {
     const startY =
       centent.y % grid_size > 0
         ? centent.y % grid_size
-        : grid_size - (centent.y % grid_size);
+        : grid_size + (centent.y % grid_size);
+
     for (let index = 0; index * grid_size + startY <= height; index++) {
       drawOuterGrid(
         [0, index * grid_size + startY],
@@ -79,16 +79,14 @@ function DrawGrid() {
 
 /** 坐标轴 - 文字 */
 function DrawAxisText() {
-  const { ctx, width, height, centent, gridSize, scale, delta, cycle } =
-    baseData.value!;
+  const { ctx, width, height, centent, gridSize, scale, delta, cycle, style } =
+    graphingEquations.value!;
 
   /** 文字宽 */
   const textWidth = (text: string) => Math.ceil(ctx.measureText(text).width);
 
-  const textOffset = 2;
-  const textSize = 12;
-  ctx.fillStyle = color.value.text;
-  ctx.font = textSize + `px 微软雅黑`;
+  const textOffset = 4;
+  const textSize = style[Settings.value.theme].text.size;
 
   /** 0 */ {
     const w = textWidth("0");
@@ -101,21 +99,89 @@ function DrawAxisText() {
       centent.y > height + textSize + textOffset;
 
     if (!isXAxisOverflowing && !isYAxisOverflowing) {
-      ctx.fillText(
+      graphingEquations.value!.drawText(
         "0",
         centent.x - w - textOffset,
-        centent.y + 12 + textOffset
+        centent.y + textSize + textOffset
       );
     }
   }
 
-  const grid_size = (scale * gridSize.min) / (gridSize.max - gridSize.min);
-  // console.log(scale, (scale - 1) / (cycle * delta));
+  let count = gridSize.count;
+  if (scale > 1) {
+    count /= Math.pow(2, Math.floor((scale - 1) / (cycle * delta)));
+  } else if (scale < 1) {
+    count *= Math.pow(2, Math.ceil(Math.abs(scale - 1) / (cycle * delta)) + 1);
+  }
+
+  const grid_size = gridSize.size;
+
+  /** x 轴的文字 */ {
+    let y = centent.y + textSize + textOffset;
+    y = Math.max(Math.min(y, height - textOffset), textOffset + textSize);
+
+    const isSecondary = centent.y > height || centent.y < 0;
+
+    /** 起始位置 */
+    let x =
+      centent.x % grid_size > 0
+        ? centent.x % grid_size
+        : grid_size + (centent.x % grid_size);
+    /** 起始值 */
+    let v =
+      centent.x > 0
+        ? count * Math.floor(centent.x / grid_size) * -1
+        : count * (Math.ceil(Math.abs(centent.x / grid_size)) || 1);
+
+    while (x <= width) {
+      const textW = textWidth(String(v));
+      v !== 0 &&
+        graphingEquations.value!.drawText(
+          String(v),
+          x - textW / 2,
+          y,
+          isSecondary
+        );
+      x += grid_size;
+      v += count;
+    }
+  }
+
+  /** y 轴的文字 */ {
+    const isSecondary = centent.x > width || centent.x < 0;
+
+    /** 起始位置 */
+    let y =
+      centent.y % grid_size > 0
+        ? centent.y % grid_size
+        : grid_size + (centent.y % grid_size);
+    /** 起始值 */
+    let v =
+      centent.y > 0
+        ? count * Math.floor(centent.y / grid_size)
+        : count * (Math.ceil(Math.abs(centent.y / grid_size)) || 1) * -1;
+
+    while (y <= height) {
+      const textW = textWidth(String(v));
+      let x = centent.x - textW - textOffset;
+      x = Math.max(Math.min(x, width - textW - textOffset), textOffset);
+
+      v !== 0 &&
+        graphingEquations.value!.drawText(
+          String(v),
+          x,
+          y + textSize / 2,
+          isSecondary
+        );
+      y += grid_size;
+      v -= count;
+    }
+  }
 }
 
 /** 坐标轴 */
 function DrawAxis() {
-  const { ctx, width, height, centent } = baseData.value!;
+  const { ctx, width, height, centent } = graphingEquations.value!;
 
   /** 绘制x和y轴 */
   const drawAxis = (moveTo: [number, number], lineTo: [number, number]) => {
