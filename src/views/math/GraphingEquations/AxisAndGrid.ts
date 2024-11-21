@@ -107,7 +107,7 @@ function DrawAxisText() {
     }
   }
 
-  let count = gridSize.count;
+  const count = graphingEquations.value!.getGridCount();
 
   const grid_size = gridSize.size;
 

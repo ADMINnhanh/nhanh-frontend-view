@@ -113,6 +113,22 @@ class DataGather extends Style {
     }
   }
 
+  getGridCount() {
+    const { gridSize, scale, cycle, delta } = this;
+
+    let count = gridSize.count;
+    if (scale > 1) {
+      count /= Math.pow(2, Math.floor((scale - 1) / (cycle * delta)));
+    } else if (scale < 1) {
+      count *= Math.pow(
+        2,
+        Math.ceil(Math.abs(scale - 1) / (cycle * delta)) + 1
+      );
+    }
+
+    return count;
+  }
+
   getMousePositionOnAxis() {
     const { canvas, centent } = this;
     const rect = canvas.getBoundingClientRect();
@@ -122,16 +138,24 @@ class DataGather extends Style {
   }
   getAxisPointValue(x: number, y: number) {
     const { gridSize } = this;
-    const xV = (x / gridSize.size) * gridSize.count;
-    const yV = (y / gridSize.size) * gridSize.count;
+    const count = this.getGridCount();
+    const xV = (x / gridSize.size) * count;
+    const yV = (y / gridSize.size) * count;
     return { xV, yV };
+  }
+  getAxisPointByValue(xV: number, yV: number) {
+    const { gridSize } = this;
+    const count = this.getGridCount();
+    const x = (xV / count) * gridSize.size;
+    const y = (yV / count) * gridSize.size;
+    return { x, y };
   }
 }
 
 class UpdateData extends DataGather {
   /** 监听元素大小 */
   resizeObserver = new ResizeObserver(
-    _Throttle(() => this.updateCanvasSize(), 300)
+    _Throttle(() => this.updateCanvasSize(), 30)
   );
   updateCanvasSize() {
     const { canvas } = this;
@@ -149,10 +173,9 @@ class UpdateData extends DataGather {
     if (!isReset && this.isAuto) this.isAuto = false;
 
     const mousePoint = this.getMousePositionOnAxis();
+    const mouseValue = this.getAxisPointValue(mousePoint.x, mousePoint.y);
 
-    const { cycle, delta, gridSize, scale } = this;
-
-    console.log(gridSize.size);
+    const { cycle, delta, gridSize } = this;
 
     if (typeof scaleOffset === "boolean")
       scaleOffset = scaleOffset ? delta : -delta;
@@ -165,21 +188,15 @@ class UpdateData extends DataGather {
         (size / cycle) * (gridSize.max - gridSize.min) + gridSize.min;
     }
 
-    /** count */ {
-      let count = gridSize.count;
-      if (this.scale > 1) {
-        count /= Math.pow(2, Math.floor((this.scale - 1) / (cycle * delta)));
-      } else if (this.scale < 1) {
-        count *= Math.pow(
-          2,
-          Math.ceil(Math.abs(this.scale - 1) / (cycle * delta)) + 1
-        );
-      }
-      gridSize.count = count;
+    /** offset */
+    if (!isReset) {
+      const newMousePoint = this.getAxisPointByValue(
+        mouseValue.xV,
+        mouseValue.yV
+      );
+      this.offset.x += -(newMousePoint.x - mousePoint.x);
+      this.offset.y += newMousePoint.y - mousePoint.y;
     }
-
-    console.log(gridSize.size);
-    console.log(mousePoint.x * scaleOffset, mousePoint.y * scaleOffset);
 
     this.redraw();
   }
@@ -212,7 +229,7 @@ class QuickMethod extends UpdateData {
       if (schedule === 1) {
         this.offset = { x: 0, y: 0 };
         this.scale = 1;
-        this.updateScale(0);
+        this.updateScale(0, true);
         this.isAuto = false;
       } else if (schedule > 0) {
         schedule = 1 - schedule;
