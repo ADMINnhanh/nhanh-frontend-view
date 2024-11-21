@@ -1,9 +1,8 @@
-import { _GenerateUUID } from "nhanh-pure-function";
 import { DrawAxisAndGrid } from "./AxisAndGrid";
 import { shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
+import { _Schedule, _Throttle } from "nhanh-pure-function";
 
-export const id = "canvas-" + _GenerateUUID();
 class BaseData {
   /** 画布元素 */
   canvas = {} as HTMLCanvasElement;
@@ -27,10 +26,17 @@ class BaseData {
   delta = 0.05;
   /** 是否在下一个渲染帧进行重绘 */
   redrawInNextRenderFrame = false;
-  constructor() {
+  /** 监听元素大小 */
+  resizeObserver = new ResizeObserver(
+    _Throttle(() => this.updateCanvasSize(), 300)
+  );
+  /** 是否正在复位 */
+  isResetting = false;
+  constructor(id: string) {
     const canvas = document.getElementById(id) as HTMLCanvasElement;
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d")!;
+    this.resizeObserver.observe(canvas);
   }
   updateCanvas() {
     const { ctx, width, height, offset } = this;
@@ -39,6 +45,7 @@ class BaseData {
       x: width / 2 + offset.x,
       y: height / 2 + offset.y,
     };
+
     DrawAxisAndGrid();
   }
   redraw() {
@@ -50,15 +57,17 @@ class BaseData {
       });
     }
   }
-  updateScale(scaleOffset: number | boolean) {
-    const { cycle, delta, gridSize, scale } = this;
+  updateScale(scaleOffset: number | boolean, isReset?: boolean) {
+    if (!isReset && this.isResetting) this.isResetting = false;
+
+    const { cycle, delta, gridSize } = this;
 
     if (typeof scaleOffset === "boolean")
       scaleOffset = scaleOffset ? delta : -delta;
     this.scale += scaleOffset;
 
-    let size = (Math.abs(scale - 1) % (cycle * delta)) / delta;
-    size = Math.round(scale < 1 ? cycle - size : size);
+    let size = (Math.abs(this.scale - 1) % (cycle * delta)) / delta;
+    size = Math.round(this.scale < 1 ? cycle - size : size);
 
     gridSize.size =
       (size / cycle) * (gridSize.max - gridSize.min) + gridSize.min;
@@ -74,17 +83,50 @@ class BaseData {
     this.height = clientHeight;
     this.redraw();
   }
-  updateOffset(offset: { x: number; y: number }) {
+  updateOffset(offset: { x: number; y: number }, isReset?: boolean) {
+    if (!isReset && this.isResetting) this.isResetting = false;
+
     this.offset.x += offset.x;
     this.offset.y += offset.y;
     this.redraw();
+  }
+  reset() {
+    this.isResetting = true;
+    const time = 1000;
+    const waitResetData = {
+      offset: { ...this.offset },
+      scale: this.scale - 1,
+    };
+
+    _Schedule((schedule) => {
+      if (!this.isResetting) return;
+
+      if (schedule === 1) {
+        this.offset = { x: 0, y: 0 };
+        this.scale = 1;
+        this.updateScale(0);
+        this.isResetting = false;
+      } else if (schedule > 0) {
+        schedule = 1 - schedule;
+        this.offset = {
+          x: waitResetData.offset.x * schedule,
+          y: waitResetData.offset.y * schedule,
+        };
+        this.scale = 1 + waitResetData.scale * schedule;
+        this.updateScale(0, true);
+      }
+    }, time);
+  }
+
+  destroy() {
+    this.resizeObserver.disconnect();
   }
 }
 
 export const baseData = shallowRef<BaseData>();
 
-export function Init() {
-  baseData.value = new BaseData();
+export function Init(id: string) {
+  baseData.value = new BaseData(id);
   baseData.value.updateCanvasSize();
 }
 
@@ -92,12 +134,3 @@ watch(
   () => Settings.value.theme,
   () => baseData.value?.redraw()
 );
-
-/** 放大 */
-export function ZoomIn() {
-  baseData.value?.updateScale(0.1);
-}
-/** 缩小 */
-export function ZoomOut() {
-  baseData.value?.updateScale(-0.1);
-}

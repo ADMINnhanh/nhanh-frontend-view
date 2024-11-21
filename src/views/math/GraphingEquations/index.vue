@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { computed, onUnmounted } from "vue";
-import { id, baseData, Init, ZoomIn, ZoomOut } from ".";
+import { computed } from "vue";
+import { baseData, Init } from ".";
 import { MouseInCanvas, MouseOutCanvas, MouseDown } from "./Event";
-import { NButton, NIcon, NSpace, NButtonGroup } from "naive-ui";
+import { NButton, NIcon, NSpace, NButtonGroup, NText } from "naive-ui";
 import { Add, Home, Remove } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
+import { _GenerateUUID } from "nhanh-pure-function";
+import { useFps } from "@vueuse/core";
 
-requestAnimationFrame(Init);
-const resize = () => baseData.value?.updateCanvasSize();
-window.addEventListener("resize", resize);
-onUnmounted(() => window.removeEventListener("resize", resize));
+const fps = useFps();
+const id = _GenerateUUID("canvas-");
+requestAnimationFrame(() => Init(id));
 
 const buttonApi = computed(() => {
   const theme = Settings.value.theme;
@@ -32,17 +33,23 @@ const buttonApi = computed(() => {
     <div class="button-box">
       <NSpace vertical>
         <NButtonGroup vertical>
-          <NButton :="buttonApi" @click="ZoomIn"
+          <NButton :="buttonApi" @click="baseData?.updateScale(0.1)"
             ><template #icon><NIcon :component="Add" /></template
           ></NButton>
-          <NButton :="buttonApi" @click="ZoomOut"
+          <NButton :="buttonApi" @click="baseData?.updateScale(-0.1)"
             ><template #icon><NIcon :component="Remove" /></template
           ></NButton>
         </NButtonGroup>
-        <NButton :="buttonApi"
+        <NButton :="buttonApi" @click="baseData?.reset()"
           ><template #icon><NIcon :component="Home" /></template
         ></NButton>
       </NSpace>
+      <n-text
+        class="fps"
+        :type="fps > 60 ? 'success' : fps > 30 ? 'warning' : 'error'"
+      >
+        {{ fps }}
+      </n-text>
     </div>
   </div>
 </template>
@@ -72,6 +79,13 @@ const buttonApi = computed(() => {
       :deep(> div > *) {
         box-shadow: 0 0 5px 1px var(--box-shadow);
       }
+    }
+    .fps {
+      position: absolute;
+      top: 0;
+      left: -40px;
+      font-size: 18px;
+      font-weight: bold;
     }
   }
 }

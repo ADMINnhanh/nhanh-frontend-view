@@ -12,6 +12,7 @@ import {
   LogoGithub,
 } from "@vicons/ionicons5";
 import { NButton, NSpace, NIcon } from "naive-ui";
+import { _IsFullscreen } from "nhanh-pure-function";
 import { computed, onUnmounted, ref } from "vue";
 
 const themeText = computed(
@@ -49,21 +50,12 @@ function OpenSettings() {
 const isFullScreen = ref(false);
 /** 全屏切换 */
 function toggleFullScreen() {
-  if (isFullScreen.value) {
-    document.exitFullscreen();
-  } else {
-    document.documentElement.requestFullscreen();
-  }
+  if (isFullScreen.value) document.exitFullscreen();
+  else document.documentElement.requestFullscreen();
 }
 /** 全屏切换监测 */
 function onFullScreen() {
-  const fullScreenWidth = window.screen.width;
-  const fullScreenHeight = window.screen.height;
-  const currentWidth = document.documentElement.clientWidth;
-  const currentHeight = document.documentElement.clientHeight;
-
-  isFullScreen.value =
-    currentWidth === fullScreenWidth && currentHeight === fullScreenHeight;
+  isFullScreen.value = !!_IsFullscreen();
 }
 onFullScreen();
 window.addEventListener("resize", onFullScreen);

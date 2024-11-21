@@ -6,11 +6,13 @@ const color = computed(() => {
   const theme = Settings.value.theme;
   if (theme === "light")
     return {
+      text: "#222",
       axis: "#222",
       grid: "#666",
       innerGrid: "#e5e5e5",
     };
   return {
+    text: "#aeaeae",
     axis: "#aeaeae",
     grid: "#666",
     innerGrid: "#272727",
@@ -18,7 +20,7 @@ const color = computed(() => {
 });
 /** 绘制网格 */
 function DrawGrid() {
-  const { ctx, width, height, centent, gridSize } = baseData.value!;
+  const { ctx, width, height, centent, gridSize, scale } = baseData.value!;
 
   const grid_size = gridSize.size;
   const inner_grid_size = grid_size / 5;
@@ -75,6 +77,42 @@ function DrawGrid() {
   drawY(grid_size, color.value.grid);
 }
 
+/** 坐标轴 - 文字 */
+function DrawAxisText() {
+  const { ctx, width, height, centent, gridSize, scale, delta, cycle } =
+    baseData.value!;
+
+  /** 文字宽 */
+  const textWidth = (text: string) => Math.ceil(ctx.measureText(text).width);
+
+  const textOffset = 2;
+  const textSize = 12;
+  ctx.fillStyle = color.value.text;
+  ctx.font = textSize + `px 微软雅黑`;
+
+  /** 0 */ {
+    const w = textWidth("0");
+    /** x 轴方向溢出？ */
+    const isXAxisOverflowing =
+      centent.x < textOffset || centent.x > width + w + textOffset;
+    /** y 轴方向溢出？ */
+    const isYAxisOverflowing =
+      centent.y < -(textOffset + textSize) ||
+      centent.y > height + textSize + textOffset;
+
+    if (!isXAxisOverflowing && !isYAxisOverflowing) {
+      ctx.fillText(
+        "0",
+        centent.x - w - textOffset,
+        centent.y + 12 + textOffset
+      );
+    }
+  }
+
+  const grid_size = (scale * gridSize.min) / (gridSize.max - gridSize.min);
+  // console.log(scale, (scale - 1) / (cycle * delta));
+}
+
 /** 坐标轴 */
 function DrawAxis() {
   const { ctx, width, height, centent } = baseData.value!;
@@ -107,4 +145,5 @@ function DrawAxis() {
 export function DrawAxisAndGrid() {
   DrawGrid();
   DrawAxis();
+  DrawAxisText();
 }

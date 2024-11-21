@@ -27,7 +27,7 @@ const canBack = computed(() => {
 /** 是否正在移动滚动条中 */
 const isMoving = ref(false);
 
-const id = "id-" + _GenerateUUID();
+const id = _GenerateUUID("id-");
 function MoveSrcoll() {
   const scrollDom = document.querySelector(
     `#` + id + ` .scroll >div`
