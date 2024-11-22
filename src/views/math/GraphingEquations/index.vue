@@ -65,7 +65,7 @@ const buttonApi = computed(() => {
   border-radius: 5px;
   position: relative;
   nav {
-    width: 100px;
+    width: 400px;
     box-shadow: 0 0 3px 1px var(--box-shadow);
     border-radius: 5px;
     z-index: 2;

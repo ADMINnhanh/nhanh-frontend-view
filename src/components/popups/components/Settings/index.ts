@@ -11,7 +11,9 @@ const defaultSettings: SettingsType = {
   customShortcutKeys: [],
 };
 export const Settings = ref<SettingsType>(
-  OldSettings ? JSON.parse(OldSettings) : defaultSettings
+  OldSettings
+    ? Object.assign(structuredClone(defaultSettings), JSON.parse(OldSettings))
+    : structuredClone(defaultSettings)
 );
 export function SetOptions() {
   const options = JSON.stringify(toRaw(Settings.value));

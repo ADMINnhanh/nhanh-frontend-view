@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import SvgGather from "@/assets/icon/gather";
 import {
   Settings,
   SetOptions,
@@ -11,7 +12,7 @@ import {
   Expand,
   LogoGithub,
 } from "@vicons/ionicons5";
-import { NButton, NSpace, NIcon } from "naive-ui";
+import { NButton, NSpace, NIcon, NDropdown } from "naive-ui";
 import { _IsFullscreen } from "nhanh-pure-function";
 import { computed, onUnmounted, ref } from "vue";
 
@@ -65,6 +66,34 @@ onUnmounted(() => window.removeEventListener("resize", onFullScreen));
 function GotoGitHub() {
   window.open("https://github.com/ADMINnhanh/nhanh-frontend-view", "_blank");
 }
+
+/** 本项目使用到的 依赖 */
+const options = [
+  {
+    label: "vue",
+    key: "https://github.com/vuejs/core",
+  },
+  {
+    label: "naive-ui",
+    key: "https://github.com/TuSimple/naive-ui",
+  },
+  {
+    label: "@vueuse/core",
+    key: "https://github.com/antfu/vueuse",
+  },
+  {
+    label: "gl-matrix",
+    key: "https://github.com/toji/gl-matrix",
+  },
+  {
+    label: "nhanh-pure-function",
+    key: "https://github.com/ADMINnhanh/nhanh-pure-function",
+  },
+];
+/** 前往依赖官网 */
+function GoToTheOfficialWebsite(value: string) {
+  window.open(value, "_blank");
+}
 </script>
 
 <template>
@@ -86,6 +115,19 @@ function GotoGitHub() {
       <NButton quaternary @click="GotoGitHub">
         <template #icon><NIcon :component="LogoGithub" /></template>
       </NButton>
+      <NDropdown
+        trigger="hover"
+        :options="options"
+        @select="GoToTheOfficialWebsite"
+      >
+        <div>
+          <NButton quaternary>
+            <template #icon
+              ><NIcon :component="SvgGather('ColumnDependency')"
+            /></template>
+          </NButton>
+        </div>
+      </NDropdown>
       <NButton quaternary @click="OpenSettings">
         <template #icon><NIcon :component="SettingsOutline" /></template>
       </NButton>
