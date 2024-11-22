@@ -10,6 +10,7 @@ import {
   NScrollbar,
   NIcon,
   type UploadFileInfo,
+  NA,
 } from "naive-ui";
 import { onUnmounted, ref, watch } from "vue";
 import {
@@ -192,6 +193,9 @@ onUnmounted(() => {
 <template>
   <div class="content">
     <div class="info">
+      <NA href="https://github.com/ultralytics/ultralytics" target="_blank">
+        ultralytics YOLO Vision
+      </NA>
       <NButton @click="addBoxType">添加标签</NButton>
       <NSpace>
         <NTag
@@ -277,7 +281,7 @@ onUnmounted(() => {
   display: flex;
   justify-content: space-between;
   border-radius: 5px;
-
+  padding: 10px;
   .info {
     width: 400px;
     margin-right: 15px;
