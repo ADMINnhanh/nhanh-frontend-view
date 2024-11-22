@@ -68,6 +68,7 @@ function Mousedown(payload: MouseEvent) {
 /** 鼠标松开 */
 function Mouseup(payload: MouseEvent) {
   if (!pressed.value) return;
+
   document.body.classList.remove("no-select");
   pressed.value = false;
 
@@ -80,6 +81,7 @@ function Mouseup(payload: MouseEvent) {
 /** 鼠标移动 */
 function Mousemove(payload: MouseEvent) {
   if (!pressed.value) return;
+
   speed.value.x = Math.abs(payload.clientX - x.value);
   speed.value.y = Math.abs(payload.clientY - y.value);
 
@@ -104,7 +106,11 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="speed-nhanh" @mousedown="Mousedown">
+  <div
+    class="speed-nhanh"
+    :style="{ cursor: pressed ? 'grabbing' : 'grab' }"
+    @mousedown="Mousedown"
+  >
     <img
       src="/nhanh.ico"
       alt=""
@@ -119,6 +125,7 @@ onUnmounted(() => {
   height: 100%;
   background-color: var(--active-hover) !important;
   img {
+    pointer-events: none;
     position: relative;
     width: 100px;
     height: 100px;
