@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { computed } from "vue";
-import { graphingEquations, Init } from ".";
-import { MouseInCanvas, MouseOutCanvas, MouseDown } from "./Event";
+import { computed, onMounted, onUnmounted, watch } from "vue";
 import { NButton, NIcon, NSpace, NButtonGroup, NText, NA } from "naive-ui";
 import { Add, Home, Remove } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID } from "nhanh-pure-function";
 import { useFps } from "@vueuse/core";
+import { Canvas } from "./Canvas";
 import InputMath from "./InputMath/index.vue";
 
 const fps = useFps();
 const id = _GenerateUUID("canvas-");
-requestAnimationFrame(() => Init(id));
+
+let canvas: Canvas;
 
 const buttonApi = computed(() => {
   const theme = Settings.value.theme;
@@ -23,6 +23,37 @@ const buttonApi = computed(() => {
     },
   };
 });
+
+watch(
+  () => Settings.value.theme,
+  (theme) => canvas.setTheme(theme)
+);
+
+const img = new Image(200, 300);
+img.src =
+  "https://fastly.picsum.photos/id/440/200/300.jpg?hmac=3Nx5MHMCVguEcZQ1M3RnSrCpHNn9sabFI5y6aYzvceQ";
+
+img.onload = () => {
+  canvas?.redrawOnce();
+};
+
+onMounted(() => {
+  canvas = new Canvas(id);
+  canvas.setTheme(Settings.value.theme);
+  canvas.startCreation = () => {
+    const { ctx, centent, percentage } = canvas;
+    ctx?.drawImage(
+      img,
+      centent.x,
+      centent.y,
+      200 * percentage,
+      300 * percentage
+    );
+  };
+});
+onUnmounted(() => {
+  canvas.destroy();
+});
 </script>
 
 <template>
@@ -33,24 +64,19 @@ const buttonApi = computed(() => {
       </NA>
       <InputMath />
     </nav>
-    <canvas
-      :id="id"
-      @mouseover="MouseInCanvas"
-      @mouseleave="MouseOutCanvas"
-      @mousedown="MouseDown"
-    ></canvas>
+    <canvas :id="id"></canvas>
 
     <div class="button-box">
       <NSpace vertical>
         <NButtonGroup vertical>
-          <NButton :="buttonApi" @click="graphingEquations?.updateScale(0.1)"
+          <NButton :="buttonApi" @click="canvas?.zoomIn()"
             ><template #icon> <NIcon :component="Add" /> </template
           ></NButton>
-          <NButton :="buttonApi" @click="graphingEquations?.updateScale(-0.1)"
+          <NButton :="buttonApi" @click="canvas?.zoomOut()"
             ><template #icon> <NIcon :component="Remove" /> </template
           ></NButton>
         </NButtonGroup>
-        <NButton :="buttonApi" @click="graphingEquations?.reset()"
+        <NButton :="buttonApi" @click="canvas?.reset()"
           ><template #icon>
             <NIcon :component="Home" />
           </template>

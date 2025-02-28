@@ -16,7 +16,7 @@
     "gl-matrix": "^4.0.0-beta.2",
     "highlight.js": "^11.10.0",
     "jszip": "^3.10.1",
-    "nhanh-pure-function": "^1.3.8",
+    "nhanh-pure-function": "^2.0.4",
     "pinia": "^2.1.7",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
