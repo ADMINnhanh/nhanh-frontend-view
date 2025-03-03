@@ -23,14 +23,21 @@ class Style {
 }
 
 export class Grid extends Style {
+  /** 网格开关 */
+  show = {
+    grid: true,
+    axis: true,
+    axisText: true,
+  };
+
   drawAxisAndGrid(canvas: Draw) {
-    this.drawGrid(canvas);
-    this.drawAxis(canvas);
-    this.drawAxisText(canvas);
+    if (this.show.grid) this.drawGrid(canvas);
+    if (this.show.axis) this.drawAxis(canvas);
+    if (this.show.axisText) this.drawAxisText(canvas);
   }
   /** 绘制网格 */
   private drawGrid(canvas: Draw) {
-    const { ctx, width, height, centent, gridConfig } = canvas;
+    const { ctx, width, height, center, gridConfig } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const color = this.style[this.theme];
@@ -55,9 +62,9 @@ export class Grid extends Style {
     const drawX = (grid_size: number, color: string) => {
       /** 起始位置 */
       const startX =
-        centent.x % grid_size > 0
-          ? centent.x % grid_size
-          : grid_size + (centent.x % grid_size);
+        center.x % grid_size > 0
+          ? center.x % grid_size
+          : grid_size + (center.x % grid_size);
 
       for (let index = 0; index * grid_size + startX <= width; index++) {
         drawOuterGrid(
@@ -70,9 +77,9 @@ export class Grid extends Style {
     const drawY = (grid_size: number, color: string) => {
       /** 起始位置 */
       const startY =
-        centent.y % grid_size > 0
-          ? centent.y % grid_size
-          : grid_size + (centent.y % grid_size);
+        center.y % grid_size > 0
+          ? center.y % grid_size
+          : grid_size + (center.y % grid_size);
 
       for (let index = 0; index * grid_size + startY <= height; index++) {
         drawOuterGrid(
@@ -94,7 +101,7 @@ export class Grid extends Style {
 
   /** 坐标轴 */
   private drawAxis(canvas: Draw) {
-    const { ctx, width, height, centent } = canvas;
+    const { ctx, width, height, center } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const color = this.style[this.theme];
@@ -110,13 +117,13 @@ export class Grid extends Style {
     };
 
     const drawX = () => {
-      if (centent.y >= 0 && centent.y <= height) {
-        drawAxis([0, centent.y], [width, centent.y]);
+      if (center.y >= 0 && center.y <= height) {
+        drawAxis([0, center.y], [width, center.y]);
       }
     };
     const drawY = () => {
-      if (centent.x >= 0 && centent.x <= width) {
-        drawAxis([centent.x, 0], [centent.x, height]);
+      if (center.x >= 0 && center.x <= width) {
+        drawAxis([center.x, 0], [center.x, height]);
       }
     };
 
@@ -126,7 +133,7 @@ export class Grid extends Style {
 
   /** 坐标轴 - 文字 */
   private drawAxisText(canvas: Draw) {
-    const { ctx, width, height, centent, gridConfig, style } = canvas;
+    const { ctx, width, height, center, gridConfig, style } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     /** 文字宽 */
@@ -139,17 +146,17 @@ export class Grid extends Style {
       const w = textWidth("0");
       /** x 轴方向溢出？ */
       const isXAxisOverflowing =
-        centent.x < textOffset || centent.x > width + w + textOffset;
+        center.x < textOffset || center.x > width + w + textOffset;
       /** y 轴方向溢出？ */
       const isYAxisOverflowing =
-        centent.y < -(textOffset + textSize) ||
-        centent.y > height + textSize + textOffset;
+        center.y < -(textOffset + textSize) ||
+        center.y > height + textSize + textOffset;
 
       if (!isXAxisOverflowing && !isYAxisOverflowing) {
         canvas.drawText(
           "0",
-          centent.x - w - textOffset,
-          centent.y + textSize + textOffset
+          center.x - w - textOffset,
+          center.y + textSize + textOffset
         );
       }
     }
@@ -159,21 +166,21 @@ export class Grid extends Style {
     const grid_size = gridConfig.size;
 
     /** x 轴的文字 */ {
-      let y = centent.y + textSize + textOffset;
+      let y = center.y + textSize + textOffset;
       y = Math.max(Math.min(y, height - textOffset), textOffset + textSize);
 
-      const isSecondary = centent.y > height || centent.y < 0;
+      const isSecondary = center.y > height || center.y < 0;
 
       /** 起始位置 */
       let x =
-        centent.x > 0
-          ? centent.x % grid_size
-          : centent.x < 0
-          ? grid_size + (centent.x % grid_size)
+        center.x > 0
+          ? center.x % grid_size
+          : center.x < 0
+          ? grid_size + (center.x % grid_size)
           : 0;
 
       /** 起始值 */
-      let v = canvas.getAxisPointValue(x - centent.x, 0).xV;
+      let v = canvas.getAxisPointValue(x - center.x, 0).xV;
 
       while (x <= width) {
         const textW = textWidth(String(v));
@@ -184,22 +191,22 @@ export class Grid extends Style {
     }
 
     /** y 轴的文字 */ {
-      const isSecondary = centent.x > width || centent.x < 0;
+      const isSecondary = center.x > width || center.x < 0;
 
       /** 起始位置 */
       let y =
-        centent.y > 0
-          ? centent.y % grid_size
-          : centent.y < 0
-          ? grid_size + (centent.y % grid_size)
+        center.y > 0
+          ? center.y % grid_size
+          : center.y < 0
+          ? grid_size + (center.y % grid_size)
           : 0;
 
       /** 起始值 */
-      let v = canvas.getAxisPointValue(0, y - centent.y).yV;
+      let v = canvas.getAxisPointValue(0, y - center.y).yV;
 
       while (y <= height) {
         const textW = textWidth(String(v));
-        let x = centent.x - textW - textOffset;
+        let x = center.x - textW - textOffset;
         x = Math.max(Math.min(x, width - textW - textOffset), textOffset);
 
         v !== 0 && canvas.drawText(String(v), x, y + textSize / 2, isSecondary);

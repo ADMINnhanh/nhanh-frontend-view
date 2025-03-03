@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, watch } from "vue";
 import { NButton, NIcon, NSpace, NButtonGroup, NText, NA } from "naive-ui";
-import { Add, Home, Remove } from "@vicons/ionicons5";
+import { Add, GridOutline, Home, Remove } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID } from "nhanh-pure-function";
 import { useFps } from "@vueuse/core";
@@ -39,16 +39,11 @@ img.onload = () => {
 
 onMounted(() => {
   canvas = new Canvas(id);
+  canvas.gridConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
-  canvas.startCreation = () => {
-    const { ctx, centent, percentage } = canvas;
-    ctx?.drawImage(
-      img,
-      centent.x,
-      centent.y,
-      200 * percentage,
-      300 * percentage
-    );
+  canvas.startCreationOnGrid = () => {
+    const { ctx, center, percentage } = canvas;
+    ctx?.drawImage(img, center.x, center.y, 200 * percentage, 300 * percentage);
   };
 });
 onUnmounted(() => {
@@ -69,17 +64,18 @@ onUnmounted(() => {
     <div class="button-box">
       <NSpace vertical>
         <NButtonGroup vertical>
-          <NButton :="buttonApi" @click="canvas?.zoomIn()"
-            ><template #icon> <NIcon :component="Add" /> </template
-          ></NButton>
-          <NButton :="buttonApi" @click="canvas?.zoomOut()"
-            ><template #icon> <NIcon :component="Remove" /> </template
-          ></NButton>
+          <NButton :="buttonApi" @click="canvas?.zoomIn()">
+            <template #icon><NIcon :component="Add" /></template>
+          </NButton>
+          <NButton :="buttonApi" @click="canvas?.zoomOut()">
+            <template #icon><NIcon :component="Remove" /></template>
+          </NButton>
         </NButtonGroup>
-        <NButton :="buttonApi" @click="canvas?.reset()"
-          ><template #icon>
-            <NIcon :component="Home" />
-          </template>
+        <NButton :="buttonApi" @click="canvas?.reset()">
+          <template #icon><NIcon :component="Home" /></template>
+        </NButton>
+        <NButton :="buttonApi" @click="canvas?.toggleGrid()">
+          <template #icon><NIcon :component="GridOutline" /></template>
         </NButton>
       </NSpace>
       <n-text
@@ -111,7 +107,6 @@ onUnmounted(() => {
   canvas {
     flex-grow: 1;
     width: 100px;
-    cursor: grab;
   }
 
   .button-box {

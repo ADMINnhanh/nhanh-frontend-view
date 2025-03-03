@@ -20,3 +20,10 @@ type GridItemType = {
 };
 type GridStyleType = Record<KnownStyleKeys, GridItemType> &
   Record<string, GridItemType>;
+
+type DefaultCenter = Partial<{
+  top: number | `${number}%` | "top" | "middle" | "bottom";
+  bottom: number | `${number}%`;
+  left: number | `${number}%` | "left" | "center" | "right";
+  right: number | `${number}%`;
+}>;

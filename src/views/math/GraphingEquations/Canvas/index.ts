@@ -1,5 +1,6 @@
 import { _Schedule, _Throttle } from "nhanh-pure-function";
 import { Grid } from "./AxisAndGrid";
+import "./index.less";
 
 /** 基础数据 */
 class BaseData {
@@ -14,14 +15,21 @@ class BaseData {
   /** 画布偏移量 */
   offset = { x: 0, y: 0 };
   /** 画布中心点 */
-  centent = { x: 0, y: 0 };
+  center = { x: 0, y: 0 };
+  /** 默认画布中心点 */
+  defaultCenter: DefaultCenter = {
+    top: undefined,
+    bottom: undefined,
+    left: undefined,
+    right: undefined,
+  };
   /** 缩放比例 */
   scale = 1;
   /** 百分比 */
   percentage = 1;
   /** 网格大小 */
   gridConfig = {
-    /** 初始状态下每个网格表示的数字 */
+    /** 缩放比例为1时每个网格表示的数字 */
     count: 2,
     /** 网格最小尺寸 */
     min: 75,
@@ -46,11 +54,83 @@ class BaseData {
       this.ctx = canvas.getContext("2d")!;
 
       const { clientWidth, clientHeight } = canvas;
-      canvas.width = clientWidth;
-      canvas.height = clientHeight;
-      this.width = clientWidth;
-      this.height = clientHeight;
+      [canvas.width, canvas.height] = [clientWidth, clientHeight];
+      [this.width, this.height] = [clientWidth, clientHeight];
     } else console.error("canvas is not HTMLCanvasElement");
+  }
+
+  /** 更新中心点 */
+  updateCenter() {
+    const { canvas, offset, defaultCenter } = this;
+    if (!canvas) return console.error("canvas is not HTMLCanvasElement");
+
+    const { clientWidth, clientHeight } = canvas;
+    [canvas.width, canvas.height] = [clientWidth, clientHeight];
+    [this.width, this.height] = [clientWidth, clientHeight];
+
+    // 值解析策略
+    const valueParsers = {
+      /* 垂直方向解析 */
+      vertical: (value: string | number, max: number) => {
+        if (value == Infinity || value == -Infinity) return undefined;
+        if (typeof value === "number") return value;
+        if (["top", "left"].includes(value)) return 0;
+        if (["bottom", "right"].includes(value)) return max;
+        if (["middle", "center"].includes(value)) return max / 2;
+        const percent = value.match(/^(\d+)%*$/)?.[1];
+        return (
+          (percent ? (max * Number(percent)) / 100 : Number(value)) || undefined
+        );
+      },
+
+      /* 反向解析 (bottom/right) */
+      reverse: (value: string | number, max: number) => {
+        if (value == Infinity || value == -Infinity) return undefined;
+        if (typeof value === "number") return max - value;
+        const parsed = valueParsers.vertical(value, max);
+        return parsed ? max - parsed : undefined;
+      },
+    };
+
+    // 坐标计算器
+    const calculateCoordinate = (
+      primary: string | number | undefined,
+      secondary: string | number | undefined,
+      max: number
+    ) => {
+      const val = primary ?? secondary;
+      if (val === undefined) return max / 2;
+
+      return (
+        (primary !== undefined
+          ? valueParsers.vertical(primary, max) ||
+            valueParsers.reverse(secondary!, max)
+          : valueParsers.reverse(secondary!, max)) || max / 2
+      );
+    };
+
+    const { top, bottom, left, right } = defaultCenter;
+
+    // 计算坐标
+    const y = calculateCoordinate(top, bottom, clientHeight);
+    const x = calculateCoordinate(left, right, clientWidth);
+
+    this.center = {
+      x: x + offset.x,
+      y: y + offset.y,
+    };
+  }
+  /** 更新网格大小 */
+  updateSize() {
+    const { scale, cycle, delta, gridConfig } = this;
+
+    let size = (Math.abs(scale - 1) % (cycle * delta)) / delta;
+    size = Math.round(scale < 1 ? cycle - size : size);
+    gridConfig.size =
+      (size / cycle) * (gridConfig.max - gridConfig.min) + gridConfig.min;
+
+    this.percentage =
+      this.getAxisPointByValue(gridConfig.count, 0).x / gridConfig.min;
   }
 
   /** 获取每个网格表示的数字 */
@@ -68,13 +148,13 @@ class BaseData {
   }
   /** 获取鼠标在坐标轴上的位置 */
   getMousePositionOnAxis(event: MouseEvent) {
-    const { canvas, centent } = this;
+    const { canvas, center } = this;
     if (!canvas) return console.error("canvas is not HTMLCanvasElement");
 
     const { clientX, clientY } = event;
     const rect = canvas.getBoundingClientRect();
-    const x = -(centent.x - (clientX - rect.left));
-    const y = centent.y - (clientY - rect.top);
+    const x = -(center.x - (clientX - rect.left));
+    const y = center.y - (clientY - rect.top);
     return { x, y };
   }
   /** 获取坐标轴上的值 */
@@ -93,16 +173,10 @@ class BaseData {
     const y = (yV / count) * gridConfig.size;
     return { x, y };
   }
-  /** 更新网格大小 */
-  updateSize() {
-    const { scale, cycle, delta, gridConfig } = this;
 
-    let size = (Math.abs(scale - 1) % (cycle * delta)) / delta;
-    size = Math.round(scale < 1 ? cycle - size : size);
-    gridConfig.size =
-      (size / cycle) * (gridConfig.max - gridConfig.min) + gridConfig.min;
-
-    this.percentage = this.getAxisPointByValue(2, 0).x / 75;
+  destroy() {
+    this.canvas = undefined;
+    this.ctx = undefined;
   }
 }
 
@@ -124,7 +198,7 @@ class Style extends BaseData {
       background: "#000",
       text: {
         color: "#aeaeae",
-        secondary: "#A3A6AD",
+        secondary: "#8c8c8c",
         size: 12,
         family: "微软雅黑",
         bold: true,
@@ -140,8 +214,11 @@ class Style extends BaseData {
 
   /** 初始化样式 */
   initStyle() {
-    const { ctx, theme } = this;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+    const { canvas, ctx, theme } = this;
+    if (!canvas || !ctx)
+      return console.error("ctx is not CanvasRenderingContext2D");
+
+    canvas.classList.add("_nhanh_canvas");
 
     const style = this.style[theme];
     ctx.font = `${style.text.bold ? "bold" : ""} ${style.text.size}px ${
@@ -162,17 +239,19 @@ class Style extends BaseData {
     this.initStyle();
   }
 }
+
+/** 绘制方法 */
 export class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
 
-  /** 开启网格 */
-  private grid = true;
   /** 绘制网格 */
   protected drawGrid = new Grid();
 
-  /** 在这里进行你的创作 */
-  startCreation?: () => void;
+  /** 在网格上开始创作 */
+  startCreationOnGrid?: () => void;
+  /** 在网格下开始创作 */
+  startCreationBelowGrid?: () => void;
 
   constructor(id: string) {
     super(id);
@@ -186,24 +265,17 @@ export class Draw extends Style {
 
   /** 重绘画布 */
   private redraw() {
-    const { canvas, offset } = this;
-    if (!canvas) return console.error("canvas is not HTMLCanvasElement");
+    if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
 
-    const { clientWidth, clientHeight } = canvas;
-    canvas.width = clientWidth;
-    canvas.height = clientHeight;
-    this.width = clientWidth;
-    this.height = clientHeight;
+    this.updateCenter();
 
     this.clearScreen();
-    this.centent = {
-      x: this.width / 2 + offset.x,
-      y: this.height / 2 + offset.y,
-    };
 
-    if (this.grid) this.drawGrid.drawAxisAndGrid(this);
+    this.startCreationBelowGrid?.();
 
-    this.startCreation?.();
+    this.drawGrid.drawAxisAndGrid(this);
+
+    this.startCreationOnGrid?.();
   }
   /** 重绘画布 同一个渲染帧只会执行一次 */
   redrawOnce() {
@@ -251,13 +323,30 @@ export class Draw extends Style {
   }
 
   /** 开关网格 */
-  toggleGrid() {
-    this.grid = !this.grid;
+  toggleGrid(show?: boolean | Partial<Grid["show"]>) {
+    // 统一处理配置
+    const newState = (() => {
+      // 对象配置：未传的属性用默认值 true
+      if (typeof show === "object") {
+        const { grid = true, axis = true, axisText = true } = show;
+        return { grid, axis, axisText };
+      }
+      // 布尔配置：全部属性同步开关
+      if (typeof show === "boolean") {
+        return { grid: show, axis: show, axisText: show };
+      }
+      // 无参数：根据当前状态取反
+      const anyVisible = Object.values(this.drawGrid.show).some(Boolean);
+      return { grid: !anyVisible, axis: !anyVisible, axisText: !anyVisible };
+    })();
+
+    this.drawGrid.show = newState;
     this.redrawOnce();
   }
 
   /** 销毁resizeObserver监听器 */
   destroy() {
+    super.destroy();
     this.resizeObserver?.disconnect();
   }
 }
@@ -381,7 +470,7 @@ class QuickMethod extends Event {
     };
 
     _Schedule((schedule) => {
-      if (!this.isAuto) return;
+      if (!this.isAuto || !this.canvas) return;
 
       if (schedule === 1) {
         this.offset = { x: 0, y: 0 };
@@ -400,7 +489,6 @@ class QuickMethod extends Event {
       this.redrawOnce();
     }, time);
   }
-
   /** 缩放画布 */
   zoom(delta: number) {
     const { canvas } = this;
@@ -426,7 +514,6 @@ class QuickMethod extends Event {
 
     this.redrawOnce();
   }
-
   /** 放大 */
   zoomIn() {
     this.zoom(this.delta);

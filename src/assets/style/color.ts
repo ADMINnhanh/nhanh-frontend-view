@@ -26,7 +26,7 @@ const dark = {
   "active-hover": "rgba(99, 226, 183, 0.15)",
   "background-color": "rgb(16, 16, 20)",
   "border-color": "#ffffff17",
-  "box-shadow": "rgba(255, 255, 255, 0.2)",
+  "box-shadow": "rgba(255, 255, 255, 0.3)",
 
   "text-color": "rgba(255, 255, 255, 0.82)",
   "text-color-focus": "#ffffff",
