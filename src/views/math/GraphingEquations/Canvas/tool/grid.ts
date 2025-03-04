@@ -1,8 +1,7 @@
-import type { Draw } from ".";
+import type Draw from "../core/draw";
 
 /** 样式管理器 */
 class Style {
-  theme: KnownStyleKeys = "light";
   style: GridStyleType = {
     light: {
       axis: "#222",
@@ -37,11 +36,11 @@ export class Grid extends Style {
   }
   /** 绘制网格 */
   private drawGrid(canvas: Draw) {
-    const { ctx, rect, center, gridConfig } = canvas;
+    const { ctx, rect, center, gridConfig, theme } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
-    const color = this.style[this.theme];
+    const color = this.style[theme];
 
     const grid_size = gridConfig.size;
     const inner_grid_size = grid_size / 5;
@@ -102,12 +101,12 @@ export class Grid extends Style {
 
   /** 坐标轴 */
   private drawAxis(canvas: Draw) {
-    const { ctx, rect, center } = canvas;
+    const { ctx, rect, center, theme } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
 
-    const color = this.style[this.theme];
+    const color = this.style[theme];
 
     /** 绘制x和y轴 */
     const drawAxis = (moveTo: [number, number], lineTo: [number, number]) => {
@@ -136,7 +135,7 @@ export class Grid extends Style {
 
   /** 坐标轴 - 文字 */
   private drawAxisText(canvas: Draw) {
-    const { ctx, rect, center, gridConfig, style } = canvas;
+    const { ctx, rect, center, gridConfig, style, theme } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
@@ -145,7 +144,7 @@ export class Grid extends Style {
     const textWidth = (text: string) => Math.ceil(ctx.measureText(text).width);
 
     const textOffset = 4;
-    const textSize = style[this.theme].text.size;
+    const textSize = style[theme].text.size;
 
     /** 0 */ {
       const w = textWidth("0");
