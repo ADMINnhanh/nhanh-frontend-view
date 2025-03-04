@@ -37,9 +37,10 @@ export class Grid extends Style {
   }
   /** 绘制网格 */
   private drawGrid(canvas: Draw) {
-    const { ctx, width, height, center, gridConfig } = canvas;
+    const { ctx, rect, center, gridConfig } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
+    const { width, height } = rect!;
     const color = this.style[this.theme];
 
     const grid_size = gridConfig.size;
@@ -101,8 +102,10 @@ export class Grid extends Style {
 
   /** 坐标轴 */
   private drawAxis(canvas: Draw) {
-    const { ctx, width, height, center } = canvas;
+    const { ctx, rect, center } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+
+    const { width, height } = rect!;
 
     const color = this.style[this.theme];
 
@@ -133,8 +136,10 @@ export class Grid extends Style {
 
   /** 坐标轴 - 文字 */
   private drawAxisText(canvas: Draw) {
-    const { ctx, width, height, center, gridConfig, style } = canvas;
+    const { ctx, rect, center, gridConfig, style } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+
+    const { width, height } = rect!;
 
     /** 文字宽 */
     const textWidth = (text: string) => Math.ceil(ctx.measureText(text).width);

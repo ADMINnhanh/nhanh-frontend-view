@@ -39,6 +39,8 @@ img.onload = () => {
 
 onMounted(() => {
   canvas = new Canvas(id);
+  canvas.defaultCenter.top = "top";
+  canvas.defaultCenter.left = "left";
   canvas.gridConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
   canvas.startCreationOnGrid = () => {
