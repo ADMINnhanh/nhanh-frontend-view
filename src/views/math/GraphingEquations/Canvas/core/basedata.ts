@@ -44,12 +44,16 @@ export default class BaseData {
   constructor(id: string) {
     const canvas = document.getElementById(id);
     if (canvas instanceof HTMLCanvasElement) {
-      this.canvas = canvas;
-      this.ctx = canvas.getContext("2d")!;
-      this.rect = canvas.getBoundingClientRect();
+      if (canvas.getContext) {
+        this.canvas = canvas;
+        this.ctx = canvas.getContext("2d")!;
+        this.rect = canvas.getBoundingClientRect();
 
-      const { clientWidth, clientHeight } = canvas;
-      [canvas.width, canvas.height] = [clientWidth, clientHeight];
+        const { clientWidth, clientHeight } = canvas;
+        [canvas.width, canvas.height] = [clientWidth, clientHeight];
+      } else {
+        console.error("canvas-unsupported code here");
+      }
     } else console.error("canvas is not HTMLCanvasElement");
   }
 
@@ -107,8 +111,8 @@ export default class BaseData {
     const x = calculateCoordinate(left, right, width);
 
     this.center = {
-      x: x + offset.x,
-      y: y + offset.y,
+      x: Math.floor(x + offset.x),
+      y: Math.floor(y + offset.y),
     };
   }
   /** 更新网格大小 */

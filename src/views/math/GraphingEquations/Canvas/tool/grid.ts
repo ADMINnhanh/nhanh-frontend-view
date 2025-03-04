@@ -21,7 +21,7 @@ class Style {
   }
 }
 
-export class Grid extends Style {
+export default class Grid extends Style {
   /** 网格开关 */
   show = {
     grid: true,
@@ -40,7 +40,7 @@ export class Grid extends Style {
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
-    const color = this.style[theme];
+    const color = this.style[theme] || this.style.light;
 
     const grid_size = gridConfig.size;
     const inner_grid_size = grid_size / 5;
@@ -106,7 +106,7 @@ export class Grid extends Style {
 
     const { width, height } = rect!;
 
-    const color = this.style[theme];
+    const color = this.style[theme] || this.style.light;
 
     /** 绘制x和y轴 */
     const drawAxis = (moveTo: [number, number], lineTo: [number, number]) => {

@@ -1,5 +1,5 @@
 import { _Throttle } from "nhanh-pure-function";
-import { Grid } from "../tool/grid";
+import Grid from "../tool/grid";
 import Style from "./style";
 
 /** 绘制方法 */
