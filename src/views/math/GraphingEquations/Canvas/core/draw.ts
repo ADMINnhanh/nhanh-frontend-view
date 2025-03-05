@@ -7,7 +7,14 @@ export default class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
 
-  /** 在网格上开始创作 */
+  /**
+   * 在网格上开始创作
+   *
+   * 此函数可以有以下两种返回类型：
+   * 1. void：表示创建过程不需要任何额外的信息或操作
+   * 2. [number, () => void][]：表示返回一个数组，数组中的每个元素都是一个元组，
+   *    元组的第一个元素是数字，绘制顺序，第二个元素是绘制方法
+   */
   startCreationOnGrid?: () => void | [number, () => void][];
   /** 在网格下开始创作 */
   startCreationBelowGrid?: () => void;

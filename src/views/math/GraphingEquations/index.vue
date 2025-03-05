@@ -52,10 +52,21 @@ onMounted(() => {
     { value: [6, -6] },
   ]);
 
-  // canvas.startCreationOnGrid = () => {
-  //   const { ctx, center, percentage } = canvas;
-  //   ctx?.drawImage(img, center.x, center.y, 200 * percentage, 300 * percentage);
-  // };
+  canvas.startCreationOnGrid = [
+    [
+      0,
+      () => {
+        const { ctx, center, percentage } = canvas;
+        ctx?.drawImage(
+          img,
+          center.x,
+          center.y,
+          200 * percentage,
+          300 * percentage
+        );
+      },
+    ],
+  ] as any;
 });
 onUnmounted(() => {
   canvas.destroy();
