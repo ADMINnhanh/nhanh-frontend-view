@@ -1,5 +1,5 @@
 import { _Throttle } from "nhanh-pure-function";
-import Grid from "../tool/grid";
+import type Grid from "../tool/grid";
 import Style from "./style";
 
 /** 绘制方法 */
@@ -7,13 +7,15 @@ export default class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
 
-  /** 绘制网格 */
-  protected drawGrid = new Grid();
-
   /** 在网格上开始创作 */
-  startCreationOnGrid?: () => void;
+  startCreationOnGrid?: () => void | [number, () => void][];
   /** 在网格下开始创作 */
   startCreationBelowGrid?: () => void;
+
+  /** 计算坐标所需依赖 */
+  rely = [this.center.x, this.center.y, this.scale].join();
+  /** 是否需要重新计算坐标 */
+  isRecalculate = false;
 
   constructor(id: string) {
     super(id);
@@ -39,13 +41,40 @@ export default class Draw extends Style {
 
     this.updateCenter();
 
+    const { center, scale } = this;
+    const newRely = [center.x, center.y, scale].join();
+    this.isRecalculate = this.rely !== newRely;
+    this.rely = newRely;
+
     this.clearScreen();
 
     this.startCreationBelowGrid?.();
 
-    this.drawGrid.drawAxisAndGrid(this);
+    this.drawGrid?.drawAxisAndGrid();
 
-    this.startCreationOnGrid?.();
+    const creationOnGrid = this.startCreationOnGrid;
+
+    const zIndexs: { [key: number]: (() => void)[] } = {};
+    if (Array.isArray(creationOnGrid)) {
+      for (const [zIndex, func] of creationOnGrid) {
+        zIndexs[zIndex] = [...(zIndexs[zIndex] || []), func];
+      }
+    }
+    this.drawPoint.fetchDrawFunctions().forEach(([zIndex, func]) => {
+      zIndexs[zIndex] = [...(zIndexs[zIndex] || []), func];
+    });
+
+    Object.keys(zIndexs)
+      .sort()
+      .forEach((zIndex) => {
+        const funcs = zIndexs[zIndex as unknown as number];
+        funcs.forEach((func) => func());
+      });
+
+    if (typeof this.startCreationOnGrid === "function")
+      this.startCreationOnGrid?.();
+
+    this.isRecalculate = false;
   }
   /** 重绘画布 同一个渲染帧只会执行一次 */
   redrawOnce(isAuto?: boolean) {
@@ -110,16 +139,33 @@ export default class Draw extends Style {
     const newState = (() => {
       // 对象配置：未传的属性用默认值 true
       if (typeof show === "object") {
-        const { grid = true, axis = true, axisText = true } = show;
+        const {
+          grid = { main: true, secondary: true },
+          axis = true,
+          axisText = true,
+        } = show;
         return { grid, axis, axisText };
       }
       // 布尔配置：全部属性同步开关
       if (typeof show === "boolean") {
-        return { grid: show, axis: show, axisText: show };
+        return {
+          grid: { main: show, secondary: show },
+          axis: show,
+          axisText: show,
+        };
       }
       // 无参数：根据当前状态取反
-      const anyVisible = Object.values(this.drawGrid.show).some(Boolean);
-      return { grid: !anyVisible, axis: !anyVisible, axisText: !anyVisible };
+      show = !(
+        this.drawGrid.show.axis ||
+        this.drawGrid.show.axisText ||
+        this.drawGrid.show.grid.main ||
+        this.drawGrid.show.grid.secondary
+      );
+      return {
+        grid: { main: show, secondary: show },
+        axis: show,
+        axisText: show,
+      };
     })();
 
     this.drawGrid.show = newState;

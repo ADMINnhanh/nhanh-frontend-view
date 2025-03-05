@@ -1,3 +1,8 @@
+import type Grid from "../tool/grid";
+import type Point from "../tool/point";
+import type Line from "../tool/line";
+import type Polygon from "../tool/polygon";
+
 /** 基础数据 */
 export default class BaseData {
   /** 画布元素 */
@@ -40,6 +45,15 @@ export default class BaseData {
   protected redrawInNextRenderFrame = false;
   /** 是否正在自动调整 */
   protected isAuto = false;
+
+  /** 绘制网格 */
+  drawGrid: Grid = undefined as any;
+  /** 绘制点 */
+  drawPoint: Point = undefined as any;
+  /** 绘制线 */
+  drawLine: Line = undefined as any;
+  /** 绘制面 */
+  drawPolygon: Polygon = undefined as any;
 
   constructor(id: string) {
     const canvas = document.getElementById(id);
@@ -146,7 +160,7 @@ export default class BaseData {
     }
 
     const mousePoint = this.getMousePositionOnAxis({ clientX, clientY })!;
-    const mouseValue = this.getAxisPointValue(mousePoint.x, mousePoint.y);
+    const mouseValue = this.getAxisValueByPoint(mousePoint.x, mousePoint.y);
 
     this.scale += delta;
 
@@ -186,7 +200,7 @@ export default class BaseData {
     return { x, y };
   }
   /** 获取坐标轴上的值 */
-  getAxisPointValue(x: number, y: number) {
+  getAxisValueByPoint(x: number, y: number) {
     const { gridConfig } = this;
     const count = this.getGridCount();
     const xV = (x / gridConfig.size) * count;

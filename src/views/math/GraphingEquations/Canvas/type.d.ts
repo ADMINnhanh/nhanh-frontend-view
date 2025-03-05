@@ -46,8 +46,9 @@ type PointStyleType = Record<KnownStyleKeys, PointItemType> &
   Record<string, PointItemType>;
 
 type PointListType = {
-  style?: PointStyleType;
+  style?: PointItemType;
   location?: [number, number];
+  dynamicLocation?: [number, number];
   value?: [number, number];
   zIndex?: number;
   show?: boolean;

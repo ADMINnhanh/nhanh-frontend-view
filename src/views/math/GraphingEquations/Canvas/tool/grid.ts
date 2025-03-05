@@ -1,4 +1,4 @@
-import type Draw from "../core/draw";
+import type Canvas from "..";
 
 /** 样式管理器 */
 class Style {
@@ -22,20 +22,33 @@ class Style {
 }
 
 export default class Grid extends Style {
+  /** 画布 */
+  canvas?: Canvas;
+
   /** 网格开关 */
   show = {
-    grid: true,
+    grid: {
+      main: true,
+      secondary: true,
+    },
     axis: true,
     axisText: true,
   };
 
-  drawAxisAndGrid(canvas: Draw) {
-    if (this.show.grid) this.drawGrid(canvas);
-    if (this.show.axis) this.drawAxis(canvas);
-    if (this.show.axisText) this.drawAxisText(canvas);
+  constructor(canvas: Canvas) {
+    super();
+    this.canvas = canvas;
+  }
+
+  drawAxisAndGrid() {
+    if (!this.canvas) return;
+    if (this.show.grid.main || this.show.grid.secondary) this.drawGrid();
+    if (this.show.axis) this.drawAxis();
+    if (this.show.axisText) this.drawAxisText();
   }
   /** 绘制网格 */
-  private drawGrid(canvas: Draw) {
+  private drawGrid() {
+    const canvas = this.canvas!;
     const { ctx, rect, center, gridConfig, theme } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
@@ -89,18 +102,24 @@ export default class Grid extends Style {
         );
       }
     };
-    /** 内网格x */
-    drawX(inner_grid_size, color.innerGrid);
-    /** 内网格y */
-    drawY(inner_grid_size, color.innerGrid);
-    /** 外网格x */
-    drawX(grid_size, color.grid);
-    /** 外网格y */
-    drawY(grid_size, color.grid);
+
+    if (this.show.grid.secondary) {
+      /** 内网格x */
+      drawX(inner_grid_size, color.innerGrid);
+      /** 内网格y */
+      drawY(inner_grid_size, color.innerGrid);
+    }
+    if (this.show.grid.main) {
+      /** 外网格x */
+      drawX(grid_size, color.grid);
+      /** 外网格y */
+      drawY(grid_size, color.grid);
+    }
   }
 
   /** 坐标轴 */
-  private drawAxis(canvas: Draw) {
+  private drawAxis() {
+    const canvas = this.canvas!;
     const { ctx, rect, center, theme } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
@@ -134,7 +153,8 @@ export default class Grid extends Style {
   }
 
   /** 坐标轴 - 文字 */
-  private drawAxisText(canvas: Draw) {
+  private drawAxisText() {
+    const canvas = this.canvas!;
     const { ctx, rect, center, gridConfig, style, theme } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
@@ -184,7 +204,7 @@ export default class Grid extends Style {
           : 0;
 
       /** 起始值 */
-      let v = canvas.getAxisPointValue(x - center.x, 0).xV;
+      let v = canvas.getAxisValueByPoint(x - center.x, 0).xV;
 
       while (x <= width) {
         const textW = textWidth(String(v));
@@ -206,7 +226,7 @@ export default class Grid extends Style {
           : 0;
 
       /** 起始值 */
-      let v = canvas.getAxisPointValue(0, y - center.y).yV;
+      let v = canvas.getAxisValueByPoint(0, y - center.y).yV;
 
       while (y <= height) {
         const textW = textWidth(String(v));

@@ -5,7 +5,7 @@ import { Add, GridOutline, Home, Remove } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID } from "nhanh-pure-function";
 import { useFps } from "@vueuse/core";
-import { Canvas } from "./Canvas";
+import Canvas from "./Canvas";
 import InputMath from "./InputMath/index.vue";
 
 const fps = useFps();
@@ -39,14 +39,23 @@ img.onload = () => {
 
 onMounted(() => {
   canvas = new Canvas(id);
-  canvas.defaultCenter.top = "top";
-  canvas.defaultCenter.left = "left";
-  canvas.gridConfig.count = 75;
+  // canvas.defaultCenter.top = "top";
+  // canvas.defaultCenter.left = "left";
+  // canvas.gridConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
-  canvas.startCreationOnGrid = () => {
-    const { ctx, center, percentage } = canvas;
-    ctx?.drawImage(img, center.x, center.y, 200 * percentage, 300 * percentage);
-  };
+
+  canvas.drawPoint.addPoint([
+    { location: [75, 75] },
+    { value: [6, 6] },
+    { value: [-6, 6] },
+    { value: [-6, -6] },
+    { value: [6, -6] },
+  ]);
+
+  // canvas.startCreationOnGrid = () => {
+  //   const { ctx, center, percentage } = canvas;
+  //   ctx?.drawImage(img, center.x, center.y, 200 * percentage, 300 * percentage);
+  // };
 });
 onUnmounted(() => {
   canvas.destroy();
@@ -87,6 +96,10 @@ onUnmounted(() => {
         {{ fps }}
       </n-text>
     </div>
+
+    <!-- <div class="color">
+      <div></div>
+    </div> -->
   </div>
 </template>
 
@@ -129,6 +142,26 @@ onUnmounted(() => {
       font-size: 18px;
       font-weight: bold;
     }
+  }
+}
+.color {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  @color: #5faaff;
+  @background-color: ~"@{color}70";
+  background-color: @background-color;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  div {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: @color;
   }
 }
 </style>
