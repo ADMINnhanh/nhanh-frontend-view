@@ -31,6 +31,27 @@ type GridItemType = {
 type GridStyleType = Record<KnownStyleKeys, GridItemType> &
   Record<string, GridItemType>;
 
+type PluralSwitch<T, P extends boolean> = P extends true ? T[] : T;
+/** 公共数据属性 */
+type CommonDataType<STYLE, PLURAL extends boolean, OTHER = {}> = Array<
+  Partial<
+    {
+      /** 样式 */
+      style: STYLE;
+      /** 层级 */
+      zIndex: number;
+      /** 是否显示 */
+      show: boolean;
+      /** 未缩放状态下的位置 */
+      location: PluralSwitch<[number, number], PLURAL>;
+      /** 动态位置 */
+      dynamicLocation: PluralSwitch<[number, number], PLURAL>;
+      /** 值 */
+      value: PluralSwitch<[number, number], PLURAL>;
+    } & OTHER
+  >
+>;
+
 type PointItemType = {
   /** 半径 */
   radius: number;
@@ -44,12 +65,34 @@ type PointItemType = {
 /** 点位样式 */
 type PointStyleType = Record<KnownStyleKeys, PointItemType> &
   Record<string, PointItemType>;
+/** 点位列表 */
+type PointListType = CommonDataType<PointItemType, false>;
 
-type PointListType = {
-  style?: PointItemType;
-  location?: [number, number];
-  dynamicLocation?: [number, number];
-  value?: [number, number];
-  zIndex?: number;
-  show?: boolean;
-}[];
+type LineItemType = {
+  /** 颜色 */
+  color: string;
+  /** 宽度 */
+  width: number;
+  /** 虚线 */
+  dash: boolean;
+  /** 虚线间隔 */
+  dashGap: number[];
+  /** 偏移虚线 */
+  dashOffset: number;
+  /** 末端的形状 */
+  cap: "butt" | "round" | "square";
+  /** 路径中的相连部分的形状 */
+  join: "bevel" | "round" | "miter";
+};
+/** 线样式 */
+type LineStyleType = Record<KnownStyleKeys, LineItemType> &
+  Record<string, LineItemType>;
+/** 线列表 */
+type LineListType = CommonDataType<
+  LineItemType,
+  true,
+  {
+    /** 无限线 */
+    infinite: boolean;
+  }
+>;

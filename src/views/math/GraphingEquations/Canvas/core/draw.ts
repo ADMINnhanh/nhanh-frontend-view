@@ -42,6 +42,16 @@ export default class Draw extends Style {
     }
   }
 
+  // 封装添加函数到 zIndexs 对象的逻辑
+  addFunctionsToZIndexs(zIndexFuncPairs: [number, () => void][]) {
+    const zIndexs: { [key: number]: (() => void)[] } = {};
+
+    zIndexFuncPairs.forEach(([zIndex, func]) => {
+      zIndexs[zIndex] = [...(zIndexs[zIndex] || []), func];
+    });
+    return zIndexs;
+  }
+
   /** 重绘画布 */
   private redraw() {
     if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
@@ -61,15 +71,12 @@ export default class Draw extends Style {
 
     const creationOnGrid = this.startCreationOnGrid;
 
-    const zIndexs: { [key: number]: (() => void)[] } = {};
-    if (Array.isArray(creationOnGrid)) {
-      for (const [zIndex, func] of creationOnGrid) {
-        zIndexs[zIndex] = [...(zIndexs[zIndex] || []), func];
-      }
-    }
-    this.drawPoint.fetchDrawFunctions().forEach(([zIndex, func]) => {
-      zIndexs[zIndex] = [...(zIndexs[zIndex] || []), func];
-    });
+    const zIndexs = this.addFunctionsToZIndexs(
+      this.drawPoint
+        .fetchDrawFunctions()
+        .concat(this.drawLine.fetchDrawFunctions())
+        .concat(Array.isArray(creationOnGrid) ? creationOnGrid : [])
+    );
 
     Object.keys(zIndexs)
       .sort()

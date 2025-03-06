@@ -45,12 +45,19 @@ onMounted(() => {
   canvas.setTheme(Settings.value.theme);
 
   canvas.drawPoint.addPoint([
-    { location: [75, 75] },
+    { zIndex: 1, location: [75, 75] },
     { value: [6, 6] },
     { value: [-6, 6] },
     { value: [-6, -6] },
     { value: [6, -6] },
   ]);
+  canvas.drawLine.addLine({
+    value: [
+      [-2, -2],
+      [2, -6],
+      [-4, -4],
+    ],
+  });
 
   canvas.startCreationOnGrid = [
     [

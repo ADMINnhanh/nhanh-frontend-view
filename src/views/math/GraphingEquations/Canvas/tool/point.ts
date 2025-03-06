@@ -1,4 +1,5 @@
 import type Canvas from "..";
+import { IsValid } from "./public";
 
 /** 样式管理器 */
 class Style {
@@ -79,26 +80,13 @@ export default class Point extends Style {
       ctx.fill();
     });
   }
-  /** 参数是否合法 */
-  isValid(arr: any) {
-    return (
-      Array.isArray(arr) &&
-      typeof arr[0] === "number" &&
-      typeof arr[1] === "number" &&
-      isFinite(arr[0]) &&
-      isFinite(arr[1])
-    );
-  }
   /** 添加点位 */
   addPoint(points: PointListType | PointListType[number]) {
     const canvas = this.canvas!;
     [points].flat().forEach((item) => {
       let { location, value, zIndex = 0, show = true, style } = item;
 
-      const [isValue, isLocation] = [
-        this.isValid(value),
-        this.isValid(location),
-      ];
+      const [isValue, isLocation] = [IsValid(value), IsValid(location)];
       if (!isValue && !isLocation) return;
       if (isValue && !isLocation) {
         const loc = canvas.getAxisPointByValue(...value!);
