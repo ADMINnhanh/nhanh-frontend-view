@@ -83,6 +83,8 @@ type LineItemType = {
   cap: "butt" | "round" | "square";
   /** 路径中的相连部分的形状 */
   join: "bevel" | "round" | "miter";
+  /** 点位样式 */
+  point: PointItemType;
 };
 /** 线样式 */
 type LineStyleType = Record<KnownStyleKeys, LineItemType> &

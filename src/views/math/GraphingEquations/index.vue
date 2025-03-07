@@ -44,19 +44,34 @@ onMounted(() => {
   // canvas.gridConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
 
-  canvas.drawPoint.addPoint([
+  canvas.drawPoint.addPoints([
     { zIndex: 1, location: [75, 75] },
     { value: [6, 6] },
     { value: [-6, 6] },
     { value: [-6, -6] },
     { value: [6, -6] },
   ]);
-  canvas.drawLine.addLine({
-    value: [
-      [-2, -2],
-      [2, -6],
-      [-4, -4],
-    ],
+  canvas.drawLine.addLines([
+    {
+      value: [
+        [-2, -2],
+        [2, -6],
+        [-4, -4],
+      ],
+    },
+    {
+      value: [
+        [-2, 4],
+        [2, -4],
+      ],
+      infinite: true,
+    },
+  ]);
+
+  Array.from({ length: 10000 }, (_, i) => {
+    canvas.drawPoint.addPoints({
+      value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
+    });
   });
 
   canvas.startCreationOnGrid = [
