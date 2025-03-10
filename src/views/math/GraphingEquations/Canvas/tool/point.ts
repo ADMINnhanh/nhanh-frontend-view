@@ -1,4 +1,5 @@
 import type Canvas from "..";
+import _Worker from "../worker";
 import { IsValid } from "./public";
 
 /** 样式管理器 */
@@ -33,6 +34,9 @@ export default class Point extends Style {
   private pointMap = new Map<number, PointListType>();
   /** 角度 */
   private angle = 2 * Math.PI;
+
+  /** 最大的半径 */
+  private maxRadius = 16;
 
   /** 需要绘制点位数量 */
   private pointCount = 0;
@@ -72,75 +76,103 @@ export default class Point extends Style {
       this.drawSinglePoint(dynamicLocation!, style);
     });
   }
+
+  /** 待添加的点位 */
+  private pointList: PointListType = [];
+
   /** 向数据集合中添加点位 */
   addPoints(points: PointListType | PointListType[number]) {
     const canvas = this.canvas!;
-    const { center, percentage } = canvas!;
+    const { center, percentage } = canvas;
 
-    [points].flat().forEach((item) => {
-      let { location, value, zIndex = 0, show = true, style } = item;
-
-      const [isValue, isLocation] = [IsValid(value), IsValid(location)];
-      if (!isValue && !isLocation) return;
-      if (isValue && !isLocation) {
-        const loc = canvas.getAxisPointByValue(...value!);
-        location = [loc.x, loc.y];
-      } else if (!isValue && isLocation) {
-        const val = canvas.getAxisValueByPoint(...location!);
-        value = [val.xV, val.yV];
-      }
-
-      let [x, y] = location!;
-      x = center.x + x * percentage;
-      y = center.y + y * percentage;
-      const dynamicLocation: [number, number] = [x, y];
-
-      const list = (this.pointMap.get(zIndex) || []).concat({
-        location,
-        dynamicLocation,
-        value,
-        zIndex,
-        show,
-        style,
+    if (this.pointList.length == 0) {
+      Promise.resolve().then(() => {
+        // _Worker({},()=>{
+        //   this.pointList = [];
+        //   canvas.redrawOnce();
+        // });
+        // pointList.forEach((item) => {
+        //   console.log(IsValid, canvas);
+        //   let { location, value, zIndex = 0, show = true, style } = item;
+        //   if (style)
+        //     this.maxRadius = Math.max(
+        //       style.radius + style.width,
+        //       this.maxRadius
+        //     );
+        //   const [isValue, isLocation] = [IsValid(value), IsValid(location)];
+        //   if (!isValue && !isLocation) return;
+        //   if (isValue && !isLocation) {
+        //     const loc = canvas.getAxisPointByValue(...value!);
+        //     location = [loc.x, loc.y];
+        //   } else if (!isValue && isLocation) {
+        //     const val = canvas.getAxisValueByPoint(...location!);
+        //     value = [val.xV, val.yV];
+        //   }
+        //   let [x, y] = location!;
+        //   x = center.x + x * percentage;
+        //   y = center.y + y * percentage;
+        //   const dynamicLocation: [number, number] = [x, y];
+        //   const list = (this.pointMap.get(zIndex) || []).concat({
+        //     location,
+        //     dynamicLocation,
+        //     value,
+        //     zIndex,
+        //     show,
+        //     style,
+        //   });
+        //   this.pointMap.set(zIndex, list);
+        // });
       });
-      this.pointMap.set(zIndex, list);
-    });
-
-    this.canvas!.redrawOnce();
+    }
+    this.pointList = this.pointList.concat(points);
   }
   /** 获取绘制函数 */
   fetchDrawFunctions() {
-    const { show, style, canvas } = this;
-    const { ctx, center, theme, percentage, isRecalculate, rect } = canvas!;
+    const { show, style } = this;
+    const canvas = this.canvas!;
+    const { ctx, center, theme, percentage, isRecalculate, rect } = canvas;
     if (!ctx || !show) return [];
 
     this.pointCount = 0;
+
+    const publicStyle = style[theme] || style.light;
+    this.maxRadius = Math.max(
+      publicStyle.radius + publicStyle.width,
+      this.maxRadius
+    );
+
+    const pointRect = {
+      left: rect!.left - this.maxRadius,
+      right: rect!.right + this.maxRadius,
+      top: rect!.top - this.maxRadius,
+      bottom: rect!.bottom + this.maxRadius,
+    };
+
+    const videoXyRange = canvas.getMaxMinValue(pointRect);
 
     const keys = Array.from(this.pointMap.keys());
     const funcs: [number, () => void][] = keys.map((zIndex) => {
       const points = this.pointMap.get(zIndex)!.filter((point) => {
         const { location, show } = point;
         if (!show) return;
-        const { width, radius } = point.style || style[theme] || style.light;
+        const [xv, yv] = point.value!;
 
-        let x, y;
+        if (
+          !(
+            xv > videoXyRange.minXV &&
+            xv < videoXyRange.maxXV &&
+            yv > videoXyRange.minYV &&
+            yv < videoXyRange.maxYV
+          )
+        )
+          return;
 
         if (isRecalculate) {
-          [x, y] = location!;
+          let [x, y] = location!;
           x = center.x + x * percentage;
           y = center.y + y * percentage;
           point.dynamicLocation = [x, y];
-        } else {
-          [x, y] = point.dynamicLocation!;
         }
-
-        if (
-          x > rect!.width + radius + width ||
-          x < -radius - width ||
-          y > rect!.height + radius + width ||
-          y < -radius - width
-        )
-          return;
 
         return true;
       });
@@ -150,6 +182,10 @@ export default class Point extends Style {
 
       return [zIndex, () => this.drawMultiplePoints(points)];
     });
+
+    console.log(
+      `本次需要绘制点位数量：${this.pointCount}，本次是否简化绘制：${this.simplify}`
+    );
 
     return funcs;
   }

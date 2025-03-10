@@ -39,8 +39,6 @@ export default class QuickMethod extends Event {
       return console.error("canvas is not HTMLCanvasElement");
 
     this.setScale("center", delta);
-
-    this.redrawOnce();
   }
   /** 放大 */
   zoomIn() {

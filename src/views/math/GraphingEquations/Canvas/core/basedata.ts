@@ -170,8 +170,9 @@ export default class BaseData {
       mouseValue.xV,
       mouseValue.yV
     );
-    this.offset.x += -(newMousePoint.x - mousePoint.x);
-    this.offset.y += newMousePoint.y - mousePoint.y;
+
+    this.offset.x -= newMousePoint.x - mousePoint.x;
+    this.offset.y -= newMousePoint.y - mousePoint.y;
   }
 
   /** 获取每个网格表示的数字 */
@@ -195,8 +196,8 @@ export default class BaseData {
     const { clientX, clientY } = event;
     const { left, top } = rect!;
 
-    const x = -(center.x - (clientX - left));
-    const y = center.y - (clientY - top);
+    const x = clientX - left - center.x;
+    const y = clientY - top - center.y;
     return { x, y };
   }
   /** 获取坐标轴上的值 */
@@ -214,6 +215,29 @@ export default class BaseData {
     const x = (xV / count) * gridConfig.size;
     const y = (yV / count) * gridConfig.size;
     return { x, y };
+  }
+
+  /** 获取最大/小的 值 */
+  getMaxMinValue(rect?: {
+    left: number;
+    top: number;
+    right: number;
+    bottom: number;
+  }) {
+    rect = rect || this.rect!;
+    const { x: minX, y: minY } = this.getMousePositionOnAxis({
+      clientX: rect.left,
+      clientY: rect.top,
+    })!;
+    const { xV: minXV, yV: minYV } = this.getAxisValueByPoint(minX, minY);
+
+    const { x: maxX, y: maxY } = this.getMousePositionOnAxis({
+      clientX: rect.right,
+      clientY: rect.bottom,
+    })!;
+    const { xV: maxXV, yV: maxYV } = this.getAxisValueByPoint(maxX, maxY);
+
+    return { minXV, minYV, maxXV, maxYV };
   }
 
   destroy() {

@@ -68,7 +68,7 @@ onMounted(() => {
     },
   ]);
 
-  Array.from({ length: 10000 }, (_, i) => {
+  Array.from({ length: 10000 * 1 }, (_, i) => {
     canvas.drawPoint.addPoints({
       value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
     });
