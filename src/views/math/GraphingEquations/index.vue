@@ -37,12 +37,15 @@ img.onload = () => {
   canvas?.redrawOnce();
 };
 
-// const list = Array.from({ length: 10000 * 20 });
-
+// const list = Array.from({ length: 10000 * 200 });
+// let a = 0;
 // const t = performance.now();
 // for (let i = 0; i < list.length; i++) {
-
+//   a++;
 // }
+// // for (const e of list) {
+// //   a++;
+// // }
 // console.log(performance.now() - t + "ms");
 
 onMounted(() => {
@@ -60,6 +63,13 @@ onMounted(() => {
   // ]);
   // canvas.drawLine.addLines([
   //   {
+  //     location: [
+  //       [-75 * 2, 75 * 2],
+  //       [75 * 2, 75 * 2],
+  //       [75 * 2, 0 * 2],
+  //     ],
+  //   },
+  //   {
   //     value: [
   //       [-2, -2],
   //       [2, -6],
@@ -68,13 +78,20 @@ onMounted(() => {
   //   },
   //   {
   //     value: [
-  //       [-2, 4],
-  //       [2, -4],
+  //       [-2, 0],
+  //       [0, -2],
+  //     ],
+  //     infinite: true,
+  //   },
+  //   {
+  //     value: [
+  //       [2, 0],
+  //       [0, 2],
   //     ],
   //     infinite: true,
   //   },
   // ]);
-  // const points = Array.from({ length: 10000 * 5 }).map((_, i) => ({
+  // const points = Array.from({ length: 10000 }).map((_, i) => ({
   //   value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
   // }));
   // canvas.drawPoint.addPoints(points as any);
@@ -97,6 +114,9 @@ onMounted(() => {
 onUnmounted(() => {
   canvas.destroy();
 });
+
+{
+}
 </script>
 
 <template>

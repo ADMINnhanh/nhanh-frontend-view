@@ -72,7 +72,7 @@ export default class Point extends Style {
 
     for (let i = 0; i < points.length; i++) {
       const { show, dynamicLocation, style } = points[i];
-      if (!show) return;
+      if (!show) continue;
       this.drawSinglePoint(dynamicLocation!, style);
     }
   }

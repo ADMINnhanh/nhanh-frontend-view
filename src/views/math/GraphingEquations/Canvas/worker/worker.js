@@ -7,6 +7,10 @@ function IsValid(arr) {
     isFinite(arr[1])
   );
 }
+/** 参数是否合法 */
+function IsValids(arr) {
+  return Array.isArray(arr) && arr.every(IsValid);
+}
 
 /** 通过坐标轴上的点 获取坐标轴上的值 */
 function getAxisValueByPoint(x, y, gridConfig, count) {
@@ -32,7 +36,7 @@ function AnalyzeThePoint(pointList, config) {
     let { location, value, zIndex = 0, show = true, style } = item;
     if (style) maxRadius = Math.max(style.radius + style.width, maxRadius);
     const [isValue, isLocation] = [IsValid(value), IsValid(location)];
-    if (!isValue && !isLocation) return;
+    if (!isValue && !isLocation) continue;
     if (isValue && !isLocation) {
       const loc = getAxisPointByValue(value[0], value[1], gridConfig, count);
       location = [loc.x, loc.y];
@@ -75,15 +79,72 @@ function AnalyzeThePoint(pointList, config) {
 
   return pointMap;
 }
+/** 解析线段 */
+function AnalyzeTheLine(lineList, config) {
+  let { gridConfig, count, center, percentage } = config;
+
+  const lineMap = new Map();
+  for (let i = 0; i < lineList.length; i++) {
+    let {
+      location,
+      value,
+      zIndex = 0,
+      show = true,
+      style,
+      infinite,
+    } = lineList[i];
+
+    const [isValue, isLocation] = [IsValids(value), IsValids(location)];
+    if (!isValue && !isLocation) return;
+
+    if (isValue && !isLocation) {
+      location = [];
+      for (let i = 0; i < value.length; i++) {
+        const item = value[i];
+        const loc = getAxisPointByValue(item[0], item[1], gridConfig, count);
+        location.push([loc.x, loc.y]);
+      }
+    } else if (!isValue && isLocation) {
+      value = [];
+      for (let i = 0; i < location.length; i++) {
+        const item = location[i];
+        const val = getAxisValueByPoint(item[0], item[1], gridConfig, count);
+        value.push([val.xV, val.yV]);
+      }
+    }
+
+    const dynamicLocation = [];
+    for (let i = 0; i < location.length; i++) {
+      let [x, y] = location[i];
+      x = center.x + x * percentage;
+      y = center.y + y * percentage;
+      dynamicLocation.push([x, y]);
+    }
+
+    const list = (lineMap.get(zIndex) || []).concat({
+      location,
+      dynamicLocation,
+      value,
+      zIndex,
+      show,
+      style,
+      infinite: infinite && location?.length == 2,
+    });
+    lineMap.set(zIndex, list);
+  }
+
+  return lineMap;
+}
 
 self.onmessage = function (event) {
   const data = event.data;
   const { type, config, list } = data;
 
-  let t = performance.now();
+  // let t = performance.now();
   let result;
   if (type == "point") result = AnalyzeThePoint(list, config);
-  console.log("worker.js 耗时：", performance.now() - t + " ms");
+  else if (type == "line") result = AnalyzeTheLine(list, config);
+  // console.log("worker.js 耗时：", performance.now() - t + " ms");
 
   self.postMessage(result);
 };

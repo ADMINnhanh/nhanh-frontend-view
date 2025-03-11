@@ -1,5 +1,5 @@
 import type Canvas from "..";
-import { IsValids } from "./public";
+import _Worker from "../worker";
 
 /** 样式管理器 */
 class Style {
@@ -20,7 +20,7 @@ class Style {
       },
     },
     dark: {
-      color: "#7751b7",
+      color: "#d98d40",
       width: 4,
       dash: false,
       dashGap: [5, 10],
@@ -29,9 +29,9 @@ class Style {
       join: "round",
       point: {
         radius: 4,
-        stroke: "#7751b780",
+        stroke: "#d98d40" + "80",
         width: 12,
-        fill: "#7751b7",
+        fill: "#d98d40",
       },
     },
   };
@@ -148,13 +148,14 @@ export default class Line extends Style {
     this.drawLine([extendedStart, extendedEnd], item.style);
   }
   /** 绘制多条线段 */
-  drawLines(items: LineListType) {
+  drawLines(lines: LineListType) {
     const { show, canvas } = this;
     const { ctx, center, percentage, isRecalculate } = canvas!;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
     if (!show) return;
 
-    items.forEach((line) => {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       const { show, infinite, location } = line;
       if (!show) return;
 
@@ -169,55 +170,59 @@ export default class Line extends Style {
 
       if (infinite) this.drawInfiniteStraightLine(line);
       else this.drawLine(line.dynamicLocation!, line.style);
-    });
+    }
   }
+
+  /** 待添加的线段 */
+  private lineList: LineListType = [];
   /** 向绘图对象中添加一条线段 */
   addLines(items: LineListType | LineListType[number]) {
     const canvas = this.canvas!;
-    const { center, percentage } = canvas!;
-    [items].flat().forEach((item) => {
-      let { location, value, zIndex = 0, show = true, style, infinite } = item;
 
-      const [isValue, isLocation] = [IsValids(value), IsValids(location)];
-      if (!isValue && !isLocation) return;
+    if (this.lineList.length == 0) {
+      Promise.resolve().then(() => {
+        const { center, percentage, gridConfig } = canvas;
+        const count = gridConfig.count;
 
-      if (isValue && !isLocation) {
-        location = value!.map((item) => {
-          const loc = canvas.getAxisPointByValue(item[0], item[1]);
-          return [loc.x, loc.y];
+        const result = [],
+          step = 1000;
+        for (let i = 0; i < this.lineList.length; i += step) {
+          result.push(this.lineList.slice(i, i + step));
+        }
+        result.forEach((list) => {
+          _Worker(
+            {
+              type: "line",
+              list,
+              config: { count, gridConfig, percentage, center },
+            },
+            (lineMap: Map<number, LineListType>) => {
+              if (lineMap) {
+                lineMap.forEach((list, zIndex) => {
+                  if (this.lineMap.has(zIndex)) {
+                    this.lineMap.set(
+                      zIndex,
+                      this.lineMap.get(zIndex)!.concat(list)
+                    );
+                  } else {
+                    this.lineMap.set(zIndex, list);
+                  }
+                });
+                canvas.redrawOnce();
+              }
+            }
+          );
         });
-      } else if (!isValue && isLocation) {
-        value = value!.map((item) => {
-          const val = canvas.getAxisValueByPoint(item[0], item[1]);
-          return [val.xV, val.yV];
-        });
-      }
 
-      const dynamicLocation: [number, number][] = location!.map((item) => {
-        let [x, y] = item!;
-        x = center.x + x * percentage;
-        y = center.y + y * percentage;
-        return [x, y];
+        this.lineList = [];
       });
-
-      const list = (this.lineMap.get(zIndex) || []).concat({
-        location,
-        dynamicLocation,
-        value,
-        zIndex,
-        show,
-        style,
-        infinite: infinite && location?.length == 2,
-      });
-      this.lineMap.set(zIndex, list);
-    });
-
-    canvas.redrawOnce();
+    }
+    this.lineList = this.lineList.concat(items);
   }
   /** 获取绘制函数 */
   fetchDrawFunctions(): [number, () => void][] {
     const { show, canvas } = this;
-    const { ctx, center, percentage, isRecalculate } = canvas!;
+    const { ctx } = canvas!;
     if (!ctx || !show) return [];
 
     const keys = Array.from(this.lineMap.keys());

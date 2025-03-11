@@ -58,19 +58,7 @@ export default class Grid extends Style {
     const grid_size = gridConfig.size;
     const inner_grid_size = grid_size / 5;
 
-    /** 绘制外网格线 */
-    const drawOuterGrid = (
-      moveTo: [number, number],
-      lineTo: [number, number],
-      color: string
-    ) => {
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = color;
-      ctx.beginPath();
-      ctx.moveTo(...moveTo);
-      ctx.lineTo(...lineTo);
-      ctx.stroke();
-    };
+    ctx.lineWidth = 1;
 
     const drawX = (grid_size: number, color: string) => {
       /** 起始位置 */
@@ -79,13 +67,15 @@ export default class Grid extends Style {
           ? center.x % grid_size
           : grid_size + (center.x % grid_size);
 
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+
       for (let index = 0; index * grid_size + startX <= width; index++) {
-        drawOuterGrid(
-          [index * grid_size + startX, 0],
-          [index * grid_size + startX, height],
-          color
-        );
+        ctx.moveTo(index * grid_size + startX, 0);
+        ctx.lineTo(index * grid_size + startX, height);
       }
+
+      ctx.stroke();
     };
     const drawY = (grid_size: number, color: string) => {
       /** 起始位置 */
@@ -94,13 +84,15 @@ export default class Grid extends Style {
           ? center.y % grid_size
           : grid_size + (center.y % grid_size);
 
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+
       for (let index = 0; index * grid_size + startY <= height; index++) {
-        drawOuterGrid(
-          [0, index * grid_size + startY],
-          [width, index * grid_size + startY],
-          color
-        );
+        ctx.moveTo(0, index * grid_size + startY);
+        ctx.lineTo(width, index * grid_size + startY);
       }
+
+      ctx.stroke();
     };
 
     if (this.show.grid.secondary) {
@@ -127,24 +119,23 @@ export default class Grid extends Style {
 
     const color = this.style[theme] || this.style.light;
 
-    /** 绘制x和y轴 */
-    const drawAxis = (moveTo: [number, number], lineTo: [number, number]) => {
-      ctx.strokeStyle = color.axis;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(...moveTo);
-      ctx.lineTo(...lineTo);
-      ctx.stroke();
-    };
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = color.axis;
 
     const drawX = () => {
       if (center.y >= 0 && center.y <= height) {
-        drawAxis([0, center.y], [width, center.y]);
+        ctx.beginPath();
+        ctx.moveTo(0, center.y);
+        ctx.lineTo(width, center.y);
+        ctx.stroke();
       }
     };
     const drawY = () => {
       if (center.x >= 0 && center.x <= width) {
-        drawAxis([center.x, 0], [center.x, height]);
+        ctx.beginPath();
+        ctx.moveTo(center.x, 0);
+        ctx.lineTo(center.x, height);
+        ctx.stroke();
       }
     };
 
