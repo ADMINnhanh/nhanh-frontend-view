@@ -1,6 +1,5 @@
 import type Canvas from "..";
 import _Worker from "../worker";
-import { IsValid } from "./public";
 
 /** 样式管理器 */
 class Style {
@@ -30,8 +29,8 @@ export default class Point extends Style {
   private canvas?: Canvas;
   /** 点位开关 */
   show = true;
-  /** 点位列表 */
-  private pointMap = new Map<number, PointListType>();
+  /** 点位列表 zIndex -> xAxis -> yAxis -> PointListType */
+  private pointMap: PointMap = new Map();
   /** 角度 */
   private angle = 2 * Math.PI;
 
@@ -62,7 +61,8 @@ export default class Point extends Style {
     if (!this.simplify) ctx.strokeStyle = stroke;
     ctx.fillStyle = fill;
     ctx.beginPath();
-    ctx.arc(...location, radius, 0, this.angle);
+    ctx.arc(location[0], location[1], radius, 0, this.angle);
+
     ctx.fill();
     if (!this.simplify) ctx.stroke();
   }
@@ -70,58 +70,68 @@ export default class Point extends Style {
   drawMultiplePoints(points: PointListType) {
     if (!this.show) return;
 
-    points.forEach((point) => {
-      const { show, dynamicLocation, style } = point;
+    for (let i = 0; i < points.length; i++) {
+      const { show, dynamicLocation, style } = points[i];
       if (!show) return;
       this.drawSinglePoint(dynamicLocation!, style);
-    });
+    }
   }
 
   /** 待添加的点位 */
   private pointList: PointListType = [];
-
   /** 向数据集合中添加点位 */
   addPoints(points: PointListType | PointListType[number]) {
     const canvas = this.canvas!;
-    const { center, percentage } = canvas;
 
     if (this.pointList.length == 0) {
       Promise.resolve().then(() => {
-        // _Worker({},()=>{
-        //   this.pointList = [];
-        //   canvas.redrawOnce();
-        // });
-        // pointList.forEach((item) => {
-        //   console.log(IsValid, canvas);
-        //   let { location, value, zIndex = 0, show = true, style } = item;
-        //   if (style)
-        //     this.maxRadius = Math.max(
-        //       style.radius + style.width,
-        //       this.maxRadius
-        //     );
-        //   const [isValue, isLocation] = [IsValid(value), IsValid(location)];
-        //   if (!isValue && !isLocation) return;
-        //   if (isValue && !isLocation) {
-        //     const loc = canvas.getAxisPointByValue(...value!);
-        //     location = [loc.x, loc.y];
-        //   } else if (!isValue && isLocation) {
-        //     const val = canvas.getAxisValueByPoint(...location!);
-        //     value = [val.xV, val.yV];
-        //   }
-        //   let [x, y] = location!;
-        //   x = center.x + x * percentage;
-        //   y = center.y + y * percentage;
-        //   const dynamicLocation: [number, number] = [x, y];
-        //   const list = (this.pointMap.get(zIndex) || []).concat({
-        //     location,
-        //     dynamicLocation,
-        //     value,
-        //     zIndex,
-        //     show,
-        //     style,
-        //   });
-        //   this.pointMap.set(zIndex, list);
-        // });
+        const { center, percentage, gridConfig } = canvas;
+        const maxRadius = this.maxRadius;
+        const count = gridConfig.count;
+
+        const result = [],
+          step = 20000;
+        for (let i = 0; i < this.pointList.length; i += step) {
+          result.push(this.pointList.slice(i, i + step));
+        }
+        result.forEach((list) => {
+          _Worker(
+            {
+              type: "point",
+              list,
+              config: { maxRadius, count, gridConfig, percentage, center },
+            },
+            (pointMap: PointMap) => {
+              if (pointMap) {
+                pointMap.forEach((xMap, zIndex) => {
+                  if (this.pointMap.has(zIndex)) {
+                    const oldXMap = this.pointMap.get(zIndex)!;
+                    xMap.forEach((yMap, x) => {
+                      if (oldXMap.has(x)) {
+                        const oldYMap = oldXMap.get(x)!;
+                        yMap.forEach((point, y) => {
+                          if (oldYMap.has(y)) {
+                            const oldPoints = oldYMap.get(y)!;
+                            oldYMap.set(y, oldPoints.concat(point));
+                          } else {
+                            oldYMap.set(y, point);
+                          }
+                        });
+                      } else {
+                        oldXMap.set(x, yMap);
+                      }
+                    });
+                  } else {
+                    this.pointMap.set(zIndex, xMap);
+                  }
+                });
+                canvas.redrawOnce();
+              }
+            }
+          );
+        });
+
+        this.pointList = [];
       });
     }
     this.pointList = this.pointList.concat(points);
@@ -130,8 +140,11 @@ export default class Point extends Style {
   fetchDrawFunctions() {
     const { show, style } = this;
     const canvas = this.canvas!;
-    const { ctx, center, theme, percentage, isRecalculate, rect } = canvas;
+    const { ctx, center, theme, percentage, isRecalculate, rect, gridConfig } =
+      canvas;
     if (!ctx || !show) return [];
+
+    const count = gridConfig.count;
 
     this.pointCount = 0;
 
@@ -149,42 +162,49 @@ export default class Point extends Style {
     };
 
     const videoXyRange = canvas.getMaxMinValue(pointRect);
+    videoXyRange.minXV = Math.floor(videoXyRange.minXV / count) * count;
+    videoXyRange.minYV = Math.floor(videoXyRange.minYV / count) * count;
+    videoXyRange.maxXV = Math.ceil(videoXyRange.maxXV / count) * count;
+    videoXyRange.maxYV = Math.ceil(videoXyRange.maxYV / count) * count;
 
-    const keys = Array.from(this.pointMap.keys());
-    const funcs: [number, () => void][] = keys.map((zIndex) => {
-      const points = this.pointMap.get(zIndex)!.filter((point) => {
-        const { location, show } = point;
-        if (!show) return;
-        const [xv, yv] = point.value!;
+    const funcs: [number, () => void][] = [];
+    this.pointMap.forEach((xMap, zIndex) => {
+      const _points: PointListType = [];
+      xMap.forEach((yMap, x) => {
+        if (x < videoXyRange.minXV || x + count > videoXyRange.maxXV) return;
+        yMap.forEach((points, y) => {
+          if (y < videoXyRange.minYV || y + count > videoXyRange.maxYV) return;
+          points.forEach((point) => {
+            const { location, show } = point;
+            if (!show) return;
 
-        if (
-          !(
-            xv > videoXyRange.minXV &&
-            xv < videoXyRange.maxXV &&
-            yv > videoXyRange.minYV &&
-            yv < videoXyRange.maxYV
-          )
-        )
-          return;
+            if (isRecalculate) {
+              let [x, y] = location!;
+              x = center.x + x * percentage;
+              y = center.y + y * percentage;
+              point.dynamicLocation = [x, y];
+            }
 
-        if (isRecalculate) {
-          let [x, y] = location!;
-          x = center.x + x * percentage;
-          y = center.y + y * percentage;
-          point.dynamicLocation = [x, y];
-        }
-
-        return true;
+            _points.push(point);
+          });
+        });
       });
 
-      this.pointCount += points.length;
-      this.simplify = this.pointCount > this.pointSimplifyCount;
+      this.pointCount += _points.length;
 
-      return [zIndex, () => this.drawMultiplePoints(points)];
+      funcs.push([zIndex, () => this.drawMultiplePoints(_points)]);
     });
+    this.simplify = this.pointCount > this.pointSimplifyCount;
 
     console.log(
-      `本次需要绘制点位数量：${this.pointCount}，本次是否简化绘制：${this.simplify}`
+      `%c本次需要绘制点位数量：${this.pointCount}\n%c本次是否简化绘制：${this.simplify}`,
+      "color:" +
+        (this.pointCount > 50000
+          ? "#F56C6C"
+          : this.pointCount > 10000
+          ? "#E6A23C"
+          : "#67C23A"),
+      "color:" + (this.simplify ? "#F56C6C" : "#67C23A")
     );
 
     return funcs;

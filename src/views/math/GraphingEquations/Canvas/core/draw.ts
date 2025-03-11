@@ -1,6 +1,7 @@
 import { _Throttle } from "nhanh-pure-function";
 import type Grid from "../tool/grid";
 import Style from "./style";
+import { _TimeConsumption } from "..";
 
 /** 绘制方法 */
 export default class Draw extends Style {
@@ -90,54 +91,16 @@ export default class Draw extends Style {
 
     this.isRecalculate = false;
   }
-  // 在类中添加属性
-  private drawTimes: number[] = [];
-  // 保留最近10次的耗时数据
-  private maxHistory = 10;
-  /** 平均耗时 */
-  private avgTime: number = 0;
+
   /** 测量重绘性能 */
-  private measureRedrawPerformance() {
-    // 记录开始时间
-    const startTime = performance.now();
-
-    // 执行重绘函数
-    this.redraw();
-
-    // 记录结束时间并计算本次重绘的耗时
-    const elapsedTime = performance.now() - startTime;
-
-    // 将本次耗时添加到 drawTimes 数组中
-    this.drawTimes.push(elapsedTime);
-
-    // 如果 drawTimes 数组的长度超过最大历史记录数，移除最早的记录
-    if (this.drawTimes.length > this.maxHistory) this.drawTimes.shift();
-
-    // 计算平均耗时
-    this.avgTime =
-      this.drawTimes.reduce((sum, time) => sum + time, 0) /
-        this.drawTimes.length || 0;
-
-    // 根据单次耗时确定颜色
-    const singleColor =
-      elapsedTime < 0.4 ? "#67C23A" : elapsedTime < 0.8 ? "#E6A23C" : "#F56C6C";
-
-    // 根据平均耗时确定颜色
-    const avgColor =
-      this.avgTime < 0.4
-        ? "#67C23A"
-        : this.avgTime < 0.8
-        ? "#E6A23C"
-        : "#F56C6C";
-
-    // 输出带样式的日志，包含单次耗时和平均耗时
-    console.log(
-      `%c单次耗时：${elapsedTime.toFixed(2)}ms
-%c平均耗时（${this.drawTimes.length}次）：${this.avgTime.toFixed(2)}ms`,
-      `color: ${singleColor}; padding: 2px 0;`,
-      `color: ${avgColor}; padding: 2px 0;`
-    );
-  }
+  private measureRedrawPerformance = _TimeConsumption(
+    () => this.redraw(),
+    [
+      [1, "#F56C6C"],
+      [0.5, "#E6A23C"],
+      [0, "#67C23A"],
+    ]
+  );
 
   /** 重绘画布 同一个渲染帧只会执行一次 */
   redrawOnce(isAuto?: boolean) {

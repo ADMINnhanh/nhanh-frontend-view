@@ -98,3 +98,6 @@ type LineListType = CommonDataType<
     infinite: boolean;
   }
 >;
+
+/** zIndex -> xAxis -> yAxis -> PointListType */
+type PointMap = Map<number, Map<number, Map<number, PointListType>>>;

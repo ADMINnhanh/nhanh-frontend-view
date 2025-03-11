@@ -200,7 +200,7 @@ export default class BaseData {
     const y = clientY - top - center.y;
     return { x, y };
   }
-  /** 获取坐标轴上的值 */
+  /** 通过坐标轴上的点 获取坐标轴上的值 */
   getAxisValueByPoint(x: number, y: number) {
     const { gridConfig } = this;
     const count = this.getGridCount();

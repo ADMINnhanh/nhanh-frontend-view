@@ -72,7 +72,7 @@ export default class Line extends Style {
     ctx.beginPath();
 
     location.forEach((item, index) => {
-      ctx[index == 0 ? "moveTo" : "lineTo"](...item);
+      ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
 
     ctx.stroke();
@@ -85,7 +85,10 @@ export default class Line extends Style {
     // 解构关键数据并校验
     const { dynamicLocation, style, value } = item;
     if (!dynamicLocation || !value) return console.error("坐标数据缺失");
-    const [start, end]: [number, number][] = dynamicLocation.map((p) => [...p]); // 克隆坐标避免污染原始数据
+    const [start, end]: [number, number][] = dynamicLocation.map((p) => [
+      p[0],
+      p[1],
+    ]); // 克隆坐标避免污染原始数据
 
     // 方向向量计算（终点到起点）
     const dirVector: [number, number] = [end[0] - start[0], end[1] - start[1]];
@@ -180,12 +183,12 @@ export default class Line extends Style {
 
       if (isValue && !isLocation) {
         location = value!.map((item) => {
-          const loc = canvas.getAxisPointByValue(...item);
+          const loc = canvas.getAxisPointByValue(item[0], item[1]);
           return [loc.x, loc.y];
         });
       } else if (!isValue && isLocation) {
         value = value!.map((item) => {
-          const val = canvas.getAxisValueByPoint(...item!);
+          const val = canvas.getAxisValueByPoint(item[0], item[1]);
           return [val.xV, val.yV];
         });
       }

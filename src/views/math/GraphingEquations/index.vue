@@ -37,58 +37,63 @@ img.onload = () => {
   canvas?.redrawOnce();
 };
 
+// const list = Array.from({ length: 10000 * 20 });
+// const arr = [1, 2];
+// const t = performance.now();
+// for (let i = 0; i < list.length; i++) {
+//   // const b = [...arr];
+//   // const b = [arr[0], arr[1]];
+// }
+// console.log(performance.now() - t + "ms");
+
 onMounted(() => {
   canvas = new Canvas(id);
   // canvas.defaultCenter.top = "top";
   // canvas.defaultCenter.left = "left";
   // canvas.gridConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
-
-  canvas.drawPoint.addPoints([
-    { zIndex: 1, location: [75, 75] },
-    { value: [6, 6] },
-    { value: [-6, 6] },
-    { value: [-6, -6] },
-    { value: [6, -6] },
-  ]);
-  canvas.drawLine.addLines([
-    {
-      value: [
-        [-2, -2],
-        [2, -6],
-        [-4, -4],
-      ],
-    },
-    {
-      value: [
-        [-2, 4],
-        [2, -4],
-      ],
-      infinite: true,
-    },
-  ]);
-
-  Array.from({ length: 10000 * 1 }, (_, i) => {
-    canvas.drawPoint.addPoints({
-      value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
-    });
-  });
-
-  canvas.startCreationOnGrid = [
-    [
-      0,
-      () => {
-        const { ctx, center, percentage } = canvas;
-        ctx?.drawImage(
-          img,
-          center.x,
-          center.y,
-          200 * percentage,
-          300 * percentage
-        );
-      },
-    ],
-  ] as any;
+  // canvas.drawPoint.addPoints([
+  //   { zIndex: 1, location: [75, 75] },
+  //   { value: [6, 6] },
+  //   { value: [-6, 6] },
+  //   { value: [-6, -6] },
+  //   { value: [6, -6] },
+  // ]);
+  // canvas.drawLine.addLines([
+  //   {
+  //     value: [
+  //       [-2, -2],
+  //       [2, -6],
+  //       [-4, -4],
+  //     ],
+  //   },
+  //   {
+  //     value: [
+  //       [-2, 4],
+  //       [2, -4],
+  //     ],
+  //     infinite: true,
+  //   },
+  // ]);
+  const points = Array.from({ length: 10000 * 5 }).map((_, i) => ({
+    value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
+  }));
+  canvas.drawPoint.addPoints(points as any);
+  // canvas.startCreationOnGrid = [
+  //   [
+  //     0,
+  //     () => {
+  //       const { ctx, center, percentage } = canvas;
+  //       ctx?.drawImage(
+  //         img,
+  //         center.x,
+  //         center.y,
+  //         200 * percentage,
+  //         300 * percentage
+  //       );
+  //     },
+  //   ],
+  // ] as any;
 });
 onUnmounted(() => {
   canvas.destroy();
