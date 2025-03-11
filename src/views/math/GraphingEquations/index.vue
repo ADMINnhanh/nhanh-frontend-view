@@ -38,11 +38,10 @@ img.onload = () => {
 };
 
 // const list = Array.from({ length: 10000 * 20 });
-// const arr = [1, 2];
+
 // const t = performance.now();
 // for (let i = 0; i < list.length; i++) {
-//   // const b = [...arr];
-//   // const b = [arr[0], arr[1]];
+
 // }
 // console.log(performance.now() - t + "ms");
 
@@ -75,10 +74,10 @@ onMounted(() => {
   //     infinite: true,
   //   },
   // ]);
-  const points = Array.from({ length: 10000 * 5 }).map((_, i) => ({
-    value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
-  }));
-  canvas.drawPoint.addPoints(points as any);
+  // const points = Array.from({ length: 10000 * 5 }).map((_, i) => ({
+  //   value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
+  // }));
+  // canvas.drawPoint.addPoints(points as any);
   // canvas.startCreationOnGrid = [
   //   [
   //     0,
