@@ -26,18 +26,26 @@ export default class BaseData {
   scale = 1;
   /** 百分比 */
   percentage = 1;
-  /** 网格大小 */
+  /**
+   * 网格大小相关说明：
+   * 1. 以 count 计算的网格内部会被平分为 5 个子网格。
+   * 2. 为避免绘制网格时出现网格线显示异常，max 与 min 的差值必须是 5 的倍数。
+   */
   gridConfig = {
     /** 缩放比例为1时每个网格表示的数字 */
     count: 2,
     /** 网格最小尺寸 */
     min: 75,
     /** 网格最大尺寸 */
-    max: 150,
+    max: 125,
     /** 网格当前大小 */
     size: 75,
   };
-  /** 滚动10次一个周期 */
+  /**
+   * 滚动周期规则说明：
+   * 1. 每滚动 10 次构成一个完整的滚动周期。
+   * 2. 为保证与网格绘制相适配，滚动周期数值必须为 5 的整数倍。
+   */
   cycle = 10;
   /** 滚轮滚动的值 */
   delta = 0.02;
@@ -135,6 +143,7 @@ export default class BaseData {
 
     let size = (Math.abs(scale - 1) % (cycle * delta)) / delta;
     size = Math.round(scale < 1 ? cycle - size : size);
+
     gridConfig.size =
       (size / cycle) * (gridConfig.max - gridConfig.min) + gridConfig.min;
 

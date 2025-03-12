@@ -41,6 +41,7 @@ export default class Grid {
 
     const grid_size = gridConfig.size;
     const inner_grid_size = grid_size / 5;
+    console.log(grid_size, inner_grid_size);
 
     ctx.lineWidth = 1;
 

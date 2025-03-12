@@ -61,7 +61,7 @@ export default class Style extends BaseData {
       grid: {
         axis: "#aeaeae",
         grid: "#666",
-        innerGrid: "#444",
+        innerGrid: "#454545",
       },
       point: {
         radius: 4,
