@@ -9,19 +9,30 @@ export default class Polygon {
   /** 点位列表 */
   private polygonMap = new Map<number, PolygonListType>();
 
+  /** 默认样式 */
+  private defaultStyle: PolygonStyleType;
+
   constructor(canvas: Canvas) {
     this.canvas = canvas;
-  }
 
-  private color() {
     const { theme, style } = this.canvas!;
-    return (style[theme] || style.light).polygon;
+    this.defaultStyle = (style[theme] || style.light).polygon;
   }
 
-  private setStyle(ctx: CanvasRenderingContext2D, style?: PolygonStyleType) {
-    const { width, stroke, dash, dashGap, dashOffset, fill } =
-      style || this.color();
-    ctx.setLineDash(dash ? dashGap : []);
+  private setStyle(
+    ctx: CanvasRenderingContext2D,
+    style?: DeepPartial<PolygonStyleType>
+  ) {
+    const {
+      width = this.defaultStyle.width,
+      stroke = this.defaultStyle.stroke,
+      dash = this.defaultStyle.dash,
+      dashGap = this.defaultStyle.dashGap,
+      dashOffset = this.defaultStyle.dashOffset,
+      fill = this.defaultStyle.fill,
+    } = style || {};
+
+    ctx.setLineDash(dash ? (dashGap as any) : []);
     ctx.lineDashOffset = dashOffset;
     ctx.lineWidth = width;
     ctx.strokeStyle = stroke;
@@ -32,7 +43,7 @@ export default class Polygon {
   drawRect(
     location: [number, number],
     size: [number, number],
-    style?: PolygonStyleType
+    style?: DeepPartial<PolygonStyleType>
   ) {
     const { ctx } = this.canvas!;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
@@ -47,7 +58,10 @@ export default class Polygon {
     ctx.fill();
   }
   /** 绘制多边形 */
-  drawPolygon(location: [number, number][], style?: PolygonStyleType) {
+  drawPolygon(
+    location: [number, number][],
+    style?: DeepPartial<PolygonStyleType>
+  ) {
     const ctx = this.canvas?.ctx;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
@@ -143,8 +157,10 @@ export default class Polygon {
   /** 获取绘制函数 */
   fetchDrawFunctions(): [number, () => void][] {
     const { show, canvas } = this;
-    const { ctx } = canvas!;
+    const { ctx, theme, style } = canvas!;
     if (!ctx || !show) return [];
+
+    this.defaultStyle = (style[theme] || style.light).polygon;
 
     const keys = Array.from(this.polygonMap.keys());
     return keys.map((zIndex) => [

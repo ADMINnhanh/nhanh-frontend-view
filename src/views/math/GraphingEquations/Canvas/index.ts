@@ -35,7 +35,7 @@ export function _TimeConsumption(func: Function, level: [number, string][]) {
   // 在类中添加属性
   let drawTimes: number[] = [];
   // 保留最近10次的耗时数据
-  let maxHistory = 10;
+  let maxHistory = 100;
   /** 平均耗时 */
   let avgTime: number = 0;
 

@@ -9,24 +9,31 @@ export default class Line {
   /** 点位列表 */
   private lineMap = new Map<number, LineListType>();
 
+  /** 默认样式 */
+  private defaultStyle: LineStyleType;
+
   constructor(canvas: Canvas) {
     this.canvas = canvas;
-  }
-
-  private color() {
     const { theme, style } = this.canvas!;
-    return (style[theme] || style.light).line;
+    this.defaultStyle = (style[theme] || style.light).line;
   }
 
   /** 绘制线段 */
-  drawLine(location: [number, number][], style?: LineStyleType) {
+  drawLine(location: [number, number][], style?: DeepPartial<LineStyleType>) {
     const ctx = this.canvas?.ctx;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
-    const { width, color, dash, dashGap, dashOffset, cap, join } =
-      style || this.color();
+    const {
+      width = this.defaultStyle.width,
+      color = this.defaultStyle.color,
+      dash = this.defaultStyle.dash,
+      dashGap = this.defaultStyle.dashGap,
+      dashOffset = this.defaultStyle.dashOffset,
+      cap = this.defaultStyle.cap,
+      join = this.defaultStyle.join,
+    } = style || {};
 
-    ctx.setLineDash(dash ? dashGap : []);
+    ctx.setLineDash(dash ? (dashGap as number[]) : []);
     ctx.lineDashOffset = dashOffset;
     ctx.lineCap = cap;
     ctx.lineJoin = join;
@@ -60,9 +67,15 @@ export default class Line {
     }
 
     // 绘制原始端点
-    const pointStyle = style?.point || this.color().point;
-    drawPoint.drawSinglePoint(start, pointStyle);
-    drawPoint.drawSinglePoint(end, pointStyle);
+    const defaultPointStyle = this.defaultStyle.point;
+    const {
+      radius = defaultPointStyle.radius,
+      stroke = defaultPointStyle.stroke,
+      width = defaultPointStyle.width,
+      fill = defaultPointStyle.fill,
+    } = style?.point || {};
+    drawPoint.drawSinglePoint(start, { radius, stroke, width, fill });
+    drawPoint.drawSinglePoint(end, { radius, stroke, width, fill });
 
     // 核心算法：计算线段与画布边界的交点
     const getBoundaryIntersection = (
@@ -183,8 +196,10 @@ export default class Line {
   /** 获取绘制函数 */
   fetchDrawFunctions(): [number, () => void][] {
     const { show, canvas } = this;
-    const { ctx } = canvas!;
+    const { ctx, theme, style } = canvas!;
     if (!ctx || !show) return [];
+
+    this.defaultStyle = (style[theme] || style.light).line;
 
     const keys = Array.from(this.lineMap.keys());
     return keys.map((zIndex) => [

@@ -45,10 +45,9 @@ img.onload = () => {
 };
 
 // const list = Array.from({ length: 10000 * 200 });
-// let a = 0;
 // const t = performance.now();
 // for (let i = 0; i < list.length; i++) {
-//   a++;
+
 // }
 // // for (const e of list) {
 // //   a++;

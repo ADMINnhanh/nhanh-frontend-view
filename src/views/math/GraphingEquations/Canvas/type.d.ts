@@ -107,7 +107,7 @@ type CommonDataType<STYLE, PLURAL extends boolean, OTHER = {}> = Array<
   Partial<
     {
       /** 样式 */
-      style: STYLE;
+      style: DeepPartial<STYLE>;
       /** 层级 */
       zIndex: number;
       /** 是否显示 */

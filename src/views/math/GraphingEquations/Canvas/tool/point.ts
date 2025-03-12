@@ -21,21 +21,29 @@ export default class Point {
   /** 是否简化 */
   private simplify = false;
 
+  /** 默认样式 */
+  private defaultStyle: PointStyleType;
+
   constructor(canvas: Canvas) {
     this.canvas = canvas;
-  }
-
-  private color() {
     const { theme, style } = this.canvas!;
-    return (style[theme] || style.light).point;
+    this.defaultStyle = (style[theme] || style.light).point;
   }
 
   /** 绘制单个点位 */
-  drawSinglePoint(location: [number, number], style?: PointStyleType) {
+  drawSinglePoint(
+    location: [number, number],
+    style?: DeepPartial<PointStyleType>
+  ) {
     const ctx = this.canvas!.ctx;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
-    const { width, stroke, fill, radius } = style || this.color();
+    const {
+      width = this.defaultStyle.width,
+      stroke = this.defaultStyle.stroke,
+      fill = this.defaultStyle.fill,
+      radius = this.defaultStyle.radius,
+    } = style || {};
 
     ctx.lineWidth = width;
     if (!this.simplify) ctx.strokeStyle = stroke;
@@ -124,16 +132,26 @@ export default class Point {
   /** 获取绘制函数 */
   fetchDrawFunctions() {
     const canvas = this.canvas!;
-    const { ctx, center, percentage, isRecalculate, rect, gridConfig } = canvas;
+    const {
+      ctx,
+      center,
+      percentage,
+      isRecalculate,
+      rect,
+      gridConfig,
+      theme,
+      style,
+    } = canvas;
     if (!ctx || !this.show) return [];
+
+    this.defaultStyle = (style[theme] || style.light).point;
 
     const count = gridConfig.count;
 
     this.pointCount = 0;
 
-    const publicStyle = this.color();
     this.maxRadius = Math.max(
-      publicStyle.radius + publicStyle.width,
+      this.defaultStyle.radius + this.defaultStyle.width,
       this.maxRadius
     );
 
