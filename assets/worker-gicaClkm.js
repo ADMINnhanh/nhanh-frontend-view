@@ -90,8 +90,11 @@ function AnalyzeTheLine(lineList, config) {
       infinite,
     } = lineList[i];
 
-    const [isValue, isLocation] = [IsValids(value), IsValids(location)];
-    if (!isValue && !isLocation) return;
+    const [isValue, isLocation] = [
+      IsValids(value) && value.length > 1,
+      IsValids(location) && location.length > 1,
+    ];
+    if (!isValue && !isLocation) continue;
 
     if (isValue && !isLocation) {
       location = [];
@@ -131,6 +134,81 @@ function AnalyzeTheLine(lineList, config) {
 
   return lineMap;
 }
+/** 解析面 */
+function AnalyzeThePolygon(polygonList, config) {
+  let { gridConfig, center, percentage } = config;
+  const polygonMap = new Map();
+  for (let i = 0; i < polygonList.length; i++) {
+    let {
+      location,
+      value,
+      zIndex = 0,
+      show = true,
+      style,
+      size,
+    } = polygonList[i];
+
+    const [isValue, isLocation, isRect] = [
+      IsValids(value),
+      IsValids(location),
+      IsValid(size),
+    ];
+
+    if (isRect) {
+      if (!isValue && !isLocation) continue;
+      if (isLocation) location.length = 1;
+      if (isValue) value.length = 1;
+    } else {
+      if (isValue && value.length < 3) continue;
+      if (isLocation && location.length < 3) continue;
+      size = undefined;
+    }
+
+    if (isValue && !isLocation) {
+      location = [];
+      for (let i = 0; i < value.length; i++) {
+        const item = value[i];
+        const loc = getAxisPointByValue(item[0], item[1], gridConfig);
+        location.push([loc.x, loc.y]);
+      }
+    } else if (!isValue && isLocation) {
+      value = [];
+      for (let i = 0; i < location.length; i++) {
+        const item = location[i];
+        const val = getAxisValueByPoint(item[0], item[1], gridConfig);
+        value.push([val.xV, val.yV]);
+      }
+    }
+
+    const dynamicLocation = [];
+    for (let i = 0; i < location.length; i++) {
+      let [x, y] = location[i];
+      x = center.x + x * percentage;
+      y = center.y + y * percentage;
+      dynamicLocation.push([x, y]);
+    }
+    const dynamicSize = [];
+    if (isRect) {
+      const [width, height] = size;
+      dynamicSize[0] = width * percentage;
+      dynamicSize[1] = height * percentage;
+    }
+
+    const list = (polygonMap.get(zIndex) || []).concat({
+      location,
+      dynamicLocation,
+      value,
+      zIndex,
+      show,
+      style,
+      size,
+      dynamicSize,
+    });
+    polygonMap.set(zIndex, list);
+  }
+
+  return polygonMap;
+}
 
 self.onmessage = function (event) {
   const data = event.data;
@@ -140,6 +218,7 @@ self.onmessage = function (event) {
   let result;
   if (type == "point") result = AnalyzeThePoint(list, config);
   else if (type == "line") result = AnalyzeTheLine(list, config);
+  else if (type == "polygon") result = AnalyzeThePolygon(list, config);
   // console.log("worker.js 耗时：", performance.now() - t + " ms");
 
   self.postMessage(result);
