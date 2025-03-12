@@ -144,7 +144,6 @@ export default class Line {
     if (this.lineList.length == 0) {
       Promise.resolve().then(() => {
         const { center, percentage, gridConfig } = canvas;
-        const count = gridConfig.count;
 
         const result = [],
           step = 1000;
