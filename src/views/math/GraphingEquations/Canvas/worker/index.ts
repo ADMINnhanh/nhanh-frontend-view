@@ -26,7 +26,13 @@ type LineData = {
   list: LineListType;
   config: PublicConfig;
 };
-type WorkerData = PointData | LineData;
+type PolygonData = {
+  type: "polygon";
+  list: PolygonListType;
+  config: PublicConfig;
+};
+
+type WorkerData = PointData | LineData | PolygonData;
 
 export default function _Worker(
   data: WorkerData,

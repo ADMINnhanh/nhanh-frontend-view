@@ -15,6 +15,11 @@ export const SystemSvg = {
   ColumnDependency:
     '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><path d="M30 10V2h-8v3h-5a2.002 2.002 0 0 0-2 2v8h-5v-3H2v8h8v-3h5v8a2.002 2.002 0 0 0 2 2h5v3h8v-8h-8v3h-5v-8h5v3h8v-8h-8v3h-5V7h5v3zM8 18H4v-4h4zm16 6h4v4h-4zm0-10h4v4h-4zm0-10h4v4h-4z" fill="currentColor"></path></svg>',
 
+  /** LockOpenOutline */
+  LockOpenOutline: `<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 112C16 90.7827 24.4285 70.4344 39.4315 55.4315C54.4344 40.4285 74.7827 32 96 32C117.217 32 137.566 40.4285 152.569 55.4315C167.571 70.4344 176 90.7827 176 112V208" stroke="currentColor" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M368 208H144C117.49 208 96 229.49 96 256V432C96 458.51 117.49 480 144 480H368C394.51 480 416 458.51 416 432V256C416 229.49 394.51 208 368 208Z" stroke="currentColor" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`,
   /**  */
 };
 

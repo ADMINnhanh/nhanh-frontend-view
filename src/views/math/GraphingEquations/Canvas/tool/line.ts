@@ -119,7 +119,7 @@ export default class Line {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
       const { show, infinite, location } = line;
-      if (!show) return;
+      if (!show) continue;
 
       if (isRecalculate) {
         line.dynamicLocation = location?.map((item) => {

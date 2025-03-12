@@ -22,6 +22,9 @@ export default class BaseData {
     left: undefined,
     right: undefined,
   };
+  /** 是否禁用拖拽和缩放 */
+  lockDragAndResize = false;
+
   /** 缩放比例 */
   scale = 1;
   /** 百分比 */
@@ -158,7 +161,9 @@ export default class BaseData {
     event: "center" | { clientX: number; clientY: number },
     delta: number
   ) {
-    const { canvas, rect } = this;
+    const { canvas, rect, lockDragAndResize } = this;
+
+    if (lockDragAndResize) return;
     if (!canvas || !rect)
       return console.error("canvas is not HTMLCanvasElement");
 

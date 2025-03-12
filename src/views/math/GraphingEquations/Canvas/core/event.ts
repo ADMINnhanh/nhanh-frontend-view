@@ -90,8 +90,9 @@ export default class Event extends Draw {
   }
   /** 键盘按下事件 */
   private keydown(event: KeyboardEvent) {
-    const { mouseInCanvas, offset, delta } = this;
-    if (mouseInCanvas) {
+    const { mouseInCanvas, offset, delta, lockDragAndResize } = this;
+
+    if (mouseInCanvas && !lockDragAndResize) {
       // console.log(event.key);
 
       const key = event.key;
@@ -143,7 +144,8 @@ export default class Event extends Draw {
   }
   /** 滚轮滚动 */
   private wheel(event: WheelEvent) {
-    const { delta } = this;
+    const { delta, lockDragAndResize } = this;
+    if (lockDragAndResize) return;
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
     this.redrawOnce();
@@ -160,8 +162,8 @@ export default class Event extends Draw {
   }
   /** 鼠标移动 */
   private mousemove(event: MouseEvent) {
-    const { mouseIsDown, offset, mouseLastPosition } = this;
-    if (mouseIsDown) {
+    const { mouseIsDown, offset, mouseLastPosition, lockDragAndResize } = this;
+    if (mouseIsDown && !lockDragAndResize) {
       const { clientX, clientY } = event;
 
       offset.x += clientX - mouseLastPosition.x;

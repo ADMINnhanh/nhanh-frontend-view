@@ -1,16 +1,23 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { NButton, NIcon, NSpace, NButtonGroup, NText, NA } from "naive-ui";
-import { Add, GridOutline, Home, Remove } from "@vicons/ionicons5";
+import {
+  Add,
+  GridOutline,
+  Home,
+  LockClosedOutline,
+  Remove,
+} from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID } from "nhanh-pure-function";
-import { set, useFps } from "@vueuse/core";
+import { useFps } from "@vueuse/core";
 import Canvas from "./Canvas";
 import InputMath from "./InputMath/index.vue";
+import SvgGather from "@/assets/icon/gather";
 
 const fps = useFps();
 const id = _GenerateUUID("canvas-");
-
+const lock = ref(false);
 let canvas: Canvas;
 
 const buttonApi = computed(() => {
@@ -54,47 +61,63 @@ onMounted(() => {
   // canvas.defaultCenter.left = "left";
   // canvas.gridConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
-  // canvas.drawPoint.addPoints([
-  //   { zIndex: 1, location: [75, 75] },
-  //   { value: [6, 6] },
-  //   { value: [-6, 6] },
-  //   { value: [-6, -6] },
-  //   { value: [6, -6] },
-  // ]);
-  // canvas.drawLine.addLines([
-  //   {
-  //     location: [
-  //       [-75 * 2, 75 * 2],
-  //       [75 * 2, 75 * 2],
-  //       [75 * 2, 0 * 2],
-  //     ],
-  //   },
-  //   {
-  //     value: [
-  //       [-2, -2],
-  //       [2, -6],
-  //       [-4, -4],
-  //     ],
-  //   },
-  //   {
-  //     value: [
-  //       [-2, 0],
-  //       [0, -2],
-  //     ],
-  //     infinite: true,
-  //   },
-  //   {
-  //     value: [
-  //       [2, 0],
-  //       [0, 2],
-  //     ],
-  //     infinite: true,
-  //   },
-  // ]);
+  canvas.drawPoint.addPoints([
+    { zIndex: 1, location: [75, 75] },
+    { value: [6, 6] },
+    { value: [-6, 6] },
+    { value: [-6, -6] },
+    { value: [6, -6] },
+  ]);
   // const points = Array.from({ length: 10000 * 10 }).map((_, i) => ({
   //   value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
   // }));
   // canvas.drawPoint.addPoints(points as any);
+
+  canvas.drawLine.addLines([
+    {
+      location: [
+        [-75 * 2, 75 * 2],
+        [75 * 2, 75 * 2],
+        [75 * 2, 0 * 2],
+      ],
+    },
+    {
+      value: [
+        [-2, -2],
+        [-2, -6],
+        [-4, -4],
+      ],
+    },
+    {
+      value: [
+        [-2, 0],
+        [0, -2],
+      ],
+      infinite: true,
+    },
+    {
+      value: [
+        [2, 0],
+        [0, 2],
+      ],
+      infinite: true,
+    },
+  ]);
+
+  canvas.drawPolygon.addPolygons([
+    {
+      value: [
+        [4, -4],
+        [2, -6],
+        [0, -4],
+      ],
+    },
+    {
+      value: [[2, 2]],
+      size: [200, 200],
+    },
+  ]);
+
   // canvas.startCreationOnGrid = [
   //   [
   //     0,
@@ -112,7 +135,7 @@ onMounted(() => {
   // ] as any;
 });
 onUnmounted(() => {
-  canvas.destroy();
+  canvas?.destroy();
 });
 
 {
@@ -139,11 +162,20 @@ onUnmounted(() => {
             <template #icon><NIcon :component="Remove" /></template>
           </NButton>
         </NButtonGroup>
-        <NButton :="buttonApi" @click="canvas?.reset()">
+        <NButton :="buttonApi" @click="canvas.reset()">
           <template #icon><NIcon :component="Home" /></template>
         </NButton>
-        <NButton :="buttonApi" @click="canvas?.toggleGrid()">
+        <NButton :="buttonApi" @click="canvas.toggleGrid()">
           <template #icon><NIcon :component="GridOutline" /></template>
+        </NButton>
+        <NButton :="buttonApi" @click="lock = canvas.toggleLock()">
+          <template #icon>
+            <NIcon
+              :component="
+                lock ? LockClosedOutline : SvgGather('LockOpenOutline')
+              "
+            />
+          </template>
         </NButton>
       </NSpace>
       <n-text

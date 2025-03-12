@@ -18,127 +18,87 @@ export default class Polygon {
     return (style[theme] || style.light).polygon;
   }
 
-  // /** 绘制线段 */
-  // drawLine(location: [number, number][], style?: LineStyleType) {
-  //   const { ctx } = this.canvas!;
-  //   if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+  private setStyle(ctx: CanvasRenderingContext2D, style?: PolygonStyleType) {
+    const { width, stroke, dash, dashGap, dashOffset, fill } =
+      style || this.color();
+    ctx.setLineDash(dash ? dashGap : []);
+    ctx.lineDashOffset = dashOffset;
+    ctx.lineWidth = width;
+    ctx.strokeStyle = stroke;
+    ctx.fillStyle = fill;
+  }
 
-  //   const { width, color, dash, dashGap, dashOffset, cap, join } =
-  //     style || this.color();
+  /** 绘制矩形 */
+  drawRect(
+    location: [number, number],
+    size: [number, number],
+    style?: PolygonStyleType
+  ) {
+    const { ctx } = this.canvas!;
+    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
-  //   ctx.setLineDash(dash ? dashGap : []);
-  //   ctx.lineDashOffset = dashOffset;
-  //   ctx.lineCap = cap;
-  //   ctx.lineJoin = join;
-  //   ctx.lineWidth = width;
-  //   ctx.strokeStyle = color;
-  //   ctx.beginPath();
+    this.setStyle(ctx, style);
 
-  //   location.forEach((item, index) => {
-  //     ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
-  //   });
+    ctx.beginPath();
 
-  //   ctx.stroke();
-  // }
-  // /** 绘制无限延伸线段 */
-  // drawInfiniteStraightLine(item: PolygonListType[number]) {
-  //   const { ctx, rect, drawPoint } = this.canvas!;
-  //   if (!ctx || !rect) return console.error("Canvas上下文丢失");
+    ctx.rect(location[0], location[1], size[0], size[1]);
 
-  //   // 解构关键数据并校验
-  //   const { dynamicLocation, style, value } = item;
-  //   if (!dynamicLocation || !value) return console.error("坐标数据缺失");
-  //   const [start, end]: [number, number][] = dynamicLocation.map((p) => [
-  //     p[0],
-  //     p[1],
-  //   ]); // 克隆坐标避免污染原始数据
+    ctx.stroke();
+    ctx.fill();
+  }
+  /** 绘制多边形 */
+  drawPolygon(location: [number, number][], style?: PolygonStyleType) {
+    const ctx = this.canvas?.ctx;
+    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
-  //   // 方向向量计算（终点到起点）
-  //   const dirVector: [number, number] = [end[0] - start[0], end[1] - start[1]];
-  //   if (dirVector[0] === 0 && dirVector[1] === 0) {
-  //     return console.error("重合点无法确定方向");
-  //   }
+    this.setStyle(ctx, style);
 
-  //   // 绘制原始端点
-  //   const pointStyle = style?.point || this.color().point;
-  //   drawPoint.drawSinglePoint(start, pointStyle);
-  //   drawPoint.drawSinglePoint(end, pointStyle);
+    ctx.beginPath();
 
-  //   // 核心算法：计算线段与画布边界的交点
-  //   const getBoundaryIntersection = (
-  //     point: [number, number],
-  //     vector: [number, number]
-  //   ): [number, number] => {
-  //     const [px, py] = point; // 当前点的x,y坐标
-  //     const [vx, vy] = vector; // 方向向量的x,y分量
-  //     let t = Infinity; // 记录最小正值的参数t
+    location.forEach((item, index) => {
+      ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
+    });
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+  }
+  /** 绘制多个多边形 */
+  drawPolygons(polygons: PolygonListType) {
+    const { show, canvas } = this;
+    const { ctx, center, percentage, isRecalculate } = canvas!;
+    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+    if (!show) return;
 
-  //     // 横向边界检测 (left/right)
-  //     if (vx !== 0) {
-  //       // 计算到达横向边界的参数t
-  //       const tx =
-  //         vx > 0
-  //           ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
-  //           : -px / vx; // 向左延伸至左边界（x=0）
+    for (let i = 0; i < polygons.length; i++) {
+      const polygon = polygons[i];
+      const { show, location, style } = polygon;
+      if (!show) continue;
 
-  //       if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
-  //     }
+      if (isRecalculate) {
+        polygon.dynamicLocation = location?.map((item) => {
+          let [x, y] = item!;
+          x = center.x + x * percentage;
+          y = center.y + y * percentage;
+          return [x, y];
+        });
+        if (polygon.size) {
+          polygon.dynamicSize = [
+            polygon.size[0] * percentage,
+            polygon.size[1] * percentage,
+          ];
+        }
+      }
 
-  //     // 纵向边界检测 (top/bottom)
-  //     if (vx !== 0) {
-  //       // 计算到达横向边界的参数t
-  //       const tx =
-  //         vx > 0
-  //           ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
-  //           : -px / vx; // 向左延伸至左边界（x=0）
+      const { dynamicLocation, dynamicSize } = polygon;
+      if (polygon.size) this.drawRect(dynamicLocation![0], dynamicSize!, style);
+      else this.drawPolygon(dynamicLocation!, style);
+    }
+  }
 
-  //       if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
-  //     }
-
-  //     // 延长向量至边界
-  //     return t === Infinity ? point : [px + vx * t, py + vy * t];
-  //   };
-
-  //   // 计算延长后的实际坐标
-  //   const extendedStart = getBoundaryIntersection(start, [
-  //     -dirVector[0],
-  //     -dirVector[1],
-  //   ]);
-  //   const extendedEnd = getBoundaryIntersection(end, dirVector);
-
-  //   // 绘制最终线段
-  //   this.drawLine([extendedStart, extendedEnd], item.style);
-  // }
-  // /** 绘制多条线段 */
-  // drawLines(lines: PolygonListType) {
-  //   const { show, canvas } = this;
-  //   const { ctx, center, percentage, isRecalculate } = canvas!;
-  //   if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
-  //   if (!show) return;
-
-  //   for (let i = 0; i < lines.length; i++) {
-  //     const line = lines[i];
-  //     const { show, infinite, location } = line;
-  //     if (!show) return;
-
-  //     if (isRecalculate) {
-  //       line.dynamicLocation = location?.map((item) => {
-  //         let [x, y] = item!;
-  //         x = center.x + x * percentage;
-  //         y = center.y + y * percentage;
-  //         return [x, y];
-  //       });
-  //     }
-
-  //     if (infinite) this.drawInfiniteStraightLine(line);
-  //     else this.drawLine(line.dynamicLocation!, line.style);
-  //   }
-  // }
-
-  /** 待添加的线段 */
+  /** 待添加的多边形 */
   private polygonList: PolygonListType = [];
-  /** 向绘图对象中添加一条线段 */
-  addLines(items: PolygonListType | PolygonListType[number]) {
+  /** 向绘图对象中添加多边形 */
+  addPolygons(items: PolygonListType | PolygonListType[number]) {
     const canvas = this.canvas!;
 
     if (this.polygonList.length == 0) {
@@ -151,28 +111,28 @@ export default class Polygon {
           result.push(this.polygonList.slice(i, i + step));
         }
         result.forEach((list) => {
-          // _Worker(
-          // {
-          //   type: "line",
-          //   list,
-          //   config: { count, gridConfig, percentage, center },
-          // },
-          // (lineMap: Map<number, PolygonListType>) => {
-          //   if (lineMap) {
-          //     lineMap.forEach((list, zIndex) => {
-          //       if (this.lineMap.has(zIndex)) {
-          //         this.lineMap.set(
-          //           zIndex,
-          //           this.lineMap.get(zIndex)!.concat(list)
-          //         );
-          //       } else {
-          //         this.lineMap.set(zIndex, list);
-          //       }
-          //     });
-          //     canvas.redrawOnce();
-          //   }
-          // }
-          // );
+          _Worker(
+            {
+              type: "polygon",
+              list,
+              config: { gridConfig, percentage, center },
+            },
+            (polygonMap: Map<number, PolygonListType>) => {
+              if (polygonMap) {
+                polygonMap.forEach((list, zIndex) => {
+                  if (this.polygonMap.has(zIndex)) {
+                    this.polygonMap.set(
+                      zIndex,
+                      this.polygonMap.get(zIndex)!.concat(list)
+                    );
+                  } else {
+                    this.polygonMap.set(zIndex, list);
+                  }
+                });
+                canvas.redrawOnce();
+              }
+            }
+          );
         });
 
         this.polygonList = [];
@@ -180,20 +140,20 @@ export default class Polygon {
     }
     this.polygonList = this.polygonList.concat(items);
   }
-  // /** 获取绘制函数 */
-  // fetchDrawFunctions(): [number, () => void][] {
-  //   const { show, canvas } = this;
-  //   const { ctx } = canvas!;
-  //   if (!ctx || !show) return [];
+  /** 获取绘制函数 */
+  fetchDrawFunctions(): [number, () => void][] {
+    const { show, canvas } = this;
+    const { ctx } = canvas!;
+    if (!ctx || !show) return [];
 
-  //   const keys = Array.from(this.polygonMap.keys());
-  //   return keys.map((zIndex) => [
-  //     zIndex,
-  //     () => this.drawLines(this.polygonMap.get(zIndex)!),
-  //   ]);
-  // }
-  // /** 清除绘图对象中的所有线段 */
-  // clearAllLines() {
-  //   this.polygonMap.clear();
-  // }
+    const keys = Array.from(this.polygonMap.keys());
+    return keys.map((zIndex) => [
+      zIndex,
+      () => this.drawPolygons(this.polygonMap.get(zIndex)!),
+    ]);
+  }
+  /** 清除绘图对象中的所有多边形 */
+  clearAllLines() {
+    this.polygonMap.clear();
+  }
 }

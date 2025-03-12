@@ -143,7 +143,7 @@ type PolygonListType = CommonDataType<
   PolygonStyleType,
   true,
   {
-    width: number;
-    height: number;
+    size: [number, number];
+    dynamicSize: [number, number];
   }
 >;
