@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 import { NButton, NIcon, NSpace, NButtonGroup, NText, NA } from "naive-ui";
 import { Add, GridOutline, Home, Remove } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID } from "nhanh-pure-function";
-import { useFps } from "@vueuse/core";
+import { set, useFps } from "@vueuse/core";
 import Canvas from "./Canvas";
 import InputMath from "./InputMath/index.vue";
 
@@ -91,7 +91,7 @@ onMounted(() => {
   //     infinite: true,
   //   },
   // ]);
-  // const points = Array.from({ length: 10000 }).map((_, i) => ({
+  // const points = Array.from({ length: 10000 * 10 }).map((_, i) => ({
   //   value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
   // }));
   // canvas.drawPoint.addPoints(points as any);
@@ -153,10 +153,6 @@ onUnmounted(() => {
         {{ fps }}
       </n-text>
     </div>
-
-    <!-- <div class="color">
-      <div></div>
-    </div> -->
   </div>
 </template>
 
@@ -174,6 +170,11 @@ onUnmounted(() => {
     border-radius: 5px;
     z-index: 2;
     padding: 5px;
+    .n-a {
+      display: flex;
+      justify-content: center;
+      padding: 5px 0;
+    }
   }
 
   canvas {
@@ -199,26 +200,6 @@ onUnmounted(() => {
       font-size: 18px;
       font-weight: bold;
     }
-  }
-}
-.color {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  @color: #5faaff;
-  @background-color: ~"@{color}70";
-  background-color: @background-color;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  div {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background-color: @color;
   }
 }
 </style>

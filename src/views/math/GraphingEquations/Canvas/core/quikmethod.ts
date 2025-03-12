@@ -48,9 +48,15 @@ export default class QuickMethod extends Event {
   zoomOut() {
     this.zoom(-this.delta);
   }
+
+  /** 添加样式 */
+  setStyle(style: DeepPartial<StyleType>) {
+    super.setStyle(style);
+    this.redrawOnce();
+  }
   /** 设置主题 */
   setTheme(theme: KnownStyleKeys) {
-    if (theme in this.style) this.theme = theme;
+    super.setTheme(theme);
     this.redrawOnce();
   }
 }

@@ -7,7 +7,6 @@ type PublicConfig = {
     max: number;
     size: number;
   };
-  count: number;
   center: {
     x: number;
     y: number;
@@ -31,9 +30,9 @@ type WorkerData = PointData | LineData;
 
 export default function _Worker(
   data: WorkerData,
-  callback?: (data: any) => void
+  callback: (data: any) => void
 ) {
   const worker = new Worker(url);
   worker.postMessage(data);
-  worker.onmessage = (event) => callback?.(event.data);
+  worker.onmessage = (event) => callback(event.data);
 }

@@ -1,27 +1,6 @@
 import type Canvas from "..";
 
-/** 样式管理器 */
-class Style {
-  style: GridStyleType = {
-    light: {
-      axis: "#222",
-      grid: "#666",
-      innerGrid: "#e5e5e5",
-    },
-    dark: {
-      axis: "#aeaeae",
-      grid: "#666",
-      innerGrid: "#272727",
-    },
-  };
-
-  /** 添加样式 */
-  addStyle(style: GridStyleType) {
-    this.style = { ...this.style, ...style };
-  }
-}
-
-export default class Grid extends Style {
+export default class Grid {
   /** 画布 */
   canvas?: Canvas;
 
@@ -36,7 +15,6 @@ export default class Grid extends Style {
   };
 
   constructor(canvas: Canvas) {
-    super();
     this.canvas = canvas;
   }
 
@@ -46,14 +24,20 @@ export default class Grid extends Style {
     if (this.show.axis) this.drawAxis();
     if (this.show.axisText) this.drawAxisText();
   }
+
+  private color() {
+    const { theme, style } = this.canvas!;
+    return (style[theme] || style.light).grid;
+  }
+
   /** 绘制网格 */
   private drawGrid() {
     const canvas = this.canvas!;
-    const { ctx, rect, center, gridConfig, theme } = canvas;
+    const { ctx, rect, center, gridConfig } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
-    const color = this.style[theme] || this.style.light;
+    const color = this.color();
 
     const grid_size = gridConfig.size;
     const inner_grid_size = grid_size / 5;
@@ -112,12 +96,12 @@ export default class Grid extends Style {
   /** 坐标轴 */
   private drawAxis() {
     const canvas = this.canvas!;
-    const { ctx, rect, center, theme } = canvas;
+    const { ctx, rect, center } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
 
-    const color = this.style[theme] || this.style.light;
+    const color = this.color();
 
     ctx.lineWidth = 2;
     ctx.strokeStyle = color.axis;

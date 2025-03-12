@@ -1,3 +1,4 @@
+import { _Clone, _MergeObjects } from "nhanh-pure-function";
 import BaseData from "./basedata";
 
 /** 样式管理器 */
@@ -13,6 +14,40 @@ export default class Style extends BaseData {
         family: "微软雅黑",
         bold: true,
       },
+      grid: {
+        axis: "#222",
+        grid: "#666",
+        innerGrid: "#e5e5e5",
+      },
+      point: {
+        radius: 4,
+        fill: "#d03050",
+        width: 12,
+        stroke: "#d03050" + 80,
+      },
+      line: {
+        color: "#f0a020",
+        width: 4,
+        dash: false,
+        dashGap: [5, 10],
+        dashOffset: 0,
+        cap: "round",
+        join: "round",
+        point: {
+          radius: 4,
+          stroke: "#f0a020" + 80,
+          width: 12,
+          fill: "#f0a020",
+        },
+      },
+      polygon: {
+        fill: "#18a058" + 30,
+        stroke: "#18a058",
+        width: 1,
+        dash: false,
+        dashGap: [5, 10],
+        dashOffset: 0,
+      },
     },
     dark: {
       background: "#000",
@@ -22,6 +57,40 @@ export default class Style extends BaseData {
         size: 12,
         family: "微软雅黑",
         bold: true,
+      },
+      grid: {
+        axis: "#aeaeae",
+        grid: "#666",
+        innerGrid: "#444",
+      },
+      point: {
+        radius: 4,
+        fill: "#e88080",
+        width: 12,
+        stroke: "#e88080" + "70",
+      },
+      line: {
+        color: "#f2c97d",
+        width: 4,
+        dash: false,
+        dashGap: [5, 10],
+        dashOffset: 0,
+        cap: "round",
+        join: "round",
+        point: {
+          radius: 4,
+          stroke: "#f2c97d" + "80",
+          width: 12,
+          fill: "#f2c97d",
+        },
+      },
+      polygon: {
+        fill: "#63e2b7" + 30,
+        stroke: "#63e2b7",
+        width: 1,
+        dash: false,
+        dashGap: [5, 10],
+        dashOffset: 0,
       },
     },
   };
@@ -55,9 +124,20 @@ export default class Style extends BaseData {
     ctx.fillStyle = this.style[theme].background;
     ctx.fillRect(0, 0, width, height);
   }
-  /** 添加样式 */
-  addStyle(style: StyleType) {
-    this.style = { ...this.style, ...style };
+  /** 设置样式 */
+  setStyle(style: DeepPartial<StyleType>) {
+    for (const key in style) {
+      if (Object.prototype.hasOwnProperty.call(style, key)) {
+        const oldStyle = _Clone(this.style[key] || this.style[this.theme]);
+        _MergeObjects(oldStyle, style[key]);
+        this.style[key] = oldStyle as StyleItemType;
+      }
+    }
     this.initStyle();
+  }
+
+  /** 设置主题 */
+  setTheme(theme: KnownStyleKeys) {
+    if (theme in this.style) this.theme = theme;
   }
 }

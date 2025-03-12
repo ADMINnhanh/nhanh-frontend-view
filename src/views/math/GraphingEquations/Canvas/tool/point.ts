@@ -1,30 +1,7 @@
 import type Canvas from "..";
 import _Worker from "../worker";
 
-/** 样式管理器 */
-class Style {
-  style: PointStyleType = {
-    light: {
-      radius: 4,
-      fill: "#6042a6",
-      width: 12,
-      stroke: "#6042a680",
-    },
-    dark: {
-      radius: 4,
-      fill: "#5faaff",
-      width: 12,
-      stroke: "#5faaff70",
-    },
-  };
-
-  /** 添加样式 */
-  addStyle(style: PointStyleType) {
-    this.style = { ...this.style, ...style };
-  }
-}
-
-export default class Point extends Style {
+export default class Point {
   /** 画布 */
   private canvas?: Canvas;
   /** 点位开关 */
@@ -45,17 +22,20 @@ export default class Point extends Style {
   private simplify = false;
 
   constructor(canvas: Canvas) {
-    super();
     this.canvas = canvas;
   }
 
+  private color() {
+    const { theme, style } = this.canvas!;
+    return (style[theme] || style.light).point;
+  }
+
   /** 绘制单个点位 */
-  drawSinglePoint(location: [number, number], style?: PointItemType) {
-    const { ctx, theme } = this.canvas!;
+  drawSinglePoint(location: [number, number], style?: PointStyleType) {
+    const ctx = this.canvas!.ctx;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
-    const { width, stroke, fill, radius } =
-      style || this.style[theme] || this.style.light;
+    const { width, stroke, fill, radius } = style || this.color();
 
     ctx.lineWidth = width;
     if (!this.simplify) ctx.strokeStyle = stroke;
@@ -87,7 +67,6 @@ export default class Point extends Style {
       Promise.resolve().then(() => {
         const { center, percentage, gridConfig } = canvas;
         const maxRadius = this.maxRadius;
-        const count = gridConfig.count;
 
         const result = [],
           step = 20000;
@@ -99,10 +78,16 @@ export default class Point extends Style {
             {
               type: "point",
               list,
-              config: { maxRadius, count, gridConfig, percentage, center },
+              config: { maxRadius, gridConfig, percentage, center },
             },
-            (pointMap: PointMap) => {
-              if (pointMap) {
+            (data) => {
+              if (data) {
+                const { pointMap, maxRadius } = data as {
+                  pointMap: PointMap;
+                  maxRadius: number;
+                };
+                this.maxRadius = Math.max(this.maxRadius, maxRadius);
+
                 pointMap.forEach((xMap, zIndex) => {
                   if (this.pointMap.has(zIndex)) {
                     const oldXMap = this.pointMap.get(zIndex)!;
@@ -138,17 +123,15 @@ export default class Point extends Style {
   }
   /** 获取绘制函数 */
   fetchDrawFunctions() {
-    const { show, style } = this;
     const canvas = this.canvas!;
-    const { ctx, center, theme, percentage, isRecalculate, rect, gridConfig } =
-      canvas;
-    if (!ctx || !show) return [];
+    const { ctx, center, percentage, isRecalculate, rect, gridConfig } = canvas;
+    if (!ctx || !this.show) return [];
 
     const count = gridConfig.count;
 
     this.pointCount = 0;
 
-    const publicStyle = style[theme] || style.light;
+    const publicStyle = this.color();
     this.maxRadius = Math.max(
       publicStyle.radius + publicStyle.width,
       this.maxRadius

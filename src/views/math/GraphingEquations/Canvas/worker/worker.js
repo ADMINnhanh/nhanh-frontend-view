@@ -13,22 +13,23 @@ function IsValids(arr) {
 }
 
 /** 通过坐标轴上的点 获取坐标轴上的值 */
-function getAxisValueByPoint(x, y, gridConfig, count) {
-  const xV = (x / gridConfig.size) * count;
-  const yV = (y / gridConfig.size) * count;
+function getAxisValueByPoint(x, y, gridConfig) {
+  const xV = (x / gridConfig.size) * gridConfig.count;
+  const yV = (y / gridConfig.size) * gridConfig.count;
   return { xV, yV };
 }
 /** 通过坐标轴上的值 获取坐标轴上的点 */
-function getAxisPointByValue(xV, yV, gridConfig, count) {
-  const x = (xV / count) * gridConfig.size;
-  const y = (yV / count) * gridConfig.size;
+function getAxisPointByValue(xV, yV, gridConfig) {
+  const x = (xV / gridConfig.count) * gridConfig.size;
+  const y = (yV / gridConfig.count) * gridConfig.size;
   return { x, y };
 }
 
 /** 解析点位 */
 function AnalyzeThePoint(pointList, config) {
-  let { maxRadius, gridConfig, count, center, percentage } = config;
+  let { maxRadius, gridConfig, center, percentage } = config;
 
+  const count = gridConfig.count;
   const pointMap = new Map();
 
   for (let i = 0; i < pointList.length; i++) {
@@ -38,15 +39,10 @@ function AnalyzeThePoint(pointList, config) {
     const [isValue, isLocation] = [IsValid(value), IsValid(location)];
     if (!isValue && !isLocation) continue;
     if (isValue && !isLocation) {
-      const loc = getAxisPointByValue(value[0], value[1], gridConfig, count);
+      const loc = getAxisPointByValue(value[0], value[1], gridConfig);
       location = [loc.x, loc.y];
     } else if (!isValue && isLocation) {
-      const val = getAxisValueByPoint(
-        location[0],
-        location[1],
-        gridConfig,
-        count
-      );
+      const val = getAxisValueByPoint(location[0], location[1], gridConfig);
       value = [val.xV, val.yV];
     }
     let [x, y] = location;
@@ -77,11 +73,11 @@ function AnalyzeThePoint(pointList, config) {
     }
   }
 
-  return pointMap;
+  return { pointMap, maxRadius };
 }
 /** 解析线段 */
 function AnalyzeTheLine(lineList, config) {
-  let { gridConfig, count, center, percentage } = config;
+  let { gridConfig, center, percentage } = config;
 
   const lineMap = new Map();
   for (let i = 0; i < lineList.length; i++) {
@@ -101,14 +97,14 @@ function AnalyzeTheLine(lineList, config) {
       location = [];
       for (let i = 0; i < value.length; i++) {
         const item = value[i];
-        const loc = getAxisPointByValue(item[0], item[1], gridConfig, count);
+        const loc = getAxisPointByValue(item[0], item[1], gridConfig);
         location.push([loc.x, loc.y]);
       }
     } else if (!isValue && isLocation) {
       value = [];
       for (let i = 0; i < location.length; i++) {
         const item = location[i];
-        const val = getAxisValueByPoint(item[0], item[1], gridConfig, count);
+        const val = getAxisValueByPoint(item[0], item[1], gridConfig);
         value.push([val.xV, val.yV]);
       }
     }

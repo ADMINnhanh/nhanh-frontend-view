@@ -8,28 +8,98 @@ type DefaultCenter = Partial<{
 
 type KnownStyleKeys = "light" | "dark";
 
-type StyleItemType = {
-  background: string;
-  text: {
-    color: string;
-    secondary: string;
-    size: number;
-    family: string;
-    bold: boolean;
-  };
+/** 文本样式 */
+type TextStyleType = {
+  /** 颜色 */
+  color: string;
+  /**  secondary颜色 */
+  secondary: string;
+  /** 字体大小 */
+  size: number;
+  /** 字体族 */
+  family: string;
+  /** 是否加粗 */
+  bold: boolean;
 };
-/** 主题样式 */
-type StyleType = Record<KnownStyleKeys, StyleItemType> &
-  Record<string, StyleItemType>;
 
-type GridItemType = {
+/** 网格样式 */
+type GridStyleType = {
   axis: string;
   grid: string;
   innerGrid: string;
 };
-/** 网格样式 */
-type GridStyleType = Record<KnownStyleKeys, GridItemType> &
-  Record<string, GridItemType>;
+
+/** 点位样式 */
+type PointStyleType = {
+  /** 半径 */
+  radius: number;
+  /** 边框颜色 */
+  stroke: string;
+  /** 边框大小 */
+  width: number;
+  /** 填充颜色 */
+  fill: string;
+};
+
+/** 线样式 */
+type LineStyleType = {
+  /** 颜色 */
+  color: string;
+  /** 宽度 */
+  width: number;
+  /** 虚线 */
+  dash: boolean;
+  /** 虚线间隔 */
+  dashGap: number[];
+  /** 偏移虚线 */
+  dashOffset: number;
+  /** 末端的形状 */
+  cap: "butt" | "round" | "square";
+  /** 路径中的相连部分的形状 */
+  join: "bevel" | "round" | "miter";
+  /** 点位样式 */
+  point: PointStyleType;
+};
+
+/** 面样式 */
+type PolygonStyleType = {
+  /** 填充色 */
+  fill: string;
+  /** 描边色 */
+  stroke: string;
+  /** 宽度 */
+  width: number;
+  /** 虚线 */
+  dash: boolean;
+  /** 虚线间隔 */
+  dashGap: number[];
+  /** 偏移虚线 */
+  dashOffset: number;
+};
+
+/** 主题样式 */
+type StyleItemType = {
+  /** 背景色 */
+  background: string;
+  /** 文本样式 */
+  text: TextStyleType;
+  /** 网格样式 */
+  grid: GridStyleType;
+  /** 点位样式 */
+  point: PointStyleType;
+  /** 线样式 */
+  line: LineStyleType;
+  /** 面样式 */
+  polygon: PolygonStyleType;
+};
+
+/** 主题样式 */
+type StyleType = Record<KnownStyleKeys, StyleItemType> &
+  Record<string, StyleItemType>;
+
+type DeepPartial<T> = {
+  [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
+};
 
 type PluralSwitch<T, P extends boolean> = P extends true ? T[] : T;
 /** 公共数据属性 */
@@ -52,46 +122,15 @@ type CommonDataType<STYLE, PLURAL extends boolean, OTHER = {}> = Array<
   >
 >;
 
-type PointItemType = {
-  /** 半径 */
-  radius: number;
-  /** 边框颜色 */
-  stroke: string;
-  /** 边框大小 */
-  width: number;
-  /** 填充颜色 */
-  fill: string;
-};
-/** 点位样式 */
-type PointStyleType = Record<KnownStyleKeys, PointItemType> &
-  Record<string, PointItemType>;
-/** 点位列表 */
-type PointListType = CommonDataType<PointItemType, false>;
+/** zIndex -> xAxis -> yAxis -> PointListType */
+type PointMap = Map<number, Map<number, Map<number, PointListType>>>;
 
-type LineItemType = {
-  /** 颜色 */
-  color: string;
-  /** 宽度 */
-  width: number;
-  /** 虚线 */
-  dash: boolean;
-  /** 虚线间隔 */
-  dashGap: number[];
-  /** 偏移虚线 */
-  dashOffset: number;
-  /** 末端的形状 */
-  cap: "butt" | "round" | "square";
-  /** 路径中的相连部分的形状 */
-  join: "bevel" | "round" | "miter";
-  /** 点位样式 */
-  point: PointItemType;
-};
-/** 线样式 */
-type LineStyleType = Record<KnownStyleKeys, LineItemType> &
-  Record<string, LineItemType>;
+/** 点位列表 */
+type PointListType = CommonDataType<PointStyleType, false>;
+
 /** 线列表 */
 type LineListType = CommonDataType<
-  LineItemType,
+  LineStyleType,
   true,
   {
     /** 无限线 */
@@ -99,5 +138,12 @@ type LineListType = CommonDataType<
   }
 >;
 
-/** zIndex -> xAxis -> yAxis -> PointListType */
-type PointMap = Map<number, Map<number, Map<number, PointListType>>>;
+/** 面列表 */
+type PolygonListType = CommonDataType<
+  PolygonStyleType,
+  true,
+  {
+    width: number;
+    height: number;
+  }
+>;

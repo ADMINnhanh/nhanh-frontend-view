@@ -1,48 +1,7 @@
 import type Canvas from "..";
 import _Worker from "../worker";
 
-/** 样式管理器 */
-class Style {
-  style: LineStyleType = {
-    light: {
-      color: "#c74440",
-      width: 4,
-      dash: false,
-      dashGap: [5, 10],
-      dashOffset: 0,
-      cap: "round",
-      join: "round",
-      point: {
-        radius: 4,
-        stroke: "#c7444080",
-        width: 12,
-        fill: "#c74440",
-      },
-    },
-    dark: {
-      color: "#d98d40",
-      width: 4,
-      dash: false,
-      dashGap: [5, 10],
-      dashOffset: 0,
-      cap: "round",
-      join: "round",
-      point: {
-        radius: 4,
-        stroke: "#d98d40" + "80",
-        width: 12,
-        fill: "#d98d40",
-      },
-    },
-  };
-
-  /** 添加样式 */
-  addStyle(style: LineStyleType) {
-    this.style = { ...this.style, ...style };
-  }
-}
-
-export default class Line extends Style {
+export default class Line {
   /** 画布 */
   private canvas?: Canvas;
   /** 点位开关 */
@@ -51,17 +10,21 @@ export default class Line extends Style {
   private lineMap = new Map<number, LineListType>();
 
   constructor(canvas: Canvas) {
-    super();
     this.canvas = canvas;
   }
 
+  private color() {
+    const { theme, style } = this.canvas!;
+    return (style[theme] || style.light).line;
+  }
+
   /** 绘制线段 */
-  drawLine(location: [number, number][], style?: LineItemType) {
-    const { ctx, theme } = this.canvas!;
+  drawLine(location: [number, number][], style?: LineStyleType) {
+    const ctx = this.canvas?.ctx;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, color, dash, dashGap, dashOffset, cap, join } =
-      style || this.style[theme] || this.style.light;
+      style || this.color();
 
     ctx.setLineDash(dash ? dashGap : []);
     ctx.lineDashOffset = dashOffset;
@@ -79,7 +42,7 @@ export default class Line extends Style {
   }
   /** 绘制无限延伸线段 */
   drawInfiniteStraightLine(item: LineListType[number]) {
-    const { ctx, theme, rect, drawPoint } = this.canvas!;
+    const { ctx, rect, drawPoint } = this.canvas!;
     if (!ctx || !rect) return console.error("Canvas上下文丢失");
 
     // 解构关键数据并校验
@@ -97,8 +60,7 @@ export default class Line extends Style {
     }
 
     // 绘制原始端点
-    const pointStyle =
-      style?.point || this.style[theme]?.point || this.style.light.point;
+    const pointStyle = style?.point || this.color().point;
     drawPoint.drawSinglePoint(start, pointStyle);
     drawPoint.drawSinglePoint(end, pointStyle);
 
@@ -194,7 +156,7 @@ export default class Line extends Style {
             {
               type: "line",
               list,
-              config: { count, gridConfig, percentage, center },
+              config: { gridConfig, percentage, center },
             },
             (lineMap: Map<number, LineListType>) => {
               if (lineMap) {

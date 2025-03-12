@@ -37,7 +37,7 @@ export default class Draw extends Style {
             clientHeight,
           ];
           this.redrawOnce();
-        }, 100)
+        }, 200)
       );
       this.resizeObserver.observe(this.canvas);
     }
