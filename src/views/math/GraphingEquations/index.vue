@@ -33,11 +33,12 @@ import {
   SettingsOutline,
 } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
-import { _GenerateUUID } from "nhanh-pure-function";
+import { _GenerateUUID, _ReadFile } from "nhanh-pure-function";
 import { useFps } from "@vueuse/core";
 import Canvas from "./Canvas";
 import InputMath from "./InputMath/index.vue";
 import SvgGather from "@/assets/icon/gather";
+import DrawChina from "./china";
 
 const buttonApi = computed(() => {
   const theme = Settings.value.theme;
@@ -58,10 +59,11 @@ let canvas: Canvas;
 
 const setConfig = ref({
   theme: "",
-  defaultCenter: "middle,center",
+  defaultCenter: "bottom,left",
   axis: {
     x: 1 as 1 | -1,
-    y: 1 as 1 | -1,
+    y: -1 as 1 | -1,
+    count: 85,
     show: {
       all: true,
       grid: {
@@ -82,21 +84,19 @@ const setConfig = ref({
     show: true,
   },
 });
-watch(
-  setConfig,
-  (config) => {
-    canvas.toggleAxis(config.axis.show);
-    canvas.togglePoint(config.point.show);
-    canvas.toggleLine(config.line.show);
-    canvas.togglePolygon(config.polygon.show);
-    const { x, y } = config.axis;
-    canvas.setAxis({ x, y });
-    const [top, left] = config.defaultCenter.split(",") as any;
-    canvas.setDefaultCenter({ top, left });
-    if (config.theme) canvas.setTheme(config.theme as any);
-  },
-  { deep: true }
-);
+function UpdateCanvasConfig() {
+  const config = setConfig.value;
+  canvas.toggleAxis(config.axis.show);
+  canvas.togglePoint(config.point.show);
+  canvas.toggleLine(config.line.show);
+  canvas.togglePolygon(config.polygon.show);
+  const { x, y, count } = config.axis;
+  canvas.setAxis({ x, y, count });
+  const [top, left] = config.defaultCenter.split(",") as any;
+  canvas.setDefaultCenter({ top, left });
+  if (config.theme) canvas.setTheme(config.theme as any);
+}
+watch(setConfig, UpdateCanvasConfig, { deep: true });
 
 watch(
   () => Settings.value.theme,
@@ -125,14 +125,18 @@ onMounted(() => {
   // canvas.defaultCenter.top = "top";
   // canvas.defaultCenter.left = "left";
   // canvas.axisConfig.count = 75;
+  canvas.offset.x = -800;
   canvas.setTheme(Settings.value.theme);
-  canvas.drawPoint.addPoints([
-    { zIndex: 1, location: [75, 75] },
-    { value: [6, 6] },
-    { value: [-6, 6] },
-    { value: [-6, -6] },
-    { value: [6, -6] },
-  ]);
+  UpdateCanvasConfig();
+  DrawChina(canvas);
+
+  // canvas.drawPoint.addPoints([
+  //   { zIndex: 1, location: [75, 75] },
+  //   { value: [6, 6] },
+  //   { value: [-6, 6] },
+  //   { value: [-6, -6] },
+  //   { value: [6, -6] },
+  // ]);
   // const points = Array.from({ length: 10000 * 1 }).map((_, i) => ({
   //   value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
   // }));

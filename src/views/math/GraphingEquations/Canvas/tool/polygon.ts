@@ -120,10 +120,11 @@ export default class Polygon {
         const { center, percentage, axisConfig } = canvas;
 
         const result = [],
-          step = 1000;
+          step = 100;
         for (let i = 0; i < this.polygonList.length; i += step) {
           result.push(this.polygonList.slice(i, i + step));
         }
+
         result.forEach((list) => {
           _Worker(
             {
