@@ -55,6 +55,7 @@ const lock = ref(false);
 let canvas: Canvas;
 
 const setConfig = ref({
+  theme: "",
   defaultCenter: "middle,center",
   axis: {
     x: 1 as 1 | -1,
@@ -90,13 +91,16 @@ watch(
     canvas.setAxis({ x, y });
     const [top, left] = config.defaultCenter.split(",") as any;
     canvas.setDefaultCenter({ top, left });
+    if (config.theme) canvas.setTheme(config.theme as any);
   },
   { deep: true }
 );
 
 watch(
   () => Settings.value.theme,
-  (theme) => canvas?.setTheme(theme)
+  (theme) => {
+    if (!setConfig.value.theme) canvas?.setTheme(theme);
+  }
 );
 
 const img = new Image(200, 300);
@@ -123,59 +127,59 @@ onMounted(() => {
   canvas.drawPoint.addPoints([
     { zIndex: 1, location: [75, 75] },
     { value: [6, 6] },
-    // { value: [-6, 6] },
-    // { value: [-6, -6] },
-    // { value: [6, -6] },
+    { value: [-6, 6] },
+    { value: [-6, -6] },
+    { value: [6, -6] },
   ]);
-  // const points = Array.from({ length: 10000 * 10 }).map((_, i) => ({
+  // const points = Array.from({ length: 10000 * 1 }).map((_, i) => ({
   //   value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
   // }));
   // canvas.drawPoint.addPoints(points as any);
 
-  canvas.drawLine.addLines([
-    {
-      location: [
-        [-75 * 2, 75 * 2],
-        [75 * 2, 75 * 2],
-        [75 * 2, 0 * 2],
-      ],
-    },
-    {
-      value: [
-        [-2, -2],
-        [-2, -6],
-        [-4, -4],
-      ],
-    },
-    {
-      value: [
-        [-2, 0],
-        [0, -2],
-      ],
-      infinite: true,
-    },
-    {
-      value: [
-        [2, 0],
-        [0, 2],
-      ],
-      infinite: true,
-    },
-  ]);
+  // canvas.drawLine.addLines([
+  //   {
+  //     location: [
+  //       [-75 * 2, 75 * 2],
+  //       [75 * 2, 75 * 2],
+  //       [75 * 2, 0 * 2],
+  //     ],
+  //   },
+  //   {
+  //     value: [
+  //       [-2, -2],
+  //       [-2, -6],
+  //       [-4, -4],
+  //     ],
+  //   },
+  //   {
+  //     value: [
+  //       [-2, 0],
+  //       [0, -2],
+  //     ],
+  //     infinite: true,
+  //   },
+  //   {
+  //     value: [
+  //       [2, 0],
+  //       [0, 2],
+  //     ],
+  //     infinite: true,
+  //   },
+  // ]);
 
-  canvas.drawPolygon.addPolygons([
-    {
-      value: [
-        [4, -4],
-        [2, -6],
-        [0, -4],
-      ],
-    },
-    {
-      value: [[2, 2]],
-      size: [200, 200],
-    },
-  ]);
+  // canvas.drawPolygon.addPolygons([
+  //   {
+  //     value: [
+  //       [4, -4],
+  //       [2, -6],
+  //       [0, -4],
+  //     ],
+  //   },
+  //   {
+  //     value: [[2, 2]],
+  //     size: [200, 200],
+  //   },
+  // ]);
 
   // canvas.startCreationOnGrid = [
   //   [
@@ -204,7 +208,10 @@ onUnmounted(() => {
 <template>
   <div class="graphing-equations">
     <nav>
-      <NA href="https://www.desmos.com/calculator?lang=zh-CN" target="_blank">
+      <NA
+        href="https://www.desmos.com/calculator/mekfho0w38?lang=zh-CN"
+        target="_blank"
+      >
         希望达到的目标！ desmos
       </NA>
       <InputMath />
@@ -253,10 +260,14 @@ onUnmounted(() => {
   <NDrawer v-model:show="setActive" :width="500" to=".graphing-equations">
     <NDrawerContent title="更加全面的配置">
       <NTabs addable animated placement="left">
-        <NTabPane name="坐标轴">
+        <NTabPane name="公共">
           <NForm :model="setConfig" label-width="auto">
-            <NFormItem label="整体显示">
-              <NSwitch v-model:value="setConfig.axis.show.all" />
+            <NFormItem label="主题">
+              <NRadioGroup v-model:value="setConfig.theme">
+                <NRadioButton value="light">浅色</NRadioButton>
+                <NRadioButton value="dark">深色</NRadioButton>
+                <NRadioButton value="">跟随外部主题</NRadioButton>
+              </NRadioGroup>
             </NFormItem>
             <NFormItem label="默认中心">
               <NRadioGroup v-model:value="setConfig.defaultCenter">
@@ -280,6 +291,13 @@ onUnmounted(() => {
                   </NSpace>
                 </NSpace>
               </NRadioGroup>
+            </NFormItem>
+          </NForm>
+        </NTabPane>
+        <NTabPane name="坐标轴">
+          <NForm :model="setConfig" label-width="auto">
+            <NFormItem label="整体显示">
+              <NSwitch v-model:value="setConfig.axis.show.all" />
             </NFormItem>
             <NFormItem label="x 轴向">
               <NRadioGroup v-model:value="setConfig.axis.x">
