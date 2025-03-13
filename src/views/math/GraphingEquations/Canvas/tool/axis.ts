@@ -1,11 +1,12 @@
 import type Canvas from "..";
 
-export default class Grid {
+export default class Axis {
   /** 画布 */
-  canvas?: Canvas;
+  private canvas?: Canvas;
 
   /** 网格开关 */
   show = {
+    all: true,
     grid: {
       main: true,
       secondary: true,
@@ -19,7 +20,7 @@ export default class Grid {
   }
 
   drawAxisAndGrid() {
-    if (!this.canvas) return;
+    if (!this.canvas || !this.show.all) return;
     if (this.show.grid.main || this.show.grid.secondary) this.drawGrid();
     if (this.show.axis) this.drawAxis();
     if (this.show.axisText) this.drawAxisText();
@@ -33,13 +34,13 @@ export default class Grid {
   /** 绘制网格 */
   private drawGrid() {
     const canvas = this.canvas!;
-    const { ctx, rect, center, gridConfig } = canvas;
+    const { ctx, rect, center, axisConfig } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
     const color = this.color();
 
-    const grid_size = gridConfig.size;
+    const grid_size = axisConfig.size;
     const inner_grid_size = grid_size / 5;
 
     ctx.lineWidth = 1;
@@ -130,7 +131,7 @@ export default class Grid {
   /** 坐标轴 - 文字 */
   private drawAxisText() {
     const canvas = this.canvas!;
-    const { ctx, rect, center, gridConfig, style, theme } = canvas;
+    const { ctx, rect, center, axisConfig, style, theme } = canvas;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
@@ -162,7 +163,7 @@ export default class Grid {
 
     const count = canvas.getGridCount();
 
-    const grid_size = gridConfig.size;
+    const grid_size = axisConfig.size;
 
     /** x 轴的文字 */ {
       let y = center.y + textSize + textOffset;
@@ -179,13 +180,13 @@ export default class Grid {
           : 0;
 
       /** 起始值 */
-      let v = canvas.getAxisValueByPoint(x - center.x, 0).xV;
+      let v = canvas.getAxisValueByPoint((x - center.x) * axisConfig.x, 0).xV;
 
       while (x <= width) {
         const textW = textWidth(String(v));
         v !== 0 && canvas.drawText(String(v), x - textW / 2, y, isSecondary);
         x += grid_size;
-        v += count;
+        v += count * axisConfig.x;
       }
     }
 
@@ -201,7 +202,7 @@ export default class Grid {
           : 0;
 
       /** 起始值 */
-      let v = canvas.getAxisValueByPoint(0, y - center.y).yV;
+      let v = canvas.getAxisValueByPoint(0, (y - center.y) * axisConfig.y).yV;
 
       while (y <= height) {
         const textW = textWidth(String(v));
@@ -210,7 +211,7 @@ export default class Grid {
 
         v !== 0 && canvas.drawText(String(v), x, y + textSize / 2, isSecondary);
         y += grid_size;
-        v += count;
+        v += count * axisConfig.y;
       }
     }
   }

@@ -1,5 +1,6 @@
 import type Canvas from "..";
 import _Worker from "../worker";
+import { CalculatePointPosition } from "./public";
 
 export default class Polygon {
   /** 画布 */
@@ -79,7 +80,7 @@ export default class Polygon {
   /** 绘制多个多边形 */
   drawPolygons(polygons: PolygonListType) {
     const { show, canvas } = this;
-    const { ctx, center, percentage, isRecalculate } = canvas!;
+    const { ctx, center, percentage, isRecalculate, axisConfig } = canvas!;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
     if (!show) return;
 
@@ -89,16 +90,15 @@ export default class Polygon {
       if (!show) continue;
 
       if (isRecalculate) {
-        polygon.dynamicLocation = location?.map((item) => {
-          let [x, y] = item!;
-          x = center.x + x * percentage;
-          y = center.y + y * percentage;
-          return [x, y];
+        polygon.dynamicLocation = CalculatePointPosition(location!, {
+          center,
+          percentage,
+          axisConfig,
         });
         if (polygon.size) {
           polygon.dynamicSize = [
-            polygon.size[0] * percentage,
-            polygon.size[1] * percentage,
+            polygon.size[0] * percentage * axisConfig.x,
+            polygon.size[1] * percentage * axisConfig.y,
           ];
         }
       }
@@ -117,7 +117,7 @@ export default class Polygon {
 
     if (this.polygonList.length == 0) {
       Promise.resolve().then(() => {
-        const { center, percentage, gridConfig } = canvas;
+        const { center, percentage, axisConfig } = canvas;
 
         const result = [],
           step = 1000;
@@ -129,7 +129,7 @@ export default class Polygon {
             {
               type: "polygon",
               list,
-              config: { gridConfig, percentage, center },
+              config: { axisConfig, percentage, center },
             },
             (polygonMap: Map<number, PolygonListType>) => {
               if (polygonMap) {

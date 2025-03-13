@@ -1,5 +1,5 @@
 import { _Schedule } from "nhanh-pure-function";
-import type Grid from "../tool/grid";
+import type Axis from "../tool/axis";
 import Event from "./event";
 
 /** 快速方法 */
@@ -62,22 +62,35 @@ export default class QuickMethod extends Event {
     super.setTheme(theme);
     this.redrawOnce();
   }
-  /** 开关网格 */
-  toggleGrid(show?: boolean | Partial<Grid["show"]>) {
+  /** 设置坐标轴 */
+  setAxis(config: Partial<QuickMethod["axisConfig"]>) {
+    super.setAxis(config);
+    this.redrawOnce();
+  }
+  /** 设置默认中心 */
+  setDefaultCenter(center: Partial<QuickMethod["defaultCenter"]>) {
+    super.setDefaultCenter(center);
+    this.redrawOnce();
+  }
+
+  /** 开关坐标轴 */
+  toggleAxis(show?: boolean | Partial<Axis["show"]>) {
     // 统一处理配置
     const newState = (() => {
       // 对象配置：未传的属性用默认值 true
       if (typeof show === "object") {
         const {
+          all = true,
           grid = { main: true, secondary: true },
           axis = true,
           axisText = true,
         } = show;
-        return { grid, axis, axisText };
+        return { all, grid, axis, axisText };
       }
       // 布尔配置：全部属性同步开关
       if (typeof show === "boolean") {
         return {
+          all: true,
           grid: { main: show, secondary: show },
           axis: show,
           axisText: show,
@@ -85,26 +98,44 @@ export default class QuickMethod extends Event {
       }
       // 无参数：根据当前状态取反
       show = !(
-        this.drawGrid.show.axis ||
-        this.drawGrid.show.axisText ||
-        this.drawGrid.show.grid.main ||
-        this.drawGrid.show.grid.secondary
+        this.drawAxis.show.all ||
+        this.drawAxis.show.axis ||
+        this.drawAxis.show.axisText ||
+        this.drawAxis.show.grid.main ||
+        this.drawAxis.show.grid.secondary
       );
       return {
+        all: show,
         grid: { main: show, secondary: show },
         axis: show,
         axisText: show,
       };
     })();
 
-    this.drawGrid.show = newState;
+    this.drawAxis.show = newState;
     this.redrawOnce();
+  }
+  /** 开关点位 */
+  togglePoint(show?: boolean) {
+    this.drawPoint.show = show ?? !this.drawPoint.show;
+    this.redrawOnce();
+    return this.drawPoint.show;
+  }
+  /** 开关线段 */
+  toggleLine(show?: boolean) {
+    this.drawLine.show = show ?? !this.drawLine.show;
+    this.redrawOnce();
+    return this.drawLine.show;
+  }
+  /** 开关多边形 */
+  togglePolygon(show?: boolean) {
+    this.drawPolygon.show = show ?? !this.drawPolygon.show;
+    this.redrawOnce();
+    return this.drawPolygon.show;
   }
   /** 切换锁定状态 */
   toggleLock(lock?: boolean) {
-    this.lockDragAndResize =
-      typeof lock == "bigint" ? lock : !this.lockDragAndResize;
-    this.redrawOnce();
+    this.lockDragAndResize = lock ?? !this.lockDragAndResize;
     return this.lockDragAndResize;
   }
 }

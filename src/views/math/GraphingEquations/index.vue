@@ -1,12 +1,34 @@
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, ref, watch } from "vue";
-import { NButton, NIcon, NSpace, NButtonGroup, NText, NA } from "naive-ui";
+import {
+  NButton,
+  NIcon,
+  NSpace,
+  NButtonGroup,
+  NText,
+  NA,
+  NDrawer,
+  NDrawerContent,
+  NTabs,
+  NTabPane,
+  NForm,
+  NFormItem,
+  NSwitch,
+  NRadioGroup,
+  NRadioButton,
+  NRadio,
+} from "naive-ui";
 import {
   Add,
+  ArrowBack,
+  ArrowDown,
+  ArrowForward,
+  ArrowUp,
   GridOutline,
   Home,
   LockClosedOutline,
   Remove,
+  SettingsOutline,
 } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID } from "nhanh-pure-function";
@@ -14,11 +36,6 @@ import { useFps } from "@vueuse/core";
 import Canvas from "./Canvas";
 import InputMath from "./InputMath/index.vue";
 import SvgGather from "@/assets/icon/gather";
-
-const fps = useFps();
-const id = _GenerateUUID("canvas-");
-const lock = ref(false);
-let canvas: Canvas;
 
 const buttonApi = computed(() => {
   const theme = Settings.value.theme;
@@ -31,9 +48,55 @@ const buttonApi = computed(() => {
   };
 });
 
+const fps = useFps();
+const id = _GenerateUUID("canvas-");
+const setActive = ref(false);
+const lock = ref(false);
+let canvas: Canvas;
+
+const setConfig = ref({
+  defaultCenter: "middle,center",
+  axis: {
+    x: 1 as 1 | -1,
+    y: 1 as 1 | -1,
+    show: {
+      all: true,
+      grid: {
+        main: true,
+        secondary: true,
+      },
+      axis: true,
+      axisText: true,
+    },
+  },
+  point: {
+    show: true,
+  },
+  line: {
+    show: true,
+  },
+  polygon: {
+    show: true,
+  },
+});
+watch(
+  setConfig,
+  (config) => {
+    canvas.toggleAxis(config.axis.show);
+    canvas.togglePoint(config.point.show);
+    canvas.toggleLine(config.line.show);
+    canvas.togglePolygon(config.polygon.show);
+    const { x, y } = config.axis;
+    canvas.setAxis({ x, y });
+    const [top, left] = config.defaultCenter.split(",") as any;
+    canvas.setDefaultCenter({ top, left });
+  },
+  { deep: true }
+);
+
 watch(
   () => Settings.value.theme,
-  (theme) => canvas.setTheme(theme)
+  (theme) => canvas?.setTheme(theme)
 );
 
 const img = new Image(200, 300);
@@ -46,26 +109,23 @@ img.onload = () => {
 
 // const list = Array.from({ length: 10000 * 200 });
 // const t = performance.now();
-// for (let i = 0; i < list.length; i++) {
 
-// }
-// // for (const e of list) {
-// //   a++;
-// // }
+// for (let i = 0; i < list.length; i++) {}
+
 // console.log(performance.now() - t + "ms");
 
 onMounted(() => {
   canvas = new Canvas(id);
   // canvas.defaultCenter.top = "top";
   // canvas.defaultCenter.left = "left";
-  // canvas.gridConfig.count = 75;
+  // canvas.axisConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
   canvas.drawPoint.addPoints([
     { zIndex: 1, location: [75, 75] },
     { value: [6, 6] },
-    { value: [-6, 6] },
-    { value: [-6, -6] },
-    { value: [6, -6] },
+    // { value: [-6, 6] },
+    // { value: [-6, -6] },
+    // { value: [6, -6] },
   ]);
   // const points = Array.from({ length: 10000 * 10 }).map((_, i) => ({
   //   value: [Math.random() * 100 - 50, Math.random() * 100 - 50],
@@ -164,7 +224,7 @@ onUnmounted(() => {
         <NButton :="buttonApi" @click="canvas.reset()">
           <template #icon><NIcon :component="Home" /></template>
         </NButton>
-        <NButton :="buttonApi" @click="canvas.toggleGrid()">
+        <NButton :="buttonApi" @click="canvas.toggleAxis()">
           <template #icon><NIcon :component="GridOutline" /></template>
         </NButton>
         <NButton :="buttonApi" @click="lock = canvas.toggleLock()">
@@ -176,6 +236,11 @@ onUnmounted(() => {
             />
           </template>
         </NButton>
+        <NButton :="buttonApi" @click="setActive = true">
+          <template #icon>
+            <NIcon :component="SettingsOutline" />
+          </template>
+        </NButton>
       </NSpace>
       <n-text
         class="fps"
@@ -185,6 +250,95 @@ onUnmounted(() => {
       </n-text>
     </div>
   </div>
+  <NDrawer v-model:show="setActive" :width="500" to=".graphing-equations">
+    <NDrawerContent title="更加全面的配置">
+      <NTabs addable animated placement="left">
+        <NTabPane name="坐标轴">
+          <NForm :model="setConfig" label-width="auto">
+            <NFormItem label="整体显示">
+              <NSwitch v-model:value="setConfig.axis.show.all" />
+            </NFormItem>
+            <NFormItem label="默认中心">
+              <NRadioGroup v-model:value="setConfig.defaultCenter">
+                <NSpace vertical>
+                  <NSpace>
+                    <NRadio value="top,left" />
+                    <NRadio value="top,center" />
+                    <NRadio value="top,right" />
+                  </NSpace>
+
+                  <NSpace>
+                    <NRadio value="middle,left" />
+                    <NRadio value="middle,center" />
+                    <NRadio value="middle,right" />
+                  </NSpace>
+
+                  <NSpace>
+                    <NRadio value="bottom,left" />
+                    <NRadio value="bottom,center" />
+                    <NRadio value="bottom,right" />
+                  </NSpace>
+                </NSpace>
+              </NRadioGroup>
+            </NFormItem>
+            <NFormItem label="x 轴向">
+              <NRadioGroup v-model:value="setConfig.axis.x">
+                <NRadioButton :value="-1">
+                  <NIcon :component="ArrowBack" />
+                </NRadioButton>
+                <NRadioButton :value="1">
+                  <NIcon :component="ArrowForward" />
+                </NRadioButton>
+              </NRadioGroup>
+            </NFormItem>
+            <NFormItem label="y 轴向">
+              <NRadioGroup v-model:value="setConfig.axis.y">
+                <NRadioButton :value="1">
+                  <NIcon :component="ArrowDown" />
+                </NRadioButton>
+                <NRadioButton :value="-1">
+                  <NIcon :component="ArrowUp" />
+                </NRadioButton>
+              </NRadioGroup>
+            </NFormItem>
+            <NFormItem label="x 、y 轴显示">
+              <NSwitch v-model:value="setConfig.axis.show.axis" />
+            </NFormItem>
+            <NFormItem label="x 、y 轴文字显示">
+              <NSwitch v-model:value="setConfig.axis.show.axisText" />
+            </NFormItem>
+            <NFormItem label="网格 - 主要的">
+              <NSwitch v-model:value="setConfig.axis.show.grid.main" />
+            </NFormItem>
+            <NFormItem label="网格 - 次要的">
+              <NSwitch v-model:value="setConfig.axis.show.grid.secondary" />
+            </NFormItem>
+          </NForm>
+        </NTabPane>
+        <NTabPane name="点">
+          <NForm :model="setConfig" label-width="auto">
+            <NFormItem label="整体显示">
+              <NSwitch v-model:value="setConfig.point.show" />
+            </NFormItem>
+          </NForm>
+        </NTabPane>
+        <NTabPane name="线">
+          <NForm :model="setConfig" label-width="auto">
+            <NFormItem label="整体显示">
+              <NSwitch v-model:value="setConfig.line.show" />
+            </NFormItem>
+          </NForm>
+        </NTabPane>
+        <NTabPane name="面">
+          <NForm :model="setConfig" label-width="auto">
+            <NFormItem label="整体显示">
+              <NSwitch v-model:value="setConfig.polygon.show" />
+            </NFormItem>
+          </NForm>
+        </NTabPane>
+      </NTabs>
+    </NDrawerContent>
+  </NDrawer>
 </template>
 
 <style scoped lang="less">

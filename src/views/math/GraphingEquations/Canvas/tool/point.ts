@@ -1,5 +1,6 @@
 import type Canvas from "..";
 import _Worker from "../worker";
+import { CalculatePointPosition } from "./public";
 
 export default class Point {
   /** 画布 */
@@ -57,7 +58,6 @@ export default class Point {
   /** 批量绘制多个点位 */
   drawMultiplePoints(points: PointListType) {
     if (!this.show) return;
-
     for (let i = 0; i < points.length; i++) {
       const { show, dynamicLocation, style } = points[i];
       if (!show) continue;
@@ -73,7 +73,7 @@ export default class Point {
 
     if (this.pointList.length == 0) {
       Promise.resolve().then(() => {
-        const { center, percentage, gridConfig } = canvas;
+        const { center, percentage, axisConfig } = canvas;
         const maxRadius = this.maxRadius;
 
         const result = [],
@@ -86,7 +86,7 @@ export default class Point {
             {
               type: "point",
               list,
-              config: { maxRadius, gridConfig, percentage, center },
+              config: { maxRadius, axisConfig, percentage, center },
             },
             (data) => {
               if (data) {
@@ -138,7 +138,7 @@ export default class Point {
       percentage,
       isRecalculate,
       rect,
-      gridConfig,
+      axisConfig,
       theme,
       style,
     } = canvas;
@@ -146,7 +146,7 @@ export default class Point {
 
     this.defaultStyle = (style[theme] || style.light).point;
 
-    const count = gridConfig.count;
+    const count = axisConfig.count;
 
     this.pointCount = 0;
 
@@ -163,6 +163,7 @@ export default class Point {
     };
 
     const videoXyRange = canvas.getMaxMinValue(pointRect);
+
     videoXyRange.minXV = Math.floor(videoXyRange.minXV / count) * count;
     videoXyRange.minYV = Math.floor(videoXyRange.minYV / count) * count;
     videoXyRange.maxXV = Math.ceil(videoXyRange.maxXV / count) * count;
@@ -180,10 +181,11 @@ export default class Point {
             if (!show) return;
 
             if (isRecalculate) {
-              let [x, y] = location!;
-              x = center.x + x * percentage;
-              y = center.y + y * percentage;
-              point.dynamicLocation = [x, y];
+              point.dynamicLocation = CalculatePointPosition([location!], {
+                center,
+                percentage,
+                axisConfig,
+              })[0];
             }
 
             _points.push(point);

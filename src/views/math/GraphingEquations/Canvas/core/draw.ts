@@ -13,14 +13,14 @@ export default class Draw extends Style {
    * 此函数可以有以下两种返回类型：
    * 1. void：表示创建过程不需要任何额外的信息或操作
    * 2. [number, () => void][]：表示返回一个数组，数组中的每个元素都是一个元组，
-   *    元组的第一个元素是数字，绘制顺序，第二个元素是绘制方法
+   *    元组的第一个元素是数字表示绘制顺序；第二个元素是绘制方法
    */
   startCreationOnGrid?: () => void | [number, () => void][];
   /** 在网格下开始创作 */
   startCreationBelowGrid?: () => void;
 
   /** 计算坐标所需依赖 */
-  rely = [this.center.x, this.center.y, this.scale].join();
+  rely = "";
   /** 是否需要重新计算坐标 */
   isRecalculate = false;
 
@@ -40,8 +40,25 @@ export default class Draw extends Style {
       );
       this.resizeObserver.observe(this.canvas);
     }
+    this.updateRely();
+    this.isRecalculate = false;
   }
 
+  /** 更新 计算坐标所需依赖 */
+  private updateRely() {
+    const { center, scale, rect, axisConfig } = this;
+
+    const newRely = [
+      center.x,
+      center.y,
+      scale,
+      JSON.stringify(axisConfig),
+      rect?.width,
+      rect?.height,
+    ].join();
+    this.isRecalculate = this.rely !== newRely;
+    this.rely = newRely;
+  }
   // 封装添加函数到 zIndexs 对象的逻辑
   private addFunctionsToZIndexs(zIndexFuncPairs: [number, () => void][]) {
     const zIndexs: { [key: number]: (() => void)[] } = {};
@@ -53,29 +70,25 @@ export default class Draw extends Style {
   }
   /** 重绘画布 */
   private redraw() {
-    const { canvas, center, scale, rect } = this;
-    if (!canvas || !rect)
-      return console.error("canvas is not HTMLCanvasElement");
+    if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
 
     this.updateCenter();
 
-    const newRely = [center.x, center.y, scale].join();
-    this.isRecalculate = this.rely !== newRely;
-    this.rely = newRely;
+    this.updateRely();
 
     this.clearScreen();
 
     this.startCreationBelowGrid?.();
 
-    this.drawGrid?.drawAxisAndGrid();
+    this.drawAxis?.drawAxisAndGrid();
 
     const creationOnGrid = this.startCreationOnGrid;
 
     const zIndexs = this.addFunctionsToZIndexs(
-      this.drawPoint
+      this.drawPolygon
         .fetchDrawFunctions()
         .concat(this.drawLine.fetchDrawFunctions())
-        .concat(this.drawPolygon.fetchDrawFunctions())
+        .concat(this.drawPoint.fetchDrawFunctions())
         .concat(Array.isArray(creationOnGrid) ? creationOnGrid : [])
     );
 

@@ -1,5 +1,6 @@
 import type Canvas from "..";
 import _Worker from "../worker";
+import { CalculatePointPosition } from "./public";
 
 export default class Line {
   /** 画布 */
@@ -125,7 +126,7 @@ export default class Line {
   /** 绘制多条线段 */
   drawLines(lines: LineListType) {
     const { show, canvas } = this;
-    const { ctx, center, percentage, isRecalculate } = canvas!;
+    const { ctx, center, percentage, isRecalculate, axisConfig } = canvas!;
     if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
     if (!show) return;
 
@@ -135,11 +136,10 @@ export default class Line {
       if (!show) continue;
 
       if (isRecalculate) {
-        line.dynamicLocation = location?.map((item) => {
-          let [x, y] = item!;
-          x = center.x + x * percentage;
-          y = center.y + y * percentage;
-          return [x, y];
+        line.dynamicLocation = CalculatePointPosition(location!, {
+          center,
+          percentage,
+          axisConfig,
         });
       }
 
@@ -156,7 +156,7 @@ export default class Line {
 
     if (this.lineList.length == 0) {
       Promise.resolve().then(() => {
-        const { center, percentage, gridConfig } = canvas;
+        const { center, percentage, axisConfig } = canvas;
 
         const result = [],
           step = 1000;
@@ -168,7 +168,7 @@ export default class Line {
             {
               type: "line",
               list,
-              config: { gridConfig, percentage, center },
+              config: { axisConfig, percentage, center },
             },
             (lineMap: Map<number, LineListType>) => {
               if (lineMap) {

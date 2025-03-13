@@ -1,4 +1,4 @@
-import type Grid from "../tool/grid";
+import type Axis from "../tool/axis";
 import type Point from "../tool/point";
 import type Line from "../tool/line";
 import type Polygon from "../tool/polygon";
@@ -36,8 +36,8 @@ export default class BaseData {
    *    - 条件一：max 必须是 min 的 2 倍，即 max / min === 2。
    *    - 条件二：min 必须是 5 的整数倍，即 min % 5 === 0。
    */
-  gridConfig = {
-    /** 缩放比例为1时每个网格表示的数字 */
+  axisConfig = {
+    /** 缩放比为 1 时单网格代表的数字 */
     count: 2,
     /** 网格最小尺寸 */
     min: 100,
@@ -45,6 +45,10 @@ export default class BaseData {
     max: 200,
     /** 网格当前大小 */
     size: 100,
+    /** x 轴方向：1 右增左减，-1 左增右减 */
+    x: 1 as 1 | -1,
+    /** y 轴方向：1 下增上减，-1 上增下减 */
+    y: 1 as 1 | -1,
   };
   /**
    * 滚动周期规则说明：
@@ -59,8 +63,8 @@ export default class BaseData {
   /** 是否正在自动调整 */
   protected isAuto = false;
 
-  /** 绘制网格 */
-  drawGrid: Grid = undefined as any;
+  /** 绘制坐标轴 */
+  drawAxis: Axis = undefined as any;
   /** 绘制点 */
   drawPoint: Point = undefined as any;
   /** 绘制线 */
@@ -144,16 +148,16 @@ export default class BaseData {
   }
   /** 更新网格大小 */
   updateSize() {
-    const { scale, cycle, delta, gridConfig } = this;
+    const { scale, cycle, delta, axisConfig } = this;
 
     let size = (Math.abs(scale - 1) % (cycle * delta)) / delta;
     size = Math.round(scale < 1 ? cycle - size : size);
 
-    gridConfig.size =
-      (size / cycle) * (gridConfig.max - gridConfig.min) + gridConfig.min;
+    axisConfig.size =
+      (size / cycle) * (axisConfig.max - axisConfig.min) + axisConfig.min;
 
     this.percentage =
-      this.getAxisPointByValue(gridConfig.count, 0).x / gridConfig.min;
+      this.getAxisPointByValue(axisConfig.count, 0).x / axisConfig.min;
   }
 
   /** 设置缩放 */
@@ -161,7 +165,7 @@ export default class BaseData {
     event: "center" | { clientX: number; clientY: number },
     delta: number
   ) {
-    const { canvas, rect, lockDragAndResize } = this;
+    const { canvas, rect, lockDragAndResize, axisConfig } = this;
 
     if (lockDragAndResize) return;
     if (!canvas || !rect)
@@ -187,15 +191,59 @@ export default class BaseData {
       mouseValue.yV
     );
 
-    this.offset.x -= newMousePoint.x - mousePoint.x;
-    this.offset.y -= newMousePoint.y - mousePoint.y;
+    this.offset.x -= (newMousePoint.x - mousePoint.x) * axisConfig.x;
+    this.offset.y -= (newMousePoint.y - mousePoint.y) * axisConfig.y;
+  }
+  /** 设置坐标轴 */
+  setAxis(config: Partial<BaseData["axisConfig"]>) {
+    // 1. 合并配置并转换为数值类型
+    const mergedConfig = { ...this.axisConfig, ...config };
+    const numericConfig = Object.fromEntries(
+      Object.entries(mergedConfig).map(([key, value]) => [key, Number(value)])
+    ) as typeof this.axisConfig;
+
+    // 2. 解构需要验证的字段
+    const { x, y, count, min, max, size } = numericConfig;
+
+    // 3. 验证条件拆分（带明确变量名）
+    const isValidX = [1, -1].includes(x);
+    const isValidY = [1, -1].includes(y);
+    const isValidCount = count > 0;
+    const isValidRange = min > 0 && min < max;
+    const isValidSize = size >= min && size <= max;
+
+    // 4. 条件组合与提前返回
+    if (
+      !isValidX ||
+      !isValidY ||
+      !isValidCount ||
+      !isValidRange ||
+      !isValidSize
+    ) {
+      console.warn("Invalid axis configuration:", {
+        x,
+        y,
+        count,
+        min,
+        max,
+        size,
+      });
+      return;
+    }
+
+    // 5. 通过所有验证后更新配置
+    this.axisConfig = numericConfig;
+  }
+  /** 设置默认中心 */
+  setDefaultCenter(center: Partial<BaseData["defaultCenter"]>) {
+    Object.assign(this.defaultCenter, center);
   }
 
   /** 获取每个网格表示的数字 */
   getGridCount() {
-    const { gridConfig, scale, cycle, delta } = this;
+    const { axisConfig, scale, cycle, delta } = this;
 
-    let count = gridConfig.count;
+    let count = axisConfig.count;
     if (scale > 1) {
       count /= Math.pow(2, Math.floor((scale - 1) / (cycle * delta)));
     } else if (scale < 1) {
@@ -206,30 +254,31 @@ export default class BaseData {
   }
   /** 获取鼠标在坐标轴上的位置 */
   getMousePositionOnAxis(event: { clientX: number; clientY: number }) {
-    const { canvas, center, rect } = this;
+    const { canvas, center, rect, axisConfig } = this;
     if (!canvas) return console.error("canvas is not HTMLCanvasElement");
 
     const { clientX, clientY } = event;
     const { left, top } = rect!;
 
-    const x = clientX - left - center.x;
-    const y = clientY - top - center.y;
+    const x = (clientX - left - center.x) * axisConfig.x;
+    const y = (clientY - top - center.y) * axisConfig.y;
     return { x, y };
   }
+
   /** 通过坐标轴上的点 获取坐标轴上的值 */
   getAxisValueByPoint(x: number, y: number) {
-    const { gridConfig } = this;
+    const { axisConfig } = this;
     const count = this.getGridCount();
-    const xV = (x / gridConfig.size) * count;
-    const yV = (y / gridConfig.size) * count;
+    const xV = (x / axisConfig.size) * count;
+    const yV = (y / axisConfig.size) * count;
     return { xV, yV };
   }
   /** 通过坐标轴上的值 获取坐标轴上的点 */
   getAxisPointByValue(xV: number, yV: number) {
-    const { gridConfig } = this;
+    const { axisConfig } = this;
     const count = this.getGridCount();
-    const x = (xV / count) * gridConfig.size;
-    const y = (yV / count) * gridConfig.size;
+    const x = (xV / count) * axisConfig.size;
+    const y = (yV / count) * axisConfig.size;
     return { x, y };
   }
 
@@ -253,7 +302,12 @@ export default class BaseData {
     })!;
     const { xV: maxXV, yV: maxYV } = this.getAxisValueByPoint(maxX, maxY);
 
-    return { minXV, minYV, maxXV, maxYV };
+    return {
+      minXV: minXV * this.axisConfig.x,
+      maxXV: maxXV * this.axisConfig.x,
+      minYV: minYV * this.axisConfig.y,
+      maxYV: maxYV * this.axisConfig.y,
+    };
   }
 
   destroy() {
