@@ -88,7 +88,7 @@ const interfaceText = computed(() => {
                     <NIcon size="20" :component="Sync" />
                   </NButton>
                   <NButton quaternary @click="SetCustomShortcutKey(item)">
-                    <NIcon size="20" :component="SvgGather('Edit')" />
+                    <SvgGather size="20" icon="Edit" />
                   </NButton>
                 </NSpace>
                 <NSpace>

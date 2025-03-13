@@ -122,9 +122,9 @@ function GoToTheOfficialWebsite(value: string) {
       >
         <div>
           <NButton quaternary>
-            <template #icon
-              ><NIcon :component="SvgGather('ColumnDependency')"
-            /></template>
+            <template #icon>
+              <SvgGather icon="ColumnDependency" />
+            </template>
           </NButton>
         </div>
       </NDropdown>

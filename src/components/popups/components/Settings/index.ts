@@ -119,7 +119,7 @@ export function SetCustomShortcutKey(item: (typeof shortcutKeysList.value)[0]) {
   window.addEventListener("keydown", keyUp);
   window.$dialog.success({
     title,
-    icon: () => SvgGather("Edit"),
+    icon: () => SvgGather({ icon: "Edit" }),
     content,
     positiveText: Settings.value.language == "zhCN" ? "保存" : "Save",
     negativeText: Settings.value.language == "zhCN" ? "取消" : "Cancel",

@@ -1,11 +1,12 @@
 import SvgGather from "@/assets/icon/gather";
 import { FishOutline } from "@vicons/ionicons5";
-import type { Component } from "vue";
+import { NIcon } from "naive-ui";
+import { h, type Component } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
 type CustomRouteRecord = RouteRecordRaw & {
   meta: {
-    icon?: Component;
+    icon?: ReturnType<typeof h>;
     name: {
       zhCN: string;
       enUS: string;
@@ -14,12 +15,16 @@ type CustomRouteRecord = RouteRecordRaw & {
   children?: CustomRouteRecord[];
 };
 
+function RenderIcon(icon: Component) {
+  return h(NIcon, null, { default: () => h(icon) });
+}
+
 /** 数学 */
 const math: CustomRouteRecord = {
   path: "math",
   name: "math",
   meta: {
-    icon: SvgGather("Math"),
+    icon: SvgGather({ icon: "Math" }),
     name: {
       zhCN: "数学",
       enUS: "Math",
@@ -45,7 +50,7 @@ const canvas: CustomRouteRecord = {
   path: "canvas",
   name: "canvas",
   meta: {
-    icon: SvgGather("canvas"),
+    icon: SvgGather({ icon: "canvas" }),
     name: {
       zhCN: "Canvas 绘画",
       enUS: "Canvas Drawing",
@@ -82,7 +87,7 @@ const relaxRouting: CustomRouteRecord = {
   path: "relax",
   name: "relax",
   meta: {
-    icon: FishOutline,
+    icon: RenderIcon(FishOutline),
     name: {
       zhCN: "解乏小组件",
       enUS: "Relax Widget",

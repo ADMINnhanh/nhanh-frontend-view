@@ -2,12 +2,9 @@
 import { Settings } from "@/components/popups/components/Settings/index";
 import router from "@/router";
 import Routes from "@/router/Routes";
-import { NMenu, type MenuOption, NIcon, NLayout, NLayoutSider } from "naive-ui";
-import { computed, h, ref, type Component } from "vue";
+import { NMenu, type MenuOption, NLayout, NLayoutSider } from "naive-ui";
+import { computed, ref } from "vue";
 
-function RenderIcon(icon: Component) {
-  return () => h(NIcon, null, { default: () => h(icon) });
-}
 const menuOptions = computed<MenuOption[]>(() => {
   const language = Settings.value.language;
   /** 生成菜单 */
@@ -17,7 +14,7 @@ const menuOptions = computed<MenuOption[]>(() => {
         label: item.meta.name[language],
         key: item.name as string,
       };
-      if (item.meta.icon) i.icon = RenderIcon(item.meta.icon);
+      if (item.meta.icon) i.icon = () => item.meta.icon;
       if (item.children) i.children = generateMenu(item.children);
 
       return i;

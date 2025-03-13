@@ -17,6 +17,8 @@ import {
   NRadioGroup,
   NRadioButton,
   NRadio,
+  NDivider,
+  NFlex,
 } from "naive-ui";
 import {
   Add,
@@ -236,11 +238,8 @@ onUnmounted(() => {
         </NButton>
         <NButton :="buttonApi" @click="lock = canvas.toggleLock()">
           <template #icon>
-            <NIcon
-              :component="
-                lock ? LockClosedOutline : SvgGather('LockOpenOutline')
-              "
-            />
+            <NIcon v-if="lock" :component="LockClosedOutline" />
+            <SvgGather v-else icon="LockOpenOutline" />
           </template>
         </NButton>
         <NButton :="buttonApi" @click="setActive = true">
@@ -293,6 +292,66 @@ onUnmounted(() => {
               </NRadioGroup>
             </NFormItem>
           </NForm>
+        </NTabPane>
+        <NTabPane name="快捷键">
+          <NText type="success" strong>
+            <NSpace>
+              <SvgGather icon="ArrowUp" size="30" />
+              <SvgGather icon="ArrowDown" size="30" />
+              <SvgGather icon="ArrowLeft" size="30" />
+              <SvgGather icon="ArrowRight" size="30" />
+            </NSpace>
+          </NText>
+          按下不放画布会以每次键盘事件<NText type="info" strong> 1px </NText>
+          的速度移动画布，双击速度 <NText type="error" strong> x4 </NText>。
+          <NFlex> </NFlex>
+          <NDivider />
+          <NFlex>
+            <NText type="success" strong>
+              <SvgGather icon="ArrowUp" size="30" />
+            </NText>
+            向上移动
+          </NFlex>
+
+          <NDivider />
+          <NFlex>
+            <NText type="success" strong>
+              <SvgGather icon="ArrowDown" size="30" />
+            </NText>
+            向下移动
+          </NFlex>
+
+          <NDivider />
+          <NFlex>
+            <NText type="success" strong>
+              <SvgGather icon="ArrowLeft" size="30" />
+            </NText>
+            向左移动
+          </NFlex>
+
+          <NDivider />
+          <NFlex>
+            <NText type="success" strong>
+              <SvgGather icon="ArrowRight" size="30" />
+            </NText>
+            向右移动
+          </NFlex>
+
+          <NDivider />
+          <NFlex>
+            <NText type="success" strong>
+              <SvgGather icon="Plus" size="30" />
+            </NText>
+            画布比例 + 0.02
+          </NFlex>
+
+          <NDivider />
+          <NFlex>
+            <NText type="success" strong>
+              <SvgGather icon="Minus" size="30" />
+            </NText>
+            画布比例 - 0.02
+          </NFlex>
         </NTabPane>
         <NTabPane name="坐标轴">
           <NForm :model="setConfig" label-width="auto">
