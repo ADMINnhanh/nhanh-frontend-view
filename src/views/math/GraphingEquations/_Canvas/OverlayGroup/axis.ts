@@ -2,7 +2,7 @@ import type Canvas from "..";
 
 export default class Axis {
   /** 画布 */
-  private canvas?: Canvas;
+  private canvas: Canvas;
 
   /** 网格开关 */
   show = {
@@ -27,15 +27,14 @@ export default class Axis {
   }
 
   private color() {
-    const { theme, style } = this.canvas!;
+    const { theme, style } = this.canvas;
     return (style[theme] || style.light).grid;
   }
 
   /** 绘制网格 */
   private drawGrid() {
-    const canvas = this.canvas!;
+    const canvas = this.canvas;
     const { ctx, rect, center, axisConfig } = canvas;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
     const color = this.color();
@@ -96,9 +95,8 @@ export default class Axis {
 
   /** 坐标轴 */
   private drawAxis() {
-    const canvas = this.canvas!;
+    const canvas = this.canvas;
     const { ctx, rect, center } = canvas;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
 
@@ -130,9 +128,8 @@ export default class Axis {
 
   /** 坐标轴 - 文字 */
   private drawAxisText() {
-    const canvas = this.canvas!;
+    const canvas = this.canvas;
     const { ctx, rect, center, axisConfig, style, theme } = canvas;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const { width, height } = rect!;
 

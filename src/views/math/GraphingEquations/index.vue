@@ -35,7 +35,7 @@ import {
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID, _ReadFile } from "nhanh-pure-function";
 import { useFps } from "@vueuse/core";
-import Canvas from "./Canvas";
+import _Canvas from "./_Canvas";
 import InputMath from "./InputMath/index.vue";
 import SvgGather from "@/assets/icon/gather";
 import DrawChina from "./china";
@@ -55,7 +55,7 @@ const fps = useFps();
 const id = _GenerateUUID("canvas-");
 const setActive = ref(false);
 const lock = ref(false);
-let canvas: Canvas;
+let canvas: _Canvas;
 
 const setConfig = ref({
   theme: "",
@@ -121,11 +121,10 @@ img.onload = () => {
 // console.log(performance.now() - t + "ms");
 
 onMounted(() => {
-  canvas = new Canvas(id);
+  canvas = new _Canvas(id);
   // canvas.defaultCenter.top = "top";
   // canvas.defaultCenter.left = "left";
   // canvas.axisConfig.count = 75;
-  canvas.offset.x = -800;
   canvas.setTheme(Settings.value.theme);
   UpdateCanvasConfig();
   DrawChina(canvas);
@@ -227,17 +226,20 @@ onUnmounted(() => {
     <div class="button-box">
       <NSpace vertical>
         <NButtonGroup vertical>
-          <NButton :="buttonApi" @click="canvas?.zoomIn()">
+          <NButton :="buttonApi" @click="canvas.zoomIn()">
             <template #icon><NIcon :component="Add" /></template>
           </NButton>
-          <NButton :="buttonApi" @click="canvas?.zoomOut()">
+          <NButton :="buttonApi" @click="canvas.zoomOut()">
             <template #icon><NIcon :component="Remove" /></template>
           </NButton>
         </NButtonGroup>
         <NButton :="buttonApi" @click="canvas.reset()">
           <template #icon><NIcon :component="Home" /></template>
         </NButton>
-        <NButton :="buttonApi" @click="canvas.toggleAxis()">
+        <NButton
+          :="buttonApi"
+          @click="setConfig.axis.show.all = !setConfig.axis.show.all"
+        >
           <template #icon><NIcon :component="GridOutline" /></template>
         </NButton>
         <NButton :="buttonApi" @click="lock = canvas.toggleLock()">

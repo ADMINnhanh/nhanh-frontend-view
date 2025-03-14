@@ -29,12 +29,9 @@ export default class Draw extends Style {
     if (this.canvas) {
       this.resizeObserver = new ResizeObserver(
         _Throttle(() => {
-          this.rect = this.canvas!.getBoundingClientRect();
-          const { clientWidth, clientHeight } = this.canvas!;
-          [this.canvas!.width, this.canvas!.height] = [
-            clientWidth,
-            clientHeight,
-          ];
+          this.rect = this.canvas.getBoundingClientRect();
+          const { clientWidth, clientHeight } = this.canvas;
+          [this.canvas.width, this.canvas.height] = [clientWidth, clientHeight];
           this.redrawOnce();
         }, 200)
       );
@@ -142,7 +139,6 @@ export default class Draw extends Style {
   drawText(text: string, x: number, y: number, secondary?: boolean) {
     // 获取画布的上下文对象，用于绘制
     const { ctx, theme } = this;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     // 根据当前主题获取样式配置
     const style = this.style[theme];
@@ -165,7 +161,6 @@ export default class Draw extends Style {
 
   /** 销毁resizeObserver监听器 */
   destroy() {
-    super.destroy();
     this.resizeObserver?.disconnect();
   }
 }

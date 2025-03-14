@@ -12,17 +12,17 @@ function IsValids(arr) {
   return Array.isArray(arr) && arr.every(IsValid);
 }
 /** 计算点位位置 */
-function CalculatePointPosition(locationList, config) {
+function CalculatePointPosition(positionList, config) {
   const { center, percentage, axisConfig } = config;
 
-  const dynamicLocation = [];
-  for (let i = 0; i < locationList.length; i++) {
-    let [x, y] = locationList[i];
+  const dynamicPosition = [];
+  for (let i = 0; i < positionList.length; i++) {
+    let [x, y] = positionList[i];
     x = center.x + x * percentage * axisConfig.x;
     y = center.y + y * percentage * axisConfig.y;
-    dynamicLocation.push([x, y]);
+    dynamicPosition.push([x, y]);
   }
-  return dynamicLocation;
+  return dynamicPosition;
 }
 
 /** 通过坐标轴上的点 获取坐标轴上的值 */
@@ -50,22 +50,22 @@ function AnalyzeThePoint(pointList, config) {
 
   for (let i = 0; i < pointList.length; i++) {
     const item = pointList[i];
-    let { location, value, zIndex = 0, show = true, style } = item;
+    let { position, value, zIndex = 0, show = true, style } = item;
     if (style) maxRadius = Math.max(style.radius + style.width, maxRadius);
-    const [isValue, isLocation] = [IsValid(value), IsValid(location)];
-    if (!isValue && !isLocation) {
+    const [isValue, isPosition] = [IsValid(value), IsValid(position)];
+    if (!isValue && !isPosition) {
       errorList.push(item);
       continue;
     }
-    if (isValue && !isLocation) {
+    if (isValue && !isPosition) {
       const loc = getAxisPointByValue(value[0], value[1], axisConfig);
-      location = [loc.x, loc.y];
-    } else if (!isValue && isLocation) {
-      const val = getAxisValueByPoint(location[0], location[1], axisConfig);
+      position = [loc.x, loc.y];
+    } else if (!isValue && isPosition) {
+      const val = getAxisValueByPoint(position[0], position[1], axisConfig);
       value = [val.xV, val.yV];
     }
 
-    const dynamicLocation = CalculatePointPosition([location], {
+    const dynamicPosition = CalculatePointPosition([position], {
       center,
       percentage,
       axisConfig,
@@ -81,8 +81,8 @@ function AnalyzeThePoint(pointList, config) {
       const yMap = xMap.get(x) || new Map();
       const list = yMap.get(y) || [];
       list.push({
-        location,
-        dynamicLocation,
+        position,
+        dynamicPosition,
         value,
         zIndex,
         show,
@@ -109,7 +109,7 @@ function AnalyzeTheLine(lineList, config) {
 
   for (let i = 0; i < lineList.length; i++) {
     let {
-      location,
+      position,
       value,
       zIndex = 0,
       show = true,
@@ -117,45 +117,45 @@ function AnalyzeTheLine(lineList, config) {
       infinite,
     } = lineList[i];
 
-    const [isValue, isLocation] = [
+    const [isValue, isPosition] = [
       IsValids(value) && value.length > 1,
-      IsValids(location) && location.length > 1,
+      IsValids(position) && position.length > 1,
     ];
-    if (!isValue && !isLocation) {
+    if (!isValue && !isPosition) {
       errorList.push(lineList[i]);
       continue;
     }
 
-    if (isValue && !isLocation) {
-      location = [];
+    if (isValue && !isPosition) {
+      position = [];
       for (let i = 0; i < value.length; i++) {
         const item = value[i];
         const loc = getAxisPointByValue(item[0], item[1], axisConfig);
-        location.push([loc.x, loc.y]);
+        position.push([loc.x, loc.y]);
       }
-    } else if (!isValue && isLocation) {
+    } else if (!isValue && isPosition) {
       value = [];
-      for (let i = 0; i < location.length; i++) {
-        const item = location[i];
+      for (let i = 0; i < position.length; i++) {
+        const item = position[i];
         const val = getAxisValueByPoint(item[0], item[1], axisConfig);
         value.push([val.xV, val.yV]);
       }
     }
 
-    const dynamicLocation = CalculatePointPosition(location, {
+    const dynamicPosition = CalculatePointPosition(position, {
       center,
       percentage,
       axisConfig,
     });
 
     const list = (lineMap.get(zIndex) || []).concat({
-      location,
-      dynamicLocation,
+      position,
+      dynamicPosition,
       value,
       zIndex,
       show,
       style,
-      infinite: infinite && location?.length == 2,
+      infinite: infinite && position?.length == 2,
     });
     lineMap.set(zIndex, list);
   }
@@ -174,7 +174,7 @@ function AnalyzeThePolygon(polygonList, config) {
 
   for (let i = 0; i < polygonList.length; i++) {
     let {
-      location,
+      position,
       value,
       zIndex = 0,
       show = true,
@@ -182,23 +182,23 @@ function AnalyzeThePolygon(polygonList, config) {
       size,
     } = polygonList[i];
 
-    const [isValue, isLocation, isRect] = [
+    const [isValue, isPosition, isRect] = [
       IsValids(value),
-      IsValids(location),
+      IsValids(position),
       IsValid(size),
     ];
 
     if (isRect) {
-      if (!isValue && !isLocation) {
+      if (!isValue && !isPosition) {
         errorList.push(polygonList[i]);
         continue;
       }
-      if (isLocation) location.length = 1;
+      if (isPosition) position.length = 1;
       if (isValue) value.length = 1;
     } else {
       if (
         (isValue && value.length < 3) ||
-        (isLocation && location.length < 3)
+        (isPosition && position.length < 3)
       ) {
         errorList.push(polygonList[i]);
         continue;
@@ -206,23 +206,23 @@ function AnalyzeThePolygon(polygonList, config) {
       size = undefined;
     }
 
-    if (isValue && !isLocation) {
-      location = [];
+    if (isValue && !isPosition) {
+      position = [];
       for (let i = 0; i < value.length; i++) {
         const item = value[i];
         const loc = getAxisPointByValue(item[0], item[1], axisConfig);
-        location.push([loc.x, loc.y]);
+        position.push([loc.x, loc.y]);
       }
-    } else if (!isValue && isLocation) {
+    } else if (!isValue && isPosition) {
       value = [];
-      for (let i = 0; i < location.length; i++) {
-        const item = location[i];
+      for (let i = 0; i < position.length; i++) {
+        const item = position[i];
         const val = getAxisValueByPoint(item[0], item[1], axisConfig);
         value.push([val.xV, val.yV]);
       }
     }
 
-    const dynamicLocation = CalculatePointPosition(location, {
+    const dynamicPosition = CalculatePointPosition(position, {
       center,
       percentage,
       axisConfig,
@@ -235,8 +235,8 @@ function AnalyzeThePolygon(polygonList, config) {
     }
 
     const list = (polygonMap.get(zIndex) || []).concat({
-      location,
-      dynamicLocation,
+      position,
+      dynamicPosition,
       value,
       zIndex,
       show,

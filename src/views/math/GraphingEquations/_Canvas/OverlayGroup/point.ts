@@ -1,16 +1,16 @@
 import type Canvas from "..";
 import _Worker from "../worker";
-import { CalculatePointPosition } from "./public";
 
 export default class Point {
   /** 画布 */
-  private canvas?: Canvas;
-  /** 点位开关 */
-  show = true;
-  /** 点位列表 zIndex -> xAxis -> yAxis -> PointListType */
-  private pointMap: PointMap = new Map();
+  private canvas: Canvas;
   /** 角度 */
   private angle = 2 * Math.PI;
+  /** 点位开关 */
+  show = true;
+
+  /** 点位列表 zIndex -> xAxis -> yAxis -> PointListType */
+  private pointMap: PointMap = new Map();
 
   /** 最大的半径 */
   private maxRadius = 16;
@@ -27,17 +27,16 @@ export default class Point {
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
-    const { theme, style } = this.canvas!;
+    const { theme, style } = this.canvas;
     this.defaultStyle = (style[theme] || style.light).point;
   }
 
   /** 绘制单个点位 */
   drawSinglePoint(
-    location: [number, number],
+    position: [number, number],
     style?: DeepPartial<PointStyleType>
   ) {
-    const ctx = this.canvas!.ctx;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+    const ctx = this.canvas.ctx;
 
     const {
       width = this.defaultStyle.width,
@@ -50,7 +49,7 @@ export default class Point {
     if (!this.simplify) ctx.strokeStyle = stroke;
     ctx.fillStyle = fill;
     ctx.beginPath();
-    ctx.arc(location[0], location[1], radius, 0, this.angle);
+    ctx.arc(position[0], position[1], radius, 0, this.angle);
 
     ctx.fill();
     if (!this.simplify) ctx.stroke();
@@ -59,9 +58,9 @@ export default class Point {
   drawMultiplePoints(points: PointListType) {
     if (!this.show) return;
     for (let i = 0; i < points.length; i++) {
-      const { show, dynamicLocation, style } = points[i];
+      const { show, dynamicPosition, style } = points[i];
       if (!show) continue;
-      this.drawSinglePoint(dynamicLocation!, style);
+      this.drawSinglePoint(dynamicPosition!, style);
     }
   }
 
@@ -69,7 +68,7 @@ export default class Point {
   private pointList: PointListType = [];
   /** 向数据集合中添加点位 */
   addPoints(points: PointListType | PointListType[number]) {
-    const canvas = this.canvas!;
+    const canvas = this.canvas;
 
     if (this.pointList.length == 0) {
       Promise.resolve().then(() => {
@@ -131,18 +130,9 @@ export default class Point {
   }
   /** 获取绘制函数 */
   fetchDrawFunctions() {
-    const canvas = this.canvas!;
-    const {
-      ctx,
-      center,
-      percentage,
-      isRecalculate,
-      rect,
-      axisConfig,
-      theme,
-      style,
-    } = canvas;
-    if (!ctx || !this.show) return [];
+    const canvas = this.canvas;
+    const { isRecalculate, rect, axisConfig, theme, style } = canvas;
+    if (!this.show) return [];
 
     this.defaultStyle = (style[theme] || style.light).point;
 
@@ -155,11 +145,12 @@ export default class Point {
       this.maxRadius
     );
 
+    const { left, right, top, bottom } = rect;
     const pointRect = {
-      left: rect!.left - this.maxRadius,
-      right: rect!.right + this.maxRadius,
-      top: rect!.top - this.maxRadius,
-      bottom: rect!.bottom + this.maxRadius,
+      left: left - this.maxRadius,
+      right: right + this.maxRadius,
+      top: top - this.maxRadius,
+      bottom: bottom + this.maxRadius,
     };
 
     const videoXyRange = canvas.getMaxMinValue(pointRect);
@@ -177,16 +168,11 @@ export default class Point {
         yMap.forEach((points, y) => {
           if (y < videoXyRange.minYV || y + count > videoXyRange.maxYV) return;
           points.forEach((point) => {
-            const { location, show } = point;
+            const { position, show } = point;
             if (!show) return;
 
-            if (isRecalculate) {
-              point.dynamicLocation = CalculatePointPosition([location!], {
-                center,
-                percentage,
-                axisConfig,
-              })[0];
-            }
+            if (isRecalculate)
+              point.dynamicPosition = canvas.transformPosition([position!])[0];
 
             _points.push(point);
           });

@@ -1,16 +1,16 @@
-import type Axis from "../tool/axis";
-import type Point from "../tool/point";
-import type Line from "../tool/line";
-import type Polygon from "../tool/polygon";
+import type Axis from "../OverlayGroup/axis";
+import type Point from "../OverlayGroup/point";
+import type Line from "../OverlayGroup/line";
+import type Polygon from "../OverlayGroup/polygon";
 
 /** 基础数据 */
 export default class BaseData {
   /** 画布元素 */
-  canvas?: HTMLCanvasElement;
+  canvas: HTMLCanvasElement;
   /** 画布上下文 */
-  ctx?: CanvasRenderingContext2D;
+  ctx: CanvasRenderingContext2D;
   /** 画布矩形 */
-  rect?: DOMRect;
+  rect: DOMRect;
   /** 画布偏移量 */
   offset = { x: 0, y: 0 };
   /** 画布中心点 */
@@ -82,10 +82,8 @@ export default class BaseData {
 
         const { clientWidth, clientHeight } = canvas;
         [canvas.width, canvas.height] = [clientWidth, clientHeight];
-      } else {
-        console.error("canvas-unsupported code here");
-      }
-    } else console.error("canvas is not HTMLCanvasElement");
+      } else throw new Error("canvas-unsupported code here");
+    } else throw new Error("canvas is not HTMLCanvasElement");
   }
 
   /** 更新中心点 */
@@ -290,28 +288,40 @@ export default class BaseData {
     bottom: number;
   }) {
     rect = rect || this.rect!;
+
+    const { left, top, right, bottom } = rect;
+    const { axisConfig } = this;
+
     const { x: minX, y: minY } = this.getMousePositionOnAxis({
-      clientX: rect.left,
-      clientY: rect.top,
+      clientX: axisConfig.x == 1 ? left : right,
+      clientY: axisConfig.y == 1 ? top : bottom,
     })!;
     const { xV: minXV, yV: minYV } = this.getAxisValueByPoint(minX, minY);
 
     const { x: maxX, y: maxY } = this.getMousePositionOnAxis({
-      clientX: rect.right,
-      clientY: rect.bottom,
+      clientX: axisConfig.x == 1 ? right : left,
+      clientY: axisConfig.y == 1 ? bottom : top,
     })!;
     const { xV: maxXV, yV: maxYV } = this.getAxisValueByPoint(maxX, maxY);
 
     return {
-      minXV: minXV * this.axisConfig.x,
-      maxXV: maxXV * this.axisConfig.x,
-      minYV: minYV * this.axisConfig.y,
-      maxYV: maxYV * this.axisConfig.y,
+      minXV,
+      maxXV,
+      minYV,
+      maxYV,
     };
   }
 
-  destroy() {
-    this.canvas = undefined;
-    this.ctx = undefined;
+  transformPosition(positions: [number, number][]) {
+    const { center, percentage, axisConfig } = this;
+
+    const dynamicPositions: [number, number][] = [];
+    for (let i = 0; i < positions.length; i++) {
+      let [x, y] = positions[i];
+      x = center.x + x * percentage * axisConfig.x;
+      y = center.y + y * percentage * axisConfig.y;
+      dynamicPositions.push([x, y]);
+    }
+    return dynamicPositions;
   }
 }

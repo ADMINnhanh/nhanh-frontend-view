@@ -1,10 +1,9 @@
 import type Canvas from "..";
 import _Worker from "../worker";
-import { CalculatePointPosition } from "./public";
 
 export default class Polygon {
   /** 画布 */
-  private canvas?: Canvas;
+  private canvas: Canvas;
   /** 点位开关 */
   show = true;
   /** 点位列表 */
@@ -16,7 +15,7 @@ export default class Polygon {
   constructor(canvas: Canvas) {
     this.canvas = canvas;
 
-    const { theme, style } = this.canvas!;
+    const { theme, style } = this.canvas;
     this.defaultStyle = (style[theme] || style.light).polygon;
   }
 
@@ -42,35 +41,33 @@ export default class Polygon {
 
   /** 绘制矩形 */
   drawRect(
-    location: [number, number],
+    position: [number, number],
     size: [number, number],
     style?: DeepPartial<PolygonStyleType>
   ) {
-    const { ctx } = this.canvas!;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+    const { ctx } = this.canvas;
 
     this.setStyle(ctx, style);
 
     ctx.beginPath();
 
-    ctx.rect(location[0], location[1], size[0], size[1]);
+    ctx.rect(position[0], position[1], size[0], size[1]);
 
     ctx.stroke();
     ctx.fill();
   }
   /** 绘制多边形 */
   drawPolygon(
-    location: [number, number][],
+    position: [number, number][],
     style?: DeepPartial<PolygonStyleType>
   ) {
-    const ctx = this.canvas?.ctx;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+    const ctx = this.canvas.ctx;
 
     this.setStyle(ctx, style);
 
     ctx.beginPath();
 
-    location.forEach((item, index) => {
+    position.forEach((item, index) => {
       ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
     ctx.closePath();
@@ -80,21 +77,17 @@ export default class Polygon {
   /** 绘制多个多边形 */
   drawPolygons(polygons: PolygonListType) {
     const { show, canvas } = this;
-    const { ctx, center, percentage, isRecalculate, axisConfig } = canvas!;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+    const { center, percentage, isRecalculate, axisConfig } = canvas;
     if (!show) return;
 
     for (let i = 0; i < polygons.length; i++) {
       const polygon = polygons[i];
-      const { show, location, style } = polygon;
+      const { show, position, style } = polygon;
       if (!show) continue;
 
       if (isRecalculate) {
-        polygon.dynamicLocation = CalculatePointPosition(location!, {
-          center,
-          percentage,
-          axisConfig,
-        });
+        polygon.dynamicPosition = canvas.transformPosition(position!);
+
         if (polygon.size) {
           polygon.dynamicSize = [
             polygon.size[0] * percentage * axisConfig.x,
@@ -103,9 +96,9 @@ export default class Polygon {
         }
       }
 
-      const { dynamicLocation, dynamicSize } = polygon;
-      if (polygon.size) this.drawRect(dynamicLocation![0], dynamicSize!, style);
-      else this.drawPolygon(dynamicLocation!, style);
+      const { dynamicPosition, dynamicSize } = polygon;
+      if (polygon.size) this.drawRect(dynamicPosition![0], dynamicSize!, style);
+      else this.drawPolygon(dynamicPosition!, style);
     }
   }
 
@@ -113,7 +106,7 @@ export default class Polygon {
   private polygonList: PolygonListType = [];
   /** 向绘图对象中添加多边形 */
   addPolygons(items: PolygonListType | PolygonListType[number]) {
-    const canvas = this.canvas!;
+    const canvas = this.canvas;
 
     if (this.polygonList.length == 0) {
       Promise.resolve().then(() => {
@@ -158,8 +151,8 @@ export default class Polygon {
   /** 获取绘制函数 */
   fetchDrawFunctions(): [number, () => void][] {
     const { show, canvas } = this;
-    const { ctx, theme, style } = canvas!;
-    if (!ctx || !show) return [];
+    const { theme, style } = canvas;
+    if (!show) return [];
 
     this.defaultStyle = (style[theme] || style.light).polygon;
 

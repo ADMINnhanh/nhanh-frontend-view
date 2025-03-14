@@ -113,9 +113,9 @@ type CommonDataType<STYLE, PLURAL extends boolean, OTHER = {}> = Array<
       /** 是否显示 */
       show: boolean;
       /** 未缩放状态下的位置 */
-      location: PluralSwitch<[number, number], PLURAL>;
+      position: PluralSwitch<[number, number], PLURAL>;
       /** 动态位置 */
-      dynamicLocation: PluralSwitch<[number, number], PLURAL>;
+      dynamicPosition: PluralSwitch<[number, number], PLURAL>;
       /** 值 */
       value: PluralSwitch<[number, number], PLURAL>;
     } & OTHER

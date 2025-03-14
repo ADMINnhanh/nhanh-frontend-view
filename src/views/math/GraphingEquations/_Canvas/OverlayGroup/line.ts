@@ -1,10 +1,9 @@
 import type Canvas from "..";
 import _Worker from "../worker";
-import { CalculatePointPosition } from "./public";
 
 export default class Line {
   /** 画布 */
-  private canvas?: Canvas;
+  private canvas: Canvas;
   /** 点位开关 */
   show = true;
   /** 点位列表 */
@@ -15,14 +14,13 @@ export default class Line {
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
-    const { theme, style } = this.canvas!;
+    const { theme, style } = this.canvas;
     this.defaultStyle = (style[theme] || style.light).line;
   }
 
   /** 绘制线段 */
-  drawLine(location: [number, number][], style?: DeepPartial<LineStyleType>) {
+  drawLine(position: [number, number][], style?: DeepPartial<LineStyleType>) {
     const ctx = this.canvas?.ctx;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
 
     const {
       width = this.defaultStyle.width,
@@ -42,7 +40,7 @@ export default class Line {
     ctx.strokeStyle = color;
     ctx.beginPath();
 
-    location.forEach((item, index) => {
+    position.forEach((item, index) => {
       ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
 
@@ -50,13 +48,12 @@ export default class Line {
   }
   /** 绘制无限延伸线段 */
   drawInfiniteStraightLine(item: LineListType[number]) {
-    const { ctx, rect, drawPoint } = this.canvas!;
-    if (!ctx || !rect) return console.error("Canvas上下文丢失");
+    const { ctx, rect, drawPoint } = this.canvas;
 
     // 解构关键数据并校验
-    const { dynamicLocation, style, value } = item;
-    if (!dynamicLocation || !value) return console.error("坐标数据缺失");
-    const [start, end]: [number, number][] = dynamicLocation.map((p) => [
+    const { dynamicPosition, style, value } = item;
+    if (!dynamicPosition || !value) return console.error("坐标数据缺失");
+    const [start, end]: [number, number][] = dynamicPosition.map((p) => [
       p[0],
       p[1],
     ]); // 克隆坐标避免污染原始数据
@@ -126,25 +123,19 @@ export default class Line {
   /** 绘制多条线段 */
   drawLines(lines: LineListType) {
     const { show, canvas } = this;
-    const { ctx, center, percentage, isRecalculate, axisConfig } = canvas!;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
+    const isRecalculate = canvas.isRecalculate;
     if (!show) return;
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const { show, infinite, location } = line;
+      const { show, infinite, position } = line;
       if (!show) continue;
 
-      if (isRecalculate) {
-        line.dynamicLocation = CalculatePointPosition(location!, {
-          center,
-          percentage,
-          axisConfig,
-        });
-      }
+      if (isRecalculate)
+        line.dynamicPosition = canvas.transformPosition(position!);
 
       if (infinite) this.drawInfiniteStraightLine(line);
-      else this.drawLine(line.dynamicLocation!, line.style);
+      else this.drawLine(line.dynamicPosition!, line.style);
     }
   }
 
@@ -152,7 +143,7 @@ export default class Line {
   private lineList: LineListType = [];
   /** 向绘图对象中添加一条线段 */
   addLines(items: LineListType | LineListType[number]) {
-    const canvas = this.canvas!;
+    const canvas = this.canvas;
 
     if (this.lineList.length == 0) {
       Promise.resolve().then(() => {
@@ -196,8 +187,8 @@ export default class Line {
   /** 获取绘制函数 */
   fetchDrawFunctions(): [number, () => void][] {
     const { show, canvas } = this;
-    const { ctx, theme, style } = canvas!;
-    if (!ctx || !show) return [];
+    const { theme, style } = canvas;
+    if (!show) return [];
 
     this.defaultStyle = (style[theme] || style.light).line;
 

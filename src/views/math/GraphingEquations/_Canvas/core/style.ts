@@ -104,9 +104,6 @@ export default class Style extends BaseData {
   /** 初始化样式 */
   initStyle() {
     const { canvas, ctx, theme } = this;
-    if (!canvas || !ctx)
-      return console.error("ctx is not CanvasRenderingContext2D");
-
     canvas.classList.add("_nhanh_canvas");
 
     const style = this.style[theme];
@@ -117,8 +114,6 @@ export default class Style extends BaseData {
   /** 清除画布 */
   clearScreen() {
     const { ctx, theme, rect } = this;
-    if (!ctx) return console.error("ctx is not CanvasRenderingContext2D");
-
     const { width, height } = rect!;
 
     ctx.fillStyle = this.style[theme].background;

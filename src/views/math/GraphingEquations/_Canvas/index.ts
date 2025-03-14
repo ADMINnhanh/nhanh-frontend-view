@@ -1,13 +1,20 @@
 import "./index.less";
 import QuickMethod from "./core/quikmethod";
-import Axis from "./tool/axis";
-import Point from "./tool/point";
-import Line from "./tool/line";
-import Polygon from "./tool/polygon";
+import Axis from "./OverlayGroup/axis";
+import Point from "./OverlayGroup/point";
+import Line from "./OverlayGroup/line";
+import Polygon from "./OverlayGroup/polygon";
+
+type InitConfig = DeepPartial<{
+  theme: Canvas["theme"];
+  axisConfig: Canvas["axisConfig"];
+  axisShow: Canvas["drawAxis"]["show"];
+  defaultCenter: Canvas["defaultCenter"];
+}>;
 
 /** 画布类 */
 export default class Canvas extends QuickMethod {
-  constructor(id: string) {
+  constructor(id: string, config?: InitConfig) {
     super(id);
     this.drawAxis = new Axis(this);
     this.drawPoint = new Point(this);
@@ -15,6 +22,14 @@ export default class Canvas extends QuickMethod {
     this.drawPolygon = new Polygon(this);
 
     this.updateCenter();
+
+    if (config) {
+      const { theme, axisConfig, axisShow, defaultCenter } = config;
+      if (theme) this.setTheme(theme);
+      if (axisConfig) this.setAxis(axisConfig);
+      if (axisShow) this.toggleAxis(axisShow);
+      if (defaultCenter) this.setDefaultCenter(defaultCenter);
+    }
   }
 
   /** 销毁 */
