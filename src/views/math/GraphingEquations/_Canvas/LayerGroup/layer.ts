@@ -1,6 +1,6 @@
 import _Canvas from "..";
 import OverlayGroup from "../OverlayGroup";
-import LayerBaseData from "./basedata";
+import LayerBaseData from "./layerbasedata";
 
 export default class Layer extends LayerBaseData {
   groups = [new OverlayGroup()];
