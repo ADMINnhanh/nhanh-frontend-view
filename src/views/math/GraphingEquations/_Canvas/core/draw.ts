@@ -79,22 +79,22 @@ export default class Draw extends Style {
 
     this.drawAxis?.drawAxisAndGrid();
 
-    const creationOnGrid = this.startCreationOnGrid;
+    // const creationOnGrid = this.startCreationOnGrid;
 
-    const zIndexs = this.addFunctionsToZIndexs(
-      this.drawPolygon
-        .fetchDrawFunctions()
-        .concat(this.drawLine.fetchDrawFunctions())
-        .concat(this.drawPoint.fetchDrawFunctions())
-        .concat(Array.isArray(creationOnGrid) ? creationOnGrid : [])
-    );
+    // const zIndexs = this.addFunctionsToZIndexs(
+    //   this.drawPolygon
+    //     .fetchDrawFunctions()
+    //     .concat(this.drawLine.fetchDrawFunctions())
+    //     .concat(this.drawPoint.fetchDrawFunctions())
+    //     .concat(Array.isArray(creationOnGrid) ? creationOnGrid : [])
+    // );
 
-    Object.keys(zIndexs)
-      .sort()
-      .forEach((zIndex) => {
-        const funcs = zIndexs[zIndex as unknown as number];
-        funcs.forEach((func) => func());
-      });
+    // Object.keys(zIndexs)
+    //   .sort()
+    //   .forEach((zIndex) => {
+    //     const funcs = zIndexs[zIndex as unknown as number];
+    //     funcs.forEach((func) => func());
+    //   });
 
     if (typeof this.startCreationOnGrid === "function")
       this.startCreationOnGrid?.();

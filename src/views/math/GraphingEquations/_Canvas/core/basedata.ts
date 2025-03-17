@@ -1,7 +1,5 @@
-import type Axis from "../OverlayGroup/axis";
-import type Point from "../OverlayGroup/point";
-import type Line from "../OverlayGroup/line";
-import type Polygon from "../OverlayGroup/polygon";
+import Axis from "../Overlay/axis";
+import LayerGroup from "../LayerGroup";
 
 /** 基础数据 */
 export default class BaseData {
@@ -65,12 +63,9 @@ export default class BaseData {
 
   /** 绘制坐标轴 */
   drawAxis: Axis = undefined as any;
-  /** 绘制点 */
-  drawPoint: Point = undefined as any;
-  /** 绘制线 */
-  drawLine: Line = undefined as any;
-  /** 绘制面 */
-  drawPolygon: Polygon = undefined as any;
+
+  /** 图层群组 集合 */
+  protected layerGroups = new Map<string, LayerGroup>();
 
   constructor(id: string) {
     const canvas = document.getElementById(id);

@@ -127,7 +127,8 @@ onMounted(() => {
   // canvas.axisConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
   UpdateCanvasConfig();
-  DrawChina(canvas);
+
+  // DrawChina(canvas);
 
   // canvas.drawPoint.addPoints([
   //   { zIndex: 1, location: [75, 75] },

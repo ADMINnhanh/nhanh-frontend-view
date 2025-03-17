@@ -3,7 +3,7 @@ import OverlayGroup from "../OverlayGroup";
 import LayerBaseData from "./layerbasedata";
 
 export default class Layer extends LayerBaseData {
-  groups = [new OverlayGroup()];
+  groups = new Map<string, OverlayGroup>();
   // 定义构造函数，接收一个包含配置信息的对象
   constructor(
     name: string,
@@ -14,23 +14,15 @@ export default class Layer extends LayerBaseData {
       zIndex?: number;
     } = {}
   ) {
-    super();
-    this.name = name;
-    if (config.scales) this.scales = config.scales;
-    if (config.opacity) this.opacity = config.opacity;
-    if (config.show !== undefined) this.show = config.show;
-    if (config.zIndex) this.zIndex = config.zIndex;
+    super(name, config);
   }
 
+  /** 设置主画布 */
   setMainCanvas(mainCanvas: _Canvas) {
-    if (mainCanvas instanceof _Canvas) {
-      this.mainCanvas = mainCanvas;
-      const { width, height } = mainCanvas.rect;
-      [this.canvas.width, this.canvas.height] = [width, height];
-    }
-    this.reload();
+    super.setMainCanvas(mainCanvas);
+    this.notifyReload();
   }
-
+  /** 判断是否需要渲染 */
   shouldRender() {
     if (!this.show || this.opacity == 0 || !this.mainCanvas) return;
     if (this.scales) {
@@ -41,14 +33,54 @@ export default class Layer extends LayerBaseData {
     }
     return true;
   }
+
+  /** 重新渲染 */
   reload() {
     if (this.shouldRender()) {
-      const groups = this.groups.filter(
-        (group) => group.show && group.overlay.size
-      );
-      const overlays = groups
-        .map((group) => Array.from(group.overlay.values()))
-        .flat();
+      // this.groups.forEach((group) => {
+      //   if (!group.equalsMainCanvas(this.mainCanvas!)) this.removeLayer(layer);
+      // });
+      // const groups = Array.from(this.groups.values()).filter(
+      //   (group) => group.show && group.overlay.size
+      // );
+      // const overlays = groups
+      //   .map((group) => Array.from(group.overlay.values()))
+      //   .flat();
+      return [this.zIndex, this.canvas];
+    }
+  }
+
+  /** 获取覆盖物组 */
+  getGroup(name: string) {
+    return this.groups.get(name);
+  }
+  /** 添加覆盖物组 */
+  addGroup(groups: OverlayGroup | OverlayGroup[]) {
+    let isReload = false;
+    [groups].flat().forEach((group) => {
+      if (group instanceof OverlayGroup) {
+        this.groups.set(group.name, group);
+        isReload = true;
+      }
+    });
+    isReload && this.notifyReload();
+  }
+  /** 移除覆盖物组 */
+  removeGroup(groups: OverlayGroup | OverlayGroup[]) {
+    let isReload = false;
+    [groups].flat().forEach((group) => {
+      if (group instanceof OverlayGroup) {
+        this.groups.delete(group.name);
+        isReload = true;
+      }
+    });
+    isReload && this.notifyReload();
+  }
+  /** 清空覆盖物 */
+  clearGroup() {
+    if (this.groups.size) {
+      this.groups.clear();
+      this.notifyReload();
     }
   }
 }

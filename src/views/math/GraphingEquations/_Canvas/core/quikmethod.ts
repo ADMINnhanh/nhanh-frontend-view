@@ -4,6 +4,26 @@ import Event from "./event";
 
 /** 快速方法 */
 export default class QuickMethod extends Event {
+  /** 获取默认覆盖物群组 */
+  getDefaultOverlayGroup() {
+    const layerGroup = this.layerGroups.get("默认图层群组");
+    if (!layerGroup) return;
+    const overlays_point = layerGroup
+      .getLayer("点位图层")
+      ?.getGroup("点位覆盖物群组");
+    const overlays_line = layerGroup
+      .getLayer("线段图层")
+      ?.getGroup("线段覆盖物群组");
+    const overlays_polygon = layerGroup
+      .getLayer("多边形图层")
+      ?.getGroup("多边形覆盖物群组");
+    return {
+      overlays_point,
+      overlays_line,
+      overlays_polygon,
+    };
+  }
+
   /** 重置画布 */
   reset() {
     if (this.lockDragAndResize) return;
@@ -109,21 +129,34 @@ export default class QuickMethod extends Event {
   }
   /** 开关点位 */
   togglePoint(show?: boolean) {
-    this.drawPoint.show = show ?? !this.drawPoint.show;
-    this.redrawOnce();
-    return this.drawPoint.show;
+    const { overlays_point } = this.getDefaultOverlayGroup() || {};
+
+    if (overlays_point) {
+      overlays_point.setShow(show ?? !overlays_point.show);
+      this.redrawOnce();
+      return overlays_point.show;
+    }
+    return false;
   }
   /** 开关线段 */
   toggleLine(show?: boolean) {
-    this.drawLine.show = show ?? !this.drawLine.show;
-    this.redrawOnce();
-    return this.drawLine.show;
+    const { overlays_line } = this.getDefaultOverlayGroup() || {};
+    if (overlays_line) {
+      overlays_line.setShow(show ?? !overlays_line.show);
+      this.redrawOnce();
+      return overlays_line.show;
+    }
+    return false;
   }
   /** 开关多边形 */
   togglePolygon(show?: boolean) {
-    this.drawPolygon.show = show ?? !this.drawPolygon.show;
-    this.redrawOnce();
-    return this.drawPolygon.show;
+    const { overlays_polygon } = this.getDefaultOverlayGroup() || {};
+    if (overlays_polygon) {
+      overlays_polygon.setShow(show ?? !overlays_polygon.show);
+      this.redrawOnce();
+      return overlays_polygon.show;
+    }
+    return false;
   }
   /** 切换锁定状态 */
   toggleLock(lock?: boolean) {

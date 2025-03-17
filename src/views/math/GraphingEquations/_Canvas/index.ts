@@ -1,27 +1,41 @@
 import "./index.less";
 import QuickMethod from "./core/quikmethod";
-import Axis from "./OverlayGroup/axis";
-import Point from "./OverlayGroup/point";
-import Line from "./OverlayGroup/line";
-import Polygon from "./OverlayGroup/polygon";
+import LayerGroup from "./LayerGroup";
+import OverlayGroup from "./OverlayGroup";
+import Layer from "./LayerGroup/layer";
+import Point from "./Overlay/point";
+import Line from "./Overlay/line";
+import Polygon from "./Overlay/polygon";
+import Axis from "./Overlay/axis";
+
+type Overlay = Point | Line | Polygon;
 
 type InitConfig = DeepPartial<{
-  theme: Canvas["theme"];
-  axisConfig: Canvas["axisConfig"];
-  axisShow: Canvas["drawAxis"]["show"];
-  defaultCenter: Canvas["defaultCenter"];
+  theme: _Canvas["theme"];
+  axisConfig: _Canvas["axisConfig"];
+  axisShow: _Canvas["drawAxis"]["show"];
+  defaultCenter: _Canvas["defaultCenter"];
 }>;
 
 /** 画布类 */
-export default class Canvas extends QuickMethod {
+export default class _Canvas extends QuickMethod {
+  /** 图层群组 */
+  static LayerGroup = LayerGroup;
+  /** 图层 */
+  static Layer = Layer;
+  /** 覆盖物群组 */
+  static OverlayGroup = OverlayGroup;
+
+  /** 点位 */
+  static Point = Point;
+  /** 线段 */
+  static Line = Line;
+  /** 多边形 */
+  static Polygon = Polygon;
+
   constructor(id: string, config?: InitConfig) {
     super(id);
     this.drawAxis = new Axis(this);
-    this.drawPoint = new Point(this);
-    this.drawLine = new Line(this);
-    this.drawPolygon = new Polygon(this);
-
-    this.updateCenter();
 
     if (config) {
       const { theme, axisConfig, axisShow, defaultCenter } = config;
@@ -30,6 +44,76 @@ export default class Canvas extends QuickMethod {
       if (axisShow) this.toggleAxis(axisShow);
       if (defaultCenter) this.setDefaultCenter(defaultCenter);
     }
+
+    this.initLayerGroups();
+    this.updateCenter();
+  }
+
+  private initLayerGroups() {
+    const layerGroup = new LayerGroup("默认图层群组");
+    const layer_point = new Layer("点位图层", { zIndex: 3 });
+    const layer_line = new Layer("线段图层", { zIndex: 2 });
+    const layer_polygon = new Layer("多边形图层", { zIndex: 1 });
+
+    this.setLayerGroups(layerGroup);
+    layerGroup.addLayer([layer_point, layer_line, layer_polygon]);
+    layer_point.addGroup(new OverlayGroup("点位覆盖物群组"));
+    layer_line.addGroup(new OverlayGroup("线段覆盖物群组"));
+    layer_polygon.addGroup(new OverlayGroup("多边形覆盖物群组"));
+
+    layerGroup.setMainCanvas(this);
+  }
+  /** 获取图层群组 集合 */
+  gteLayerGroups(key: string) {
+    return this.layerGroups.get(key);
+  }
+  /** 设置图层群组 */
+  setLayerGroups(layerGroup: LayerGroup) {
+    if (layerGroup instanceof LayerGroup) {
+      this.layerGroups.set(layerGroup.name, layerGroup);
+      layerGroup.destroy = () => this.removeLayerGroups(layerGroup);
+    }
+  }
+  /** 移除图层群组 */
+  removeLayerGroups(layerGroup: LayerGroup | LayerGroup[]) {
+    if (layerGroup instanceof LayerGroup) {
+      this.layerGroups.delete(layerGroup.name);
+      this.redrawOnce();
+    }
+  }
+  /** 添加图层 */
+  addLayer(layers: Layer | Layer[]) {
+    const layerGroup = this.layerGroups.get("默认图层群组");
+    if (!layerGroup) return;
+    layerGroup.addLayer([layers].flat());
+  }
+  /** 移除图层 */
+  removeLayer(layers: Layer | Layer[]) {
+    const layerGroup = this.layerGroups.get("默认图层群组");
+    if (!layerGroup) return;
+    layerGroup.removeLayer([layers].flat());
+  }
+  /** 添加覆盖物 */
+  addOverlay(overlays: Overlay | Overlay[]) {
+    const { overlays_point, overlays_line, overlays_polygon } =
+      this.getDefaultOverlayGroup() || {};
+    [overlays].flat().forEach((overlay) => {
+      if (overlay instanceof Point) overlays_point?.addOverlays(overlay);
+      else if (overlay instanceof Line) overlays_line?.addOverlays(overlay);
+      else if (overlay instanceof Polygon)
+        overlays_polygon?.addOverlays(overlay);
+    });
+  }
+  /** 移除覆盖物 */
+  removeOverlay(overlays: Overlay | Overlay[]) {
+    const { overlays_point, overlays_line, overlays_polygon } =
+      this.getDefaultOverlayGroup() || {};
+    [overlays].flat().forEach((overlay) => {
+      if (overlay instanceof Point) overlays_point?.removeOverlays(overlay);
+      else if (overlay instanceof Line) overlays_line?.removeOverlays(overlay);
+      else if (overlay instanceof Polygon)
+        overlays_polygon?.removeOverlays(overlay);
+    });
   }
 
   /** 销毁 */
