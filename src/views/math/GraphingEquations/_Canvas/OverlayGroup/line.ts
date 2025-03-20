@@ -48,7 +48,8 @@ export default class Line {
   }
   /** 绘制无限延伸线段 */
   drawInfiniteStraightLine(item: LineListType[number]) {
-    const { ctx, rect, drawPoint } = this.canvas;
+    // const { ctx, rect, drawPoint } = this.canvas;
+    const { ctx, rect } = this.canvas;
 
     // 解构关键数据并校验
     const { dynamicPosition, style, value } = item;
@@ -65,15 +66,15 @@ export default class Line {
     }
 
     // 绘制原始端点
-    const defaultPointStyle = this.defaultStyle.point;
-    const {
-      radius = defaultPointStyle.radius,
-      stroke = defaultPointStyle.stroke,
-      width = defaultPointStyle.width,
-      fill = defaultPointStyle.fill,
-    } = style?.point || {};
-    drawPoint.drawSinglePoint(start, { radius, stroke, width, fill });
-    drawPoint.drawSinglePoint(end, { radius, stroke, width, fill });
+    // const defaultPointStyle = this.defaultStyle.point;
+    // const {
+    //   radius = defaultPointStyle.radius,
+    //   stroke = defaultPointStyle.stroke,
+    //   width = defaultPointStyle.width,
+    //   fill = defaultPointStyle.fill,
+    // } = style?.point || {};
+    // drawPoint.drawSinglePoint(start, { radius, stroke, width, fill });
+    // drawPoint.drawSinglePoint(end, { radius, stroke, width, fill });
 
     // 核心算法：计算线段与画布边界的交点
     const getBoundaryIntersection = (
