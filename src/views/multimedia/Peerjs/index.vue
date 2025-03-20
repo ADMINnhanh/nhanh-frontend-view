@@ -69,7 +69,7 @@ import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLa
       </NSpace>
     </template>
     <template #right>
-      <video ref="videoEl"></video>
+      <video ref="videoEl" autoplay></video>
     </template>
   </ResponsiveDirectionLayout>
 </template>
