@@ -1,4 +1,3 @@
-// The usage -
 import type { ScrollbarInst } from "naive-ui";
 import { Peer } from "peerjs";
 import { ref } from "vue";
@@ -31,7 +30,6 @@ const newLog = (
 
 export const videoEl = ref<HTMLVideoElement>();
 const renderVideo = (stream: MediaStream) => {
-  console.log(videoEl.value);
   if (videoEl.value) videoEl.value.srcObject = stream;
 };
 
