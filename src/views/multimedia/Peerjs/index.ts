@@ -40,7 +40,7 @@ peer.on("open", function (id) {
   newLog(`获取到了新的对接id: ${id}`, "info");
 });
 peer.on("error", (error) => {
-  console.error(error);
+  newLog(error.message);
 });
 peer.on("connection", function (conn) {
   newLog("传入对等连接！", "warning");
