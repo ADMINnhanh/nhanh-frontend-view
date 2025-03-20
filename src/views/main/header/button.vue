@@ -3,7 +3,6 @@ import SvgGather from "@/assets/icon/gather";
 import {
   Settings,
   SetOptions,
-  themeOptions,
 } from "@/components/popups/components/Settings/index";
 import { AddUniqueModal } from "@/components/popups/popups";
 import {
@@ -11,16 +10,13 @@ import {
   Contract,
   Expand,
   LogoGithub,
+  LanguageOutline,
+  MoonOutline,
+  SunnyOutline,
 } from "@vicons/ionicons5";
 import { NButton, NSpace, NIcon, NDropdown } from "naive-ui";
 import { _IsFullscreen } from "nhanh-pure-function";
 import { computed, onUnmounted, ref } from "vue";
-
-const themeText = computed(
-  () =>
-    themeOptions.value.find((item) => item.value !== Settings.value.theme)
-      ?.label
-);
 
 /** 切换语言 */
 function ChangeLanguage() {
@@ -97,67 +93,48 @@ function GoToTheOfficialWebsite(value: string) {
 </script>
 
 <template>
-  <header>
-    <div class="name">
-      <img src="/nhanh.ico" alt="" />
-      你好啊你好
-    </div>
-    <NSpace>
-      <NButton quaternary @click="toggleFullScreen">
-        <template #icon>
-          <NIcon :component="isFullScreen ? Contract : Expand" />
-        </template>
-      </NButton>
-      <NButton quaternary @click="ChangeTheme">{{ themeText }}</NButton>
-      <NButton quaternary @click="ChangeLanguage">{{
-        Settings.language == "zhCN" ? "English" : "中文"
-      }}</NButton>
-      <NButton quaternary @click="GotoGitHub">
-        <template #icon><NIcon :component="LogoGithub" /></template>
-      </NButton>
-      <NDropdown
-        trigger="hover"
-        :options="options"
-        @select="GoToTheOfficialWebsite"
-      >
-        <div>
-          <NButton quaternary>
-            <template #icon>
-              <SvgGather icon="ColumnDependency" />
-            </template>
-          </NButton>
-        </div>
-      </NDropdown>
-      <NButton quaternary @click="OpenSettings">
-        <template #icon><NIcon :component="SettingsOutline" /></template>
-      </NButton>
-    </NSpace>
-  </header>
+  <NSpace>
+    <NButton quaternary @click="toggleFullScreen">
+      <template #icon>
+        <NIcon :component="isFullScreen ? Contract : Expand" />
+      </template>
+    </NButton>
+    <NButton quaternary @click="ChangeTheme">
+      <template #icon>
+        <NIcon
+          :component="Settings.theme == 'light' ? SunnyOutline : MoonOutline"
+        />
+      </template>
+    </NButton>
+    <NButton quaternary @click="ChangeLanguage">
+      <template #icon>
+        <NIcon :component="LanguageOutline" />
+      </template>
+    </NButton>
+    <NButton quaternary @click="GotoGitHub">
+      <template #icon><NIcon :component="LogoGithub" /></template>
+    </NButton>
+    <NDropdown
+      trigger="hover"
+      :options="options"
+      @select="GoToTheOfficialWebsite"
+    >
+      <div>
+        <NButton quaternary>
+          <template #icon>
+            <SvgGather icon="ColumnDependency" />
+          </template>
+        </NButton>
+      </div>
+    </NDropdown>
+    <NButton quaternary @click="OpenSettings">
+      <template #icon><NIcon :component="SettingsOutline" /></template>
+    </NButton>
+  </NSpace>
 </template>
 
 <style scoped lang="less">
-header {
-  width: 100%;
-  padding: 10px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid var(--border-color);
-  background-color: var(--background-color);
-  > * {
-    flex-shrink: 0;
-  }
-  .name {
-    display: flex;
-    align-items: center;
-    font-size: 18px;
-    color: var(--text-color);
-    img {
-      width: 40px;
-      height: 40px;
-      margin-right: 12px;
-    }
-  }
+.n-space {
   :deep(.n-menu) {
     width: 100px;
     flex-grow: 1;

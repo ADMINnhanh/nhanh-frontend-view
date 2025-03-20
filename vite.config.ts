@@ -2,10 +2,11 @@ import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import path from "path";
+import mkcert from "vite-plugin-mkcert";
 
 export default defineConfig({
   base: "./",
-  plugins: [vue(), vueJsx()],
+  plugins: [vue(), vueJsx(), mkcert()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),

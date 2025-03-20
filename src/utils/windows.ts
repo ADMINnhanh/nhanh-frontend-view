@@ -11,7 +11,7 @@ import {
   type GlobalThemeOverrides,
 } from "naive-ui";
 import { Settings } from "@/components/popups/components/Settings/index";
-
+import { _Tip } from "nhanh-pure-function";
 import hljs from "highlight.js/lib/core";
 import javascript from "highlight.js/lib/languages/javascript";
 import json from "highlight.js/lib/languages/json";
@@ -40,6 +40,10 @@ window.$notification = notification;
 window.$dialog = dialog;
 window.$loadingBar = loadingBar;
 window.$modal = modal;
+
+(["info", "success", "warning", "error"] as const).forEach((type) =>
+  _Tip.register(type, message[type])
+);
 
 window.$CustomizeError = function (message: string, error?: any) {
   error && console.error(error);

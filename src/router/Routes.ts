@@ -1,5 +1,5 @@
 import SvgGather from "@/assets/icon/gather";
-import { FishOutline } from "@vicons/ionicons5";
+import { FishOutline, FootballOutline } from "@vicons/ionicons5";
 import { NIcon } from "naive-ui";
 import { h, type Component } from "vue";
 import type { RouteRecordRaw } from "vue-router";
@@ -41,6 +41,32 @@ const math: CustomRouteRecord = {
         },
       },
       component: () => import("@/views/math/GraphingEquations/index.vue"),
+    },
+  ],
+};
+
+/** 多媒体 */
+const multimedia: CustomRouteRecord = {
+  path: "multimedia",
+  name: "multimedia",
+  meta: {
+    icon: SvgGather({ icon: "Multimedia" }),
+    name: {
+      zhCN: "多媒体",
+      enUS: "Multimedia",
+    },
+  },
+  children: [
+    {
+      path: "Peerjs",
+      name: "Peerjs",
+      meta: {
+        name: {
+          zhCN: "Peerjs 音视频通话",
+          enUS: "Peerjs Video Call",
+        },
+      },
+      component: () => import("@/views/multimedia/Peerjs/index.vue"),
     },
   ],
 };
@@ -108,7 +134,7 @@ const relaxRouting: CustomRouteRecord = {
   ],
 };
 
-const AllRoute = [math, canvas, relaxRouting];
+const AllRoute = [math, multimedia, canvas, relaxRouting];
 
 /** 路由重名检测 */
 function CheckPath(item: CustomRouteRecord[]) {

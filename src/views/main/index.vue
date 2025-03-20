@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import MyHeader from "./header.vue";
-import MyBody from "./body.vue";
+import MyHeader from "./header/index.vue";
+import MyBody from "./body/index.vue";
 </script>
 
 <template>

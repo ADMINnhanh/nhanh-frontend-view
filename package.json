@@ -17,7 +17,9 @@
     "highlight.js": "^11.10.0",
     "jszip": "^3.10.1",
     "nhanh-pure-function": "^2.0.4",
+    "peerjs": "^1.5.4",
     "pinia": "^2.1.7",
+    "vite-plugin-mkcert": "^1.17.8",
     "vue": "^3.4.29",
     "vue-router": "^4.3.3"
   },

@@ -39,6 +39,8 @@ import _Canvas from "./_Canvas";
 import InputMath from "./InputMath/index.vue";
 import SvgGather from "@/assets/icon/gather";
 import DrawChina from "./china";
+import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
+import Media from "@/stores/media";
 
 const buttonApi = computed(() => {
   const theme = Settings.value.theme;
@@ -212,58 +214,65 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="graphing-equations">
-    <nav>
-      <NA
-        href="https://www.desmos.com/calculator/mekfho0w38?lang=zh-CN"
-        target="_blank"
-      >
-        希望达到的目标！ desmos
-      </NA>
-      <InputMath />
-    </nav>
-    <canvas :id="id"></canvas>
-
-    <div class="button-box">
-      <NSpace vertical>
-        <NButtonGroup vertical>
-          <NButton :="buttonApi" @click="canvas.zoomIn()">
-            <template #icon><NIcon :component="Add" /></template>
-          </NButton>
-          <NButton :="buttonApi" @click="canvas.zoomOut()">
-            <template #icon><NIcon :component="Remove" /></template>
-          </NButton>
-        </NButtonGroup>
-        <NButton :="buttonApi" @click="canvas.reset()">
-          <template #icon><NIcon :component="Home" /></template>
-        </NButton>
-        <NButton
-          :="buttonApi"
-          @click="setConfig.axis.show.all = !setConfig.axis.show.all"
+  <ResponsiveDirectionLayout class="graphing-equations">
+    <template #left>
+      <nav>
+        <NA
+          href="https://www.desmos.com/calculator/mekfho0w38?lang=zh-CN"
+          target="_blank"
         >
-          <template #icon><NIcon :component="GridOutline" /></template>
-        </NButton>
-        <NButton :="buttonApi" @click="lock = canvas.toggleLock()">
-          <template #icon>
-            <NIcon v-if="lock" :component="LockClosedOutline" />
-            <SvgGather v-else icon="LockOpenOutline" />
-          </template>
-        </NButton>
-        <NButton :="buttonApi" @click="setActive = true">
-          <template #icon>
-            <NIcon :component="SettingsOutline" />
-          </template>
-        </NButton>
-      </NSpace>
-      <n-text
-        class="fps"
-        :type="fps > 60 ? 'success' : fps > 30 ? 'warning' : 'error'"
-      >
-        {{ fps }}
-      </n-text>
-    </div>
-  </div>
-  <NDrawer v-model:show="setActive" :width="500" to=".graphing-equations">
+          希望达到的目标！ desmos
+        </NA>
+        <InputMath />
+      </nav>
+    </template>
+    <template #right>
+      <canvas :id="id"></canvas>
+      <div class="button-box">
+        <NSpace vertical>
+          <NButtonGroup vertical>
+            <NButton :="buttonApi" @click="canvas.zoomIn()">
+              <template #icon><NIcon :component="Add" /></template>
+            </NButton>
+            <NButton :="buttonApi" @click="canvas.zoomOut()">
+              <template #icon><NIcon :component="Remove" /></template>
+            </NButton>
+          </NButtonGroup>
+          <NButton :="buttonApi" @click="canvas.reset()">
+            <template #icon><NIcon :component="Home" /></template>
+          </NButton>
+          <NButton
+            :="buttonApi"
+            @click="setConfig.axis.show.all = !setConfig.axis.show.all"
+          >
+            <template #icon><NIcon :component="GridOutline" /></template>
+          </NButton>
+          <NButton :="buttonApi" @click="lock = canvas.toggleLock()">
+            <template #icon>
+              <NIcon v-if="lock" :component="LockClosedOutline" />
+              <SvgGather v-else icon="LockOpenOutline" />
+            </template>
+          </NButton>
+          <NButton :="buttonApi" @click="setActive = true">
+            <template #icon>
+              <NIcon :component="SettingsOutline" />
+            </template>
+          </NButton>
+        </NSpace>
+        <n-text
+          class="fps"
+          :type="fps > 60 ? 'success' : fps > 30 ? 'warning' : 'error'"
+        >
+          {{ fps }}
+        </n-text>
+      </div>
+    </template>
+  </ResponsiveDirectionLayout>
+  <NDrawer
+    v-model:show="setActive"
+    :width="Media.isMobileStyle ? '80%' : 500"
+    to=".graphing-equations"
+  >
     <NDrawerContent title="更加全面的配置">
       <NTabs addable animated placement="left">
         <NTabPane name="公共">
@@ -427,14 +436,10 @@ onUnmounted(() => {
 
 <style scoped lang="less">
 .graphing-equations {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  border-radius: 5px;
   position: relative;
 
   nav {
-    width: 400px;
+    width: 100%;
     box-shadow: 0 0 3px 1px var(--box-shadow);
     border-radius: 5px;
     z-index: 2;
@@ -447,8 +452,8 @@ onUnmounted(() => {
   }
 
   canvas {
-    flex-grow: 1;
-    width: 100px;
+    width: 100%;
+    height: 100%;
   }
 
   .button-box {
