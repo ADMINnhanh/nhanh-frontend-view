@@ -1,4 +1,5 @@
 import type { ScrollbarInst } from "naive-ui";
+import { _WaitForCondition } from "nhanh-pure-function";
 import { Peer } from "peerjs";
 import { ref } from "vue";
 
@@ -33,7 +34,12 @@ const renderVideo = (stream: MediaStream) => {
   if (videoEl.value) videoEl.value.srcObject = stream;
 };
 
-const peer = new Peer();
+const peer = new Peer({
+  host: "47.117.69.99",
+  port: 9000,
+  debug: 1,
+  path: "/myapp",
+});
 
 peer.on("open", function (id) {
   peerID.value = id;
@@ -53,6 +59,10 @@ peer.on("connection", function (conn) {
   });
 });
 peer.on("call", (call) => {
+  let finish = false;
+  _WaitForCondition(() => finish, 5000).catch(() => {
+    newLog("获取本地流超时", "error");
+  });
   navigator.mediaDevices
     .getUserMedia({ video: true, audio: true })
     .then((stream) => {
@@ -61,7 +71,8 @@ peer.on("call", (call) => {
     })
     .catch((err) => {
       newLog("获取本地流失败" + err, "error");
-    });
+    })
+    .finally(() => (finish = true));
 });
 
 let conn: ReturnType<typeof peer.connect>;
@@ -74,6 +85,12 @@ export function ConnectToPeer() {
   conn.on("open", () => {
     conn.send("hi!");
   });
+
+  let finish = false;
+  _WaitForCondition(() => finish, 5000).catch(() => {
+    newLog("获取本地流超时", "error");
+  });
+
   navigator.mediaDevices
     .getUserMedia({ video: true, audio: true })
     .then((stream) => {
@@ -83,5 +100,6 @@ export function ConnectToPeer() {
     })
     .catch((err) => {
       newLog("获取本地流失败" + err, "error");
-    });
+    })
+    .finally(() => (finish = true));
 }
