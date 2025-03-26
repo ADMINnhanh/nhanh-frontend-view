@@ -35,10 +35,11 @@ const renderVideo = (stream: MediaStream) => {
 };
 
 const peer = new Peer({
+  // host: "www.nhanh.xin",
+  // host: "nhanh.xin",
   host: "47.117.69.99",
-  port: 9000,
   debug: 1,
-  path: "/myapp",
+  path: "/peerjs-server/myapp",
 });
 
 peer.on("open", function (id) {
