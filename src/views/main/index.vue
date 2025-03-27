@@ -13,7 +13,7 @@ import MyBody from "./body/index.vue";
 <style scoped lang="less">
 .home {
   width: 100vw;
-  height: 100vh;
+  height: var(--100vh);
   display: flex;
   flex-direction: column;
 }

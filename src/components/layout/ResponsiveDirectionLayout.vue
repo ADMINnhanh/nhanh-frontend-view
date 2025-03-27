@@ -1,14 +1,48 @@
 <script setup lang="ts">
 import Media from "@/stores/media";
 import { NSplit } from "naive-ui";
+import { ref, shallowRef } from "vue";
+
+const size = ref(0.25);
+
+const split = shallowRef();
+requestAnimationFrame(() => {
+  const triggerDom: HTMLElement = split.value.$el.querySelector(
+    ".n-split__resize-trigger-wrapper"
+  );
+
+  if (triggerDom) {
+    const { width, height } = split.value.$el.getBoundingClientRect();
+    let oldClientX: number | undefined, oldClientY: number | undefined;
+    triggerDom.addEventListener("touchmove", (event) => {
+      const { clientX, clientY } = event.touches[0];
+
+      if (Media.value.isMobileStyle) {
+        if (oldClientY) size.value += (clientY - oldClientY) / height;
+        oldClientY = clientY;
+      } else {
+        if (oldClientX) size.value += (clientX - oldClientX) / width;
+        oldClientX = clientX;
+      }
+
+      size.value = Math.max(0.25, Math.min(0.75, size.value));
+    });
+    triggerDom.addEventListener("touchend", () => {
+      oldClientX = oldClientY = undefined;
+      console.log(123);
+    });
+  }
+});
 </script>
 
 <template>
   <NSplit
+    ref="split"
     :direction="Media.isMobileStyle ? 'vertical' : 'horizontal'"
+    :resize-trigger-size="Media.isMobileStyle ? 6 : 3"
     :max="0.75"
     :min="0.25"
-    :default-size="0.25"
+    v-model:size="size"
   >
     <template #1>
       <slot name="left" />

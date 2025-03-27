@@ -20,6 +20,13 @@ const NSpinApi = computed(() => {
     },
   };
 });
+
+function UpdateVh() {
+  const htmlDom = document.querySelector("html");
+  htmlDom?.style.setProperty("--100vh", window.innerHeight + "px");
+}
+requestAnimationFrame(UpdateVh);
+window.addEventListener("resize", UpdateVh);
 </script>
 
 <template>
@@ -46,9 +53,12 @@ const NSpinApi = computed(() => {
 </template>
 
 <style lang="less">
+html {
+  --100vh: 100vh;
+}
 #app {
   width: 100vw;
-  height: 100vh;
+  height: var(--100vh);
   overflow: hidden;
 }
 </style>

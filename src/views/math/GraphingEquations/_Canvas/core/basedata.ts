@@ -1,4 +1,4 @@
-import Axis from "../Overlay/axis";
+import Axis from "../OverlayGroup/axis";
 import LayerGroup from "../LayerGroup";
 
 /** 基础数据 */
@@ -307,6 +307,7 @@ export default class BaseData {
     };
   }
 
+  /** 变换坐标 */
   transformPosition(positions: [number, number][]) {
     const { center, percentage, axisConfig } = this;
 

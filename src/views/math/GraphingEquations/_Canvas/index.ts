@@ -3,10 +3,10 @@ import QuickMethod from "./core/quikmethod";
 import LayerGroup from "./LayerGroup";
 import OverlayGroup from "./OverlayGroup";
 import Layer from "./LayerGroup/layer";
-import Point from "./Overlay/point";
-import Line from "./Overlay/line";
-import Polygon from "./Overlay/polygon";
-import Axis from "./Overlay/axis";
+import Point from "./OverlayGroup/point";
+import Line from "./OverlayGroup/line";
+import Polygon from "./OverlayGroup/polygon";
+import Axis from "./OverlayGroup/axis";
 
 type Overlay = Point | Line | Polygon;
 
@@ -54,12 +54,14 @@ export default class _Canvas extends QuickMethod {
     const layer_point = new Layer("点位图层", { zIndex: 3 });
     const layer_line = new Layer("线段图层", { zIndex: 2 });
     const layer_polygon = new Layer("多边形图层", { zIndex: 1 });
+    const layer_axis = new Layer("坐标轴图层", { zIndex: 0 });
 
     this.setLayerGroups(layerGroup);
     layerGroup.addLayer([layer_point, layer_line, layer_polygon]);
     layer_point.addGroup(new OverlayGroup("点位覆盖物群组"));
     layer_line.addGroup(new OverlayGroup("线段覆盖物群组"));
     layer_polygon.addGroup(new OverlayGroup("多边形覆盖物群组"));
+    layer_axis.addGroup(new OverlayGroup("坐标轴覆盖物群组"));
 
     layerGroup.setMainCanvas(this);
   }
@@ -185,4 +187,21 @@ export function _TimeConsumption(func: Function, level: [number, string][]) {
 
     return result;
   };
+}
+
+// 计算平面直角坐标系中两点的距离
+export function _CalculateDistance2D(
+  x1: number,
+  y1: number,
+  x2: number,
+  y2: number
+) {
+  return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+/** 获取两点的中点 */
+export function _GetMidpoint(x1: number, y1: number, x2: number, y2: number) {
+  const midX = (x1 + x2) / 2;
+  const midY = (y1 + y2) / 2;
+  return { x: midX, y: midY };
 }

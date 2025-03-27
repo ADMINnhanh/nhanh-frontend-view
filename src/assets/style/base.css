@@ -21,7 +21,7 @@ body {
   text-rendering: optimizeLegibility;
 
   width: 100vw;
-  height: 100vh;
+  height: var(--100vh);
   overflow: hidden;
 
   color: var(--text-color);

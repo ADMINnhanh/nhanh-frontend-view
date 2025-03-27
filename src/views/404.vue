@@ -328,7 +328,7 @@ requestAnimationFrame(() => {
 <style lang="less" scoped>
 main {
   width: 100vw;
-  height: 100vh;
+  height: var(--100vh);
   background-color: rgba(255, 255, 255, 0.2);
   display: flex;
   justify-content: center;

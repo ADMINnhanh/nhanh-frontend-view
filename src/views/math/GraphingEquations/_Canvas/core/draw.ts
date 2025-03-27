@@ -1,4 +1,4 @@
-import { _Throttle } from "nhanh-pure-function";
+import { _Debounce, _Throttle } from "nhanh-pure-function";
 import Style from "./style";
 import { _TimeConsumption } from "..";
 
@@ -28,7 +28,7 @@ export default class Draw extends Style {
     super(id);
     if (this.canvas) {
       this.resizeObserver = new ResizeObserver(
-        _Throttle(() => {
+        _Debounce(() => {
           this.rect = this.canvas.getBoundingClientRect();
           const { clientWidth, clientHeight } = this.canvas;
           [this.canvas.width, this.canvas.height] = [clientWidth, clientHeight];

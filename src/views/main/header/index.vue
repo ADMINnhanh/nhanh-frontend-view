@@ -6,6 +6,7 @@ import { ref } from "vue";
 import Button from "./button.vue";
 import { showMenu } from "../body";
 import { MenuOutline } from "@vicons/ionicons5";
+import router from "@/router";
 
 const show = ref(false);
 
@@ -15,6 +16,7 @@ window.addEventListener("click", (ev) => {
     /** @ts-ignore */
     if (ev.target.closest(".menu-button")) {
       show.value = !show.value;
+      showMenu.value = false;
     } else {
       show.value = false;
     }
@@ -24,7 +26,7 @@ window.addEventListener("click", (ev) => {
 
 <template>
   <header>
-    <div class="name">
+    <div @click="router.push('/')" class="name">
       <img src="/nhanh.ico" alt="" />
       你好啊你好
     </div>
@@ -64,6 +66,7 @@ header {
     align-items: center;
     font-size: 18px;
     color: var(--text-color);
+    cursor: pointer;
     img {
       width: 40px;
       height: 40px;

@@ -1,3 +1,4 @@
+import { _CalculateDistance2D, _GetMidpoint } from "..";
 import Draw from "./draw";
 
 /** 事件管理器 */
@@ -32,6 +33,8 @@ export default class Event extends Draw {
       { type: "mousedown", handler: this.mousedown.bind(this) },
       { type: "mouseup", handler: this.mouseup.bind(this), target: window },
       { type: "mousemove", handler: this.mousemove.bind(this), target: window },
+      { type: "touchend", handler: this.touchend.bind(this) },
+      { type: "touchmove", handler: this.touchmove.bind(this) },
     ];
 
     // 批量添加事件监听
@@ -175,6 +178,64 @@ export default class Event extends Draw {
     }
   }
 
+  private oldClientX: number[] = [];
+  private oldClientY: number[] = [];
+  /** 移动端 松开 */
+  private touchend(event: TouchEvent) {
+    this.oldClientX = this.oldClientY = [];
+  }
+  /** 移动端 移动 */
+  private touchmove(event: TouchEvent) {
+    const touches = event.touches;
+    event.preventDefault();
+    const { oldClientX, oldClientY, offset, delta } = this;
+
+    if (touches.length === 1) {
+      const { clientX, clientY } = touches[0];
+      if (oldClientX.length) {
+        offset.x += clientX - oldClientX[0];
+        offset.y += clientY - oldClientY[0];
+        this.redrawOnce();
+      }
+      this.oldClientX = [clientX];
+      this.oldClientY = [clientY];
+    } else if (touches.length === 2) {
+      const { clientX: clientX1, clientY: clientY1 } = touches[0];
+      const { clientX: clientX2, clientY: clientY2 } = touches[1];
+
+      if (oldClientX.length == 2) {
+        const oldDistance = _CalculateDistance2D(
+          oldClientX[0],
+          oldClientY[0],
+          oldClientX[1],
+          oldClientY[1]
+        );
+        const newDistance = _CalculateDistance2D(
+          clientX1,
+          clientY1,
+          clientX2,
+          clientY2
+        );
+
+        const { x: clientX, y: clientY } = _GetMidpoint(
+          clientX1,
+          clientY1,
+          clientX2,
+          clientY2
+        );
+
+        this.setScale(
+          { clientX, clientY },
+          newDistance > oldDistance ? delta : -delta
+        );
+        this.redrawOnce();
+      }
+      this.oldClientX = [clientX1, clientX2];
+      this.oldClientY = [clientY1, clientY2];
+    }
+  }
+
+  /** 销毁事件 */
   destroy() {
     super.destroy();
     this.unBind?.();

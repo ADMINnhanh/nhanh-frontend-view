@@ -1,6 +1,6 @@
-import Point from "../Overlay/point";
-import Line from "../Overlay/line";
-import Polygon from "../Overlay/polygon";
+import Point from "../OverlayGroup/point";
+import Line from "../OverlayGroup/line";
+import Polygon from "../OverlayGroup/polygon";
 
 type Overlay = Point | Line | Polygon;
 

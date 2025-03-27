@@ -230,7 +230,7 @@ onUnmounted(() => {
       <canvas :id="id"></canvas>
       <div class="button-box">
         <NSpace vertical>
-          <NButtonGroup vertical>
+          <NButtonGroup vertical style="border-radius: 3px">
             <NButton :="buttonApi" @click="canvas.zoomIn()">
               <template #icon><NIcon :component="Add" /></template>
             </NButton>
