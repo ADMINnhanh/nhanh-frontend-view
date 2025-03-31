@@ -36,8 +36,8 @@ const renderVideo = (stream: MediaStream) => {
 
 const peer = new Peer({
   // host: "www.nhanh.xin",
-  // host: "nhanh.xin",
-  host: "47.117.69.99",
+  host: "nhanh.xin",
+  // host: "47.117.69.99",
   debug: 1,
   path: "/peerjs-server/myapp",
 });
