@@ -6,7 +6,7 @@ import Layer from "./LayerGroup/layer";
 import Point from "./OverlayGroup/point";
 import Line from "./OverlayGroup/line";
 import Polygon from "./OverlayGroup/polygon";
-import Axis from "./OverlayGroup/axis";
+import Axis from "./core/axis";
 
 type Overlay = Point | Line | Polygon;
 
@@ -50,20 +50,22 @@ export default class _Canvas extends QuickMethod {
   }
 
   private initLayerGroups() {
+    const layer_polygon = new Layer("多边形图层");
+    layer_polygon.addGroup(new OverlayGroup("多边形覆盖物群组"));
+    layer_polygon.setzIndex(1);
+
+    const layer_line = new Layer("线段图层");
+    layer_line.addGroup(new OverlayGroup("线段覆盖物群组"));
+    layer_line.setzIndex(2);
+
+    const layer_point = new Layer("点位图层");
+    layer_point.addGroup(new OverlayGroup("点位覆盖物群组"));
+    layer_point.setzIndex(3);
+
     const layerGroup = new LayerGroup("默认图层群组");
-    const layer_point = new Layer("点位图层", { zIndex: 3 });
-    const layer_line = new Layer("线段图层", { zIndex: 2 });
-    const layer_polygon = new Layer("多边形图层", { zIndex: 1 });
-    const layer_axis = new Layer("坐标轴图层", { zIndex: 0 });
+    layerGroup.addLayer([layer_point, layer_line, layer_polygon]);
 
     this.setLayerGroups(layerGroup);
-    layerGroup.addLayer([layer_point, layer_line, layer_polygon]);
-    layer_point.addGroup(new OverlayGroup("点位覆盖物群组"));
-    layer_line.addGroup(new OverlayGroup("线段覆盖物群组"));
-    layer_polygon.addGroup(new OverlayGroup("多边形覆盖物群组"));
-    layer_axis.addGroup(new OverlayGroup("坐标轴覆盖物群组"));
-
-    layerGroup.setMainCanvas(this);
   }
   /** 获取图层群组 集合 */
   gteLayerGroups(key: string) {
@@ -73,13 +75,16 @@ export default class _Canvas extends QuickMethod {
   setLayerGroups(layerGroup: LayerGroup) {
     if (layerGroup instanceof LayerGroup) {
       this.layerGroups.set(layerGroup.name, layerGroup);
-      layerGroup.destroy = () => this.removeLayerGroups(layerGroup);
+      layerGroup.setNotifyReload(() => this.redrawOnce());
+      layerGroup.setMainCanvas(this);
     }
   }
   /** 移除图层群组 */
   removeLayerGroups(layerGroup: LayerGroup | LayerGroup[]) {
     if (layerGroup instanceof LayerGroup) {
       this.layerGroups.delete(layerGroup.name);
+      layerGroup.setNotifyReload();
+      layerGroup.setMainCanvas();
       this.redrawOnce();
     }
   }

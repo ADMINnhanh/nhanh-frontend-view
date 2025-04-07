@@ -7,18 +7,6 @@ export default class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
 
-  /**
-   * 在网格上开始创作
-   *
-   * 此函数可以有以下两种返回类型：
-   * 1. void：表示创建过程不需要任何额外的信息或操作
-   * 2. [number, () => void][]：表示返回一个数组，数组中的每个元素都是一个元组，
-   *    元组的第一个元素是数字表示绘制顺序；第二个元素是绘制方法
-   */
-  startCreationOnGrid?: () => void | [number, () => void][];
-  /** 在网格下开始创作 */
-  startCreationBelowGrid?: () => void;
-
   /** 计算坐标所需依赖 */
   rely = "";
   /** 是否需要重新计算坐标 */
@@ -56,15 +44,7 @@ export default class Draw extends Style {
     this.isRecalculate = this.rely !== newRely;
     this.rely = newRely;
   }
-  // 封装添加函数到 zIndexs 对象的逻辑
-  private addFunctionsToZIndexs(zIndexFuncPairs: [number, () => void][]) {
-    const zIndexs: { [key: number]: (() => void)[] } = {};
 
-    zIndexFuncPairs.forEach(([zIndex, func]) => {
-      zIndexs[zIndex] = [...(zIndexs[zIndex] || []), func];
-    });
-    return zIndexs;
-  }
   /** 重绘画布 */
   private redraw() {
     if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
@@ -75,29 +55,17 @@ export default class Draw extends Style {
 
     this.clearScreen();
 
-    this.startCreationBelowGrid?.();
-
-    this.drawAxis?.drawAxisAndGrid();
-
-    // const creationOnGrid = this.startCreationOnGrid;
-
-    // const zIndexs = this.addFunctionsToZIndexs(
-    //   this.drawPolygon
-    //     .fetchDrawFunctions()
-    //     .concat(this.drawLine.fetchDrawFunctions())
-    //     .concat(this.drawPoint.fetchDrawFunctions())
-    //     .concat(Array.isArray(creationOnGrid) ? creationOnGrid : [])
-    // );
-
-    // Object.keys(zIndexs)
-    //   .sort()
-    //   .forEach((zIndex) => {
-    //     const funcs = zIndexs[zIndex as unknown as number];
-    //     funcs.forEach((func) => func());
-    //   });
-
-    if (typeof this.startCreationOnGrid === "function")
-      this.startCreationOnGrid?.();
+    let canvasArr: [number, HTMLCanvasElement | (() => void)][] = [
+      [0, () => this.drawAxis?.drawAxisAndGrid()],
+    ];
+    this.layerGroups.forEach(
+      (layerGroup) => (canvasArr = canvasArr.concat(layerGroup.fetchCanvas()))
+    );
+    canvasArr.sort((a, b) => a[0] - b[0]);
+    canvasArr.forEach(([, canvas]) => {
+      if (typeof canvas === "function") canvas();
+      else this.ctx.drawImage(canvas, 0, 0);
+    });
 
     this.isRecalculate = false;
   }

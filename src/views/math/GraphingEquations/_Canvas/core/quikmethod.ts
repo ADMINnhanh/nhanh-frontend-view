@@ -1,5 +1,5 @@
 import { _Schedule } from "nhanh-pure-function";
-import type Axis from "../OverlayGroup/axis";
+import Axis from "../core/axis";
 import Event from "./event";
 
 /** 快速方法 */
@@ -132,7 +132,7 @@ export default class QuickMethod extends Event {
     const { overlays_point } = this.getDefaultOverlayGroup() || {};
 
     if (overlays_point) {
-      overlays_point.setShow(show ?? !overlays_point.show);
+      overlays_point.show.setShow(show ?? !overlays_point.show);
       this.redrawOnce();
       return overlays_point.show;
     }
@@ -142,7 +142,7 @@ export default class QuickMethod extends Event {
   toggleLine(show?: boolean) {
     const { overlays_line } = this.getDefaultOverlayGroup() || {};
     if (overlays_line) {
-      overlays_line.setShow(show ?? !overlays_line.show);
+      overlays_line.show.setShow(show ?? !overlays_line.show);
       this.redrawOnce();
       return overlays_line.show;
     }
@@ -152,7 +152,7 @@ export default class QuickMethod extends Event {
   togglePolygon(show?: boolean) {
     const { overlays_polygon } = this.getDefaultOverlayGroup() || {};
     if (overlays_polygon) {
-      overlays_polygon.setShow(show ?? !overlays_polygon.show);
+      overlays_polygon.show.setShow(show ?? !overlays_polygon.show);
       this.redrawOnce();
       return overlays_polygon.show;
     }

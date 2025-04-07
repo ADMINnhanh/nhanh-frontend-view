@@ -1,4 +1,4 @@
-import Axis from "../OverlayGroup/axis";
+import Axis from "../core/axis";
 import LayerGroup from "../LayerGroup";
 
 /** 基础数据 */

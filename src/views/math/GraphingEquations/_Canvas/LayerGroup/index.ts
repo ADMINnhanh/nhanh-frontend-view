@@ -1,46 +1,45 @@
 import _Canvas from "..";
+import Show from "../public/show";
 import Layer from "./layer";
 
 export default class LayerGroup {
   /** 图层群组名称 */
   name;
   /** 图层群组是否显示 */
-  show = true;
-  /** 图层群组 */
-  layers = new Map<string, Layer>();
+  show = new Show();
 
-  /** 主画布 */
-  protected mainCanvas?: _Canvas;
+  /** 图层群组 */
+  private layers = new Map<string, Layer>();
 
   constructor(name: string) {
     this.name = name;
   }
 
-  /** 设置主画布 */
-  setMainCanvas(mainCanvas: _Canvas) {
-    if (mainCanvas instanceof _Canvas) {
-      this.mainCanvas = mainCanvas;
-      this.layers.forEach((layer) => layer.setMainCanvas(mainCanvas));
-      this.notifyReload();
-    }
-  }
-  /** 通知重新加载 */
-  notifyReload() {
-    this.mainCanvas?.redrawOnce();
+  /** 主画布 */
+  private mainCanvas?: _Canvas;
+  setMainCanvas(mainCanvas?: _Canvas) {
+    this.mainCanvas = mainCanvas;
+    this.layers.forEach((layer) => layer.setMainCanvas(mainCanvas));
   }
 
-  /** 重新加载 */
-  reload() {
-    if (!this.show || !this.mainCanvas) return;
-    const layers = Array.from(this.layers.values())
-      .map((layer) => {
-        if (layer.equalsMainCanvas(this.mainCanvas!)) {
-          return layer.reload();
-        } else {
-          this.removeLayer(layer);
+  /** 通知重新加载 */
+  private notifyReload?: (needForceExecute?: boolean) => void;
+  setNotifyReload(notifyReload?: () => void) {
+    this.notifyReload = notifyReload
+      ? (needForceExecute) => {
+          if (needForceExecute) {
+            notifyReload();
+          } else if (
+            this.show.shouldRender(this.mainCanvas?.scale) &&
+            this.layers.size
+          ) {
+            notifyReload();
+          }
         }
-      })
-      .filter(Boolean) as [number, HTMLCanvasElement][];
+      : undefined;
+
+    this.layers.forEach((layer) => layer.setNotifyReload(this.notifyReload));
+    this.show.notifyReload = this.notifyReload;
   }
 
   /** 获取图层 */
@@ -49,15 +48,13 @@ export default class LayerGroup {
   }
   /** 添加图层 */
   addLayer(layers: Layer | Layer[]) {
-    let isReload = false;
     [layers].flat().forEach((layer) => {
       if (layer instanceof Layer) {
-        this.mainCanvas && layer.setMainCanvas(this.mainCanvas);
+        layer.setNotifyReload(this.notifyReload);
+        layer.setMainCanvas(this.mainCanvas);
         this.layers.set(layer.name, layer);
-        isReload = true;
       }
     });
-    isReload && this.notifyReload();
   }
   /** 删除图层 */
   removeLayer(layers: Layer | Layer[]) {
@@ -65,18 +62,37 @@ export default class LayerGroup {
     [layers].flat().forEach((layer) => {
       if (layer instanceof Layer) {
         this.layers.delete(layer.name);
+        layer.setNotifyReload();
+        layer.setMainCanvas();
         isReload = true;
       }
     });
-    isReload && this.notifyReload();
+    isReload && this.notifyReload?.();
   }
   /** 清空图层 */
   clearLayers() {
     if (this.layers.size) {
+      this.layers.forEach((layer) => {
+        layer.setNotifyReload();
+        layer.setMainCanvas();
+      });
       this.layers.clear();
-      this.notifyReload();
+      this.notifyReload?.();
     }
   }
-  /** 销毁 图层群组 */
-  destroy?: () => void;
+
+  /** 收集图层的 canvas */
+  fetchCanvas() {
+    if (this.show.shouldRender(this.mainCanvas?.scale) && this.layers.size) {
+      const canvasArr: [number, HTMLCanvasElement][] = [];
+      this.layers.forEach((layer) => {
+        const canvas = layer.getCanvas();
+        canvas && canvasArr.push(canvas);
+      });
+      return canvasArr;
+    }
+    return [];
+  }
+  // /** 销毁 图层群组 */
+  // destroy?: () => void;
 }

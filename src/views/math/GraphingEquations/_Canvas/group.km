@@ -1,0 +1,202 @@
+{
+    "root": {
+        "data": {
+            "id": "d8wm840rn1c0",
+            "created": 1743644036168,
+            "text": "图层集合"
+        },
+        "children": [
+            {
+                "data": {
+                    "id": "d8wm8lzciyo0",
+                    "created": 1743644075264,
+                    "text": "图层"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "d8wm94lw2w00",
+                            "created": 1743644115809,
+                            "text": "覆盖物集合"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "d8wm9s3v21c0",
+                                    "created": 1743644166962,
+                                    "text": "覆盖物",
+                                    "expandState": "expand"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "d8wmafggsls0",
+                                            "created": 1743644217790,
+                                            "text": "种类",
+                                            "expandState": "expand"
+                                        },
+                                        "children": [
+                                            {
+                                                "data": {
+                                                    "id": "d8wma65q07k0",
+                                                    "created": 1743644197549,
+                                                    "text": "点"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d8wma79x9i80",
+                                                    "created": 1743644199980,
+                                                    "text": "线"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d8wma85oo9s0",
+                                                    "created": 1743644201901,
+                                                    "text": "面"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d8wma94vb940",
+                                                    "created": 1743644204028,
+                                                    "text": "自定义函数"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "d8wmacha30w0",
+                                            "created": 1743644211309,
+                                            "text": "属性"
+                                        },
+                                        "children": [
+                                            {
+                                                "data": {
+                                                    "id": "d8wmb3g84pc0",
+                                                    "created": 1743644270018,
+                                                    "text": "名称"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d8wmavyu19c0",
+                                                    "created": 1743644253729,
+                                                    "text": "是否显示"
+                                                },
+                                                "children": []
+                                            },
+                                            {
+                                                "data": {
+                                                    "id": "d8wm9np0q1s0",
+                                                    "created": 1743644157357,
+                                                    "text": "层级"
+                                                },
+                                                "children": []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                "data": {
+                                    "id": "d8wm9u15k7c0",
+                                    "created": 1743644171152,
+                                    "text": "属性"
+                                },
+                                "children": [
+                                    {
+                                        "data": {
+                                            "id": "d8wm9zowgfs0",
+                                            "created": 1743644183471,
+                                            "text": "名称",
+                                            "expandState": "expand"
+                                        },
+                                        "children": []
+                                    },
+                                    {
+                                        "data": {
+                                            "id": "d8wm9v0d0qw0",
+                                            "created": 1743644173280,
+                                            "text": "是否显示",
+                                            "expandState": "expand"
+                                        },
+                                        "children": []
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "data": {
+                            "id": "d8wm9calde00",
+                            "created": 1743644132540,
+                            "text": "属性"
+                        },
+                        "children": [
+                            {
+                                "data": {
+                                    "id": "d8wm9m1s7cg0",
+                                    "created": 1743644153775,
+                                    "text": "名称"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "d8wm9iymf8o0",
+                                    "created": 1743644147054,
+                                    "text": "是否显示"
+                                },
+                                "children": []
+                            },
+                            {
+                                "data": {
+                                    "id": "d8wm9np0q1s0",
+                                    "created": 1743644157357,
+                                    "text": "层级"
+                                },
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "data": {
+                    "id": "d8wm8nsemq00",
+                    "created": 1743644079198,
+                    "text": "属性"
+                },
+                "children": [
+                    {
+                        "data": {
+                            "id": "d8wm9dn3f8g0",
+                            "created": 1743644135473,
+                            "text": "名称"
+                        },
+                        "children": []
+                    },
+                    {
+                        "data": {
+                            "id": "d8wm8zwtk340",
+                            "created": 1743644105586,
+                            "text": "是否显示"
+                        },
+                        "children": []
+                    }
+                ]
+            }
+        ]
+    },
+    "template": "right",
+    "theme": "fresh-blue",
+    "version": "1.4.43"
+}
