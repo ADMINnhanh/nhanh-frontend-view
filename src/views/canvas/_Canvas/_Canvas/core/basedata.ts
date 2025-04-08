@@ -1,4 +1,4 @@
-import Axis from "../core/axis";
+import Axis from "./axis";
 import LayerGroup from "../LayerGroup";
 
 /** 基础数据 */
@@ -319,5 +319,65 @@ export default class BaseData {
       dynamicPositions.push([x, y]);
     }
     return dynamicPositions;
+  }
+
+  /**
+   * 将纬度转换为平面坐标
+   * @param lng 经度
+   * @param lat 纬度
+   * @returns 平面坐标 [x, y]（米）
+   */
+  LngLatToPlane(lng: number, lat: number): [number, number] {
+    // 定义地球半径（米）
+    const R = 6378137;
+    // 定义Web Mercator有效纬度范围（±85°）
+    const maxLat = 85.05112878;
+
+    // 限制经度范围在-180到180度之间
+    const clampedLng = Math.max(Math.min(lng, 180), -180);
+    // 限制纬度范围在有效范围内
+    const clampedLat = Math.max(Math.min(lat, maxLat), -maxLat);
+
+    // 转换公式  返回转换后的平面坐标（米）
+    const x = clampedLng * (Math.PI / 180) * R;
+    // 转换公式  返回转换后的平面坐标（米）
+    const y = Math.log(Math.tan(((90 + clampedLat) * Math.PI) / 360)) * R;
+    return [x, y];
+  }
+
+  /**
+   * 将平面坐标转换为经纬度
+   * @param x 平面坐标 X 值（米）
+   * @param y 平面坐标 Y 值（米）
+   * @returns 经纬度 [lng, lat]（度）
+   */
+  PlaneToLngLat(x: number, y: number): [number, number] {
+    // 定义地球半径（米）
+    const R = 6378137;
+
+    // 计算经度
+    const lng = (x / R) * (180 / Math.PI);
+
+    // 计算纬度
+    const lat =
+      (2 * Math.atan(Math.exp(y / R)) - Math.PI / 2) * (180 / Math.PI);
+
+    return [lng, lat];
+  }
+
+  /** 参数是否合法 */
+  IsValid(arr: any) {
+    return (
+      Array.isArray(arr) &&
+      typeof arr[0] === "number" &&
+      typeof arr[1] === "number" &&
+      isFinite(arr[0]) &&
+      isFinite(arr[1])
+    );
+  }
+
+  /** 参数是否合法 */
+  IsValids(arr: any) {
+    return Array.isArray(arr) && arr.every((v) => this.IsValid(v));
   }
 }

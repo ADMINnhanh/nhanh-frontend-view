@@ -35,7 +35,7 @@ import {
 import { Settings } from "@/components/popups/components/Settings";
 import { _GenerateUUID, _ReadFile } from "nhanh-pure-function";
 import { useFps } from "@vueuse/core";
-import _Canvas from "./_Canvas";
+import _Canvas from "../../canvas/_Canvas/_Canvas";
 import InputMath from "./InputMath/index.vue";
 import SvgGather from "@/assets/icon/gather";
 import DrawChina from "./china";

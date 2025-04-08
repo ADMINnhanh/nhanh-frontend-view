@@ -1,5 +1,5 @@
 import _Canvas from "..";
-import Show from "../public/show";
+import Show from "../OverlayGroup/public/show";
 import Layer from "./layer";
 
 export default class LayerGroup {
@@ -86,9 +86,14 @@ export default class LayerGroup {
     if (this.show.shouldRender(this.mainCanvas?.scale) && this.layers.size) {
       const canvasArr: [number, HTMLCanvasElement][] = [];
       this.layers.forEach((layer) => {
-        const canvas = layer.getCanvas();
-        canvas && canvasArr.push(canvas);
+        if (layer.equalsMainCanvas(this.mainCanvas)) {
+          const canvas = layer.getCanvas();
+          canvas && canvasArr.push(canvas);
+        } else {
+          this.layers.delete(layer.name);
+        }
       });
+
       return canvasArr;
     }
     return [];

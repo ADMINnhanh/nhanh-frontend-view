@@ -1,5 +1,5 @@
 import { _ReadFile } from "nhanh-pure-function";
-import _Canvas from "../_Canvas";
+import _Canvas from "../../../canvas/_Canvas/_Canvas";
 
 type FeatureCollection = {
   features: {

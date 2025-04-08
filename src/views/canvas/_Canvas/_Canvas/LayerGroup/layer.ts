@@ -1,6 +1,6 @@
 import _Canvas from "..";
 import OverlayGroup from "../OverlayGroup";
-import Show from "../public/show";
+import Show from "../OverlayGroup/public/show";
 
 export default class Layer {
   name: string;
@@ -21,6 +21,9 @@ export default class Layer {
 
   /** 主画布 */
   private mainCanvas?: _Canvas;
+  equalsMainCanvas(mainCanvas?: _Canvas) {
+    return this.mainCanvas === mainCanvas;
+  }
   setMainCanvas(mainCanvas?: _Canvas) {
     this.mainCanvas = mainCanvas;
     this.canvas.width = mainCanvas?.rect.width || 0;
@@ -128,6 +131,19 @@ export default class Layer {
     if (this.show.shouldRender(this.mainCanvas?.scale) && this.groups.size) {
       if (this.isReload) {
         this.isReload = false;
+
+        this.canvas.width = this.mainCanvas?.rect.width || 0;
+        this.canvas.height = this.mainCanvas?.rect.height || 0;
+
+        const groupArr: [number, (ctx: CanvasRenderingContext2D) => void][] =
+          [];
+        this.groups.forEach((group) => {
+          if (group.equalsMainCanvas(this.mainCanvas))
+            groupArr.push(...group.getOverlays());
+          else this.groups.delete(group.name);
+        });
+        groupArr.sort((a, b) => a[0] - b[0]);
+        groupArr.forEach(([, draw]) => draw(this.ctx));
       }
 
       return [this.zIndex, this.canvas] as [number, HTMLCanvasElement];

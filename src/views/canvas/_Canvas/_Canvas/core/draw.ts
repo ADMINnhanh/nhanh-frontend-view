@@ -45,6 +45,14 @@ export default class Draw extends Style {
     this.rely = newRely;
   }
 
+  /** 获取最大/小的 值 */
+  maxMinValue = {
+    minXV: 0,
+    maxXV: 0,
+    minYV: 0,
+    maxYV: 0,
+  };
+
   /** 重绘画布 */
   private redraw() {
     if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
@@ -52,6 +60,8 @@ export default class Draw extends Style {
     this.updateCenter();
 
     this.updateRely();
+
+    this.maxMinValue = this.getMaxMinValue();
 
     this.clearScreen();
 

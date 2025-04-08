@@ -84,6 +84,17 @@ const canvas: CustomRouteRecord = {
   },
   children: [
     {
+      path: "_Canvas",
+      name: "_Canvas",
+      meta: {
+        name: {
+          zhCN: "我的 Canvas 工具",
+          enUS: "My Canvas Tools",
+        },
+      },
+      component: () => import("@/views/canvas/_Canvas/index.vue"),
+    },
+    {
       path: "YOLOFormatAnnotator",
       name: "YOLOFormatAnnotator",
       meta: {

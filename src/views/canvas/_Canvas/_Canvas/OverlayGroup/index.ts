@@ -3,7 +3,9 @@ import _Canvas from "..";
 import Point from "./point";
 import Line from "./line";
 import Polygon from "./polygon";
-import Show from "../public/show";
+import Show from "./public/show";
+import { _GenerateUUID } from "nhanh-pure-function";
+import _Worker from "../worker";
 
 type Overlay = Point | Line | Polygon;
 
@@ -13,9 +15,7 @@ export default class OverlayGroup {
   /** 群组是否显示 */
   show = new Show();
 
-  /** 点位集合 - 单独优化 */
-  private overlayPoint = new Set<Point>();
-  private overlayOther = new Set<Line | Polygon>();
+  private overlays = new Set<Point | Line | Polygon>();
 
   constructor(name: string) {
     this.name = name;
@@ -23,10 +23,14 @@ export default class OverlayGroup {
 
   /** 主画布 */
   private mainCanvas?: _Canvas;
+  equalsMainCanvas(mainCanvas?: _Canvas) {
+    return this.mainCanvas === mainCanvas;
+  }
   setMainCanvas(mainCanvas?: _Canvas) {
     this.mainCanvas = mainCanvas;
-    this.overlayPoint.forEach((point) => (point.mainCanvas = mainCanvas));
-    this.overlayOther.forEach((other) => (other.mainCanvas = mainCanvas));
+    this.overlays.forEach((overlay) => overlay.setMainCanvas(mainCanvas));
+
+    if (mainCanvas && this.overlays.size) this.notifyReload?.();
   }
 
   /** 通知重新加载 */
@@ -38,18 +42,15 @@ export default class OverlayGroup {
             notifyReload();
           } else if (
             this.show.shouldRender(this.mainCanvas?.scale) &&
-            (this.overlayPoint.size || this.overlayOther.size)
+            this.overlays.size
           ) {
             notifyReload();
           }
         }
       : undefined;
 
-    this.overlayPoint.forEach((point) =>
-      point.setNotifyReload(this.notifyReload)
-    );
-    this.overlayOther.forEach((other) =>
-      other.setNotifyReload(this.notifyReload)
+    this.overlays.forEach((overlay) =>
+      overlay.setNotifyReload(this.notifyReload)
     );
 
     this.show.notifyReload = this.notifyReload;
@@ -57,36 +58,47 @@ export default class OverlayGroup {
 
   addOverlays(overlays: Overlay[] | Overlay) {
     [overlays].flat().forEach((overlay) => {
-      if (overlay instanceof Point) this.overlayPoint.add(overlay);
-      else this.overlayOther.add(overlay);
       overlay.setNotifyReload(this.notifyReload);
-      overlay.mainCanvas = this.mainCanvas;
+      overlay.setMainCanvas(this.mainCanvas);
+      this.overlays.add(overlay);
     });
+    this.notifyReload?.();
   }
   hasOverlay(overlay: Overlay) {
-    if (overlay instanceof Point) return this.overlayPoint.has(overlay);
-    return this.overlayOther.has(overlay);
+    return this.overlays.has(overlay);
   }
   removeOverlays(overlays: Overlay[] | Overlay) {
     [overlays].flat().forEach((overlay) => {
-      if (overlay instanceof Point) this.overlayPoint.delete(overlay);
-      else this.overlayOther.delete(overlay);
+      this.overlays.delete(overlay);
       overlay.setNotifyReload();
-      overlay.mainCanvas = undefined;
+      overlay.setMainCanvas();
     });
     this.notifyReload?.();
   }
   clearOverlays() {
     this.notifyReload?.();
-    this.overlayPoint.forEach((point) => {
-      point.setNotifyReload();
-      point.mainCanvas = undefined;
+    this.overlays.forEach((overlay) => {
+      overlay.setNotifyReload();
+      overlay.setMainCanvas();
     });
-    this.overlayOther.forEach((other) => {
-      other.setNotifyReload();
-      other.mainCanvas = undefined;
-    });
-    this.overlayPoint.clear();
-    this.overlayOther.clear();
+    this.overlays.clear();
+  }
+
+  /** 获取覆盖物的绘制方法 */
+  getOverlays() {
+    const groupArr: [number, (ctx: CanvasRenderingContext2D) => void][] = [];
+
+    if (this.show.shouldRender(this.mainCanvas?.scale)) {
+      this.overlays.forEach((overlay) => {
+        if (overlay.equalsMainCanvas(this.mainCanvas)) {
+          const draw = overlay.getDraw();
+          if (draw) groupArr.push([overlay.getZIndex(), draw]);
+        } else {
+          this.overlays.delete(overlay);
+        }
+      });
+    }
+
+    return groupArr;
   }
 }
