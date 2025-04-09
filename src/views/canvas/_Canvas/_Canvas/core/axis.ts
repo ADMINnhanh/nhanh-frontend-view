@@ -183,7 +183,7 @@ export default class Axis {
         const textW = textWidth(String(v));
         v !== 0 && canvas.drawText(String(v), x - textW / 2, y, isSecondary);
         x += grid_size;
-        v += count * axisConfig.x;
+        v = canvas.preservePrecision(v + count * axisConfig.x);
       }
     }
 
@@ -208,7 +208,7 @@ export default class Axis {
 
         v !== 0 && canvas.drawText(String(v), x, y + textSize / 2, isSecondary);
         y += grid_size;
-        v += count * axisConfig.y;
+        v = canvas.preservePrecision(v + count * axisConfig.y);
       }
     }
   }

@@ -23,6 +23,9 @@ export default class BaseData {
   /** 是否禁用拖拽和缩放 */
   lockDragAndResize = false;
 
+  /** 精度 */
+  accuracy = 5;
+
   /** 缩放比例 */
   scale = 1;
   /** 百分比 */
@@ -35,7 +38,7 @@ export default class BaseData {
    *    - 条件二：min 必须是 5 的整数倍，即 min % 5 === 0。
    */
   axisConfig = {
-    /** 缩放比为 1 时单网格代表的数字 */
+    /** 滚轮滚动周期为 0 时单网格代表的数字 */
     count: 2,
     /** 网格最小尺寸 */
     min: 100,
@@ -93,19 +96,23 @@ export default class BaseData {
     const valueParsers = {
       /* 垂直方向解析 */
       vertical: (value: string | number, max: number) => {
+        if ([0, "0", "0%"].includes(value)) return 0;
         if (value == Infinity || value == -Infinity) return undefined;
         if (typeof value === "number") return value;
         if (["top", "left"].includes(value)) return 0;
         if (["bottom", "right"].includes(value)) return max;
         if (["middle", "center"].includes(value)) return max / 2;
-        const percent = value.match(/^(\d+)%*$/)?.[1];
-        return (
-          (percent ? (max * Number(percent)) / 100 : Number(value)) || undefined
-        );
+
+        if (/^(\d+)%$/.test(value)) {
+          value = value.match(/^(\d+)%$/)![1];
+          return (max * Number(value)) / 100;
+        }
+        return Number(value) || undefined;
       },
 
       /* 反向解析 (bottom/right) */
       reverse: (value: string | number, max: number) => {
+        if ([0, "0", "0%"].includes(value)) return max;
         if (value == Infinity || value == -Infinity) return undefined;
         if (typeof value === "number") return max - value;
         const parsed = valueParsers.vertical(value, max);
@@ -262,16 +269,16 @@ export default class BaseData {
   getAxisValueByPoint(x: number, y: number) {
     const { axisConfig } = this;
     const count = this.getGridCount();
-    const xV = (x / axisConfig.size) * count;
-    const yV = (y / axisConfig.size) * count;
+    const xV = this.preservePrecision((x / axisConfig.size) * count);
+    const yV = this.preservePrecision((y / axisConfig.size) * count);
     return { xV, yV };
   }
   /** 通过坐标轴上的值 获取坐标轴上的点 */
   getAxisPointByValue(xV: number, yV: number) {
     const { axisConfig } = this;
     const count = this.getGridCount();
-    const x = (xV / count) * axisConfig.size;
-    const y = (yV / count) * axisConfig.size;
+    const x = this.preservePrecision((xV / count) * axisConfig.size, 3);
+    const y = this.preservePrecision((yV / count) * axisConfig.size, 3);
     return { x, y };
   }
 
@@ -305,6 +312,16 @@ export default class BaseData {
       minYV,
       maxYV,
     };
+  }
+
+  /** 保留精度 */
+  preservePrecision(value: string | number, accuracy?: number) {
+    value = Number(value);
+    if (value) {
+      if (Number.isInteger(value)) return value;
+      return Number(value.toFixed(accuracy || this.accuracy));
+    }
+    return 0;
   }
 
   /** 变换坐标 */

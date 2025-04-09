@@ -10,6 +10,7 @@ import {
   NSpace,
   NTooltip,
 } from "naive-ui";
+import { _CopyToClipboard, _Tip } from "nhanh-pure-function";
 import { ref } from "vue";
 
 interface Props {
@@ -26,7 +27,15 @@ const showCode = ref(false);
       <NSpace>
         <NTooltip trigger="hover">
           <template #trigger>
-            <NButton text>
+            <NButton
+              @click="
+                _Tip
+                  .success('复制成功')
+                  .error('复制失败')
+                  .run(_CopyToClipboard(code))
+              "
+              text
+            >
               <template #icon>
                 <NIcon :component="CopyOutline" />
               </template>
@@ -49,7 +58,7 @@ const showCode = ref(false);
     <slot></slot>
     <template #footer>
       <NCollapseTransition :show="showCode">
-        <NScrollbar>
+        <NScrollbar x-scrollable style="max-height: 50vh">
           <NCode :code="code" language="javascript" show-line-numbers />
         </NScrollbar>
       </NCollapseTransition>

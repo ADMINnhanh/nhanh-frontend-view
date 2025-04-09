@@ -147,6 +147,8 @@ export default class Event extends Draw {
   }
   /** 滚轮滚动 */
   private wheel(event: WheelEvent) {
+    event.preventDefault();
+
     const { delta, lockDragAndResize } = this;
     if (lockDragAndResize) return;
 
