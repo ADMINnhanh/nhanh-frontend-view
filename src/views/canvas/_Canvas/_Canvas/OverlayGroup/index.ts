@@ -5,7 +5,6 @@ import Line from "./line";
 import Polygon from "./polygon";
 import Show from "./public/show";
 import { _GenerateUUID } from "nhanh-pure-function";
-import _Worker from "../worker";
 
 type Overlay = Point | Line | Polygon;
 

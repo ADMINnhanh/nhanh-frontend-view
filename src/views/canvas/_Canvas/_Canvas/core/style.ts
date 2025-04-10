@@ -4,6 +4,8 @@ import BaseData from "./basedata";
 /** 样式管理器 */
 export default class Style extends BaseData {
   theme: KnownStyleKeys = "light";
+  /** 主题是否更新 */
+  isThemeUpdated = false;
   style: StyleType = {
     light: {
       background: "#fff",
@@ -114,7 +116,7 @@ export default class Style extends BaseData {
   /** 清除画布 */
   clearScreen() {
     const { ctx, theme, rect } = this;
-    const { width, height } = rect!;
+    const { width, height } = rect!.value;
 
     ctx.fillStyle = this.style[theme].background;
     ctx.fillRect(0, 0, width, height);
@@ -133,6 +135,9 @@ export default class Style extends BaseData {
 
   /** 设置主题 */
   setTheme(theme: KnownStyleKeys) {
-    if (theme in this.style) this.theme = theme;
+    if (theme in this.style) {
+      this.theme = theme;
+      this.isThemeUpdated = true;
+    }
   }
 }

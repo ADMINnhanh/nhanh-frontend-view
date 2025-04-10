@@ -13,7 +13,7 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     this.value = line.value;
   }
 
-  updateBaseDate() {
+  updateBaseData() {
     if (!this.mainCanvas) return;
     const IsValids = this.mainCanvas.IsValids;
     let { value, position } = this;
@@ -24,18 +24,18 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
 
     if (!isValue && !isPosition) {
       return (this.dynamicPosition = undefined);
-    } else if (isValue && !isPosition) {
+    } else if (isValue) {
       position = [];
       for (let i = 0; i < value!.length; i++) {
         const item = value![i];
-        const loc = this.mainCanvas.getAxisPointByValue(item[0], item[1]);
+        const loc = this.mainCanvas.getAxisPointByValue(item[0], item[1], true);
         position.push([loc.x, loc.y]);
       }
-    } else if (!isValue && isPosition) {
+    } else {
       value = [];
       for (let i = 0; i < position!.length; i++) {
         const item = position![i];
-        const val = this.mainCanvas.getAxisValueByPoint(item[0], item[1]);
+        const val = this.mainCanvas.getAxisValueByPoint(item[0], item[1], true);
         value.push([val.xV, val.yV]);
       }
     }
@@ -68,6 +68,8 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
       style = mainCanvas.style[this.style]?.line.point || defaultStyle;
     } else if (typeof this.style?.point == "object") {
       style = Object.assign({}, defaultStyle, this.style.point as any);
+    } else {
+      style = defaultStyle;
     }
 
     const { width, stroke, fill, radius } = style;
@@ -150,7 +152,7 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
         // 计算到达横向边界的参数t
         const tx =
           vx > 0
-            ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
+            ? (rect!.value.width - px) / vx // 向右延伸至右边界（x=rect!.value.width）
             : -px / vx; // 向左延伸至左边界（x=0）
 
         if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
@@ -161,7 +163,7 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
         // 计算到达横向边界的参数t
         const tx =
           vx > 0
-            ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
+            ? (rect!.value.width - px) / vx // 向右延伸至右边界（x=rect!.value.width）
             : -px / vx; // 向左延伸至左边界（x=0）
 
         if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值

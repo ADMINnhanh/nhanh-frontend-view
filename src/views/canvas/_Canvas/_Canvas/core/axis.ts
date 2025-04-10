@@ -36,7 +36,7 @@ export default class Axis {
     const canvas = this.canvas;
     const { ctx, rect, center, axisConfig } = canvas;
 
-    const { width, height } = rect!;
+    const { width, height } = rect!.value;
     const color = this.color();
 
     const grid_size = axisConfig.size;
@@ -98,7 +98,7 @@ export default class Axis {
     const canvas = this.canvas;
     const { ctx, rect, center } = canvas;
 
-    const { width, height } = rect!;
+    const { width, height } = rect!.value;
 
     const color = this.color();
 
@@ -131,7 +131,7 @@ export default class Axis {
     const canvas = this.canvas;
     const { ctx, rect, center, axisConfig, style, theme } = canvas;
 
-    const { width, height } = rect!;
+    const { width, height } = rect!.value;
 
     /** 文字宽 */
     const textWidth = (text: string) => Math.ceil(ctx.measureText(text).width);

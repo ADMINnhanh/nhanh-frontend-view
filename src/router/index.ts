@@ -5,10 +5,12 @@ import {
 } from "vue-router";
 import home from "../views/main/index.vue";
 import Routes from "./Routes";
+import { _WaitForCondition } from "nhanh-pure-function";
 
 const router = createRouter({
   // history: createWebHistory(import.meta.env.BASE_URL),
-  history: createWebHashHistory(),
+  // history: createWebHashHistory(),
+  history: createWebHistory(),
   routes: [
     {
       path: "/",
@@ -27,6 +29,11 @@ const router = createRouter({
       redirect: "/404",
     },
   ],
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return { el: to.hash, behavior: "smooth" };
+    }
+  },
 });
 
 export default router;

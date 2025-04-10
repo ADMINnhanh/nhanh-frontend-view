@@ -15,7 +15,7 @@ export default class Polygon extends Overlay<
     this.size = polygon.size;
   }
 
-  updateBaseDate() {
+  updateBaseData() {
     if (!this.mainCanvas) return;
     const { IsValids, IsValid, axisConfig, percentage } = this.mainCanvas;
     let { value, position, size } = this;
@@ -25,9 +25,11 @@ export default class Polygon extends Overlay<
       IsValids(position),
       IsValid(size),
     ];
+
+    if (!isValue && !isPosition) return (this.dynamicPosition = undefined);
+
     if (isRect) {
-      if (!isValue && !isPosition) return (this.dynamicPosition = undefined);
-      else if (isPosition) position!.length = 1;
+      if (isPosition) position!.length = 1;
       else if (isValue) value!.length = 1;
     } else {
       if (
@@ -38,18 +40,18 @@ export default class Polygon extends Overlay<
       size = undefined;
     }
 
-    if (isValue && !isPosition) {
+    if (isValue) {
       position = [];
       for (let i = 0; i < value!.length; i++) {
         const item = value![i];
-        const loc = this.mainCanvas.getAxisPointByValue(item[0], item[1]);
+        const loc = this.mainCanvas.getAxisPointByValue(item[0], item[1], true);
         position.push([loc.x, loc.y]);
       }
-    } else if (!isValue && isPosition) {
+    } else {
       value = [];
       for (let i = 0; i < position!.length; i++) {
         const item = position![i];
-        const val = this.mainCanvas.getAxisValueByPoint(item[0], item[1]);
+        const val = this.mainCanvas.getAxisValueByPoint(item[0], item[1], true);
         value.push([val.xV, val.yV]);
       }
     }
@@ -73,8 +75,8 @@ export default class Polygon extends Overlay<
     this.size = size;
 
     const prevDynamicStatus = !!this.dynamicPosition;
-    this.updateBaseDate();
-    if (!!this.dynamicPosition != prevDynamicStatus) this.notifyReload?.();
+    this.updateBaseData();
+    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
   }
   getSize() {
     return this.size;
@@ -90,6 +92,8 @@ export default class Polygon extends Overlay<
       style = mainCanvas.style[this.style]?.polygon || defaultStyle;
     } else if (typeof this.style == "object") {
       style = Object.assign({}, defaultStyle, this.style as any);
+    } else {
+      style = defaultStyle;
     }
 
     const { width, stroke, dash, dashGap, dashOffset, fill } = style;

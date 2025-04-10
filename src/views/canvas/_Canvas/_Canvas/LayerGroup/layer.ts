@@ -26,8 +26,8 @@ export default class Layer {
   }
   setMainCanvas(mainCanvas?: _Canvas) {
     this.mainCanvas = mainCanvas;
-    this.canvas.width = mainCanvas?.rect.width || 0;
-    this.canvas.height = mainCanvas?.rect.height || 0;
+    this.canvas.width = mainCanvas?.rect?.value.width || 0;
+    this.canvas.height = mainCanvas?.rect?.value.height || 0;
     this.groups.forEach((group) => group.setMainCanvas(mainCanvas));
   }
 
@@ -128,12 +128,17 @@ export default class Layer {
 
   /** 获取画布 */
   getCanvas() {
-    if (this.show.shouldRender(this.mainCanvas?.scale) && this.groups.size) {
-      if (this.isReload) {
+    if (!this.mainCanvas) return;
+
+    const { scale, rect, isRecalculate, isThemeUpdated } = this.mainCanvas!;
+    const isShow = this.show.shouldRender(scale);
+    const size = this.groups.size;
+    if (isShow && size) {
+      if (this.isReload || isRecalculate || isThemeUpdated) {
         this.isReload = false;
 
-        this.canvas.width = this.mainCanvas?.rect.width || 0;
-        this.canvas.height = this.mainCanvas?.rect.height || 0;
+        this.canvas.width = rect?.value.width || 0;
+        this.canvas.height = rect?.value.height || 0;
 
         const groupArr: [number, (ctx: CanvasRenderingContext2D) => void][] =
           [];

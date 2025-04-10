@@ -176,6 +176,18 @@ onMounted(() => {
 <style scoped lang="less">
 .my-canvas {
   width: 100%;
-  height: 250px;
+  height: 270px;
+}
+.n-input-number {
+  :deep(.n-input__input) {
+    width: 80px;
+  }
+}
+.n-popover {
+  .n-h,
+  .n-p,
+  .n-text {
+    --n-text-color: inherit !important;
+  }
 }
 </style>

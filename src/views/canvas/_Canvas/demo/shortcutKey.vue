@@ -88,6 +88,6 @@ onMounted(() => {
 <style scoped lang="less">
 .my-canvas {
   width: 100%;
-  height: 250px;
+  height: 270px;
 }
 </style>

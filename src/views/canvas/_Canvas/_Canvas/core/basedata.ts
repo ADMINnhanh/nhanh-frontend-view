@@ -8,7 +8,9 @@ export default class BaseData {
   /** 画布上下文 */
   ctx: CanvasRenderingContext2D;
   /** 画布矩形 */
-  rect: DOMRect;
+  // rect: DOMRect;
+  rect?: { value: DOMRect };
+
   /** 画布偏移量 */
   offset = { x: 0, y: 0 };
   /** 画布中心点 */
@@ -76,9 +78,33 @@ export default class BaseData {
       if (canvas.getContext) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d")!;
-        this.rect = canvas.getBoundingClientRect();
+        this.rect = ((canvas: HTMLCanvasElement) => {
+          let isNew = true;
+          Promise.resolve().then(() => (isNew = false));
+          const rect: { value: DOMRect } = {
+            value: canvas.getBoundingClientRect(),
+          };
+          return new Proxy(rect, {
+            get(target, key) {
+              if (key == "value") {
+                if (isNew) return target.value;
+                else {
+                  target.value = canvas.getBoundingClientRect();
+                  isNew = true;
+                  Promise.resolve().then(() => (isNew = false));
+                  return target.value;
+                }
+              }
+              return target[key as never];
+            },
+            set() {
+              return false;
+            },
+          });
+        })(canvas);
 
         const { clientWidth, clientHeight } = canvas;
+
         [canvas.width, canvas.height] = [clientWidth, clientHeight];
       } else throw new Error("canvas-unsupported code here");
     } else throw new Error("canvas is not HTMLCanvasElement");
@@ -89,7 +115,7 @@ export default class BaseData {
     const { canvas, rect, offset, defaultCenter } = this;
     if (!canvas) return console.error("canvas is not HTMLCanvasElement");
 
-    const { width, height } = rect!;
+    const { width, height } = rect!.value;
     const { top, bottom, left, right } = defaultCenter;
 
     // 值解析策略
@@ -165,7 +191,8 @@ export default class BaseData {
     event: "center" | { clientX: number; clientY: number },
     delta: number
   ) {
-    const { canvas, rect, lockDragAndResize, axisConfig } = this;
+    const { canvas, lockDragAndResize, axisConfig } = this;
+    const rect = this.rect!.value;
 
     if (lockDragAndResize) return;
     if (!canvas || !rect)
@@ -258,7 +285,7 @@ export default class BaseData {
     if (!canvas) return console.error("canvas is not HTMLCanvasElement");
 
     const { clientX, clientY } = event;
-    const { left, top } = rect!;
+    const { left, top } = rect!.value;
 
     const x = (clientX - left - center.x) * axisConfig.x;
     const y = (clientY - top - center.y) * axisConfig.y;
@@ -266,19 +293,39 @@ export default class BaseData {
   }
 
   /** 通过坐标轴上的点 获取坐标轴上的值 */
-  getAxisValueByPoint(x: number, y: number) {
+  getAxisValueByPoint(x: number, y: number, returnInitialScaleValue?: boolean) {
     const { axisConfig } = this;
+
+    if (returnInitialScaleValue)
+      return {
+        xV: (x / axisConfig.min) * axisConfig.count,
+        yV: (y / axisConfig.min) * axisConfig.count,
+      };
+
     const count = this.getGridCount();
     const xV = this.preservePrecision((x / axisConfig.size) * count);
     const yV = this.preservePrecision((y / axisConfig.size) * count);
+
     return { xV, yV };
   }
   /** 通过坐标轴上的值 获取坐标轴上的点 */
-  getAxisPointByValue(xV: number, yV: number) {
+  getAxisPointByValue(
+    xV: number,
+    yV: number,
+    returnInitialScaleValue?: boolean
+  ) {
     const { axisConfig } = this;
+
+    if (returnInitialScaleValue)
+      return {
+        x: (xV / axisConfig.count) * axisConfig.min,
+        y: (yV / axisConfig.count) * axisConfig.min,
+      };
+
     const count = this.getGridCount();
     const x = this.preservePrecision((xV / count) * axisConfig.size, 3);
     const y = this.preservePrecision((yV / count) * axisConfig.size, 3);
+
     return { x, y };
   }
 
@@ -289,7 +336,7 @@ export default class BaseData {
     right: number;
     bottom: number;
   }) {
-    rect = rect || this.rect!;
+    rect = rect || this.rect!.value;
 
     const { left, top, right, bottom } = rect;
     const { axisConfig } = this;

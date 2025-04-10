@@ -12,7 +12,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.value = points.value;
   }
 
-  updateBaseDate() {
+  updateBaseData() {
     if (!this.mainCanvas) return;
     const IsValid = this.mainCanvas.IsValid;
     let { value, position } = this;
@@ -20,13 +20,18 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     if (!isValue && !isPosition) {
       return (this.dynamicPosition = undefined);
-    } else if (isValue && !isPosition) {
-      const loc = this.mainCanvas.getAxisPointByValue(value![0], value![1]);
+    } else if (isValue) {
+      const loc = this.mainCanvas.getAxisPointByValue(
+        value![0],
+        value![1],
+        true
+      );
       position = [loc.x, loc.y];
-    } else if (!isValue && isPosition) {
+    } else {
       const val = this.mainCanvas.getAxisValueByPoint(
         position![0],
-        position![1]
+        position![1],
+        true
       );
       value = [val.xV, val.yV];
     }
@@ -48,11 +53,13 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       (style?.width || defaultStyle.width) +
       (style?.radius || defaultStyle.radius);
 
-    this.radiusValue = Math.ceil((value![0] / position![0]) * radius);
+    this.radiusValue = this.mainCanvas.preservePrecision(
+      (value![0] / position![0]) * radius
+    );
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    const { position, mainCanvas } = this;
+    const { dynamicPosition, mainCanvas } = this;
     if (!mainCanvas) return;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].point;
@@ -61,6 +68,8 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       style = mainCanvas.style[this.style]?.point || defaultStyle;
     } else if (typeof this.style == "object") {
       style = Object.assign({}, defaultStyle, this.style as any);
+    } else {
+      style = defaultStyle;
     }
 
     const { width, stroke, fill, radius } = style;
@@ -69,7 +78,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     ctx.strokeStyle = stroke;
     ctx.fillStyle = fill;
     ctx.beginPath();
-    ctx.arc(position![0], position![1], radius, 0, this.angle);
+    ctx.arc(dynamicPosition![0], dynamicPosition![1], radius, 0, this.angle);
     ctx.fill();
     ctx.stroke();
   }
@@ -84,11 +93,12 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     if (isShow && prevDynamicStatus) {
       const [x, y] = value!;
+
       const isPointWithinRange =
-        maxMinValue.maxXV > x + radiusValue &&
-        maxMinValue.minXV < x - radiusValue &&
-        maxMinValue.maxYV > y + radiusValue &&
-        maxMinValue.minYV < y - radiusValue;
+        maxMinValue.maxXV > x - radiusValue &&
+        maxMinValue.minXV < x + radiusValue &&
+        maxMinValue.maxYV > y - radiusValue &&
+        maxMinValue.minYV < y + radiusValue;
 
       if (isPointWithinRange) {
         if (isRecalculate)

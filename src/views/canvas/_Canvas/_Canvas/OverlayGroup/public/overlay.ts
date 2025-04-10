@@ -26,13 +26,13 @@ export default abstract class Overlay<
     this.zIndex = overlay.zIndex ?? 0;
   }
 
-  abstract updateBaseDate(): void;
+  abstract updateBaseData(): void;
 
   /** 主画布 */
   protected mainCanvas?: _Canvas;
   setMainCanvas(mainCanvas?: _Canvas) {
     this.mainCanvas = mainCanvas;
-    this.updateBaseDate();
+    this.updateBaseData();
   }
   equalsMainCanvas(mainCanvas?: _Canvas) {
     return this.mainCanvas === mainCanvas;
@@ -70,18 +70,22 @@ export default abstract class Overlay<
   }
   setPosition(position: Overlay<T, V>["position"]) {
     this.position = position;
+    /** 位置改变时，清除值信息 */
+    this.value = undefined;
     const prevDynamicStatus = !!this.dynamicPosition;
-    this.updateBaseDate();
-    if (!!this.dynamicPosition != prevDynamicStatus) this.notifyReload?.();
+    this.updateBaseData();
+    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
   }
   getPosition() {
     return this.position;
   }
   setValue(value: Overlay<T, V>["value"]) {
     this.value = value;
+    /** 值改变时，清除位置信息 */
+    this.position = undefined;
     const prevDynamicStatus = !!this.dynamicPosition;
-    this.updateBaseDate();
-    if (!!this.dynamicPosition != prevDynamicStatus) this.notifyReload?.();
+    this.updateBaseData();
+    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
   }
   getValue() {
     return this.value;
