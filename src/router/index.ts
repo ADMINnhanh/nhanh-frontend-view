@@ -13,7 +13,7 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
-      path: "/",
+      path: "/:path(nhanh-frontend-view)?",
       name: "home",
       component: home,
       redirect: { name: Routes[0].name },
