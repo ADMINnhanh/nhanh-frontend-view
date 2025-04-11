@@ -3,6 +3,7 @@ import { NAnchor, NAnchorLink, NScrollbar, NSkeleton, NSpace } from "naive-ui";
 import MyCard from "./card.vue";
 import { markRaw, onUnmounted, ref } from "vue";
 
+const anchorPrefix = location.hash.replace(/#[^/]+/, "") + "#";
 const demoName = [
   ["original", "仅需初始化 _Canvas"],
   ["center", "中心点"],
@@ -106,11 +107,16 @@ onUnmounted(() => {
       </div>
     </NScrollbar>
     <NScrollbar style="width: 200px; flex-shrink: 0">
-      <NAnchor type="block" :bound="100" offset-target=".my-canvas-tools">
+      <NAnchor
+        type="block"
+        :bound="100"
+        ignore-gap
+        offset-target=".my-canvas-tools"
+      >
         <NAnchorLink
           v-for="item in demoName"
           :key="item[0]"
-          :href="'#' + item[0]"
+          :href="anchorPrefix + item[0]"
           :title="item[1]"
         />
       </NAnchor>

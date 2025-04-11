@@ -9,11 +9,11 @@ import { _WaitForCondition } from "nhanh-pure-function";
 
 const router = createRouter({
   // history: createWebHistory(import.meta.env.BASE_URL),
-  // history: createWebHashHistory(),
-  history: createWebHistory(),
+  history: createWebHashHistory(),
+  // history: createWebHistory(),
   routes: [
     {
-      path: "/:path(nhanh-frontend-view)?",
+      path: "/",
       name: "home",
       component: home,
       redirect: { name: Routes[0].name },
@@ -31,7 +31,8 @@ const router = createRouter({
   ],
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
-      return { el: to.hash, behavior: "smooth" };
+      const el = document.querySelector(to.hash);
+      el?.scrollIntoView({ behavior: "smooth" });
     }
   },
 });

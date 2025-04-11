@@ -55,6 +55,10 @@ export default class Draw extends Style {
   /** 重绘画布 */
   private redraw() {
     if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
+    if (this.canvas.clientWidth == 0 || this.canvas.clientHeight == 0)
+      return console.error(
+        "The image argument is a canvas element with a width or height of 0."
+      );
 
     this.updateCenter();
 
