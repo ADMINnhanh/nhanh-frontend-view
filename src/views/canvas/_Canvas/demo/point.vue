@@ -12,18 +12,16 @@ const point_value = new _Canvas.Point({ value: [1, 1] });
 const point_position = new _Canvas.Point({ position: [-100, -100] });
 
 function UpdateValue(delta: number) {
-  const [x, y] = point_value.getValue()!;
-  point_value.setValue([x + delta, y + delta]);
-
-  const [x1, y1] = point_position.getValue()!;
-  point_position.setValue([x1 + delta, y1 + delta]);
+  [point_value, point_position].forEach((point) => {
+    const [x, y] = point.value!;
+    point.setValue([x + delta, y + delta]);
+  });
 }
 function UpdatePosition(delta: number) {
-  const [x, y] = point_value.getPosition()!;
-  point_value.setPosition([x + delta, y + delta]);
-
-  const [x1, y1] = point_position.getPosition()!;
-  point_position.setPosition([x1 + delta, y1 + delta]);
+  [point_value, point_position].forEach((point) => {
+    const [x, y] = point.position!;
+    point.setPosition([x + delta, y + delta]);
+  });
 }
 
 watch(

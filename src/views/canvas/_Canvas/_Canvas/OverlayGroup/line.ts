@@ -9,17 +9,16 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
 
   constructor(line: LineListType[number]) {
     super(line);
-    this.position = line.position;
-    this.value = line.value;
+    this.infinite = line.infinite;
   }
 
   updateBaseData() {
     if (!this.mainCanvas) return;
-    const IsValids = this.mainCanvas.IsValids;
+
     let { value, position } = this;
     const [isValue, isPosition] = [
-      IsValids(value) && value!.length > 1,
-      IsValids(position) && position!.length > 1,
+      this.mainCanvas.IsValids(value) && value!.length > 1,
+      this.mainCanvas.IsValids(position) && position!.length > 1,
     ];
 
     if (!isValue && !isPosition) {
@@ -88,7 +87,7 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
   /** 绘制线段 */
   drawLine(ctx: CanvasRenderingContext2D, position?: [number, number][]) {
     const { mainCanvas } = this;
-    position = position || this.position;
+    position = position || this.dynamicPosition;
     if (!mainCanvas) return;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].line;
@@ -97,6 +96,8 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
       style = mainCanvas.style[this.style]?.line || defaultStyle;
     } else if (typeof this.style == "object") {
       style = Object.assign({}, defaultStyle, this.style as any);
+    } else {
+      style = defaultStyle;
     }
 
     const { width, color, dash, dashGap, dashOffset, cap, join } = style;
@@ -121,14 +122,6 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     if (!mainCanvas) return;
 
     const { rect } = mainCanvas;
-
-    const defaultStyle = mainCanvas.style[mainCanvas.theme].line;
-    let style = {} as LineStyleType;
-    if (typeof this.style == "string") {
-      style = mainCanvas.style[this.style]?.line || defaultStyle;
-    } else if (typeof this.style == "object") {
-      style = Object.assign({}, defaultStyle, this.style as any);
-    }
 
     const [start, end]: [number, number][] = _Clone(dynamicPosition!) as any;
 

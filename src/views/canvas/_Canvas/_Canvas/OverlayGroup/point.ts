@@ -8,8 +8,6 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
   constructor(points: PointListType[number]) {
     super(points);
-    this.position = points.position;
-    this.value = points.value;
   }
 
   updateBaseData() {

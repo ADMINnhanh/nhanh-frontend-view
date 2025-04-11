@@ -4,13 +4,13 @@ import MyCard from "./card.vue";
 import { markRaw, onUnmounted, ref } from "vue";
 
 const demoName = [
-  // ["original", "仅需初始化 _Canvas"],
-  // ["center", "中心点"],
-  // ["shortcutKey", "快捷键"],
-  // ["axis", "坐标轴"],
+  ["original", "仅需初始化 _Canvas"],
+  ["center", "中心点"],
+  ["shortcutKey", "快捷键"],
+  ["axis", "坐标轴"],
   ["point", "点"],
-  // ["line", "线"],
-  // ["polygon", "面"],
+  ["line", "线"],
+  ["polygon", "面"],
 ] as const;
 type DemoName = (typeof demoName)[number][0];
 function splitArrayByIndex<T>(arr: readonly T[]) {

@@ -91,7 +91,7 @@ export default class OverlayGroup {
       this.overlays.forEach((overlay) => {
         if (overlay.equalsMainCanvas(this.mainCanvas)) {
           const draw = overlay.getDraw();
-          if (draw) groupArr.push([overlay.getZIndex(), draw]);
+          if (draw) groupArr.push([overlay.zIndex, draw]);
         } else {
           this.overlays.delete(overlay);
         }

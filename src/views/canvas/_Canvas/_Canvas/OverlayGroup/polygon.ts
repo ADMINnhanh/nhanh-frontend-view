@@ -5,25 +5,23 @@ export default class Polygon extends Overlay<
   PolygonStyleType,
   [number, number][]
 > {
-  private size?: [number, number];
+  size?: [number, number];
   private dynamicSize?: [number, number];
 
   constructor(polygon: PolygonListType[number]) {
     super(polygon);
-    this.position = polygon.position;
-    this.value = polygon.value;
     this.size = polygon.size;
   }
 
   updateBaseData() {
     if (!this.mainCanvas) return;
-    const { IsValids, IsValid, axisConfig, percentage } = this.mainCanvas;
+    const { axisConfig, percentage } = this.mainCanvas;
     let { value, position, size } = this;
 
     const [isValue, isPosition, isRect] = [
-      IsValids(value),
-      IsValids(position),
-      IsValid(size),
+      this.mainCanvas.IsValids(value),
+      this.mainCanvas.IsValids(position),
+      this.mainCanvas.IsValid(size),
     ];
 
     if (!isValue && !isPosition) return (this.dynamicPosition = undefined);
@@ -77,9 +75,6 @@ export default class Polygon extends Overlay<
     const prevDynamicStatus = !!this.dynamicPosition;
     this.updateBaseData();
     if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
-  }
-  getSize() {
-    return this.size;
   }
 
   private setCanvasStyles(ctx: CanvasRenderingContext2D) {
@@ -157,7 +152,7 @@ export default class Polygon extends Overlay<
           ];
         }
       }
-      if (this.dynamicSize) return this.drawRect.bind(this);
+      if (this.dynamicSize?.length) return this.drawRect.bind(this);
       return this.drawPolygon.bind(this);
     }
   }
