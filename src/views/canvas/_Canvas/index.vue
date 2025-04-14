@@ -12,6 +12,7 @@ const demoName = [
   ["point", "点"],
   ["line", "线"],
   ["polygon", "面"],
+  ["custom", "自定义绘制"],
   ["layer", "图层 & 层级"],
 ] as const;
 

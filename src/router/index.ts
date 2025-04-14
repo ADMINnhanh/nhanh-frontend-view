@@ -31,8 +31,10 @@ const router = createRouter({
   ],
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
-      const el = document.querySelector(to.hash);
-      el?.scrollIntoView({ behavior: "smooth" });
+      setTimeout(() => {
+        const el = document.querySelector(to.hash);
+        el?.scrollIntoView({ behavior: "smooth" });
+      }, 500);
     }
   },
 });

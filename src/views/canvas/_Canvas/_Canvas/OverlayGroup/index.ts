@@ -3,10 +3,15 @@ import _Canvas from "..";
 import Point from "./point";
 import Line from "./line";
 import Polygon from "./polygon";
+import Custom from "./custom";
 import Show from "./public/show";
 import { _GenerateUUID } from "nhanh-pure-function";
 
-type Overlay = Point | Line | Polygon;
+export type Overlay =
+  | Point
+  | Line
+  | Polygon
+  | Custom<any, [number, number] | [number, number][]>;
 
 export default class OverlayGroup {
   /** 群组名称 */
@@ -14,7 +19,7 @@ export default class OverlayGroup {
   /** 群组是否显示 */
   show = new Show();
 
-  private overlays = new Set<Point | Line | Polygon>();
+  private overlays = new Set<Overlay>();
 
   constructor(name: string) {
     this.name = name;

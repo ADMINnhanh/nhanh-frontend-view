@@ -1,14 +1,13 @@
 import "./index.less";
 import QuickMethod from "./core/quikmethod";
 import LayerGroup from "./LayerGroup";
-import OverlayGroup from "./OverlayGroup";
+import OverlayGroup, { type Overlay } from "./OverlayGroup";
 import Layer from "./LayerGroup/layer";
 import Point from "./OverlayGroup/point";
 import Line from "./OverlayGroup/line";
 import Polygon from "./OverlayGroup/polygon";
 import Axis from "./core/axis";
-
-type Overlay = Point | Line | Polygon;
+import Custom from "./OverlayGroup/custom";
 
 type InitConfig = DeepPartial<{
   theme: _Canvas["theme"];
@@ -32,6 +31,8 @@ export default class _Canvas extends QuickMethod {
   static Line = Line;
   /** 多边形 */
   static Polygon = Polygon;
+  /** 自定义绘制 */
+  static Custom = Custom;
 
   constructor(id: string, config?: InitConfig) {
     super(id);
@@ -62,8 +63,12 @@ export default class _Canvas extends QuickMethod {
     layer_point.addGroup(new OverlayGroup("点位覆盖物群组"));
     layer_point.setzIndex(3);
 
+    const layer_custom = new Layer("自定义绘制图层");
+    layer_custom.addGroup(new OverlayGroup("自定义绘制覆盖物群组"));
+    layer_custom.setzIndex(4);
+
     const layerGroup = new LayerGroup("默认图层群组");
-    layerGroup.addLayer([layer_point, layer_line, layer_polygon]);
+    layerGroup.addLayer([layer_point, layer_line, layer_polygon, layer_custom]);
 
     this.setLayerGroups(layerGroup);
   }
@@ -102,24 +107,26 @@ export default class _Canvas extends QuickMethod {
   }
   /** 添加覆盖物 */
   addOverlay(overlays: Overlay | Overlay[]) {
-    const { overlays_point, overlays_line, overlays_polygon } =
+    const { overlays_point, overlays_line, overlays_polygon, overlays_custom } =
       this.getDefaultOverlayGroup() || {};
     [overlays].flat().forEach((overlay) => {
       if (overlay instanceof Point) overlays_point?.addOverlays(overlay);
       else if (overlay instanceof Line) overlays_line?.addOverlays(overlay);
       else if (overlay instanceof Polygon)
         overlays_polygon?.addOverlays(overlay);
+      else if (overlay instanceof Custom) overlays_custom?.addOverlays(overlay);
     });
   }
   /** 移除覆盖物 */
   removeOverlay(overlays: Overlay | Overlay[]) {
-    const { overlays_point, overlays_line, overlays_polygon } =
+    const { overlays_point, overlays_line, overlays_polygon, overlays_custom } =
       this.getDefaultOverlayGroup() || {};
     [overlays].flat().forEach((overlay) => {
       if (overlay instanceof Point) overlays_point?.removeOverlays(overlay);
       else if (overlay instanceof Line) overlays_line?.removeOverlays(overlay);
       else if (overlay instanceof Polygon)
         overlays_polygon?.removeOverlays(overlay);
+      else if (overlay instanceof Custom) overlays_custom?.addOverlays(overlay);
     });
   }
 

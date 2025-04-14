@@ -8,10 +8,10 @@ export default abstract class Overlay<
   /** 是否显示 */
   show = new Show();
   style?: DeepPartial<T> | string;
-  zIndex: number;
   position?: V;
   value?: V;
-  protected dynamicPosition?: V;
+  zIndex: number;
+  dynamicPosition?: V;
 
   /** 自定义扩展数据 */
   extData?: any;
@@ -33,7 +33,7 @@ export default abstract class Overlay<
   abstract updateBaseData(): void;
 
   /** 主画布 */
-  protected mainCanvas?: _Canvas;
+  mainCanvas?: _Canvas;
   setMainCanvas(mainCanvas?: _Canvas) {
     this.mainCanvas = mainCanvas;
     this.updateBaseData();
