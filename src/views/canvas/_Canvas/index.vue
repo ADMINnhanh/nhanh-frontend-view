@@ -3,7 +3,7 @@ import { NAnchor, NAnchorLink, NScrollbar, NSkeleton, NSpace } from "naive-ui";
 import MyCard from "./card.vue";
 import { markRaw, onUnmounted, ref } from "vue";
 
-const anchorPrefix = location.hash.replace(/#[^/]+/, "") + "#";
+const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 const demoName = [
   ["original", "仅需初始化 _Canvas"],
   ["center", "中心点"],
@@ -12,7 +12,9 @@ const demoName = [
   ["point", "点"],
   ["line", "线"],
   ["polygon", "面"],
+  ["layer", "图层 & 层级"],
 ] as const;
+
 type DemoName = (typeof demoName)[number][0];
 function splitArrayByIndex<T>(arr: readonly T[]) {
   const oddIndexArray = [];

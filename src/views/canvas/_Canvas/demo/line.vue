@@ -29,9 +29,10 @@ const line_Infinite = new _Canvas.Line({
   ],
   infinite: true,
 });
+const line_arr = [line_value, line_position, line_Infinite];
 
 function UpdateValue(delta: number) {
-  [line_value, line_position, line_Infinite].forEach((line) => {
+  line_arr.forEach((line) => {
     const newValue: [number, number][] = line.value!.map(([x, y]) => [
       x + delta,
       y + delta,
@@ -40,7 +41,7 @@ function UpdateValue(delta: number) {
   });
 }
 function UpdatePosition(delta: number) {
-  [line_value, line_position, line_Infinite].forEach((line) => {
+  line_arr.forEach((line) => {
     const newPosition: [number, number][] = line.position!.map(([x, y]) => [
       x + delta,
       y + delta,
@@ -56,7 +57,7 @@ watch(
 onMounted(() => {
   myCanvas = new _Canvas(id);
   myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addOverlay([line_value, line_position, line_Infinite]);
+  myCanvas.addOverlay(line_arr);
 });
 </script>
 

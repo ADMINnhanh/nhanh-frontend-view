@@ -26,9 +26,10 @@ const polygon_rect = new _Canvas.Polygon({
   value: [[1, -2]],
   size: [100, 100],
 });
+const polygon_arr = [polygon_value, polygon_position, polygon_rect];
 
 function UpdateValue(delta: number) {
-  [polygon_value, polygon_position, polygon_rect].forEach((polygon) => {
+  polygon_arr.forEach((polygon) => {
     const newValue: [number, number][] = polygon.value!.map(([x, y]) => [
       x + delta,
       y + delta,
@@ -37,7 +38,7 @@ function UpdateValue(delta: number) {
   });
 }
 function UpdatePosition(delta: number) {
-  [polygon_value, polygon_position, polygon_rect].forEach((polygon) => {
+  polygon_arr.forEach((polygon) => {
     const newPosition: [number, number][] = polygon.position!.map(([x, y]) => [
       x + delta,
       y + delta,
@@ -53,7 +54,7 @@ watch(
 onMounted(() => {
   myCanvas = new _Canvas(id);
   myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addOverlay([polygon_value, polygon_position, polygon_rect]);
+  myCanvas.addOverlay(polygon_arr);
 });
 </script>
 

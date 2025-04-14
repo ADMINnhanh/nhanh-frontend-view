@@ -10,15 +10,16 @@ const id = _GenerateUUID();
 let myCanvas: _Canvas;
 const point_value = new _Canvas.Point({ value: [1, 1] });
 const point_position = new _Canvas.Point({ position: [-100, -100] });
+const point_arr = [point_value, point_position];
 
 function UpdateValue(delta: number) {
-  [point_value, point_position].forEach((point) => {
+  point_arr.forEach((point) => {
     const [x, y] = point.value!;
     point.setValue([x + delta, y + delta]);
   });
 }
 function UpdatePosition(delta: number) {
-  [point_value, point_position].forEach((point) => {
+  point_arr.forEach((point) => {
     const [x, y] = point.position!;
     point.setPosition([x + delta, y + delta]);
   });
@@ -31,7 +32,7 @@ watch(
 onMounted(() => {
   myCanvas = new _Canvas(id);
   myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addOverlay([point_value, point_position]);
+  myCanvas.addOverlay(point_arr);
 });
 </script>
 
