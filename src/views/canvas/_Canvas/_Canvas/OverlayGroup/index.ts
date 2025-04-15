@@ -1,5 +1,6 @@
 import _Canvas from "..";
 
+import Text from "./text";
 import Point from "./point";
 import Line from "./line";
 import Polygon from "./polygon";
@@ -8,6 +9,7 @@ import Show from "./public/show";
 import { _GenerateUUID } from "nhanh-pure-function";
 
 export type Overlay =
+  | Text
   | Point
   | Line
   | Polygon

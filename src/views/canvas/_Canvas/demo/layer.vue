@@ -8,7 +8,7 @@ import { NP, NText } from "naive-ui";
 const id = _GenerateUUID();
 
 let myCanvas: _Canvas;
-const custom_1 = new _Canvas.Custom({ value: [0.1, -1], zIndex: 0 }, (ctx) => {
+const custom_1 = new _Canvas.Custom({ value: [-1, -0.8], zIndex: 0 }, (ctx) => {
   const [x, y] = custom_1.dynamicPosition!;
 
   ctx.fillStyle = "#b2d705";
@@ -20,7 +20,7 @@ const custom_1 = new _Canvas.Custom({ value: [0.1, -1], zIndex: 0 }, (ctx) => {
   ctx.fill();
 });
 const custom_2 = new _Canvas.Custom(
-  { value: [0.3, -0.5], zIndex: 1 },
+  { value: [-0.8, -0.2], zIndex: 1 },
   (ctx) => {
     const [x, y] = custom_2.dynamicPosition!;
 
@@ -33,15 +33,27 @@ const custom_2 = new _Canvas.Custom(
     ctx.fill();
   }
 );
+const text_value1 = new _Canvas.Text({
+  value: [0, 0.25],
+  text: "text_value1",
+  style: { color: "#208088", size: 20 },
+  zIndex: 2,
+});
+const text_value2 = new _Canvas.Text({
+  value: [0, 0.45],
+  text: "text_value2",
+  style: { color: "#898033", size: 20 },
+  zIndex: 3,
+});
 const point_value1 = new _Canvas.Point({
   value: [0, -0.2],
   style: { stroke: "#2080f0", fill: "#2080f0", width: 20 },
-  zIndex: 2,
+  zIndex: 4,
 });
 const point_value2 = new _Canvas.Point({
   value: [0, 0.2],
   style: { stroke: "#18a058", fill: "#18a058", width: 20 },
-  zIndex: 3,
+  zIndex: 5,
 });
 const line_value1 = new _Canvas.Line({
   value: [
@@ -49,7 +61,7 @@ const line_value1 = new _Canvas.Line({
     [2, 0],
   ],
   style: { color: "#8a2be2", width: 10 },
-  zIndex: 4,
+  zIndex: 6,
 });
 const line_value2 = new _Canvas.Line({
   value: [
@@ -57,19 +69,19 @@ const line_value2 = new _Canvas.Line({
     [1, -1],
   ],
   style: { color: "#ff69b4", width: 10 },
-  zIndex: 5,
+  zIndex: 7,
 });
 const polygon_rect1 = new _Canvas.Polygon({
   value: [[-1, -1]],
   size: [100, 100],
   style: { fill: "#f0a020", stroke: "#f0a020" },
-  zIndex: 6,
+  zIndex: 8,
 });
 const polygon_rect2 = new _Canvas.Polygon({
   value: [[0, -1.5]],
   size: [100, 100],
   style: { fill: "#d03050", stroke: "#d03050" },
-  zIndex: 7,
+  zIndex: 9,
 });
 
 const overlay_arr = [
@@ -79,6 +91,8 @@ const overlay_arr = [
   line_value1,
   point_value2,
   point_value1,
+  text_value2,
+  text_value1,
   custom_2,
   custom_1,
 ];
@@ -97,11 +111,12 @@ onMounted(() => {
 <template>
   <NP>
     <NText type="info"> _Canvas </NText> 工具默认配置了
-    <NText type="success"> 4 </NText>
-    个图层（自定义、点 、线 、面）
+    <NText type="success"> 5 </NText>
+    个图层（自定义、文字、点 、线 、面）
   </NP>
   <NP>
     图层默认的<NText type="info"> zIndex </NText>： （自定义
+    <NText type="success"> 5 </NText>） 、（文字
     <NText type="success"> 4 </NText>） 、（点
     <NText type="success"> 3 </NText>） 、（线
     <NText type="success"> 2 </NText>） 、（面
@@ -112,7 +127,7 @@ onMounted(() => {
   </NP>
   <NP>
     覆盖物的
-    <NText type="info"> zIndex </NText> 属性仅作用于单个图层，表现效果如图
+    <NText type="info"> zIndex </NText> 属性仅作用于所属图层，表现效果如下
   </NP>
   <canvas :id="id" class="my-canvas"></canvas>
 </template>

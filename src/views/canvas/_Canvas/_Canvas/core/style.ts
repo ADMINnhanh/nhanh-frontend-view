@@ -12,6 +12,7 @@ export default class Style extends BaseData {
       text: {
         color: "#222",
         secondary: "#909399",
+        stroke: "#fff",
         size: 12,
         family: "微软雅黑",
         bold: true,
@@ -56,6 +57,7 @@ export default class Style extends BaseData {
       text: {
         color: "#aeaeae",
         secondary: "#8c8c8c",
+        stroke: "#000",
         size: 12,
         family: "微软雅黑",
         bold: true,

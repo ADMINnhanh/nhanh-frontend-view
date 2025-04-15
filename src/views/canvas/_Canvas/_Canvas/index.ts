@@ -4,6 +4,7 @@ import LayerGroup from "./LayerGroup";
 import OverlayGroup, { type Overlay } from "./OverlayGroup";
 import Layer from "./LayerGroup/layer";
 import Point from "./OverlayGroup/point";
+import Text from "./OverlayGroup/text";
 import Line from "./OverlayGroup/line";
 import Polygon from "./OverlayGroup/polygon";
 import Axis from "./core/axis";
@@ -25,6 +26,8 @@ export default class _Canvas extends QuickMethod {
   /** 覆盖物群组 */
   static OverlayGroup = OverlayGroup;
 
+  /** 文字 */
+  static Text = Text;
   /** 点位 */
   static Point = Point;
   /** 线段 */
@@ -63,12 +66,22 @@ export default class _Canvas extends QuickMethod {
     layer_point.addGroup(new OverlayGroup("点位覆盖物群组"));
     layer_point.setzIndex(3);
 
+    const layer_text = new Layer("文字图层");
+    layer_text.addGroup(new OverlayGroup("文字覆盖物群组"));
+    layer_text.setzIndex(4);
+
     const layer_custom = new Layer("自定义绘制图层");
     layer_custom.addGroup(new OverlayGroup("自定义绘制覆盖物群组"));
-    layer_custom.setzIndex(4);
+    layer_custom.setzIndex(5);
 
     const layerGroup = new LayerGroup("默认图层群组");
-    layerGroup.addLayer([layer_point, layer_line, layer_polygon, layer_custom]);
+    layerGroup.addLayer([
+      layer_text,
+      layer_point,
+      layer_line,
+      layer_polygon,
+      layer_custom,
+    ]);
 
     this.setLayerGroups(layerGroup);
   }
@@ -107,10 +120,16 @@ export default class _Canvas extends QuickMethod {
   }
   /** 添加覆盖物 */
   addOverlay(overlays: Overlay | Overlay[]) {
-    const { overlays_point, overlays_line, overlays_polygon, overlays_custom } =
-      this.getDefaultOverlayGroup() || {};
+    const {
+      overlays_text,
+      overlays_point,
+      overlays_line,
+      overlays_polygon,
+      overlays_custom,
+    } = this.getDefaultOverlayGroup() || {};
     [overlays].flat().forEach((overlay) => {
-      if (overlay instanceof Point) overlays_point?.addOverlays(overlay);
+      if (overlay instanceof Text) overlays_text?.addOverlays(overlay);
+      else if (overlay instanceof Point) overlays_point?.addOverlays(overlay);
       else if (overlay instanceof Line) overlays_line?.addOverlays(overlay);
       else if (overlay instanceof Polygon)
         overlays_polygon?.addOverlays(overlay);
@@ -119,10 +138,17 @@ export default class _Canvas extends QuickMethod {
   }
   /** 移除覆盖物 */
   removeOverlay(overlays: Overlay | Overlay[]) {
-    const { overlays_point, overlays_line, overlays_polygon, overlays_custom } =
-      this.getDefaultOverlayGroup() || {};
+    const {
+      overlays_text,
+      overlays_point,
+      overlays_line,
+      overlays_polygon,
+      overlays_custom,
+    } = this.getDefaultOverlayGroup() || {};
     [overlays].flat().forEach((overlay) => {
-      if (overlay instanceof Point) overlays_point?.removeOverlays(overlay);
+      if (overlay instanceof Text) overlays_text?.removeOverlays(overlay);
+      else if (overlay instanceof Point)
+        overlays_point?.removeOverlays(overlay);
       else if (overlay instanceof Line) overlays_line?.removeOverlays(overlay);
       else if (overlay instanceof Polygon)
         overlays_polygon?.removeOverlays(overlay);

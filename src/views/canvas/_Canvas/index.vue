@@ -10,11 +10,13 @@ const demoName = [
   ["center", "中心点"],
   ["shortcutKey", "快捷键"],
   ["axis", "坐标轴"],
+  ["text", "文字"],
   ["point", "点"],
   ["line", "线"],
   ["polygon", "面"],
   ["custom", "自定义绘制"],
   ["layer", "图层 & 层级"],
+  ["show", "显示条件"],
 ] as const;
 
 type DemoName = (typeof demoName)[number][0];

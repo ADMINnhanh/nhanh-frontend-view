@@ -1,6 +1,6 @@
 export default class Show {
-  private show = true;
-  private scales?: [number, number];
+  show = true;
+  scales?: [number, number];
 
   constructor(config?: { show?: boolean; scales?: [number, number] }) {
     if (config?.show !== undefined) this.show = config.show;
@@ -16,27 +16,21 @@ export default class Show {
       this.notifyReload?.(true);
     }
   }
-  getShow() {
-    return this.show;
-  }
   setScales(scales: [number, number]) {
     if (scales != this.scales) {
       this.scales = scales;
       if (this.show) this.notifyReload?.();
     }
   }
-  getScales() {
-    return this.scales;
-  }
 
   shouldRender(scale?: number, opacity?: number) {
-    return (
-      this.show &&
-      scale !== undefined &&
-      (this.scales
-        ? scale >= this.scales[0] && scale <= this.scales[1]
-        : true) &&
-      opacity !== 0
-    );
+    if (!this.show || scale === undefined || opacity === 0) return false;
+
+    if (this.scales) {
+      const min = Math.min(...this.scales);
+      const max = Math.max(...this.scales);
+      return scale >= min && scale <= max;
+    }
+    return true;
   }
 }

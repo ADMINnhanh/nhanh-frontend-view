@@ -17,10 +17,14 @@ export default class QuickMethod extends Event {
     const overlays_polygon = layerGroup
       .getLayer("多边形图层")
       ?.getGroup("多边形覆盖物群组");
+    const overlays_text = layerGroup
+      .getLayer("文字图层")
+      ?.getGroup("文字覆盖物群组");
     const overlays_custom = layerGroup
       .getLayer("自定义绘制图层")
       ?.getGroup("自定义绘制覆盖物群组");
     return {
+      overlays_text,
       overlays_point,
       overlays_line,
       overlays_polygon,

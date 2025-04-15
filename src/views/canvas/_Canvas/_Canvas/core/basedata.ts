@@ -209,7 +209,7 @@ export default class BaseData {
     const mousePoint = this.getMousePositionOnAxis({ clientX, clientY })!;
     const mouseValue = this.getAxisValueByPoint(mousePoint.x, mousePoint.y);
 
-    this.scale += delta;
+    this.scale = this.preservePrecision(this.scale + delta);
 
     this.updateSize();
 

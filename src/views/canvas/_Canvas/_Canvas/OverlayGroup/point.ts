@@ -6,7 +6,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   radiusValue = 0;
   private angle = 2 * Math.PI;
 
-  constructor(points: PointListType[number]) {
+  constructor(points: PointType) {
     super(points);
   }
 

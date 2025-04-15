@@ -4,10 +4,10 @@ import Overlay from "./public/overlay";
 
 export default class Line extends Overlay<LineStyleType, [number, number][]> {
   /** 两点相连向外延展的无限线 */
-  private infinite?: boolean;
+  infinite?: boolean;
   private angle = 2 * Math.PI;
 
-  constructor(line: LineListType[number]) {
+  constructor(line: LineType) {
     super(line);
     this.infinite = line.infinite;
   }
@@ -51,9 +51,6 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
       this.infinite = infinite;
       if (this.dynamicPosition) this.notifyReload?.();
     }
-  }
-  getInfinite() {
-    return this.infinite;
   }
 
   /** 绘制点 */

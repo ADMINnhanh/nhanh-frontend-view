@@ -12,8 +12,10 @@ type KnownStyleKeys = "light" | "dark";
 type TextStyleType = {
   /** 颜色 */
   color: string;
-  /**  secondary颜色 */
+  /** secondary颜色 */
   secondary: string;
+  /** 描边色 */
+  stroke: string;
   /** 字体大小 */
   size: number;
   /** 字体族 */
@@ -103,33 +105,31 @@ type DeepPartial<T> = {
 
 type PluralSwitch<T, P extends boolean> = P extends true ? T[] : T;
 /** 公共数据属性 */
-type CommonDataType<STYLE, PLURAL extends boolean, OTHER = {}> = Array<
-  Partial<
-    {
-      /** 样式 */
-      style: DeepPartial<STYLE>;
-      /** 层级 */
-      zIndex: number;
-      /** 是否显示 */
-      show: boolean;
-      /** 未缩放状态下的位置 */
-      position: PluralSwitch<[number, number], PLURAL>;
-      /** 动态位置 */
-      dynamicPosition: PluralSwitch<[number, number], PLURAL>;
-      /** 值 */
-      value: PluralSwitch<[number, number], PLURAL>;
-    } & OTHER
-  >
+type CommonDataType<STYLE, PLURAL extends boolean, OTHER = {}> = Partial<
+  {
+    /** 样式 */
+    style: DeepPartial<STYLE>;
+    /** 层级 */
+    zIndex: number;
+    /** 是否显示 */
+    show: boolean;
+    /** 未缩放状态下的位置 */
+    position: PluralSwitch<[number, number], PLURAL>;
+    /** 动态位置 */
+    dynamicPosition: PluralSwitch<[number, number], PLURAL>;
+    /** 值 */
+    value: PluralSwitch<[number, number], PLURAL>;
+  } & OTHER
 >;
 
-/** zIndex -> xAxis -> yAxis -> PointListType */
-type PointMap = Map<number, Map<number, Map<number, PointListType>>>;
+/** 文字 */
+type TextType = CommonDataType<TextStyleType, false>;
 
-/** 点位列表 */
-type PointListType = CommonDataType<PointStyleType, false>;
+/** 点位 */
+type PointType = CommonDataType<PointStyleType, false>;
 
-/** 线列表 */
-type LineListType = CommonDataType<
+/** 线 */
+type LineType = CommonDataType<
   LineStyleType,
   true,
   {
@@ -138,8 +138,8 @@ type LineListType = CommonDataType<
   }
 >;
 
-/** 面列表 */
-type PolygonListType = CommonDataType<
+/** 面 */
+type PolygonType = CommonDataType<
   PolygonStyleType,
   true,
   {

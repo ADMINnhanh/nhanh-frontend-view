@@ -126,6 +126,36 @@ export default class Axis {
     drawY();
   }
 
+  /**
+   * 在画布上绘制文本
+   *
+   * 此函数根据给定的文本、位置和选项参数，在画布上绘制文本它首先配置文本的字体和颜色，
+   * 然后根据是否需要次要颜色和当前主题来绘制文本的描边和填充
+   *
+   * @param text 要绘制的文本内容
+   * @param x 文本绘制的横坐标
+   * @param y 文本绘制的纵坐标
+   * @param secondary 是否为次要颜色
+   */
+  private drawText(text: string, x: number, y: number, secondary?: boolean) {
+    // 获取画布的上下文对象，用于绘制
+    const { ctx, theme } = this.canvas;
+
+    // 根据当前主题获取样式配置
+    const style = this.canvas.style[theme].text;
+
+    // 设置画布的字体样式，包括是否加粗、字体大小和字体家族
+    ctx.font = `${style.bold ? "bold" : ""} ${style.size}px ${style.family}`;
+
+    // 设置文本的描边颜色为背景色，并绘制文本的描边
+    ctx.strokeStyle = style.stroke;
+    ctx.strokeText(text, x, y);
+
+    // 根据是否是次要颜色，选择相应的文本填充颜色，并填充文本
+    ctx.fillStyle = style[secondary ? "secondary" : "color"];
+    ctx.fillText(text, x, y);
+  }
+
   /** 坐标轴 - 文字 */
   private drawAxisText() {
     const canvas = this.canvas;
@@ -150,7 +180,7 @@ export default class Axis {
         center.y > height + textSize + textOffset;
 
       if (!isXAxisOverflowing && !isYAxisOverflowing) {
-        canvas.drawText(
+        this.drawText(
           "0",
           center.x - w - textOffset,
           center.y + textSize + textOffset
@@ -181,7 +211,7 @@ export default class Axis {
 
       while (x <= width) {
         const textW = textWidth(String(v));
-        v !== 0 && canvas.drawText(String(v), x - textW / 2, y, isSecondary);
+        v !== 0 && this.drawText(String(v), x - textW / 2, y, isSecondary);
         x += grid_size;
         v = canvas.preservePrecision(v + count * axisConfig.x);
       }
@@ -206,7 +236,7 @@ export default class Axis {
         let x = center.x - textW - textOffset;
         x = Math.max(Math.min(x, width - textW - textOffset), textOffset);
 
-        v !== 0 && canvas.drawText(String(v), x, y + textSize / 2, isSecondary);
+        v !== 0 && this.drawText(String(v), x, y + textSize / 2, isSecondary);
         y += grid_size;
         v = canvas.preservePrecision(v + count * axisConfig.y);
       }
