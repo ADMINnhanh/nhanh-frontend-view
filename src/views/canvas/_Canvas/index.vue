@@ -2,6 +2,7 @@
 import { NAnchor, NAnchorLink, NScrollbar, NSkeleton, NSpace } from "naive-ui";
 import MyCard from "./card.vue";
 import { markRaw, onUnmounted, ref } from "vue";
+import Media from "@/stores/media";
 
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 const demoName = [
@@ -63,8 +64,8 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="my-canvas-tools">
-    <NScrollbar style="margin-right: 30px">
+  <div :class="['my-canvas-tools', Media.isMobileStyle && 'mobile']">
+    <NScrollbar>
       <div class="list-box">
         <template v-if="doubleRow">
           <NSpace vertical>
@@ -109,7 +110,7 @@ onUnmounted(() => {
         </NSpace>
       </div>
     </NScrollbar>
-    <NScrollbar style="width: 200px; flex-shrink: 0">
+    <NScrollbar v-if="!Media.isMobileStyle">
       <NAnchor
         type="block"
         :bound="100"
@@ -128,6 +129,17 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="less">
+.my-canvas-tools.mobile {
+  padding: 0;
+  .list-box {
+    padding-right: 0;
+  }
+  :deep(.n-scrollbar) {
+    &:nth-child(1) {
+      margin-right: 0;
+    }
+  }
+}
 .my-canvas-tools {
   width: 100%;
   height: 100%;
@@ -144,6 +156,15 @@ onUnmounted(() => {
     .n-skeleton {
       width: 100%;
       height: 400px;
+    }
+  }
+  :deep(.n-scrollbar) {
+    &:nth-child(1) {
+      margin-right: 30px;
+    }
+    &:nth-child(2) {
+      width: 200px;
+      flex-shrink: 0;
     }
   }
 }
