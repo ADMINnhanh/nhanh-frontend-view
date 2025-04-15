@@ -1,5 +1,6 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
+import { type Overlay as OverlayType } from "./index";
 
 export default class Text extends Overlay<TextStyleType, [number, number]> {
   /** 文字偏差 */
@@ -106,7 +107,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     // 填充文本
     ctx.fillText(text, x, y);
   }
-  getDraw() {
+  getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, value, textOffset, mainCanvas } =
       this;
     if (!mainCanvas) return;
@@ -126,7 +127,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       if (isPointWithinRange) {
         if (isRecalculate)
           this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
-        return this.draw.bind(this);
+        return [this.draw, this];
       }
     }
   }

@@ -1,6 +1,7 @@
 import { _Clone } from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./public/overlay";
+import { type Overlay as OverlayType } from "./index";
 
 export default class Line extends Overlay<LineStyleType, [number, number][]> {
   /** 两点相连向外延展的无限线 */
@@ -176,7 +177,7 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     // 绘制原始端点
     this.drawPoint(ctx);
   }
-  getDraw() {
+  getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, infinite, mainCanvas } = this;
     if (!mainCanvas) return;
 
@@ -187,8 +188,8 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     if (isShow && prevDynamicStatus) {
       if (isRecalculate)
         this.dynamicPosition = mainCanvas.transformPosition(position!);
-      if (infinite) return this.drawInfiniteStraightLine.bind(this);
-      return this.drawLine.bind(this);
+      if (infinite) return [this.drawInfiniteStraightLine, this];
+      return [this.drawLine, this];
     }
   }
 }

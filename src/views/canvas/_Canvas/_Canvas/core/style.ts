@@ -14,7 +14,7 @@ export default class Style extends BaseData {
         secondary: "#909399",
         stroke: "#fff",
         size: 12,
-        family: "微软雅黑",
+        family: "monospace",
         bold: true,
       },
       grid: {
@@ -59,7 +59,7 @@ export default class Style extends BaseData {
         secondary: "#8c8c8c",
         stroke: "#000",
         size: 12,
-        family: "微软雅黑",
+        family: "monospace",
         bold: true,
       },
       grid: {

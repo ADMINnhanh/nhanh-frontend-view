@@ -1,5 +1,6 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
+import { type Overlay as OverlayType } from "./index";
 
 export default class Polygon extends Overlay<
   PolygonStyleType,
@@ -134,7 +135,7 @@ export default class Polygon extends Overlay<
     ctx.fill();
   }
 
-  getDraw() {
+  getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, mainCanvas } = this;
     if (!mainCanvas) return;
 
@@ -152,8 +153,8 @@ export default class Polygon extends Overlay<
           ];
         }
       }
-      if (this.dynamicSize?.length) return this.drawRect.bind(this);
-      return this.drawPolygon.bind(this);
+      if (this.dynamicSize?.length) return [this.drawRect, this];
+      return [this.drawPolygon, this];
     }
   }
 }

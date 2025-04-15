@@ -1,18 +1,18 @@
 import _Canvas from "..";
-import OverlayGroup from "../OverlayGroup";
+import OverlayGroup, { type Overlay } from "../OverlayGroup";
 import Show from "../OverlayGroup/public/show";
 
 export default class Layer {
   name: string;
   show = new Show();
-  private opacity = 1;
-  private zIndex = 4;
+  opacity = 1;
+  zIndex = 4;
 
   protected canvas = document.createElement("canvas");
   protected ctx = this.canvas.getContext("2d")!;
   private isReload = false;
 
-  private groups = new Map<string, OverlayGroup>();
+  groups = new Map<string, OverlayGroup>();
 
   // 定义构造函数，接收一个包含配置信息的对象
   constructor(name: string) {
@@ -59,7 +59,6 @@ export default class Layer {
     );
     this.show.notifyReload = this.notifyReload;
   }
-
   /** 获取覆盖物组 */
   getGroup(name: string) {
     return this.groups.get(name);
@@ -106,10 +105,6 @@ export default class Layer {
       this.notifyReload?.(false);
     }
   }
-  /** 获取图层的 zIndex 值 */
-  getzIndex() {
-    return this.zIndex;
-  }
   /** 设置图层的透明度 */
   setOpacity(opacity: number) {
     if (this.opacity != opacity) {
@@ -121,13 +116,11 @@ export default class Layer {
       }
     }
   }
-  /** 获取图层的透明度 */
-  getOpacity() {
-    return this.opacity;
-  }
 
+  /** 本次绘制的覆盖物 */
+  private currentDrawOverlays: [number, Overlay][] = [];
   /** 获取画布 */
-  getCanvas() {
+  getCanvas(): [number, HTMLCanvasElement, [number, Overlay][]] | undefined {
     if (!this.mainCanvas) return;
 
     const { scale, rect, isRecalculate, isThemeUpdated } = this.mainCanvas!;
@@ -135,23 +128,29 @@ export default class Layer {
     const size = this.groups.size;
     if (isShow && size) {
       if (this.isReload || isRecalculate || isThemeUpdated) {
+        this.currentDrawOverlays = [];
         this.isReload = false;
 
         this.canvas.width = rect?.value.width || 0;
         this.canvas.height = rect?.value.height || 0;
 
-        const groupArr: [number, (ctx: CanvasRenderingContext2D) => void][] =
-          [];
+        const groupArr: [
+          number,
+          [(ctx: CanvasRenderingContext2D) => void, Overlay]
+        ][] = [];
         this.groups.forEach((group) => {
           if (group.equalsMainCanvas(this.mainCanvas))
             groupArr.push(...group.getOverlays());
           else this.groups.delete(group.name);
         });
         groupArr.sort((a, b) => a[0] - b[0]);
-        groupArr.forEach(([, draw]) => draw(this.ctx));
+        groupArr.forEach(([zIndex, [draw, overlay]]) => {
+          draw.call(overlay, this.ctx);
+          this.currentDrawOverlays.push([zIndex + this.zIndex, overlay]);
+        });
       }
 
-      return [this.zIndex, this.canvas] as [number, HTMLCanvasElement];
+      return [this.zIndex, this.canvas, this.currentDrawOverlays];
     }
   }
 }

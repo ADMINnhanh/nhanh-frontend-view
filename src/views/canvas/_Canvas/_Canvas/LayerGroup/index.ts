@@ -1,4 +1,5 @@
 import _Canvas from "..";
+import type { Overlay } from "../OverlayGroup";
 import Show from "../OverlayGroup/public/show";
 import Layer from "./layer";
 
@@ -84,7 +85,7 @@ export default class LayerGroup {
   /** 收集图层的 canvas */
   fetchCanvas() {
     if (this.show.shouldRender(this.mainCanvas?.scale) && this.layers.size) {
-      const canvasArr: [number, HTMLCanvasElement][] = [];
+      const canvasArr: [number, HTMLCanvasElement, [number, Overlay][]][] = [];
       this.layers.forEach((layer) => {
         if (layer.equalsMainCanvas(this.mainCanvas)) {
           const canvas = layer.getCanvas();
@@ -98,6 +99,4 @@ export default class LayerGroup {
     }
     return [];
   }
-  // /** 销毁 图层群组 */
-  // destroy?: () => void;
 }

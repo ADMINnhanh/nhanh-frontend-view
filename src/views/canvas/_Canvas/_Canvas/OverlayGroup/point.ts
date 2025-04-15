@@ -1,5 +1,6 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
+import { type Overlay as OverlayType } from "./index";
 
 export default class Point extends Overlay<PointStyleType, [number, number]> {
   /** 点的半径值 */
@@ -80,7 +81,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     ctx.fill();
     ctx.stroke();
   }
-  getDraw() {
+  getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, value, radiusValue, mainCanvas } =
       this;
     if (!mainCanvas) return;
@@ -101,7 +102,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       if (isPointWithinRange) {
         if (isRecalculate)
           this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
-        return this.draw.bind(this);
+        return [this.draw, this];
       }
     }
   }

@@ -51,7 +51,7 @@ export default class Event extends Draw {
   }
   /** 鼠标左键点击画布 */
   private click(event: MouseEvent) {
-    console.log("mouseclick");
+    console.log("mouseclick", this.currentDrawOverlays);
   }
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {

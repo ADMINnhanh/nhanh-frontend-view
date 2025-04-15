@@ -1,6 +1,7 @@
 import { _Debounce, _Throttle } from "nhanh-pure-function";
 import Style from "./style";
 import _Canvas, { _TimeConsumption } from "..";
+import type { Overlay } from "../OverlayGroup";
 
 type ThrowsProperty<T extends keyof _Canvas = keyof _Canvas> = {
   keys: T[];
@@ -11,6 +12,8 @@ type ThrowsProperty<T extends keyof _Canvas = keyof _Canvas> = {
 export default class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
+  /** 本次绘制的覆盖物 */
+  protected currentDrawOverlays: Overlay[][] = [];
 
   /** 计算坐标所需依赖 */
   rely = "";
@@ -75,17 +78,35 @@ export default class Draw extends Style {
 
     this.clearScreen();
 
-    let canvasArr: [number, HTMLCanvasElement | (() => void)][] = [
-      [0, () => this.drawAxis?.drawAxisAndGrid()],
-    ];
+    /** 本次绘制的覆盖物 */
+    const currentDrawOverlays: Record<number, Overlay[]> = {};
+    let canvasArr: [
+      number,
+      HTMLCanvasElement | (() => void),
+      [number, Overlay][]
+    ][] = [[0, () => this.drawAxis?.drawAxisAndGrid(), []]];
     this.layerGroups.forEach(
       (layerGroup) => (canvasArr = canvasArr.concat(layerGroup.fetchCanvas()))
     );
     canvasArr.sort((a, b) => a[0] - b[0]);
-    canvasArr.forEach(([, canvas]) => {
+    canvasArr.forEach(([, canvas, overlays]) => {
       if (typeof canvas === "function") canvas();
       else this.ctx.drawImage(canvas, 0, 0);
+      overlays.forEach(([zIndex, overlay]) => {
+        if (!currentDrawOverlays[zIndex]) currentDrawOverlays[zIndex] = [];
+        currentDrawOverlays[zIndex].push(overlay);
+      });
     });
+
+    // 按照 zIndex 排序
+    const sortedKeys = Object.keys(currentDrawOverlays)
+      .map(Number)
+      .sort((a, b) => a - b);
+
+    // 将分组结果转换为 Overlay[][] 结构
+    this.currentDrawOverlays = sortedKeys.map(
+      (key) => currentDrawOverlays[key]
+    );
 
     this.isRecalculate = false;
     this.isThemeUpdated = false;

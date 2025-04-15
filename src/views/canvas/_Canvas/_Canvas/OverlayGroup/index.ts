@@ -92,13 +92,16 @@ export default class OverlayGroup {
 
   /** 获取覆盖物的绘制方法 */
   getOverlays() {
-    const groupArr: [number, (ctx: CanvasRenderingContext2D) => void][] = [];
+    const groupArr: [
+      number,
+      [(ctx: CanvasRenderingContext2D) => void, Overlay]
+    ][] = [];
 
     if (this.show.shouldRender(this.mainCanvas?.scale)) {
       this.overlays.forEach((overlay) => {
         if (overlay.equalsMainCanvas(this.mainCanvas)) {
-          const draw = overlay.getDraw();
-          if (draw) groupArr.push([overlay.zIndex, draw]);
+          const drawConfig = overlay.getDraw();
+          if (drawConfig) groupArr.push([overlay.zIndex, drawConfig]);
         } else {
           this.overlays.delete(overlay);
         }

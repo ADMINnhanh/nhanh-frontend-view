@@ -1,5 +1,6 @@
 import _Canvas from "../..";
 import Show from "./show";
+import { type Overlay as OverlayType } from "../index";
 
 export default abstract class Overlay<
   T,
@@ -84,5 +85,7 @@ export default abstract class Overlay<
   }
 
   /** 获取绘制函数 */
-  abstract getDraw(): ((ctx: CanvasRenderingContext2D) => void) | void;
+  abstract getDraw():
+    | [(ctx: CanvasRenderingContext2D) => void, OverlayType]
+    | void;
 }

@@ -1,5 +1,6 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
+import { type Overlay as OverlayType } from "./index";
 
 export default class Custom<
   T,
@@ -141,7 +142,7 @@ export default class Custom<
   }
 
   draw: (ctx: CanvasRenderingContext2D) => void;
-  getDraw() {
+  getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, mainCanvas, multiple, position } = this;
     if (!mainCanvas || typeof multiple != "boolean") return;
 
@@ -156,7 +157,7 @@ export default class Custom<
             ? mainCanvas.transformPosition(position as [number, number][])
             : mainCanvas.transformPosition([position as [number, number]])[0]
         ) as any;
-      return this.draw.bind(this);
+      return [this.draw, this];
     }
   }
 }
