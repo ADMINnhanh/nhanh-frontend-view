@@ -3,6 +3,12 @@ import Style from "./style";
 import _Canvas, { _TimeConsumption } from "..";
 import type { Overlay } from "../OverlayGroup";
 
+import Custom from "../OverlayGroup/custom";
+import Text from "../OverlayGroup/text";
+import Point from "../OverlayGroup/point";
+import Line from "../OverlayGroup/line";
+import Polygon from "../OverlayGroup/polygon";
+
 type ThrowsProperty<T extends keyof _Canvas = keyof _Canvas> = {
   keys: T[];
   get: (data: Record<T, _Canvas[T]>) => void;
@@ -13,12 +19,15 @@ export default class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
   /** 本次绘制的覆盖物 */
-  protected currentDrawOverlays: Overlay[][] = [];
+  protected currentDrawOverlays: Overlay[] = [];
 
   /** 计算坐标所需依赖 */
   rely = "";
   /** 是否需要重新计算坐标 */
   isRecalculate = false;
+
+  /** 抛出属性 */
+  throwsProperty?: ThrowsProperty;
 
   constructor(id: string) {
     super(id);
@@ -60,8 +69,6 @@ export default class Draw extends Style {
     maxYV: 0,
   };
 
-  throwsProperty?: ThrowsProperty;
-
   /** 重绘画布 */
   private redraw() {
     if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
@@ -79,33 +86,58 @@ export default class Draw extends Style {
     this.clearScreen();
 
     /** 本次绘制的覆盖物 */
-    const currentDrawOverlays: Record<number, Overlay[]> = {};
+    const currentDrawOverlays: [[number, number], Overlay][] = [];
     let canvasArr: [
       number,
       HTMLCanvasElement | (() => void),
-      [number, Overlay][]
+      [[number, number], Overlay][]
     ][] = [[0, () => this.drawAxis?.drawAxisAndGrid(), []]];
     this.layerGroups.forEach(
       (layerGroup) => (canvasArr = canvasArr.concat(layerGroup.fetchCanvas()))
     );
     canvasArr.sort((a, b) => a[0] - b[0]);
-    canvasArr.forEach(([, canvas, overlays]) => {
+    canvasArr.forEach(([, canvas, overlays], index) => {
       if (typeof canvas === "function") canvas();
       else this.ctx.drawImage(canvas, 0, 0);
-      overlays.forEach(([zIndex, overlay]) => {
-        if (!currentDrawOverlays[zIndex]) currentDrawOverlays[zIndex] = [];
-        currentDrawOverlays[zIndex].push(overlay);
+
+      overlays.forEach(([[layerZIndex, overlayZIndex], overlay]) => {
+        currentDrawOverlays.push([
+          [layerZIndex + index, overlayZIndex],
+          overlay,
+        ]);
       });
     });
 
-    // 按照 zIndex 排序
-    const sortedKeys = Object.keys(currentDrawOverlays)
-      .map(Number)
-      .sort((a, b) => a - b);
+    // 排序
+    currentDrawOverlays.sort(
+      (
+        [[aLayerZIndex, aOverlayZIndex], aOverlay],
+        [[bLayerZIndex, bOverlayZIndex], bOverlay]
+      ) => {
+        // 首先比较图层 z-index
+        if (aLayerZIndex !== bLayerZIndex) return bLayerZIndex - aLayerZIndex;
 
-    // 将分组结果转换为 Overlay[][] 结构
-    this.currentDrawOverlays = sortedKeys.map(
-      (key) => currentDrawOverlays[key]
+        // 然后比较覆盖层的z-index
+        if (aOverlayZIndex !== bOverlayZIndex)
+          return bOverlayZIndex - aOverlayZIndex;
+
+        // 最后比较覆盖类型优先级
+        const getPriority = (overlay: any) => {
+          if (overlay instanceof Custom) return 0;
+          if (overlay instanceof Text) return 1;
+          if (overlay instanceof Point) return 2;
+          if (overlay instanceof Line) return 3;
+          if (overlay instanceof Polygon) return 4;
+          return 5; // 默认优先级
+        };
+
+        return getPriority(bOverlay) - getPriority(aOverlay);
+      }
+    );
+
+    // 将分组结果转换为 Overlay[] 结构
+    this.currentDrawOverlays = currentDrawOverlays.map(
+      ([, overlay]) => overlay
     );
 
     this.isRecalculate = false;
@@ -142,6 +174,13 @@ export default class Draw extends Style {
         // this.redraw();
       });
     }
+  }
+
+  /** 根据坐标查找覆盖物 */
+  protected findOverlayByPoint(x: number, y: number) {
+    return this.currentDrawOverlays.find((overlay) =>
+      overlay.isPointInAnywhere(x, y)
+    );
   }
 
   /** 销毁resizeObserver监听器 */

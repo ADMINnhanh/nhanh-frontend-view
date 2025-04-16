@@ -13,6 +13,18 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     this.infinite = line.infinite;
   }
 
+  isPointInPath(x: number, y: number) {
+    if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
+    return false;
+  }
+  isPointInStroke(x: number, y: number) {
+    if (this.path && this.mainCanvas) {
+      this.setCanvasStylesLine(Overlay.ctx);
+      return Overlay.ctx.isPointInStroke(this.path, x, y);
+    }
+    return false;
+  }
+
   updateBaseData() {
     if (!this.mainCanvas) return;
 
@@ -54,10 +66,8 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     }
   }
 
-  /** 绘制点 */
-  drawPoint(ctx: CanvasRenderingContext2D) {
-    const { mainCanvas, dynamicPosition } = this;
-    if (!mainCanvas) return;
+  private setCanvasStylesPoint(ctx: CanvasRenderingContext2D) {
+    const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].line.point;
     let style = {} as PointStyleType;
@@ -75,6 +85,15 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     ctx.strokeStyle = stroke;
     ctx.fillStyle = fill;
 
+    return style;
+  }
+  /** 绘制点 */
+  drawPoint(ctx: CanvasRenderingContext2D) {
+    const { mainCanvas, dynamicPosition } = this;
+    if (!mainCanvas) return;
+
+    const { radius } = this.setCanvasStylesPoint(ctx);
+
     dynamicPosition!.forEach((position) => {
       ctx.beginPath();
       ctx.arc(position[0], position[1], radius, 0, this.angle);
@@ -82,11 +101,8 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
       ctx.stroke();
     });
   }
-  /** 绘制线段 */
-  drawLine(ctx: CanvasRenderingContext2D, position?: [number, number][]) {
-    const { mainCanvas } = this;
-    position = position || this.dynamicPosition;
-    if (!mainCanvas) return;
+  private setCanvasStylesLine(ctx: CanvasRenderingContext2D) {
+    const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].line;
     let style = {} as LineStyleType;
@@ -106,13 +122,28 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     ctx.lineJoin = join;
     ctx.lineWidth = width;
     ctx.strokeStyle = color;
+
+    return style;
+  }
+  /** 绘制线段 */
+  drawLine(ctx: CanvasRenderingContext2D, position?: [number, number][]) {
+    const { mainCanvas } = this;
+    position = position || this.dynamicPosition;
+    if (!mainCanvas) return;
+
+    this.setCanvasStylesLine(ctx);
+
     ctx.beginPath();
 
+    // 创建 Path2D 对象
+    this.path = new Path2D();
+
     position!.forEach((item, index) => {
-      ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
+      // ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
+      this.path![index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
 
-    ctx.stroke();
+    ctx.stroke(this.path);
   }
   /** 绘制无限延伸线段 */
   drawInfiniteStraightLine(ctx: CanvasRenderingContext2D) {

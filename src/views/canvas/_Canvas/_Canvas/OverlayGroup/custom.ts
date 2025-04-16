@@ -16,6 +16,13 @@ export default class Custom<
     this.draw = draw;
   }
 
+  isPointInPath(x: number, y: number) {
+    return false;
+  }
+  isPointInStroke(x: number, y: number) {
+    return false;
+  }
+
   isMultiple() {
     if (!this.mainCanvas) return;
     const IsValid = this.mainCanvas.IsValid;

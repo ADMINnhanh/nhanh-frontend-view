@@ -14,6 +14,14 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.secondary = text.secondary ?? false;
   }
 
+  isPointInPath(x: number, y: number) {
+    if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
+    return false;
+  }
+  isPointInStroke(x: number, y: number) {
+    return false;
+  }
+
   updateBaseData() {
     if (!this.mainCanvas) return;
     if (!this.text || this.text.length == 0)
@@ -102,10 +110,20 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     const x = dynamicPosition[0] - textOffset.x;
     const y = dynamicPosition[1] + textOffset.y;
+
     // 绘制文本的描边
     ctx.strokeText(text, x, y);
     // 填充文本
     ctx.fillText(text, x, y);
+
+    // 获取文本的路径 使用 Path2D 绘制文本路径
+    this.path = new Path2D();
+    this.path.rect(
+      x,
+      dynamicPosition[1] - textOffset.y,
+      textOffset.x * 2,
+      textOffset.y * 2
+    );
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, value, textOffset, mainCanvas } =

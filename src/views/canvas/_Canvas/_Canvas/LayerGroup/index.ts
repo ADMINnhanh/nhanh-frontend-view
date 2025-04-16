@@ -85,7 +85,11 @@ export default class LayerGroup {
   /** 收集图层的 canvas */
   fetchCanvas() {
     if (this.show.shouldRender(this.mainCanvas?.scale) && this.layers.size) {
-      const canvasArr: [number, HTMLCanvasElement, [number, Overlay][]][] = [];
+      const canvasArr: [
+        number,
+        HTMLCanvasElement,
+        [[number, number], Overlay][]
+      ][] = [];
       this.layers.forEach((layer) => {
         if (layer.equalsMainCanvas(this.mainCanvas)) {
           const canvas = layer.getCanvas();

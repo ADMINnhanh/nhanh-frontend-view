@@ -14,6 +14,18 @@ export default class Polygon extends Overlay<
     this.size = polygon.size;
   }
 
+  isPointInPath(x: number, y: number) {
+    if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
+    return false;
+  }
+  isPointInStroke(x: number, y: number) {
+    if (this.path && this.mainCanvas) {
+      this.setCanvasStyles(Overlay.ctx);
+      return Overlay.ctx.isPointInStroke(this.path, x, y);
+    }
+    return false;
+  }
+
   updateBaseData() {
     if (!this.mainCanvas) return;
     const { axisConfig, percentage } = this.mainCanvas;
@@ -109,15 +121,23 @@ export default class Polygon extends Overlay<
 
     ctx.beginPath();
 
-    ctx.rect(
+    // ctx.rect(
+    //   dynamicPosition![0][0],
+    //   dynamicPosition![0][1],
+    //   dynamicSize![0],
+    //   dynamicSize![1]
+    // );
+    // 创建 Path2D 对象
+    this.path = new Path2D();
+    this.path.rect(
       dynamicPosition![0][0],
       dynamicPosition![0][1],
       dynamicSize![0],
       dynamicSize![1]
     );
 
-    ctx.stroke();
-    ctx.fill();
+    ctx.stroke(this.path);
+    ctx.fill(this.path);
   }
   /** 绘制多边形 */
   drawPolygon(ctx: CanvasRenderingContext2D) {
@@ -127,12 +147,16 @@ export default class Polygon extends Overlay<
 
     ctx.beginPath();
 
+    // 创建 Path2D 对象
+    this.path = new Path2D();
+
     dynamicPosition!.forEach((item, index) => {
-      ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
+      // ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
+      this.path![index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
     ctx.closePath();
-    ctx.stroke();
-    ctx.fill();
+    ctx.stroke(this.path);
+    ctx.fill(this.path);
   }
 
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {

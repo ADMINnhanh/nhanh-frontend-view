@@ -51,7 +51,9 @@ export default class Event extends Draw {
   }
   /** 鼠标左键点击画布 */
   private click(event: MouseEvent) {
-    console.log("mouseclick", this.currentDrawOverlays);
+    const clickOverlays = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    if (clickOverlays) console.log("点击了该覆盖物", clickOverlays);
+    else console.log("没有点击到任何覆盖物");
   }
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
@@ -167,16 +169,29 @@ export default class Event extends Draw {
   }
   /** 鼠标移动 */
   private mousemove(event: MouseEvent) {
+    const { clientX, clientY } = event;
     const { mouseIsDown, offset, mouseLastPosition, lockDragAndResize } = this;
     if (mouseIsDown && !lockDragAndResize) {
-      const { clientX, clientY } = event;
-
       offset.x += clientX - mouseLastPosition.x;
       offset.y += clientY - mouseLastPosition.y;
 
       this.redrawOnce();
 
       this.mouseLastPosition = { x: clientX, y: clientY };
+    }
+
+    /** hover 覆盖物 */ {
+      const rect = this.rect!.value;
+      const x = clientX - rect.x;
+      const y = clientY - rect.y;
+      if (x < rect.width && y < rect.height) {
+        const hoverOverlays = this.findOverlayByPoint(
+          event.offsetX,
+          event.offsetY
+        );
+        if (hoverOverlays && hoverOverlays.hover)
+          console.log("鼠标位于", hoverOverlays);
+      }
     }
   }
 

@@ -9,6 +9,19 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
   constructor(points: PointType) {
     super(points);
+    this.hover = true;
+  }
+
+  isPointInPath(x: number, y: number) {
+    if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
+    return false;
+  }
+  isPointInStroke(x: number, y: number) {
+    if (this.path && this.mainCanvas) {
+      this.setCanvasStyles(Overlay.ctx);
+      return Overlay.ctx.isPointInStroke(this.path, x, y);
+    }
+    return false;
   }
 
   updateBaseData() {
@@ -57,9 +70,8 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     );
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    const { dynamicPosition, mainCanvas } = this;
-    if (!mainCanvas) return;
+  private setCanvasStyles(ctx: CanvasRenderingContext2D) {
+    const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].point;
     let style = {} as PointStyleType;
@@ -71,15 +83,34 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       style = defaultStyle;
     }
 
-    const { width, stroke, fill, radius } = style;
+    const { width, stroke, fill } = style;
 
     ctx.lineWidth = width;
     ctx.strokeStyle = stroke;
     ctx.fillStyle = fill;
+
+    return style;
+  }
+  draw(ctx: CanvasRenderingContext2D) {
+    const { dynamicPosition, mainCanvas } = this;
+    if (!mainCanvas) return;
+
+    const { radius } = this.setCanvasStyles(ctx);
+
     ctx.beginPath();
-    ctx.arc(dynamicPosition![0], dynamicPosition![1], radius, 0, this.angle);
-    ctx.fill();
-    ctx.stroke();
+
+    // ctx.arc(dynamicPosition![0], dynamicPosition![1], radius, 0, this.angle);
+    // 创建 Path2D 对象
+    this.path = new Path2D();
+    this.path.arc(
+      dynamicPosition![0],
+      dynamicPosition![1],
+      radius,
+      0,
+      this.angle
+    );
+    ctx.fill(this.path);
+    ctx.stroke(this.path);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, value, radiusValue, mainCanvas } =

@@ -118,9 +118,11 @@ export default class Layer {
   }
 
   /** 本次绘制的覆盖物 */
-  private currentDrawOverlays: [number, Overlay][] = [];
+  private currentDrawOverlays: [[number, number], Overlay][] = [];
   /** 获取画布 */
-  getCanvas(): [number, HTMLCanvasElement, [number, Overlay][]] | undefined {
+  getCanvas():
+    | [number, HTMLCanvasElement, [[number, number], Overlay][]]
+    | undefined {
     if (!this.mainCanvas) return;
 
     const { scale, rect, isRecalculate, isThemeUpdated } = this.mainCanvas!;
@@ -143,14 +145,19 @@ export default class Layer {
             groupArr.push(...group.getOverlays());
           else this.groups.delete(group.name);
         });
+
         groupArr.sort((a, b) => a[0] - b[0]);
+
         groupArr.forEach(([zIndex, [draw, overlay]]) => {
           draw.call(overlay, this.ctx);
-          this.currentDrawOverlays.push([zIndex + this.zIndex, overlay]);
+          this.currentDrawOverlays.push([
+            [Number(this.zIndex) || 0, zIndex],
+            overlay,
+          ]);
         });
       }
 
-      return [this.zIndex, this.canvas, this.currentDrawOverlays];
+      return [Number(this.zIndex) || 0, this.canvas, this.currentDrawOverlays];
     }
   }
 }

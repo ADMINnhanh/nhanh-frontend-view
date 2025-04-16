@@ -97,15 +97,23 @@ export default class OverlayGroup {
       [(ctx: CanvasRenderingContext2D) => void, Overlay]
     ][] = [];
 
-    if (this.show.shouldRender(this.mainCanvas?.scale)) {
-      this.overlays.forEach((overlay) => {
-        if (overlay.equalsMainCanvas(this.mainCanvas)) {
-          const drawConfig = overlay.getDraw();
-          if (drawConfig) groupArr.push([overlay.zIndex, drawConfig]);
-        } else {
-          this.overlays.delete(overlay);
-        }
-      });
+    if (this.show.shouldRender(this.mainCanvas?.scale) && this.overlays.size) {
+      let index = 1;
+
+      Array.from(this.overlays.values())
+        .sort((a, b) => a.zIndex - b.zIndex)
+        .forEach((overlay) => {
+          if (overlay.equalsMainCanvas(this.mainCanvas)) {
+            const drawConfig = overlay.getDraw();
+            if (drawConfig)
+              groupArr.push([
+                (Number(overlay.zIndex) || 0) + index++,
+                drawConfig,
+              ]);
+          } else {
+            this.overlays.delete(overlay);
+          }
+        });
     }
 
     return groupArr;

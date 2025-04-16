@@ -6,6 +6,8 @@ export default abstract class Overlay<
   T,
   V extends [number, number] | [number, number][]
 > {
+  static ctx = document.createElement("canvas").getContext("2d")!;
+
   /** 是否显示 */
   show = new Show();
   style?: DeepPartial<T> | string;
@@ -13,6 +15,12 @@ export default abstract class Overlay<
   value?: V;
   zIndex: number;
   dynamicPosition?: V;
+  name?: string;
+
+  /** 绘制路径 */
+  protected path?: Path2D;
+  /** 是否具有hover效果 */
+  hover?: boolean;
 
   /** 自定义扩展数据 */
   extData?: any;
@@ -23,15 +31,22 @@ export default abstract class Overlay<
     zIndex?: number;
     position?: V;
     value?: V;
+    name?: string;
   }) {
     this.show.setShow(overlay.show ?? true);
     this.style = overlay.style;
     this.zIndex = overlay.zIndex ?? 0;
     this.position = overlay.position;
     this.value = overlay.value;
+    this.name = overlay.name;
   }
 
   abstract updateBaseData(): void;
+  abstract isPointInPath(x: number, y: number): boolean;
+  abstract isPointInStroke(x: number, y: number): boolean;
+  isPointInAnywhere(x: number, y: number) {
+    return this.isPointInPath(x, y) || this.isPointInStroke(x, y);
+  }
 
   /** 主画布 */
   mainCanvas?: _Canvas;
