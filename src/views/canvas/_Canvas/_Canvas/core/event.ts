@@ -1,4 +1,4 @@
-import { _CalculateDistance2D, _GetMidpoint } from "..";
+import { _CalculateDistance2D, _GetMidpoint } from "nhanh-pure-function";
 import type { Overlay } from "../OverlayGroup";
 import Draw from "./draw";
 
@@ -202,11 +202,15 @@ export default class Event extends Draw {
             event.offsetX,
             event.offsetY
           );
+
           if (this.lastHoverOverlay != hoverOverlay)
             this.lastHoverOverlay?.notifyHover(false);
 
           this.lastHoverOverlay = hoverOverlay;
-          this.lastHoverOverlay?.notifyHover(true);
+          if (this.lastHoverOverlay) {
+            this.lastHoverOverlay.notifyHover(true);
+            this.canvas.classList.add("_nhanh_canvas_hover_overlay");
+          } else this.canvas.classList.remove("_nhanh_canvas_hover_overlay");
         }
       }
     }

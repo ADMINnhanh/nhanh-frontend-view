@@ -23,9 +23,9 @@ export default class Style extends BaseData {
         innerGrid: "#e5e5e5",
       },
       point: {
-        radius: 4,
+        radius: 5,
         fill: "#d03050",
-        width: 12,
+        width: 14,
         stroke: "#d03050" + 80,
       },
       line: {
@@ -37,9 +37,9 @@ export default class Style extends BaseData {
         cap: "round",
         join: "round",
         point: {
-          radius: 4,
+          radius: 5,
           stroke: "#f0a020" + 80,
-          width: 12,
+          width: 14,
           fill: "#f0a020",
         },
       },
@@ -68,9 +68,9 @@ export default class Style extends BaseData {
         innerGrid: "#454545",
       },
       point: {
-        radius: 4,
+        radius: 5,
         fill: "#e88080",
-        width: 12,
+        width: 14,
         stroke: "#e88080" + "70",
       },
       line: {
@@ -82,9 +82,9 @@ export default class Style extends BaseData {
         cap: "round",
         join: "round",
         point: {
-          radius: 4,
+          radius: 5,
           stroke: "#f2c97d" + "80",
-          width: 12,
+          width: 14,
           fill: "#f2c97d",
         },
       },

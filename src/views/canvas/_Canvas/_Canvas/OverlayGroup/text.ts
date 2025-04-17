@@ -9,7 +9,11 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   text?: string;
   secondary = false;
 
-  constructor(text: TextType & { text?: string; secondary?: boolean }) {
+  constructor(
+    text: ConstructorParameters<
+      typeof Overlay<TextStyleType, [number, number]>
+    >[0] & { text?: string; secondary?: boolean }
+  ) {
     super(text);
     this.text = String(text.text);
     this.secondary = text.secondary ?? false;

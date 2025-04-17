@@ -1,6 +1,6 @@
-import { _Debounce } from "nhanh-pure-function";
+import { _Debounce, _TimeConsumption } from "nhanh-pure-function";
 import Style from "./style";
-import _Canvas, { _TimeConsumption } from "..";
+import _Canvas from "..";
 import type { Overlay } from "../OverlayGroup";
 
 import Custom from "../OverlayGroup/custom";

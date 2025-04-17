@@ -2,15 +2,76 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
+import { _Schedule } from "nhanh-pure-function";
 
 export default class Point extends Overlay<PointStyleType, [number, number]> {
   /** 点的半径值 */
   radiusValue = 0;
   private angle = 2 * Math.PI;
 
-  constructor(points: PointType) {
+  constructor(
+    points: ConstructorParameters<
+      typeof Overlay<PointStyleType, [number, number]>
+    >[0]
+  ) {
     super(points);
-    this.hover = true;
+  }
+
+  private fillProgress?: {
+    lineWidthOffset: number;
+    progress: number;
+    scheduleCallback: () => void;
+  };
+  notifyHover(isHover: boolean) {
+    if (isHover == this.isHover) return;
+    super.notifyHover(isHover);
+    const time = 300;
+    const defalutLineWidth = this.setCanvasStyles().width;
+
+    if (this.fillProgress) {
+      this.fillProgress.scheduleCallback();
+      this.fillProgress.scheduleCallback = _Schedule((schedule) => {
+        if (this.fillProgress && schedule) {
+          this.fillProgress.progress += schedule * (isHover ? 1 : -1);
+          this.fillProgress.progress = Math.min(
+            1,
+            Math.max(0, this.fillProgress.progress)
+          );
+
+          const offset = Math.ceil(
+            defalutLineWidth * this.fillProgress.progress
+          );
+          if (offset != this.fillProgress.lineWidthOffset) {
+            this.fillProgress.lineWidthOffset = offset;
+            this.notifyReload?.();
+          }
+
+          if (
+            this.fillProgress.progress === 1 ||
+            this.fillProgress.progress === 0
+          ) {
+            this.fillProgress.scheduleCallback();
+            if (this.fillProgress.progress === 0) this.fillProgress = undefined;
+          }
+        }
+      }, time);
+    } else if (isHover) {
+      this.fillProgress = {
+        lineWidthOffset: 0,
+        progress: 0,
+        scheduleCallback: _Schedule((schedule) => {
+          if (this.fillProgress) {
+            this.fillProgress.progress = schedule;
+            const offset = Math.ceil(defalutLineWidth * schedule);
+            if (offset != this.fillProgress.lineWidthOffset) {
+              this.fillProgress.lineWidthOffset = offset;
+
+              this.notifyReload?.();
+            }
+          }
+        }, time),
+      };
+    }
   }
 
   isPointInPath(x: number, y: number) {
@@ -19,7 +80,8 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
-      this.setCanvasStyles(Overlay.ctx);
+      const { width } = this.setCanvasStyles(Overlay.ctx);
+      if (this.fillProgress?.lineWidthOffset == width) return false;
       return Overlay.ctx.isPointInStroke(this.path, x, y);
     }
     return false;
@@ -71,7 +133,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     );
   }
 
-  private setCanvasStyles(ctx: CanvasRenderingContext2D) {
+  private setCanvasStyles(ctx?: CanvasRenderingContext2D) {
     const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].point;
@@ -86,17 +148,21 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     const { width, stroke, fill } = style;
 
-    ctx.lineWidth = width;
-    ctx.strokeStyle = stroke;
-    ctx.fillStyle = fill;
+    if (ctx) {
+      const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
+      ctx.lineWidth = width - lineWidthOffset;
+      ctx.strokeStyle = stroke;
+      ctx.fillStyle = fill;
+    }
 
-    return style;
+    return { ...style };
   }
   draw(ctx: CanvasRenderingContext2D) {
     const { dynamicPosition, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { radius } = this.setCanvasStyles(ctx);
+    const { radius, width } = this.setCanvasStyles(ctx);
+    const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
 
     ctx.beginPath();
 
@@ -106,12 +172,12 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.path.arc(
       dynamicPosition![0],
       dynamicPosition![1],
-      radius,
+      radius + lineWidthOffset / 2,
       0,
       this.angle
     );
     ctx.fill(this.path);
-    ctx.stroke(this.path);
+    if (width != lineWidthOffset) ctx.stroke(this.path);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, value, radiusValue, mainCanvas } =

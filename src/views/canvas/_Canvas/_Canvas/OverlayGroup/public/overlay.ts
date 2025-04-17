@@ -42,12 +42,10 @@ export default abstract class Overlay<
   isClick = false;
   notifyClick(isClick: boolean) {
     this.isClick = isClick;
-    console.log("点击了该覆盖物", this);
   }
   isHover = false;
   notifyHover(isHover: boolean) {
     this.isHover = isHover;
-    console.log("鼠标移入了该覆盖物", this);
   }
 
   abstract updateBaseData(): void;

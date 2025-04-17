@@ -9,7 +9,12 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
   infinite?: boolean;
   private angle = 2 * Math.PI;
 
-  constructor(line: LineType) {
+  constructor(
+    line: ConstructorParameters<
+      typeof Overlay<LineStyleType, [number, number][]>
+    >[0] &
+      LineType
+  ) {
     super(line);
     this.infinite = line.infinite;
   }

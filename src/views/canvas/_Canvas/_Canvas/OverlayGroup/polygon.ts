@@ -10,7 +10,12 @@ export default class Polygon extends Overlay<
   size?: [number, number];
   private dynamicSize?: [number, number];
 
-  constructor(polygon: PolygonType) {
+  constructor(
+    polygon: ConstructorParameters<
+      typeof Overlay<PolygonStyleType, [number, number][]>
+    >[0] &
+      PolygonType
+  ) {
     super(polygon);
     this.size = polygon.size;
   }
