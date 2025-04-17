@@ -9,10 +9,7 @@ const id = _GenerateUUID();
 
 let myCanvas: _Canvas;
 const point_value = new _Canvas.Point({ value: [1, 1] });
-const point_position = new _Canvas.Point({
-  position: [-100, -100],
-  name: "position",
-});
+const point_position = new _Canvas.Point({ position: [-100, -100] });
 const point_arr = [point_value, point_position];
 
 function UpdateValue(delta: number) {
