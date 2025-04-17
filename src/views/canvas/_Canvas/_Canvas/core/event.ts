@@ -1,4 +1,5 @@
 import { _CalculateDistance2D, _GetMidpoint } from "..";
+import type { Overlay } from "../OverlayGroup";
 import Draw from "./draw";
 
 /** 事件管理器 */
@@ -49,11 +50,18 @@ export default class Event extends Draw {
       });
     };
   }
+
+  /** 上一个被点击的覆盖物 */
+  private lastClickedOverlay?: Overlay;
   /** 鼠标左键点击画布 */
   private click(event: MouseEvent) {
-    const clickOverlays = this.findOverlayByPoint(event.offsetX, event.offsetY);
-    if (clickOverlays) console.log("点击了该覆盖物", clickOverlays);
-    else console.log("没有点击到任何覆盖物");
+    const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+
+    if (this.lastClickedOverlay != clickOverlay)
+      this.lastClickedOverlay?.notifyClick(false);
+
+    this.lastClickedOverlay = clickOverlay;
+    this.lastClickedOverlay?.notifyClick(true);
   }
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
@@ -167,6 +175,9 @@ export default class Event extends Draw {
   private mouseup(event: MouseEvent) {
     this.mouseIsDown = false;
   }
+
+  /** 上一个被hover的覆盖物 */
+  private lastHoverOverlay?: Overlay;
   /** 鼠标移动 */
   private mousemove(event: MouseEvent) {
     const { clientX, clientY } = event;
@@ -187,12 +198,15 @@ export default class Event extends Draw {
         const x = clientX - rect.x;
         const y = clientY - rect.y;
         if (x < rect.width && y < rect.height) {
-          const hoverOverlays = this.findOverlayByPoint(
+          const hoverOverlay = this.findOverlayByPoint(
             event.offsetX,
             event.offsetY
           );
-          if (hoverOverlays && hoverOverlays.hover)
-            console.log("鼠标位于", hoverOverlays);
+          if (this.lastHoverOverlay != hoverOverlay)
+            this.lastHoverOverlay?.notifyHover(false);
+
+          this.lastHoverOverlay = hoverOverlay;
+          this.lastHoverOverlay?.notifyHover(true);
         }
       }
     }

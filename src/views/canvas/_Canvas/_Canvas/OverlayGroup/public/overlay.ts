@@ -19,8 +19,6 @@ export default abstract class Overlay<
 
   /** 绘制路径 */
   protected path?: Path2D;
-  /** 是否具有hover效果 */
-  hover?: boolean;
 
   /** 自定义扩展数据 */
   extData?: any;
@@ -39,6 +37,17 @@ export default abstract class Overlay<
     this.position = overlay.position;
     this.value = overlay.value;
     this.name = overlay.name;
+  }
+
+  isClick = false;
+  notifyClick(isClick: boolean) {
+    this.isClick = isClick;
+    console.log("点击了该覆盖物", this);
+  }
+  isHover = false;
+  notifyHover(isHover: boolean) {
+    this.isHover = isHover;
+    console.log("鼠标移入了该覆盖物", this);
   }
 
   abstract updateBaseData(): void;
