@@ -2,6 +2,7 @@ import { _Clone } from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
+import DataProcessor from "../core/dataProcessor";
 
 export default class Line extends Overlay<LineStyleType, [number, number][]> {
   /** 两点相连向外延展的无限线 */
@@ -30,8 +31,8 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
 
     let { value, position } = this;
     const [isValue, isPosition] = [
-      this.mainCanvas.IsValids(value) && value!.length > 1,
-      this.mainCanvas.IsValids(position) && position!.length > 1,
+      DataProcessor.IsValids(value) && value!.length > 1,
+      DataProcessor.IsValids(position) && position!.length > 1,
     ];
 
     if (!isValue && !isPosition) {

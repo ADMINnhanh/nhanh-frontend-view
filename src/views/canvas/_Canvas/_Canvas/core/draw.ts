@@ -1,4 +1,4 @@
-import { _Debounce, _Throttle } from "nhanh-pure-function";
+import { _Debounce } from "nhanh-pure-function";
 import Style from "./style";
 import _Canvas, { _TimeConsumption } from "..";
 import type { Overlay } from "../OverlayGroup";
@@ -8,11 +8,6 @@ import Text from "../OverlayGroup/text";
 import Point from "../OverlayGroup/point";
 import Line from "../OverlayGroup/line";
 import Polygon from "../OverlayGroup/polygon";
-
-type ThrowsProperty<T extends keyof _Canvas = keyof _Canvas> = {
-  keys: T[];
-  get: (data: Record<T, _Canvas[T]>) => void;
-};
 
 /** 绘制方法 */
 export default class Draw extends Style {
@@ -26,8 +21,8 @@ export default class Draw extends Style {
   /** 是否需要重新计算坐标 */
   isRecalculate = false;
 
-  /** 抛出属性 */
-  throwsProperty?: ThrowsProperty;
+  /** 通知重新加载 */
+  notifyReload?: () => void;
 
   constructor(id: string) {
     super(id);
@@ -143,13 +138,7 @@ export default class Draw extends Style {
     this.isRecalculate = false;
     this.isThemeUpdated = false;
 
-    if (this.throwsProperty) {
-      const { keys, get } = this.throwsProperty;
-      const obj = {} as any;
-      /** @ts-ignore */
-      keys.forEach((key) => (obj[key] = this[key]));
-      get(obj);
-    }
+    this.notifyReload?.();
   }
 
   /** 测量重绘性能 */
@@ -184,7 +173,7 @@ export default class Draw extends Style {
   }
 
   /** 销毁resizeObserver监听器 */
-  destroy() {
+  protected destroy() {
     this.resizeObserver?.disconnect();
   }
 }

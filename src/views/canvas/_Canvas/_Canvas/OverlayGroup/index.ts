@@ -6,7 +6,6 @@ import Line from "./line";
 import Polygon from "./polygon";
 import Custom from "./custom";
 import Show from "./public/show";
-import { _GenerateUUID } from "nhanh-pure-function";
 
 export type Overlay =
   | Text

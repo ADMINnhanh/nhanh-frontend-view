@@ -1,6 +1,7 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
+import DataProcessor from "../core/dataProcessor";
 
 export default class Polygon extends Overlay<
   PolygonStyleType,
@@ -32,9 +33,9 @@ export default class Polygon extends Overlay<
     let { value, position, size } = this;
 
     const [isValue, isPosition, isRect] = [
-      this.mainCanvas.IsValids(value),
-      this.mainCanvas.IsValids(position),
-      this.mainCanvas.IsValid(size),
+      DataProcessor.IsValids(value),
+      DataProcessor.IsValids(position),
+      DataProcessor.IsValid(size),
     ];
 
     if (!isValue && !isPosition) return (this.dynamicPosition = undefined);
@@ -154,6 +155,7 @@ export default class Polygon extends Overlay<
       // ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
       this.path![index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
+    this.path.lineTo(dynamicPosition![0][0], dynamicPosition![0][1]);
     ctx.closePath();
     ctx.stroke(this.path);
     ctx.fill(this.path);

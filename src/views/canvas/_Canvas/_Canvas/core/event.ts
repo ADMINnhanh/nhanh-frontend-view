@@ -171,26 +171,29 @@ export default class Event extends Draw {
   private mousemove(event: MouseEvent) {
     const { clientX, clientY } = event;
     const { mouseIsDown, offset, mouseLastPosition, lockDragAndResize } = this;
-    if (mouseIsDown && !lockDragAndResize) {
-      offset.x += clientX - mouseLastPosition.x;
-      offset.y += clientY - mouseLastPosition.y;
 
-      this.redrawOnce();
+    if (mouseIsDown) {
+      if (!lockDragAndResize) {
+        offset.x += clientX - mouseLastPosition.x;
+        offset.y += clientY - mouseLastPosition.y;
 
-      this.mouseLastPosition = { x: clientX, y: clientY };
-    }
+        this.redrawOnce();
 
-    /** hover 覆盖物 */ {
-      const rect = this.rect!.value;
-      const x = clientX - rect.x;
-      const y = clientY - rect.y;
-      if (x < rect.width && y < rect.height) {
-        const hoverOverlays = this.findOverlayByPoint(
-          event.offsetX,
-          event.offsetY
-        );
-        if (hoverOverlays && hoverOverlays.hover)
-          console.log("鼠标位于", hoverOverlays);
+        this.mouseLastPosition = { x: clientX, y: clientY };
+      }
+    } else {
+      /** hover 覆盖物 */ {
+        const rect = this.rect!.value;
+        const x = clientX - rect.x;
+        const y = clientY - rect.y;
+        if (x < rect.width && y < rect.height) {
+          const hoverOverlays = this.findOverlayByPoint(
+            event.offsetX,
+            event.offsetY
+          );
+          if (hoverOverlays && hoverOverlays.hover)
+            console.log("鼠标位于", hoverOverlays);
+        }
       }
     }
   }
@@ -205,50 +208,52 @@ export default class Event extends Draw {
   private touchmove(event: TouchEvent) {
     const touches = event.touches;
     event.preventDefault();
-    const { oldClientX, oldClientY, offset, delta } = this;
+    const { oldClientX, oldClientY, offset, delta, lockDragAndResize } = this;
 
-    if (touches.length === 1) {
-      const { clientX, clientY } = touches[0];
-      if (oldClientX.length) {
-        offset.x += clientX - oldClientX[0];
-        offset.y += clientY - oldClientY[0];
-        this.redrawOnce();
+    if (!lockDragAndResize) {
+      if (touches.length === 1) {
+        const { clientX, clientY } = touches[0];
+        if (oldClientX.length) {
+          offset.x += clientX - oldClientX[0];
+          offset.y += clientY - oldClientY[0];
+          this.redrawOnce();
+        }
+        this.oldClientX = [clientX];
+        this.oldClientY = [clientY];
+      } else if (touches.length === 2) {
+        const { clientX: clientX1, clientY: clientY1 } = touches[0];
+        const { clientX: clientX2, clientY: clientY2 } = touches[1];
+
+        if (oldClientX.length == 2) {
+          const oldDistance = _CalculateDistance2D(
+            oldClientX[0],
+            oldClientY[0],
+            oldClientX[1],
+            oldClientY[1]
+          );
+          const newDistance = _CalculateDistance2D(
+            clientX1,
+            clientY1,
+            clientX2,
+            clientY2
+          );
+
+          const { x: clientX, y: clientY } = _GetMidpoint(
+            clientX1,
+            clientY1,
+            clientX2,
+            clientY2
+          );
+
+          this.setScale(
+            { clientX, clientY },
+            newDistance > oldDistance ? delta : -delta
+          );
+          this.redrawOnce();
+        }
+        this.oldClientX = [clientX1, clientX2];
+        this.oldClientY = [clientY1, clientY2];
       }
-      this.oldClientX = [clientX];
-      this.oldClientY = [clientY];
-    } else if (touches.length === 2) {
-      const { clientX: clientX1, clientY: clientY1 } = touches[0];
-      const { clientX: clientX2, clientY: clientY2 } = touches[1];
-
-      if (oldClientX.length == 2) {
-        const oldDistance = _CalculateDistance2D(
-          oldClientX[0],
-          oldClientY[0],
-          oldClientX[1],
-          oldClientY[1]
-        );
-        const newDistance = _CalculateDistance2D(
-          clientX1,
-          clientY1,
-          clientX2,
-          clientY2
-        );
-
-        const { x: clientX, y: clientY } = _GetMidpoint(
-          clientX1,
-          clientY1,
-          clientX2,
-          clientY2
-        );
-
-        this.setScale(
-          { clientX, clientY },
-          newDistance > oldDistance ? delta : -delta
-        );
-        this.redrawOnce();
-      }
-      this.oldClientX = [clientX1, clientX2];
-      this.oldClientY = [clientY1, clientY2];
     }
   }
 

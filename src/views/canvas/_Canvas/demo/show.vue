@@ -8,7 +8,7 @@ import { NSpace, NSwitch, NText } from "naive-ui";
 const id = _GenerateUUID();
 
 let myCanvas: _Canvas;
-const myCanvasConfig = ref<_Canvas>({} as any);
+const myCanvasConfig = ref<_Canvas>({} as _Canvas);
 const point_value = new _Canvas.Point({ value: [0, 0] });
 point_value.show.setScales([0.8, 1.2]);
 
@@ -21,11 +21,10 @@ watch(
 );
 onMounted(() => {
   myCanvas = new _Canvas(id);
-  myCanvas.throwsProperty = {
-    keys: ["scale"],
-    get(value) {
-      myCanvasConfig.value = value as any;
-    },
+  myCanvas.notifyReload = () => {
+    (["scale"] as const).forEach((key) => {
+      myCanvasConfig.value[key] = myCanvas[key];
+    });
   };
   myCanvas.setTheme(Settings.value.theme);
   myCanvas.addOverlay(point_value);
@@ -41,7 +40,7 @@ onMounted(() => {
       <NText type="success">0.8 ~ 1.2</NText>
     </NSpace>
     <canvas :id="id" class="my-canvas"></canvas>
-    <NText type="success">scale: {{ myCanvasConfig.scale }}</NText>
+    <NText type="success">scale: {{ myCanvasConfig?.scale }}</NText>
   </div>
 </template>
 

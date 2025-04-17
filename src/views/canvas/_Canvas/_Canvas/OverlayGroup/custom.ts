@@ -1,6 +1,7 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
+import DataProcessor from "../core/dataProcessor";
 
 export default class Custom<
   T,
@@ -25,8 +26,8 @@ export default class Custom<
 
   isMultiple() {
     if (!this.mainCanvas) return;
-    const IsValid = this.mainCanvas.IsValid;
-    const IsValids = this.mainCanvas.IsValids.bind(this.mainCanvas);
+    const IsValid = DataProcessor.IsValid;
+    const IsValids = DataProcessor.IsValids.bind(DataProcessor);
     let { value, position } = this;
 
     const checkAndClearInvalidValue = (isValid: Function) => {

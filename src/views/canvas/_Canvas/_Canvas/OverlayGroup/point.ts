@@ -1,6 +1,7 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
+import DataProcessor from "../core/dataProcessor";
 
 export default class Point extends Overlay<PointStyleType, [number, number]> {
   /** 点的半径值 */
@@ -26,7 +27,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
   updateBaseData() {
     if (!this.mainCanvas) return;
-    const IsValid = this.mainCanvas.IsValid;
+    const IsValid = DataProcessor.IsValid;
     let { value, position } = this;
     const [isValue, isPosition] = [IsValid(value), IsValid(position)];
 

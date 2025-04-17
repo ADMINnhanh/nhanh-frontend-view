@@ -1,6 +1,7 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
+import DataProcessor from "../core/dataProcessor";
 
 export default class Text extends Overlay<TextStyleType, [number, number]> {
   /** 文字偏差 */
@@ -26,7 +27,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     if (!this.mainCanvas) return;
     if (!this.text || this.text.length == 0)
       return (this.dynamicPosition = undefined);
-    const IsValid = this.mainCanvas.IsValid;
+    const IsValid = DataProcessor.IsValid;
     let { value, position } = this;
     const [isValue, isPosition] = [IsValid(value), IsValid(position)];
 
