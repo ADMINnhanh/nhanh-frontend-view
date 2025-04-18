@@ -66,6 +66,8 @@ export default class BaseData {
   protected redrawInNextRenderFrame = false;
   /** 是否正在自动调整 */
   protected isAuto = false;
+  /** 是否正在绘制 */
+  protected isRendering = false;
 
   /** 绘制坐标轴 */
   drawAxis: Axis = undefined as any;
@@ -267,18 +269,35 @@ export default class BaseData {
     Object.assign(this.defaultCenter, center);
   }
 
+  private nowGridCount?: number;
   /** 获取每个网格表示的数字 */
   getGridCount() {
-    const { axisConfig, scale, cycle, delta } = this;
+    const { axisConfig, scale, cycle, delta, nowGridCount, isRendering } = this;
+    const count = axisConfig.count;
 
-    let count = axisConfig.count;
-    if (scale > 1) {
-      count /= Math.pow(2, Math.floor((scale - 1) / (cycle * delta)));
-    } else if (scale < 1) {
-      count *= Math.pow(2, Math.ceil(Math.abs(scale - 1) / (cycle * delta)));
+    if (nowGridCount && isRendering) return nowGridCount;
+
+    const scaleFactor = cycle * delta;
+
+    if (scale === 1) {
+      this.nowGridCount = count;
+    } else if (scale > 1) {
+      this.nowGridCount =
+        count / Math.pow(2, Math.floor((scale - 1) / scaleFactor));
+    } else {
+      const exponent = (1 - scale) / scaleFactor;
+      this.nowGridCount =
+        count *
+        Math.pow(
+          2,
+          Number.isInteger(exponent) ? exponent + 1 : Math.ceil(exponent)
+        );
     }
 
-    return count;
+    if (isRendering)
+      Promise.resolve().then(() => (this.nowGridCount = undefined));
+
+    return this.nowGridCount;
   }
   /** 获取鼠标在坐标轴上的位置 */
   getMousePositionOnAxis(event: { clientX: number; clientY: number }) {

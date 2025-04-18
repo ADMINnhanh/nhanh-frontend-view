@@ -51,18 +51,8 @@ export default class Event extends Draw {
     };
   }
 
-  /** 上一个被点击的覆盖物 */
-  private lastClickedOverlay?: Overlay;
   /** 鼠标左键点击画布 */
-  private click(event: MouseEvent) {
-    const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
-
-    if (this.lastClickedOverlay != clickOverlay)
-      this.lastClickedOverlay?.notifyClick(false);
-
-    this.lastClickedOverlay = clickOverlay;
-    this.lastClickedOverlay?.notifyClick(true);
-  }
+  private click(event: MouseEvent) {}
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
     event.preventDefault();
@@ -165,15 +155,26 @@ export default class Event extends Draw {
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
     this.redrawOnce();
   }
+  /** 上一个被点击的覆盖物 */
+  private lastClickedOverlay?: Overlay;
   /** 鼠标按下 */
   private mousedown(event: MouseEvent) {
     this.mouseIsDown = true;
     const { clientX, clientY } = event;
     this.mouseLastPosition = { x: clientX, y: clientY };
+
+    const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+
+    if (this.lastClickedOverlay != clickOverlay)
+      this.lastClickedOverlay?.notifyClick(false);
+
+    clickOverlay?.notifyClick(true);
+    this.lastClickedOverlay = clickOverlay;
   }
   /** 鼠标松开 */
   private mouseup(event: MouseEvent) {
     this.mouseIsDown = false;
+    this.lastClickedOverlay = undefined;
   }
 
   /** 上一个被hover的覆盖物 */
@@ -184,34 +185,38 @@ export default class Event extends Draw {
     const { mouseIsDown, offset, mouseLastPosition, lockDragAndResize } = this;
 
     if (mouseIsDown) {
-      if (!lockDragAndResize) {
+      if (lockDragAndResize) return;
+      if (this.lastClickedOverlay?.draggable) {
+        this.lastClickedOverlay.notifyDraggable(
+          clientX - mouseLastPosition.x,
+          clientY - mouseLastPosition.y
+        );
+      } else {
         offset.x += clientX - mouseLastPosition.x;
         offset.y += clientY - mouseLastPosition.y;
 
         this.redrawOnce();
-
-        this.mouseLastPosition = { x: clientX, y: clientY };
       }
+      this.mouseLastPosition = { x: clientX, y: clientY };
     } else {
       /** hover 覆盖物 */ {
         const rect = this.rect!.value;
         const x = clientX - rect.x;
         const y = clientY - rect.y;
-        if (x < rect.width && y < rect.height) {
-          const hoverOverlay = this.findOverlayByPoint(
-            event.offsetX,
-            event.offsetY
-          );
+        if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
+        const hoverOverlay = this.findOverlayByPoint(
+          event.offsetX,
+          event.offsetY
+        );
 
-          if (this.lastHoverOverlay != hoverOverlay)
-            this.lastHoverOverlay?.notifyHover(false);
+        if (this.lastHoverOverlay != hoverOverlay)
+          this.lastHoverOverlay?.notifyHover(false);
 
-          this.lastHoverOverlay = hoverOverlay;
-          if (this.lastHoverOverlay) {
-            this.lastHoverOverlay.notifyHover(true);
-            this.canvas.classList.add("_nhanh_canvas_hover_overlay");
-          } else this.canvas.classList.remove("_nhanh_canvas_hover_overlay");
-        }
+        this.lastHoverOverlay = hoverOverlay;
+        if (this.lastHoverOverlay) {
+          this.lastHoverOverlay.notifyHover(true);
+          this.canvas.classList.add("_nhanh_canvas_hover_overlay");
+        } else this.canvas.classList.remove("_nhanh_canvas_hover_overlay");
       }
     }
   }

@@ -17,60 +17,111 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     super(points);
   }
 
+  notifyDraggable(offsetX: number, offsetY: number): undefined {
+    if (!this.mainCanvas) return;
+    const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
+    this.value = [this.value![0] + x.value, this.value![1] + y.value];
+    this.position = [
+      this.position![0] + x.position,
+      this.position![1] + y.position,
+    ];
+    this.dynamicPosition = [
+      this.dynamicPosition![0] + x.dynamicPosition,
+      this.dynamicPosition![1] + y.dynamicPosition,
+    ];
+    this.notifyReload?.();
+  }
+
   private fillProgress?: {
     lineWidthOffset: number;
     progress: number;
     scheduleCallback: () => void;
   };
+  /**
+   * 处理悬停状态变化
+   * @param isHover 是否悬停
+   */
   notifyHover(isHover: boolean) {
-    if (isHover == this.isHover) return;
+    // 如果状态未变化则直接返回
+    if (isHover === this.isHover) return;
+
     super.notifyHover(isHover);
-    const time = 300;
-    const defalutLineWidth = this.setCanvasStyles().width;
 
+    const animationDuration = 300; // 动画持续时间(ms)
+    const defaultLineWidth = this.setCanvasStyles().width;
+
+    // 处理已有动画的情况
     if (this.fillProgress) {
-      this.fillProgress.scheduleCallback();
-      this.fillProgress.scheduleCallback = _Schedule((schedule) => {
-        if (this.fillProgress && schedule) {
-          this.fillProgress.progress += schedule * (isHover ? 1 : -1);
-          this.fillProgress.progress = Math.min(
-            1,
-            Math.max(0, this.fillProgress.progress)
-          );
+      this.cancelAndRestartAnimation(
+        isHover,
+        defaultLineWidth,
+        animationDuration - 100
+      );
+    }
+    // 处理新的悬停动画
+    else if (isHover) {
+      this.startNewHoverAnimation(defaultLineWidth, animationDuration);
+    }
+  }
+  /** 取消当前动画并重新开始相反方向的动画 */
+  private cancelAndRestartAnimation(
+    isHover: boolean,
+    defaultLineWidth: number,
+    duration: number
+  ) {
+    this.fillProgress!.scheduleCallback(); // 取消当前动画
 
-          const offset = Math.ceil(
-            defalutLineWidth * this.fillProgress.progress
-          );
-          if (offset != this.fillProgress.lineWidthOffset) {
-            this.fillProgress.lineWidthOffset = offset;
-            this.notifyReload?.();
-          }
+    let lastScheduleTime = 0;
+    this.fillProgress!.scheduleCallback = _Schedule((currentTime) => {
+      if (!this.fillProgress || !currentTime) return;
 
-          if (
-            this.fillProgress.progress === 1 ||
-            this.fillProgress.progress === 0
-          ) {
-            this.fillProgress.scheduleCallback();
-            if (this.fillProgress.progress === 0) this.fillProgress = undefined;
-          }
+      // 更新进度(正向或反向)
+      this.fillProgress.progress +=
+        (currentTime - lastScheduleTime) * (isHover ? 1 : -1);
+      lastScheduleTime = currentTime;
+
+      // 限制进度在0-1之间
+      this.fillProgress.progress = Math.min(
+        1,
+        Math.max(0, this.fillProgress.progress)
+      );
+
+      // 计算并更新线宽偏移
+      this.updateLineWidthOffset(defaultLineWidth);
+
+      // 动画完成处理
+      if (
+        this.fillProgress.progress === 1 ||
+        this.fillProgress.progress === 0
+      ) {
+        this.fillProgress.scheduleCallback(); // 停止动画
+        if (this.fillProgress.progress === 0) {
+          this.fillProgress = undefined; // 清除完成的动画
         }
-      }, time);
-    } else if (isHover) {
-      this.fillProgress = {
-        lineWidthOffset: 0,
-        progress: 0,
-        scheduleCallback: _Schedule((schedule) => {
-          if (this.fillProgress) {
-            this.fillProgress.progress = schedule;
-            const offset = Math.ceil(defalutLineWidth * schedule);
-            if (offset != this.fillProgress.lineWidthOffset) {
-              this.fillProgress.lineWidthOffset = offset;
+      }
+    }, duration);
+  }
+  /** 开始新的悬停动画 */
+  private startNewHoverAnimation(defaultLineWidth: number, duration: number) {
+    this.fillProgress = {
+      lineWidthOffset: 0,
+      progress: 0,
+      scheduleCallback: _Schedule((progress) => {
+        if (!this.fillProgress) return;
 
-              this.notifyReload?.();
-            }
-          }
-        }, time),
-      };
+        this.fillProgress.progress = progress;
+        this.updateLineWidthOffset(defaultLineWidth);
+      }, duration),
+    };
+  }
+  /** 更新线宽偏移并触发重绘 */
+  private updateLineWidthOffset(defaultLineWidth: number) {
+    if (!this.fillProgress) return;
+
+    const newOffset = Math.ceil(defaultLineWidth * this.fillProgress.progress);
+    if (newOffset !== this.fillProgress.lineWidthOffset) {
+      this.fillProgress.lineWidthOffset = newOffset;
+      this.notifyReload?.();
     }
   }
 

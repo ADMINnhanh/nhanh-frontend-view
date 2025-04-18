@@ -46,6 +46,8 @@ export default class Style extends BaseData {
       polygon: {
         fill: "#18a058" + 30,
         stroke: "#18a058",
+        fill_hover: "#036933" + 60,
+        stroke_hover: "#036933",
         width: 1,
         dash: false,
         dashGap: [5, 10],
@@ -91,6 +93,8 @@ export default class Style extends BaseData {
       polygon: {
         fill: "#63e2b7" + 30,
         stroke: "#63e2b7",
+        fill_hover: "#7efbd1" + 60,
+        stroke_hover: "#7efbd1",
         width: 1,
         dash: false,
         dashGap: [5, 10],

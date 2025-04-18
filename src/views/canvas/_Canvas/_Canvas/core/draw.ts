@@ -17,7 +17,7 @@ export default class Draw extends Style {
   protected currentDrawOverlays: Overlay[] = [];
 
   /** 计算坐标所需依赖 */
-  rely = "";
+  private rely = "";
   /** 是否需要重新计算坐标 */
   isRecalculate = false;
 
@@ -157,11 +157,18 @@ export default class Draw extends Style {
 
     if (!this.redrawInNextRenderFrame) {
       this.redrawInNextRenderFrame = true;
-      requestAnimationFrame(() => {
+      Promise.resolve().then(() => {
+        this.isRendering = true;
         this.redrawInNextRenderFrame = false;
         this.measureRedrawPerformance();
+        this.isRendering = false;
         // this.redraw();
       });
+      // requestAnimationFrame(() => {
+      //   this.redrawInNextRenderFrame = false;
+      //   this.measureRedrawPerformance();
+      //   // this.redraw();
+      // });
     }
   }
 

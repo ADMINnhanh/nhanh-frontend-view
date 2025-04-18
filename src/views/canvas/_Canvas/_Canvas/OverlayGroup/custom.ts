@@ -17,6 +17,8 @@ export default class Custom<
     this.draw = draw;
   }
 
+  notifyDraggable(offsetX: number, offsetY: number) {}
+
   isPointInPath(x: number, y: number) {
     return false;
   }

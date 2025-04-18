@@ -69,6 +69,10 @@ type PolygonStyleType = {
   fill: string;
   /** 描边色 */
   stroke: string;
+  /** 填充色 - hover */
+  fill_hover: string;
+  /** 描边色 - hover */
+  stroke_hover: string;
   /** 宽度 */
   width: number;
   /** 虚线 */

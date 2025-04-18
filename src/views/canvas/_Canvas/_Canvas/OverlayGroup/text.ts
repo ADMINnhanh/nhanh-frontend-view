@@ -7,16 +7,27 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   /** 文字偏差 */
   private textOffset = { x: 0, y: 0 };
   text?: string;
-  secondary = false;
 
   constructor(
     text: ConstructorParameters<
       typeof Overlay<TextStyleType, [number, number]>
-    >[0] & { text?: string; secondary?: boolean }
+    >[0] & { text?: string }
   ) {
     super(text);
     this.text = String(text.text);
-    this.secondary = text.secondary ?? false;
+  }
+
+  notifyDraggable(offsetX: number, offsetY: number) {}
+
+  /**
+   * 处理悬停状态变化
+   * @param isHover 是否悬停
+   */
+  notifyHover(isHover: boolean) {
+    // 如果状态未变化则直接返回
+    if (isHover === this.isHover) return;
+    super.notifyHover(isHover);
+    this.notifyReload?.();
   }
 
   isPointInPath(x: number, y: number) {
@@ -75,12 +86,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       if (this.dynamicPosition) this.notifyReload?.();
     }
   }
-  setSecondary(secondary: boolean) {
-    if (secondary != this.secondary) {
-      this.secondary = secondary;
-      if (this.dynamicPosition) this.notifyReload?.();
-    }
-  }
 
   /** 设置样式 */
   setCanvasStyles(ctx: CanvasRenderingContext2D) {
@@ -101,7 +106,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     // // 设置文本的描边颜色为背景色，并绘制文本的描边
     ctx.strokeStyle = style.stroke;
     // 根据是否是次要颜色，选择相应的文本填充颜色，并填充文本
-    ctx.fillStyle = style[this.secondary ? "secondary" : "color"];
+    ctx.fillStyle = style[this.isHover ? "secondary" : "color"];
   }
 
   draw(ctx: CanvasRenderingContext2D) {

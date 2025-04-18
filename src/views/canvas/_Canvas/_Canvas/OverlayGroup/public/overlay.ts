@@ -10,12 +10,20 @@ export default abstract class Overlay<
 
   /** 是否显示 */
   show = new Show();
+  /** 样式 */
   style?: DeepPartial<T> | string;
+  /** 坐标轴上的点位 */
   position?: V;
+  /** 坐标轴上的值 */
   value?: V;
+  /** 层级 */
   zIndex: number;
+  /** 动态点位 */
   dynamicPosition?: V;
+  /** 名称 */
   name?: string;
+  /** 是否可拖动 */
+  draggable = false;
 
   /** 绘制路径 */
   protected path?: Path2D;
@@ -28,15 +36,19 @@ export default abstract class Overlay<
     style?: DeepPartial<T> | string;
     zIndex?: number;
     position?: V;
+    dynamicPosition?: V;
     value?: V;
     name?: string;
+    draggable?: boolean;
   }) {
     this.show.setShow(overlay.show ?? true);
     this.style = overlay.style;
     this.zIndex = overlay.zIndex ?? 0;
     this.position = overlay.position;
+    this.dynamicPosition = overlay.dynamicPosition;
     this.value = overlay.value;
     this.name = overlay.name;
+    this.draggable = overlay.draggable ?? false;
   }
 
   isClick = false;
@@ -46,6 +58,23 @@ export default abstract class Overlay<
   isHover = false;
   notifyHover(isHover: boolean) {
     this.isHover = isHover;
+  }
+  notifyDraggable(offsetX: number, offsetY: number) {
+    if (this.mainCanvas) {
+      const { percentage, axisConfig } = this.mainCanvas;
+      const base = axisConfig.count / axisConfig.min / percentage;
+      const x = {
+        value: offsetX * base * axisConfig.x,
+        position: (offsetX / percentage) * axisConfig.x,
+        dynamicPosition: offsetX * axisConfig.x,
+      };
+      const y = {
+        value: offsetY * base * axisConfig.y,
+        position: (offsetY / percentage) * axisConfig.y,
+        dynamicPosition: offsetY * axisConfig.y,
+      };
+      return { x, y };
+    }
   }
 
   abstract updateBaseData(): void;

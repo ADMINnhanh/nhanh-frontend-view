@@ -20,6 +20,19 @@ export default class Polygon extends Overlay<
     this.size = polygon.size;
   }
 
+  /**
+   * 处理悬停状态变化
+   * @param isHover 是否悬停
+   */
+  notifyHover(isHover: boolean) {
+    // 如果状态未变化则直接返回
+    if (isHover === this.isHover) return;
+    super.notifyHover(isHover);
+    this.notifyReload?.();
+  }
+
+  notifyDraggable(offsetX: number, offsetY: number) {}
+
   isPointInPath(x: number, y: number) {
     if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
     return false;
@@ -97,7 +110,7 @@ export default class Polygon extends Overlay<
   }
 
   private setCanvasStyles(ctx: CanvasRenderingContext2D) {
-    const { mainCanvas } = this;
+    const { mainCanvas, isHover } = this;
     if (!mainCanvas) return;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].polygon;
@@ -110,13 +123,22 @@ export default class Polygon extends Overlay<
       style = defaultStyle;
     }
 
-    const { width, stroke, dash, dashGap, dashOffset, fill } = style;
+    const {
+      width,
+      stroke,
+      dash,
+      dashGap,
+      dashOffset,
+      fill,
+      fill_hover,
+      stroke_hover,
+    } = style;
 
     ctx.setLineDash(dash ? (dashGap as any) : []);
     ctx.lineDashOffset = dashOffset;
     ctx.lineWidth = width;
-    ctx.strokeStyle = stroke;
-    ctx.fillStyle = fill;
+    ctx.strokeStyle = isHover ? stroke_hover : stroke;
+    ctx.fillStyle = isHover ? fill_hover : fill;
   }
 
   /** 绘制矩形 */
