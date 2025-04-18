@@ -437,7 +437,6 @@ onUnmounted(() => {
 <style scoped lang="less">
 .graphing-equations {
   position: relative;
-
   nav {
     width: 100%;
     box-shadow: 0 0 3px 1px var(--box-shadow);

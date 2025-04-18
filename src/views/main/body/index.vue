@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { NLayout, NLayoutSider, NDrawer, NDrawerContent } from "naive-ui";
+import { NLayout, NLayoutSider, NDrawer, NDrawerContent, NA } from "naive-ui";
 import Media from "@/stores/media";
 import Menu from "./menu.vue";
 import { showMenu, collapsed } from ".";
+
+const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
 </script>
 
 <template>
@@ -33,7 +35,10 @@ import { showMenu, collapsed } from ".";
       <Menu />
     </n-layout-sider>
     <n-layout class="router-view">
-      <router-view></router-view>
+      <div><router-view></router-view></div>
+      <NA v-if="recordNumber" href="http://beian.miit.gov.cn/" target="_blank">
+        {{ recordNumber }}
+      </NA>
     </n-layout>
   </n-layout>
 </template>
@@ -51,9 +56,18 @@ import { showMenu, collapsed } from ".";
       height: 100%;
       padding: 10px;
       display: flex;
-      > * {
+      flex-direction: column;
+      > div {
+        width: 100%;
+        height: 100px;
+        flex-grow: 1;
         background-color: var(--background-color);
         border: var(--button-border-radius);
+      }
+      > a {
+        margin-top: 10px;
+        display: flex;
+        justify-content: center;
       }
     }
   }
