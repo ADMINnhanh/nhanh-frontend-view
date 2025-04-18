@@ -31,7 +31,7 @@ export default class Polygon extends Overlay<
     this.notifyReload?.();
   }
 
-  notifyDraggable(offsetX: number, offsetY: number) {}
+  notifyDraggable(offsetX: number, offsetY: number): undefined {}
 
   isPointInPath(x: number, y: number) {
     if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);

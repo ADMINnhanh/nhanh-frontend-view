@@ -55,6 +55,10 @@ export default abstract class Overlay<
   notifyClick(isClick: boolean) {
     this.isClick = isClick;
   }
+  isDown = false;
+  notifyDown(isDown: boolean) {
+    this.isDown = isDown;
+  }
   isHover = false;
   notifyHover(isHover: boolean) {
     this.isHover = isHover;

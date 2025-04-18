@@ -17,7 +17,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.text = String(text.text);
   }
 
-  notifyDraggable(offsetX: number, offsetY: number) {}
+  notifyDraggable(offsetX: number, offsetY: number): undefined {}
 
   /**
    * 处理悬停状态变化

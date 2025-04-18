@@ -51,12 +51,24 @@ export default class Event extends Draw {
     };
   }
 
+  /** 上一个被点击的覆盖物 */
+  private lastClickedOverlay?: Overlay;
   /** 鼠标左键点击画布 */
-  private click(event: MouseEvent) {}
+  private click(event: MouseEvent) {
+    const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+
+    if (this.lastClickedOverlay != clickOverlay)
+      this.lastClickedOverlay?.notifyClick(false);
+
+    clickOverlay?.notifyClick(true);
+    this.lastClickedOverlay = clickOverlay;
+  }
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
     event.preventDefault();
     console.log("mousecontextmenu");
+    this.lastClickedOverlay?.notifyClick(false);
+    this.lastClickedOverlay = undefined;
   }
   /** 鼠标进入画布 */
   private mouseenter(event: MouseEvent) {
@@ -156,25 +168,25 @@ export default class Event extends Draw {
     this.redrawOnce();
   }
   /** 上一个被点击的覆盖物 */
-  private lastClickedOverlay?: Overlay;
+  private lastDownOverlay?: Overlay;
   /** 鼠标按下 */
   private mousedown(event: MouseEvent) {
     this.mouseIsDown = true;
     const { clientX, clientY } = event;
     this.mouseLastPosition = { x: clientX, y: clientY };
 
-    const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    const downOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 
-    if (this.lastClickedOverlay != clickOverlay)
-      this.lastClickedOverlay?.notifyClick(false);
+    if (this.lastDownOverlay != downOverlay)
+      this.lastDownOverlay?.notifyDown(false);
 
-    clickOverlay?.notifyClick(true);
-    this.lastClickedOverlay = clickOverlay;
+    downOverlay?.notifyDown(true);
+    this.lastDownOverlay = downOverlay;
   }
   /** 鼠标松开 */
   private mouseup(event: MouseEvent) {
     this.mouseIsDown = false;
-    this.lastClickedOverlay = undefined;
+    this.lastDownOverlay = undefined;
   }
 
   /** 上一个被hover的覆盖物 */
@@ -186,8 +198,8 @@ export default class Event extends Draw {
 
     if (mouseIsDown) {
       if (lockDragAndResize) return;
-      if (this.lastClickedOverlay?.draggable) {
-        this.lastClickedOverlay.notifyDraggable(
+      if (this.lastDownOverlay?.draggable) {
+        this.lastDownOverlay.notifyDraggable(
           clientX - mouseLastPosition.x,
           clientY - mouseLastPosition.y
         );
