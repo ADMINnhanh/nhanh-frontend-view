@@ -1,15 +1,40 @@
 <script setup lang="ts">
-import { NLayout, NLayoutSider, NDrawer, NDrawerContent, NA } from "naive-ui";
+import {
+  NLayout,
+  NLayoutSider,
+  NDrawer,
+  NDrawerContent,
+  NA,
+  NButton,
+  NIcon,
+} from "naive-ui";
 import Media from "@/stores/media";
 import Menu from "./menu.vue";
 import { showMenu, collapsed } from ".";
+import { CopyOutline } from "@vicons/ionicons5";
+import { _CopyToClipboard } from "nhanh-pure-function";
 
 const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
 </script>
 
 <template>
   <div v-if="Media.isMobileStyle" class="mobile-layout">
-    <router-view></router-view>
+    <div class="router-view"><router-view></router-view></div>
+    <div v-if="recordNumber" class="record-number">
+      <NButton
+        @click="_CopyToClipboard(recordNumber)"
+        tag="a"
+        text
+        type="primary"
+        href="http://beian.miit.gov.cn/"
+        target="_blank"
+      >
+        <template #icon>
+          <NIcon :component="CopyOutline" />
+        </template>
+        {{ recordNumber }}
+      </NButton>
+    </div>
     <NDrawer
       v-model:show="showMenu"
       to=".mobile-layout"
@@ -36,9 +61,21 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
     </n-layout-sider>
     <n-layout class="router-view">
       <div><router-view></router-view></div>
-      <NA v-if="recordNumber" href="http://beian.miit.gov.cn/" target="_blank">
-        {{ recordNumber }}
-      </NA>
+      <div v-if="recordNumber" class="record-number">
+        <NButton
+          @click="_CopyToClipboard(recordNumber)"
+          tag="a"
+          text
+          type="primary"
+          href="http://beian.miit.gov.cn/"
+          target="_blank"
+        >
+          <template #icon>
+            <NIcon :component="CopyOutline" />
+          </template>
+          {{ recordNumber }}
+        </NButton>
+      </div>
     </n-layout>
   </n-layout>
 </template>
@@ -57,17 +94,12 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
       padding: 10px;
       display: flex;
       flex-direction: column;
-      > div {
+      > div:nth-child(1) {
         width: 100%;
         height: 100px;
         flex-grow: 1;
         background-color: var(--background-color);
         border: var(--button-border-radius);
-      }
-      > a {
-        margin-top: 10px;
-        display: flex;
-        justify-content: center;
       }
     }
   }
@@ -78,8 +110,19 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   padding: 10px;
   background-color: var(--main-content-box-background-color);
   position: relative;
+  .router-view {
+    width: 100%;
+    height: 100px;
+    flex-grow: 1;
+  }
+}
+.record-number {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
 }
 </style>
