@@ -18,6 +18,6 @@ export default defineConfig({
     cors: true, // 允许跨域
   },
   build: {
-    outDir: "dist",
+    outDir: "nhanh-frontend-view",
   },
 });
