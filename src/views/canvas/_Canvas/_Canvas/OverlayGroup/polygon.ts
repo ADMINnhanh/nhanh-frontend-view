@@ -10,6 +10,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
   /** 是否闭合 */
   protected isClosed = true;
+  protected minNeededHandlePoints = 3;
 
   constructor(
     polygon: ConstructorParameters<
@@ -18,13 +19,18 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   ) {
     super(polygon);
     this.isRect = polygon.isRect ?? false;
-    this.isCanCreateHandlePoint = !polygon.isRect;
+    this.canCreateOrDeleteHandlePoint = !polygon.isRect;
   }
 
   /** 处理悬停状态变化 */
   notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
     super.notifyHover(isHover, offsetX, offsetY);
     this.notifyReload?.();
+  }
+  /** 处理点击状态变化 */
+  notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
+    if (isClick && !this.isShowHandlePoint) return;
+    super.notifyClick(isClick, offsetX, offsetY);
   }
 
   isPointInPath(x: number, y: number) {
@@ -43,6 +49,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     const isLine = super.isPointInAnywhere(x, y);
     const isPoint =
       this.isClick &&
+      this.isShowHandlePoint &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
         point.notifyHover(is, x, y);
@@ -104,7 +111,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   setRect(isRect: Polygon["isRect"]) {
     if (this.isRect != isRect) {
       this.isRect = isRect;
-      this.isCanCreateHandlePoint = !isRect;
+      this.canCreateOrDeleteHandlePoint = !isRect;
 
       const prevDynamicStatus = !!this.dynamicPosition;
       this.updateBaseData();

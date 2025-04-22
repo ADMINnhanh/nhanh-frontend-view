@@ -55,6 +55,10 @@ function UpdatePosition(delta: number) {
 function UpdateDraggable(draggable: boolean) {
   line_arr.forEach((line) => (line.draggable = draggable));
 }
+function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
+  line_arr.forEach((line) => (line.isShowHandlePoint = isShowHandlePoint));
+  line_arr[0].notifyReload!();
+}
 
 watch(
   () => Settings.value.theme,
@@ -72,6 +76,10 @@ onMounted(() => {
     <NSwitch @update-value="UpdateDraggable" :default-value="true">
       <template #checked> 拖拽 </template>
       <template #unchecked> 拖拽 </template>
+    </NSwitch>
+    <NSwitch @update-value="UpdateIsShowHandlePoint" :default-value="true">
+      <template #checked> 显示控制点 </template>
+      <template #unchecked> 显示控制点 </template>
     </NSwitch>
     <NButton type="info" ghost @click="UpdateValue(1)"> value + 1 </NButton>
     <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>

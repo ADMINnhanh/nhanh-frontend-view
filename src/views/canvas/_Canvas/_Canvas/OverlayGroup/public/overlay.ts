@@ -99,7 +99,7 @@ export default abstract class Overlay<
   }
 
   /** 通知重新加载 */
-  protected notifyReload?: (needForceExecute?: boolean) => void;
+  notifyReload?: (needForceExecute?: boolean) => void;
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {

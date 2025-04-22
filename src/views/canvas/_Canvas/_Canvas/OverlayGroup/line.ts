@@ -11,7 +11,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
   /** 是否闭合 */
   protected isClosed = false;
-
+  protected minNeededHandlePoints = 2;
   constructor(
     line: ConstructorParameters<typeof GeometricBoundary<LineStyleType>>[0] & {
       infinite?: boolean;
@@ -19,11 +19,12 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   ) {
     super(line);
     this.infinite = line.infinite;
-    this.isCanCreateHandlePoint = !line.infinite;
+    this.canCreateOrDeleteHandlePoint = !line.infinite;
   }
 
   /** 处理点击状态变化 */
   notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
+    if (isClick && !this.isShowHandlePoint) return;
     if (!this.infinite) super.notifyClick(isClick, offsetX, offsetY);
   }
 
@@ -41,7 +42,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
     const isPoint =
-      (this.isClick || !!this.infinite) &&
+      ((this.isClick && this.isShowHandlePoint) || !!this.infinite) &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
         point.notifyHover(is, x, y);
@@ -93,7 +94,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   setInfinite(infinite: Line["infinite"]) {
     if (infinite != this.infinite) {
       this.infinite = infinite;
-      this.isCanCreateHandlePoint = !infinite;
+      this.canCreateOrDeleteHandlePoint = !infinite;
       if (this.dynamicPosition) this.notifyReload?.();
     }
   }

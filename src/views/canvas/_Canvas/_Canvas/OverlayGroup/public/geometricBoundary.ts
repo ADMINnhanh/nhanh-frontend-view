@@ -22,12 +22,15 @@ function pointToLineDistance(
   const [x1, y1] = lineStart;
   const [x2, y2] = lineEnd;
 
-  const numerator = Math.abs(
-    (y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1
-  );
-  const denominator = Math.sqrt((y2 - y1) ** 2 + (x2 - x1) ** 2);
+  const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+  if (l2 === 0) return Math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2);
 
-  return numerator / denominator;
+  let t = ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2;
+  t = Math.max(0, Math.min(1, t));
+
+  return Math.sqrt(
+    (x0 - (x1 + t * (x2 - x1))) ** 2 + (y0 - (y1 + t * (y2 - y1))) ** 2
+  );
 }
 
 /**
@@ -38,15 +41,26 @@ function pointToLineDistance(
  */
 function findInsertIndex(
   clickPosition: PointLocation,
-  controlPoints: PointLocation[]
+  controlPoints: PointLocation[],
+  threshold: number = 10 // 可配置的阈值
 ): number {
+  if (controlPoints.length === 0) return 0;
+  if (controlPoints.length === 1) return 1;
+
   let minDistance = Infinity;
   let insertIndex = -1;
 
   for (let i = 0; i < controlPoints.length - 1; i++) {
-    const p1 = controlPoints[i];
-    const p2 = controlPoints[i + 1];
-    const distance = pointToLineDistance(clickPosition, p1, p2);
+    const distance = pointToLineDistance(
+      clickPosition,
+      controlPoints[i],
+      controlPoints[i + 1]
+    );
+
+    // 如果找到足够近的点，可以提前返回
+    if (distance < threshold) {
+      return i + 1;
+    }
 
     if (distance < minDistance) {
       minDistance = distance;
@@ -88,43 +102,54 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   /** 是否闭合 */
   protected abstract isClosed: boolean;
   /** 是否可以创建新的 控制点 */
-  isCanCreateHandlePoint = true;
+  canCreateOrDeleteHandlePoint = true;
+  /** 最少需要的 控制点 数量 */
+  protected abstract minNeededHandlePoints: number;
   /** 锁定是否可创建句柄点 */
-  private lockedIsCanCreateHandlePoint = false;
+  private lockedCanCreateOrDeleteHandlePoint = false;
 
   constructor(
     boundary: ConstructorParameters<
       typeof Overlay<T, [number, number][]>
     >[0] & {
       isShowHandlePoint?: boolean;
-      isCanCreateHandlePoint?: boolean;
+      canCreateOrDeleteHandlePoint?: boolean;
     }
   ) {
     super(boundary);
     this.isShowHandlePoint = boundary.isShowHandlePoint ?? true;
-    this.isCanCreateHandlePoint = boundary.isCanCreateHandlePoint ?? true;
+    this.canCreateOrDeleteHandlePoint =
+      boundary.canCreateOrDeleteHandlePoint ?? true;
   }
 
   /** 处理悬停状态变化 */
   notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
     super.notifyHover(isHover, offsetX, offsetY);
   }
+
+  /** 上一个被点击的点位 */
+  private lastClickedPoint?: {
+    time: number;
+    point: Point;
+  };
   /** 处理点击状态变化 */
   notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
-    if (this.lockedIsCanCreateHandlePoint) {
-      this.lockedIsCanCreateHandlePoint = false;
+    if (this.lockedCanCreateOrDeleteHandlePoint) {
+      this.lockedCanCreateOrDeleteHandlePoint = false;
     } else if (
       isClick &&
       this.isClick &&
-      this.isCanCreateHandlePoint &&
+      this.isShowHandlePoint &&
+      this.canCreateOrDeleteHandlePoint &&
       this.draggable
     ) {
-      const isPointInStroke = this.isPointInStroke(offsetX, offsetY);
-      if (isPointInStroke) {
-        const hover_point_index = this.handlePoints.findIndex(
-          (point) => point.isHover
-        );
-        if (hover_point_index == -1) {
+      const hover_point_index = this.handlePoints.findIndex(
+        (point) => point.isHover
+      );
+
+      if (hover_point_index == -1) {
+        const isPointInStroke = this.isPointInStroke(offsetX, offsetY);
+        if (isPointInStroke) {
           const dynamicPosition = [...this.dynamicPosition!];
           if (this.isClosed) dynamicPosition.push(this.dynamicPosition![0]);
           const index = findInsertIndex([offsetX, offsetY], dynamicPosition);
@@ -132,6 +157,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
           const index1 = index - 1;
           const index2 =
             this.isClosed && index == this.dynamicPosition!.length ? 0 : index;
+          console.log(index1, index2, dynamicPosition);
 
           /** 创建新的控制点 */ {
             const value = getMidpoint(this.value![index1], this.value![index2]);
@@ -158,6 +184,32 @@ export default abstract class GeometricBoundary<T> extends Overlay<
             this.position!.splice(index, 0, position);
             this.dynamicPosition!.splice(index, 0, dynamicPosition);
           }
+        }
+      } else if (this.minNeededHandlePoints < this.handlePoints.length) {
+        const point = this.handlePoints[hover_point_index];
+        const nowTime = Date.now();
+
+        if (this.lastClickedPoint) {
+          if (
+            point == this.lastClickedPoint.point &&
+            nowTime - this.lastClickedPoint.time < 300
+          ) {
+            this.handlePoints.splice(hover_point_index, 1);
+            this.value!.splice(hover_point_index, 1);
+            this.position!.splice(hover_point_index, 1);
+            this.dynamicPosition!.splice(hover_point_index, 1);
+            this.lastClickedPoint = undefined;
+          } else {
+            this.lastClickedPoint = {
+              point,
+              time: nowTime,
+            };
+          }
+        } else {
+          this.lastClickedPoint = {
+            point,
+            time: nowTime,
+          };
         }
       }
     }
@@ -189,7 +241,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         point.dynamicPosition = this.dynamicPosition![index];
       });
       this.notifyReload?.();
-      this.lockedIsCanCreateHandlePoint = true;
+      this.lockedCanCreateOrDeleteHandlePoint = true;
     };
     if (this.isShowHandlePoint) {
       const hover_point_index = this.handlePoints.findIndex(
