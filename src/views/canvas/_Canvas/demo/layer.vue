@@ -72,14 +72,20 @@ const line_value2 = new _Canvas.Line({
   zIndex: 7,
 });
 const polygon_rect1 = new _Canvas.Polygon({
-  value: [[-1, -1]],
-  size: [100, 100],
+  value: [
+    [-1, -1],
+    [1, 1],
+  ],
+  isRect: true,
   style: { fill: "#f0a020", stroke: "#f0a020" },
   zIndex: 8,
 });
 const polygon_rect2 = new _Canvas.Polygon({
-  value: [[0, -1.5]],
-  size: [100, 100],
+  value: [
+    [0, -1.5],
+    [2, 0.5],
+  ],
+  isRect: true,
   style: { fill: "#d03050", stroke: "#d03050" },
   zIndex: 9,
 });
