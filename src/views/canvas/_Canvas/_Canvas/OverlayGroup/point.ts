@@ -18,7 +18,8 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.mainCanvas) return;
+    if (!this.mainCanvas || !this.draggable) return;
+
     const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
     this.value = [this.value![0] + x.value, this.value![1] + y.value];
     this.position = [
@@ -41,11 +42,8 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
    * 处理悬停状态变化
    * @param isHover 是否悬停
    */
-  notifyHover(isHover: boolean) {
-    // 如果状态未变化则直接返回
-    if (isHover === this.isHover) return;
-
-    super.notifyHover(isHover);
+  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
+    super.notifyHover(isHover, offsetX, offsetY);
 
     const animationDuration = 300; // 动画持续时间(ms)
     const defaultLineWidth = this.setCanvasStyles().width;

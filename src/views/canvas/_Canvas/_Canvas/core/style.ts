@@ -52,6 +52,12 @@ export default class Style extends BaseData {
         dash: false,
         dashGap: [5, 10],
         dashOffset: 0,
+        point: {
+          radius: 5,
+          stroke: "#036933" + 80,
+          width: 14,
+          fill: "#036933",
+        },
       },
     },
     dark: {
@@ -99,6 +105,12 @@ export default class Style extends BaseData {
         dash: false,
         dashGap: [5, 10],
         dashOffset: 0,
+        point: {
+          radius: 5,
+          stroke: "#7efbd1" + 80,
+          width: 14,
+          fill: "#7efbd1",
+        },
       },
     },
   };

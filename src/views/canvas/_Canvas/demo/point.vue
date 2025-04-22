@@ -3,7 +3,7 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
 import { onMounted, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NSpace } from "naive-ui";
+import { NButton, NSpace, NSwitch } from "naive-ui";
 
 const id = _GenerateUUID();
 
@@ -27,6 +27,9 @@ function UpdatePosition(delta: number) {
     point.setPosition([x + delta, y + delta]);
   });
 }
+function UpdateDraggable(draggable: boolean) {
+  point_arr.forEach((point) => (point.draggable = draggable));
+}
 
 watch(
   () => Settings.value.theme,
@@ -41,6 +44,10 @@ onMounted(() => {
 
 <template>
   <NSpace style="margin-bottom: 10px">
+    <NSwitch @update-value="UpdateDraggable" :default-value="true">
+      <template #checked> 拖拽 </template>
+      <template #unchecked> 拖拽 </template>
+    </NSwitch>
     <NButton type="info" ghost @click="UpdateValue(1)"> value + 1 </NButton>
     <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>
     <NButton ghost @click="UpdatePosition(100)"> position + 100 </NButton>

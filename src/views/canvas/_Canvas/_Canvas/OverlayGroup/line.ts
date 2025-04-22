@@ -3,46 +3,28 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
-import Point from "./point";
+import GeometricBoundary from "./public/geometricBoundary";
 
-export default class Line extends Overlay<LineStyleType, [number, number][]> {
+export default class Line extends GeometricBoundary<LineStyleType> {
   /** 两点相连向外延展的无限线 */
   infinite?: boolean;
-  private lineHandlePoints: Point[] = [];
+
+  /** 是否闭合 */
+  protected isClosed = false;
 
   constructor(
-    line: ConstructorParameters<
-      typeof Overlay<LineStyleType, [number, number][]>
-    >[0] &
-      LineType
+    line: ConstructorParameters<typeof GeometricBoundary<LineStyleType>>[0] & {
+      infinite?: boolean;
+    }
   ) {
     super(line);
     this.infinite = line.infinite;
+    this.isCanCreateHandlePoint = !line.infinite;
   }
 
-  /** 处理悬停状态变化 */
-  notifyHover(isHover: boolean) {
-    // 如果状态未变化则直接返回
-    if (isHover === this.isHover) return;
-    super.notifyHover(isHover);
-  }
   /** 处理点击状态变化 */
-  notifyClick(isClick: boolean): void {
-    if (isClick === this.isClick) return;
-    super.notifyClick(isClick);
-    this.notifyReload?.();
-  }
-  /** 处理拖动状态变化 */
-  notifyDraggable(offsetX: number, offsetY: number): undefined {
-    this.lineHandlePoints.some((point, index) => {
-      if (point.isHover) {
-        point.notifyDraggable(offsetX, offsetY);
-        this.value![index] = point.value!;
-        this.position![index] = point.position!;
-        this.dynamicPosition![index] = point.dynamicPosition!;
-      }
-      return point.isHover;
-    });
+  notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
+    if (!this.infinite) super.notifyClick(isClick, offsetX, offsetY);
   }
 
   isPointInPath(x: number, y: number) {
@@ -58,35 +40,17 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
   }
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
-    const isPoint = this.lineHandlePoints.some((point) => {
-      const is = point.isPointInAnywhere(x, y);
-      point.notifyHover(is);
-      return is;
-    });
+    const isPoint =
+      (this.isClick || !!this.infinite) &&
+      this.handlePoints.some((point) => {
+        const is = point.isPointInAnywhere(x, y);
+        point.notifyHover(is, x, y);
+        return is;
+      });
 
     return isLine || isPoint;
   }
 
-  /** 更新线段控制点 */
-  updateLineHandlePoints() {
-    let { value, position, dynamicPosition } = this;
-    if (!dynamicPosition) return;
-
-    const style = this.setCanvasStylesLine().point;
-
-    this.lineHandlePoints = [];
-
-    value?.forEach((_, index) => {
-      const point = this.lineHandlePoints[index] || new Point({});
-      point.value = value![index];
-      point.position = position![index];
-      point.dynamicPosition = dynamicPosition![index];
-      point.style = style;
-      point.mainCanvas = this.mainCanvas;
-      point.setNotifyReload(() => this.notifyReload?.());
-      if (!this.lineHandlePoints[index]) this.lineHandlePoints.push(point);
-    });
-  }
   /** 更新基础数据 */
   updateBaseData() {
     if (!this.mainCanvas) return;
@@ -98,7 +62,7 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     ];
 
     if (!isValue && !isPosition) {
-      this.lineHandlePoints = [];
+      this.handlePoints = [];
       return (this.dynamicPosition = undefined);
     } else if (isValue) {
       position = [];
@@ -122,13 +86,14 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     this.value = value;
     this.position = position;
 
-    this.updateLineHandlePoints();
+    this.updateHandlePoints();
   }
 
   /** 设置无限线段 */
   setInfinite(infinite: Line["infinite"]) {
     if (infinite != this.infinite) {
       this.infinite = infinite;
+      this.isCanCreateHandlePoint = !infinite;
       if (this.dynamicPosition) this.notifyReload?.();
     }
   }
@@ -165,7 +130,7 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     position = position || this.dynamicPosition;
     if (!mainCanvas) return;
 
-    this.setCanvasStylesLine(ctx);
+    const style = this.setCanvasStylesLine(ctx);
 
     ctx.beginPath();
 
@@ -180,8 +145,11 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     ctx.stroke(this.path);
 
     // 绘制 线段控制点
-    if (infinite || isClick)
-      this.lineHandlePoints.forEach((point) => point.draw(ctx));
+    if (infinite || (isClick && this.isShowHandlePoint))
+      this.handlePoints.forEach((point) => {
+        point.style = style.point;
+        point.draw(ctx);
+      });
   }
   /** 绘制无限延伸线段 */
   drawInfiniteStraightLine(ctx: CanvasRenderingContext2D) {
@@ -254,13 +222,12 @@ export default class Line extends Overlay<LineStyleType, [number, number][]> {
     if (isShow && prevDynamicStatus) {
       if (isRecalculate) {
         this.dynamicPosition = mainCanvas.transformPosition(position!);
-        this.lineHandlePoints.forEach(
+        this.handlePoints.forEach(
           (point, index) =>
             (point.dynamicPosition = this.dynamicPosition![index])
         );
       }
       if (infinite) return [this.drawInfiniteStraightLine, this];
-
       return [this.drawLine, this];
     }
   }

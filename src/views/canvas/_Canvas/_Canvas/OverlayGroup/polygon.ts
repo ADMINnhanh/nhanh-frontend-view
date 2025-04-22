@@ -2,36 +2,30 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
+import GeometricBoundary from "./public/geometricBoundary";
 
-export default class Polygon extends Overlay<
-  PolygonStyleType,
-  [number, number][]
-> {
-  size?: [number, number];
-  private dynamicSize?: [number, number];
+export default class Polygon extends GeometricBoundary<PolygonStyleType> {
+  /** 是否为矩形 */
+  isRect = false;
+
+  /** 是否闭合 */
+  protected isClosed = true;
 
   constructor(
     polygon: ConstructorParameters<
-      typeof Overlay<PolygonStyleType, [number, number][]>
-    >[0] &
-      PolygonType
+      typeof GeometricBoundary<PolygonStyleType>
+    >[0] & { isRect?: boolean }
   ) {
     super(polygon);
-    this.size = polygon.size;
+    this.isRect = polygon.isRect ?? false;
+    this.isCanCreateHandlePoint = !polygon.isRect;
   }
 
-  /**
-   * 处理悬停状态变化
-   * @param isHover 是否悬停
-   */
-  notifyHover(isHover: boolean) {
-    // 如果状态未变化则直接返回
-    if (isHover === this.isHover) return;
-    super.notifyHover(isHover);
+  /** 处理悬停状态变化 */
+  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
+    super.notifyHover(isHover, offsetX, offsetY);
     this.notifyReload?.();
   }
-
-  notifyDraggable(offsetX: number, offsetY: number): undefined {}
 
   isPointInPath(x: number, y: number) {
     if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
@@ -40,36 +34,48 @@ export default class Polygon extends Overlay<
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
       this.setCanvasStyles(Overlay.ctx);
+      Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
       return Overlay.ctx.isPointInStroke(this.path, x, y);
     }
     return false;
   }
+  isPointInAnywhere(x: number, y: number): boolean {
+    const isLine = super.isPointInAnywhere(x, y);
+    const isPoint =
+      this.isClick &&
+      this.handlePoints.some((point) => {
+        const is = point.isPointInAnywhere(x, y);
+        point.notifyHover(is, x, y);
+        return is;
+      });
 
+    return isLine || isPoint;
+  }
+
+  /** 更新基础数据 */
   updateBaseData() {
     if (!this.mainCanvas) return;
-    const { axisConfig, percentage } = this.mainCanvas;
-    let { value, position, size } = this;
+    let { value, position, isRect } = this;
 
-    const [isValue, isPosition, isRect] = [
-      DataProcessor.IsValids(value),
-      DataProcessor.IsValids(position),
-      DataProcessor.IsValid(size),
+    let [isValue, isPosition] = [
+      DataProcessor.IsValids(value) && value!.length > (isRect ? 1 : 2),
+      DataProcessor.IsValids(position) && position!.length > (isRect ? 1 : 2),
     ];
 
     if (!isValue && !isPosition) return (this.dynamicPosition = undefined);
 
     if (isRect) {
-      if (isPosition) position!.length = 1;
-      else if (isValue) value!.length = 1;
-    } else {
-      if (
-        (isValue && value!.length < 3) ||
-        (isPosition && position!.length < 3)
-      )
-        return (this.dynamicPosition = undefined);
-      size = undefined;
+      if (isValue) {
+        value!.length = 2;
+        const [point1, point2] = value!;
+        isValue = !(point1[0] == point2[0] || point1[1] == point2[1]);
+      }
+      if (isPosition) {
+        position!.length = 2;
+        const [point1, point2] = position!;
+        isPosition = !(point1[0] == point2[0] || point1[1] == point2[1]);
+      }
     }
-
     if (isValue) {
       position = [];
       for (let i = 0; i < value!.length; i++) {
@@ -87,31 +93,28 @@ export default class Polygon extends Overlay<
     }
 
     const dynamicPosition = this.mainCanvas.transformPosition(position!);
-    const dynamicSize = [];
-    if (isRect) {
-      const [width, height] = size!;
-      dynamicSize[0] = width * percentage * axisConfig.x;
-      dynamicSize[1] = height * percentage * axisConfig.y;
-    }
 
-    this.dynamicSize = dynamicSize as any;
     this.dynamicPosition = dynamicPosition;
     this.value = value;
     this.position = position;
-    this.size = size;
+
+    this.updateHandlePoints();
   }
 
-  setSize(size: Polygon["size"]) {
-    this.size = size;
+  setRect(isRect: Polygon["isRect"]) {
+    if (this.isRect != isRect) {
+      this.isRect = isRect;
+      this.isCanCreateHandlePoint = !isRect;
 
-    const prevDynamicStatus = !!this.dynamicPosition;
-    this.updateBaseData();
-    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
+      const prevDynamicStatus = !!this.dynamicPosition;
+      this.updateBaseData();
+      if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
+    }
   }
 
   private setCanvasStyles(ctx: CanvasRenderingContext2D) {
-    const { mainCanvas, isHover } = this;
-    if (!mainCanvas) return;
+    const isHover = this.isHover;
+    const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].polygon;
     let style = {} as PolygonStyleType;
@@ -139,39 +142,43 @@ export default class Polygon extends Overlay<
     ctx.lineWidth = width;
     ctx.strokeStyle = isHover ? stroke_hover : stroke;
     ctx.fillStyle = isHover ? fill_hover : fill;
+
+    return style;
   }
 
   /** 绘制矩形 */
   drawRect(ctx: CanvasRenderingContext2D) {
-    const { dynamicPosition, dynamicSize } = this;
+    const [[x1, y1], [x2, y2]] = this.dynamicPosition!;
+    const width = Math.abs(x2 - x1);
+    const height = Math.abs(y2 - y1);
+    const left = Math.min(x1, x2);
+    const top = Math.min(y1, y2);
 
-    this.setCanvasStyles(ctx);
+    const style = this.setCanvasStyles(ctx);
 
     ctx.beginPath();
 
-    // ctx.rect(
-    //   dynamicPosition![0][0],
-    //   dynamicPosition![0][1],
-    //   dynamicSize![0],
-    //   dynamicSize![1]
-    // );
+    // ctx.rect( left, top, width, height );
+
     // 创建 Path2D 对象
     this.path = new Path2D();
-    this.path.rect(
-      dynamicPosition![0][0],
-      dynamicPosition![0][1],
-      dynamicSize![0],
-      dynamicSize![1]
-    );
+    this.path.rect(left, top, width, height);
 
     ctx.stroke(this.path);
     ctx.fill(this.path);
+
+    // 绘制 线段控制点
+    if (this.isClick && this.isShowHandlePoint)
+      this.handlePoints.forEach((point) => {
+        point.style = style.point;
+        point.draw(ctx);
+      });
   }
   /** 绘制多边形 */
   drawPolygon(ctx: CanvasRenderingContext2D) {
-    const { dynamicPosition } = this;
+    const dynamicPosition = this.dynamicPosition!;
 
-    this.setCanvasStyles(ctx);
+    const style = this.setCanvasStyles(ctx);
 
     ctx.beginPath();
 
@@ -182,31 +189,37 @@ export default class Polygon extends Overlay<
       // ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
       this.path![index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
-    this.path.lineTo(dynamicPosition![0][0], dynamicPosition![0][1]);
+    this.path.lineTo(dynamicPosition[0][0], dynamicPosition[0][1]);
     ctx.closePath();
     ctx.stroke(this.path);
     ctx.fill(this.path);
+
+    // 绘制 线段控制点
+    if (this.isClick && this.isShowHandlePoint)
+      this.handlePoints.forEach((point) => {
+        point.style = style.point;
+        point.draw(ctx);
+      });
   }
 
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, position, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { scale, isRecalculate, percentage, axisConfig } = mainCanvas;
+    const { scale, isRecalculate } = mainCanvas;
     const isShow = show.shouldRender(scale);
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
       if (isRecalculate) {
         this.dynamicPosition = mainCanvas.transformPosition(position!);
-        if (this.size) {
-          this.dynamicSize = [
-            this.size[0] * percentage * axisConfig.x,
-            this.size[1] * percentage * axisConfig.y,
-          ];
-        }
+        this.handlePoints.forEach(
+          (point, index) =>
+            (point.dynamicPosition = this.dynamicPosition![index])
+        );
       }
-      if (this.dynamicSize?.length) return [this.drawRect, this];
+
+      if (this.isRect) return [this.drawRect, this];
       return [this.drawPolygon, this];
     }
   }

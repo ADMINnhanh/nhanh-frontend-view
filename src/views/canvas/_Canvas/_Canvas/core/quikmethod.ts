@@ -104,35 +104,7 @@ export default class QuickMethod extends Event {
 
   /** 开关坐标轴 */
   toggleAxis(show?: boolean | DeepPartial<Axis["show"]>) {
-    // 统一处理配置
-    const newState = (() => {
-      // 对象配置：未传的属性用默认值 true
-      if (typeof show === "object") {
-        const {
-          all = true,
-          grid = { main: true, secondary: true },
-          axis = true,
-          axisText = true,
-        } = show;
-        Object.assign({ main: true, secondary: true }, grid);
-        return { all, grid, axis, axisText };
-      }
-      // 布尔配置：全部属性同步开关
-      if (typeof show === "boolean") {
-        return {
-          all: true,
-          grid: { main: show, secondary: show },
-          axis: show,
-          axisText: show,
-        };
-      }
-      // 无参数：根据当前状态取反
-      return !this.drawAxis.show.all;
-    })();
-
-    if (typeof newState === "boolean") this.drawAxis.show.all = newState;
-    else this.drawAxis.show = newState as Axis["show"];
-
+    this.drawAxis.toggleAxis(show);
     this.redrawOnce();
   }
   /** 开关点位 */

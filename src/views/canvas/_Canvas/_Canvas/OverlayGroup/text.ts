@@ -17,16 +17,28 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.text = String(text.text);
   }
 
-  notifyDraggable(offsetX: number, offsetY: number): undefined {}
+  notifyDraggable(offsetX: number, offsetY: number): undefined {
+    if (!this.mainCanvas || !this.draggable) return;
+
+    const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
+    this.value = [this.value![0] + x.value, this.value![1] + y.value];
+    this.position = [
+      this.position![0] + x.position,
+      this.position![1] + y.position,
+    ];
+    this.dynamicPosition = [
+      this.dynamicPosition![0] + x.dynamicPosition,
+      this.dynamicPosition![1] + y.dynamicPosition,
+    ];
+    this.notifyReload?.();
+  }
 
   /**
    * 处理悬停状态变化
    * @param isHover 是否悬停
    */
-  notifyHover(isHover: boolean) {
-    // 如果状态未变化则直接返回
-    if (isHover === this.isHover) return;
-    super.notifyHover(isHover);
+  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
+    super.notifyHover(isHover, offsetX, offsetY);
     this.notifyReload?.();
   }
 

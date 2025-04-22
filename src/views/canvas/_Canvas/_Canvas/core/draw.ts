@@ -84,16 +84,19 @@ export default class Draw extends Style {
     const currentDrawOverlays: [[number, number], Overlay][] = [];
     let canvasArr: [
       number,
-      HTMLCanvasElement | (() => void),
+      HTMLCanvasElement,
       [[number, number], Overlay][]
-    ][] = [[0, () => this.drawAxis?.drawAxisAndGrid(), []]];
+    ][] = [];
+
+    const axis_canvas = this.drawAxis?.drawAxisAndGrid();
+    if (axis_canvas) canvasArr.push([0, axis_canvas, []]);
+
     this.layerGroups.forEach(
       (layerGroup) => (canvasArr = canvasArr.concat(layerGroup.fetchCanvas()))
     );
     canvasArr.sort((a, b) => a[0] - b[0]);
     canvasArr.forEach(([, canvas, overlays], index) => {
-      if (typeof canvas === "function") canvas();
-      else this.ctx.drawImage(canvas, 0, 0);
+      this.ctx.drawImage(canvas, 0, 0);
 
       overlays.forEach(([[layerZIndex, overlayZIndex], overlay]) => {
         currentDrawOverlays.push([

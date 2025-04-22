@@ -81,6 +81,8 @@ type PolygonStyleType = {
   dashGap: number[];
   /** 偏移虚线 */
   dashOffset: number;
+  /** 点位样式 */
+  point: PointStyleType;
 };
 
 /** 主题样式 */
@@ -139,6 +141,8 @@ type LineType = CommonDataType<
   {
     /** 无限线 */
     infinite: boolean;
+    /** 是否可显示线段控制点 */
+    isShowHandlePoint: boolean;
   }
 >;
 
@@ -147,7 +151,9 @@ type PolygonType = CommonDataType<
   PolygonStyleType,
   true,
   {
-    size: [number, number];
-    dynamicSize: [number, number];
+    /** 是否为矩形 */
+    isRect: boolean;
+    /** 是否可显示线段控制点 */
+    isShowHandlePoint: boolean;
   }
 >;

@@ -3,7 +3,7 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
 import { onMounted, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NSpace } from "naive-ui";
+import { NButton, NSpace, NSwitch } from "naive-ui";
 
 const id = _GenerateUUID();
 
@@ -14,6 +14,7 @@ const polygon_value = new _Canvas.Polygon({
     [2, 2],
     [3, 1],
   ],
+  draggable: true,
 });
 const polygon_position = new _Canvas.Polygon({
   position: [
@@ -21,10 +22,15 @@ const polygon_position = new _Canvas.Polygon({
     [-100, -100],
     [50, -100],
   ],
+  draggable: true,
 });
 const polygon_rect = new _Canvas.Polygon({
-  value: [[1, -2]],
-  size: [100, 100],
+  value: [
+    [1, -2],
+    [3, 0],
+  ],
+  isRect: true,
+  draggable: true,
 });
 const polygon_arr = [polygon_value, polygon_position, polygon_rect];
 
@@ -46,6 +52,9 @@ function UpdatePosition(delta: number) {
     polygon.setPosition(newPosition);
   });
 }
+function UpdateDraggable(draggable: boolean) {
+  polygon_arr.forEach((polygon) => (polygon.draggable = draggable));
+}
 
 watch(
   () => Settings.value.theme,
@@ -60,6 +69,10 @@ onMounted(() => {
 
 <template>
   <NSpace style="margin-bottom: 10px">
+    <NSwitch @update-value="UpdateDraggable" :default-value="true">
+      <template #checked> 拖拽 </template>
+      <template #unchecked> 拖拽 </template>
+    </NSwitch>
     <NButton type="info" ghost @click="UpdateValue(1)"> value + 1 </NButton>
     <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>
     <NButton ghost @click="UpdatePosition(100)"> position + 100 </NButton>

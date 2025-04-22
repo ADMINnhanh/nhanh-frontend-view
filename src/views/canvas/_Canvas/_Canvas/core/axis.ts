@@ -4,6 +4,10 @@ export default class Axis {
   /** 画布 */
   private canvas: Canvas;
 
+  private axis_canvas = document.createElement("canvas");
+  private ctx = this.axis_canvas.getContext("2d")!;
+  private isReload = false;
+
   /** 网格开关 */
   show = {
     all: true,
@@ -17,13 +21,67 @@ export default class Axis {
 
   constructor(canvas: Canvas) {
     this.canvas = canvas;
+    this.initAxisCanvas();
+  }
+
+  private initAxisCanvas() {
+    const { canvas, axis_canvas } = this;
+    if (canvas) {
+      axis_canvas.width = canvas.rect?.value.width || 0;
+      axis_canvas.height = canvas.rect?.value.height || 0;
+    }
+  }
+
+  /** 开关坐标轴 */
+  toggleAxis(show?: boolean | DeepPartial<Axis["show"]>) {
+    // 统一处理配置
+    const newState = (() => {
+      // 对象配置：未传的属性用默认值 true
+      if (typeof show === "object") {
+        const {
+          all = true,
+          grid = { main: true, secondary: true },
+          axis = true,
+          axisText = true,
+        } = show;
+        Object.assign({ main: true, secondary: true }, grid);
+        return { all, grid, axis, axisText };
+      }
+      // 布尔配置：全部属性同步开关
+      if (typeof show === "boolean") {
+        return {
+          all: true,
+          grid: { main: show, secondary: show },
+          axis: show,
+          axisText: show,
+        };
+      }
+      // 无参数：根据当前状态取反
+      return !this.show.all;
+    })();
+
+    if (typeof newState === "boolean") this.show.all = newState;
+    else this.show = newState as Axis["show"];
+
+    this.isReload = true;
   }
 
   drawAxisAndGrid() {
     if (!this.canvas || !this.show.all) return;
-    if (this.show.grid.main || this.show.grid.secondary) this.drawGrid();
-    if (this.show.axis) this.drawAxis();
-    if (this.show.axisText) this.drawAxisText();
+
+    if (
+      this.canvas.isRecalculate ||
+      this.isReload ||
+      this.canvas.isThemeUpdated
+    ) {
+      this.isReload = false;
+      this.initAxisCanvas();
+      if (this.show.grid.main || this.show.grid.secondary) this.drawGrid();
+      if (this.show.axis) this.drawAxis();
+      if (this.show.axisText) this.drawAxisText();
+    }
+
+    return this.axis_canvas;
   }
 
   private color() {
@@ -33,8 +91,8 @@ export default class Axis {
 
   /** 绘制网格 */
   private drawGrid() {
-    const canvas = this.canvas;
-    const { ctx, rect, center, axisConfig } = canvas;
+    const { canvas, ctx } = this;
+    const { rect, center, axisConfig } = canvas;
 
     const { width, height } = rect!.value;
     const color = this.color();
@@ -95,8 +153,8 @@ export default class Axis {
 
   /** 坐标轴 */
   private drawAxis() {
-    const canvas = this.canvas;
-    const { ctx, rect, center } = canvas;
+    const { canvas, ctx } = this;
+    const { rect, center } = canvas;
 
     const { width, height } = rect!.value;
 
@@ -139,7 +197,8 @@ export default class Axis {
    */
   private drawText(text: string, x: number, y: number, secondary?: boolean) {
     // 获取画布的上下文对象，用于绘制
-    const { ctx, theme } = this.canvas;
+    const { canvas, ctx } = this;
+    const { theme } = canvas;
 
     // 根据当前主题获取样式配置
     const style = this.canvas.style[theme].text;
@@ -158,8 +217,8 @@ export default class Axis {
 
   /** 坐标轴 - 文字 */
   private drawAxisText() {
-    const canvas = this.canvas;
-    const { ctx, rect, center, axisConfig, style, theme } = canvas;
+    const { canvas, ctx } = this;
+    const { rect, center, axisConfig, style, theme } = canvas;
 
     const { width, height } = rect!.value;
 

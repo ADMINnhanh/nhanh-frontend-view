@@ -58,16 +58,16 @@ export default class Event extends Draw {
     const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 
     if (this.lastClickedOverlay != clickOverlay)
-      this.lastClickedOverlay?.notifyClick(false);
+      this.lastClickedOverlay?.notifyClick(false, event.offsetX, event.offsetY);
 
-    clickOverlay?.notifyClick(true);
+    clickOverlay?.notifyClick(true, event.offsetX, event.offsetY);
     this.lastClickedOverlay = clickOverlay;
   }
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
     event.preventDefault();
     console.log("mousecontextmenu");
-    this.lastClickedOverlay?.notifyClick(false);
+    this.lastClickedOverlay?.notifyClick(false, event.offsetX, event.offsetY);
     this.lastClickedOverlay = undefined;
   }
   /** 鼠标进入画布 */
@@ -177,10 +177,11 @@ export default class Event extends Draw {
 
     const downOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 
-    if (this.lastDownOverlay != downOverlay)
-      this.lastDownOverlay?.notifyDown(false);
+    if (this.lastDownOverlay != downOverlay) {
+      this.lastDownOverlay?.notifyDown(false, event.offsetX, event.offsetY);
+      downOverlay?.notifyDown(true, event.offsetX, event.offsetY);
+    }
 
-    downOverlay?.notifyDown(true);
     this.lastDownOverlay = downOverlay;
   }
   /** 鼠标松开 */
@@ -221,14 +222,27 @@ export default class Event extends Draw {
           event.offsetY
         );
 
-        if (this.lastHoverOverlay != hoverOverlay)
-          this.lastHoverOverlay?.notifyHover(false);
+        const getClass = (overlay: Overlay) => {
+          if (overlay.draggable) return "_nhanh_canvas_hover_overlay_draggable";
+          else return "_nhanh_canvas_hover_overlay";
+        };
+
+        if (this.lastHoverOverlay != hoverOverlay) {
+          if (this.lastHoverOverlay) {
+            this.canvas.classList.remove(getClass(this.lastHoverOverlay));
+            this.lastHoverOverlay.notifyHover(
+              false,
+              event.offsetX,
+              event.offsetY
+            );
+          }
+          if (hoverOverlay) {
+            this.canvas.classList.add(getClass(hoverOverlay));
+            hoverOverlay.notifyHover(true, event.offsetX, event.offsetY);
+          }
+        }
 
         this.lastHoverOverlay = hoverOverlay;
-        if (this.lastHoverOverlay) {
-          this.lastHoverOverlay.notifyHover(true);
-          this.canvas.classList.add("_nhanh_canvas_hover_overlay");
-        } else this.canvas.classList.remove("_nhanh_canvas_hover_overlay");
       }
     }
   }

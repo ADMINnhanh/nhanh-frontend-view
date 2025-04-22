@@ -3,7 +3,7 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
 import { onMounted, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NSpace } from "naive-ui";
+import { NButton, NSpace, NSwitch } from "naive-ui";
 
 const id = _GenerateUUID();
 
@@ -12,11 +12,13 @@ const text_value = new _Canvas.Text({
   value: [0, 0],
   text: "你好 世界",
   style: { color: "#18a058", size: 20 },
+  draggable: true,
 });
 const text_position = new _Canvas.Text({
   position: [100, -100],
   text: "Hello World",
   style: { color: "#18a058", size: 20 },
+  draggable: true,
 });
 const text_arr = [text_value, text_position];
 
@@ -32,6 +34,9 @@ function UpdatePosition(delta: number) {
     text.setPosition([x + delta, y + delta]);
   });
 }
+function UpdateDraggable(draggable: boolean) {
+  text_arr.forEach((text) => (text.draggable = draggable));
+}
 
 watch(
   () => Settings.value.theme,
@@ -46,6 +51,10 @@ onMounted(() => {
 
 <template>
   <NSpace style="margin-bottom: 10px">
+    <NSwitch @update-value="UpdateDraggable" :default-value="true">
+      <template #checked> 拖拽 </template>
+      <template #unchecked> 拖拽 </template>
+    </NSwitch>
     <NButton type="info" ghost @click="UpdateValue(1)"> value + 1 </NButton>
     <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>
     <NButton ghost @click="UpdatePosition(100)"> position + 100 </NButton>
