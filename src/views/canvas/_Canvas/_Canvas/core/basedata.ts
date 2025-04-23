@@ -383,7 +383,7 @@ export default class BaseData {
 
   /** 保留精度 */
   preservePrecision(value: string | number, accuracy?: number) {
-    return DataProcessor.preservePrecision(value, accuracy || this.accuracy);
+    return DataProcessor.PreservePrecision(value, accuracy || this.accuracy);
   }
 
   /** 变换坐标 */

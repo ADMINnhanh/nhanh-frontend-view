@@ -24,12 +24,13 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
   /** 处理悬停状态变化 */
   notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
+    if (!this.isInteractable) return;
     super.notifyHover(isHover, offsetX, offsetY);
     this.notifyReload?.();
   }
   /** 处理点击状态变化 */
   notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
-    if (isClick && !this.isShowHandlePoint) return;
+    if (!this.isInteractable || (isClick && !this.isShowHandlePoint)) return;
     super.notifyClick(isClick, offsetX, offsetY);
   }
 
@@ -40,7 +41,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
       this.setCanvasStyles(Overlay.ctx);
-      Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
+      if (this.draggable)
+        Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
       return Overlay.ctx.isPointInStroke(this.path, x, y);
     }
     return false;

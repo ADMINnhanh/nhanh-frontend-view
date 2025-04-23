@@ -106,45 +106,46 @@ export default class Event extends Draw {
   /** 键盘按下事件 */
   private keydown(event: KeyboardEvent) {
     const { mouseInCanvas, offset, delta, lockDragAndResize } = this;
+    const key = event.key;
+    // console.log(key);
 
-    if (mouseInCanvas && !lockDragAndResize) {
-      // console.log(event.key);
+    if (mouseInCanvas) {
+      if (!lockDragAndResize) {
+        const step = this.getStep(key);
 
-      const key = event.key;
-      const step = this.getStep(key);
+        switch (key) {
+          case "ArrowUp":
+            offset.y -= step;
+            break;
+          case "ArrowDown":
+            offset.y += step;
+            break;
+          case "ArrowLeft":
+            offset.x -= step;
+            break;
+          case "ArrowRight":
+            offset.x += step;
+            break;
+          case "+":
+            this.setScale("center", delta);
+            break;
+          case "-":
+            this.setScale("center", -delta);
+            break;
+        }
 
-      switch (key) {
-        case "ArrowUp":
-          offset.y -= step;
-          break;
-        case "ArrowDown":
-          offset.y += step;
-          break;
-        case "ArrowLeft":
-          offset.x -= step;
-          break;
-        case "ArrowRight":
-          offset.x += step;
-          break;
-        case "+":
-          this.setScale("center", delta);
-          break;
-        case "-":
-          this.setScale("center", -delta);
-          break;
+        /** 是否需要重绘 */
+        const shouldRedraw = [
+          "ArrowUp",
+          "ArrowDown",
+          "ArrowLeft",
+          "ArrowRight",
+          "+",
+          "-",
+        ].includes(key);
+
+        if (shouldRedraw) this.redrawOnce();
       }
-
-      /** 是否需要重绘 */
-      const shouldRedraw = [
-        "ArrowUp",
-        "ArrowDown",
-        "ArrowLeft",
-        "ArrowRight",
-        "+",
-        "-",
-      ].includes(key);
-
-      if (shouldRedraw) this.redrawOnce();
     }
   }
   /** 键盘松开事件 */

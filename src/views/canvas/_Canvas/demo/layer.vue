@@ -8,19 +8,22 @@ import { NP, NText } from "naive-ui";
 const id = _GenerateUUID();
 
 let myCanvas: _Canvas;
-const custom_1 = new _Canvas.Custom({ value: [-1, -0.8], zIndex: 0 }, (ctx) => {
-  const [x, y] = custom_1.dynamicPosition!;
+const custom_1 = new _Canvas.Custom(
+  { value: [-1, -0.8], zIndex: 0, isInteractable: false },
+  (ctx) => {
+    const [x, y] = custom_1.dynamicPosition!;
 
-  ctx.fillStyle = "#b2d705";
+    ctx.fillStyle = "#b2d705";
 
-  ctx.beginPath();
+    ctx.beginPath();
 
-  ctx.rect(x, y, 20, 80);
+    ctx.rect(x, y, 20, 80);
 
-  ctx.fill();
-});
+    ctx.fill();
+  }
+);
 const custom_2 = new _Canvas.Custom(
-  { value: [-0.8, -0.2], zIndex: 1 },
+  { value: [-0.8, -0.2], zIndex: 1, isInteractable: false },
   (ctx) => {
     const [x, y] = custom_2.dynamicPosition!;
 
@@ -38,22 +41,26 @@ const text_value1 = new _Canvas.Text({
   text: "text_value1",
   style: { color: "#208088", size: 20 },
   zIndex: 2,
+  isInteractable: false,
 });
 const text_value2 = new _Canvas.Text({
   value: [0, 0.45],
   text: "text_value2",
   style: { color: "#898033", size: 20 },
   zIndex: 3,
+  isInteractable: false,
 });
 const point_value1 = new _Canvas.Point({
   value: [0, -0.2],
   style: { stroke: "#2080f0", fill: "#2080f0", width: 20 },
   zIndex: 4,
+  isInteractable: false,
 });
 const point_value2 = new _Canvas.Point({
   value: [0, 0.2],
   style: { stroke: "#18a058", fill: "#18a058", width: 20 },
   zIndex: 5,
+  isInteractable: false,
 });
 const line_value1 = new _Canvas.Line({
   value: [
@@ -62,6 +69,7 @@ const line_value1 = new _Canvas.Line({
   ],
   style: { color: "#8a2be2", width: 10 },
   zIndex: 6,
+  isInteractable: false,
 });
 const line_value2 = new _Canvas.Line({
   value: [
@@ -70,6 +78,7 @@ const line_value2 = new _Canvas.Line({
   ],
   style: { color: "#ff69b4", width: 10 },
   zIndex: 7,
+  isInteractable: false,
 });
 const polygon_rect1 = new _Canvas.Polygon({
   value: [
@@ -79,6 +88,7 @@ const polygon_rect1 = new _Canvas.Polygon({
   isRect: true,
   style: { fill: "#f0a020", stroke: "#f0a020" },
   zIndex: 8,
+  isInteractable: false,
 });
 const polygon_rect2 = new _Canvas.Polygon({
   value: [
@@ -88,6 +98,7 @@ const polygon_rect2 = new _Canvas.Polygon({
   isRect: true,
   style: { fill: "#d03050", stroke: "#d03050" },
   zIndex: 9,
+  isInteractable: false,
 });
 
 const overlay_arr = [
@@ -138,9 +149,4 @@ onMounted(() => {
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 
-<style scoped lang="less">
-.my-canvas {
-  width: 100%;
-  height: 270px;
-}
-</style>
+<style scoped lang="less"></style>

@@ -18,7 +18,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.mainCanvas || !this.draggable) return;
+    if (!this.isInteractable || !this.mainCanvas || !this.draggable) return;
 
     const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
     this.value = [this.value![0] + x.value, this.value![1] + y.value];
@@ -30,6 +30,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       this.dynamicPosition![0] + x.dynamicPosition,
       this.dynamicPosition![1] + y.dynamicPosition,
     ];
+
     this.notifyReload?.();
   }
 
@@ -43,6 +44,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
    * @param isHover 是否悬停
    */
   notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
+    if (!this.isInteractable) return;
     super.notifyHover(isHover, offsetX, offsetY);
 
     const animationDuration = 300; // 动画持续时间(ms)

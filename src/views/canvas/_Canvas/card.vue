@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CodeOutline, CopyOutline } from "@vicons/ionicons5";
+import { CodeOutline, Contract, CopyOutline, Expand } from "@vicons/ionicons5";
 import {
   NButton,
   NCard,
@@ -10,8 +10,8 @@ import {
   NSpace,
   NTooltip,
 } from "naive-ui";
-import { _CopyToClipboard, _Tip } from "nhanh-pure-function";
-import { ref } from "vue";
+import { _CopyToClipboard, _Fullscreen, _Tip } from "nhanh-pure-function";
+import { onMounted, ref } from "vue";
 
 interface Props {
   code: string;
@@ -19,12 +19,35 @@ interface Props {
 const props = defineProps<Props>();
 
 const showCode = ref(false);
+
+/** 当前状态是否是全屏 */
+const isFullScreen = ref(false);
+const toggleFullScreen = ref();
+const cardRef = ref();
+onMounted(() => {
+  toggleFullScreen.value = (function (toggle) {
+    return () => {
+      isFullScreen.value = !isFullScreen.value;
+      toggle();
+    };
+  })(_Fullscreen(cardRef.value.$el));
+});
 </script>
 
 <template>
-  <NCard>
+  <NCard ref="cardRef">
     <template #header-extra>
       <NSpace>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NButton @click="toggleFullScreen" text>
+              <template #icon>
+                <NIcon :component="isFullScreen ? Contract : Expand" />
+              </template>
+            </NButton>
+          </template>
+          {{ isFullScreen ? "退出全屏" : "全屏" }}
+        </NTooltip>
         <NTooltip trigger="hover">
           <template #trigger>
             <NButton
@@ -56,14 +79,25 @@ const showCode = ref(false);
       </NSpace>
     </template>
     <slot></slot>
-    <template #footer>
-      <NCollapseTransition :show="showCode">
-        <NScrollbar x-scrollable style="max-height: 50vh">
-          <NCode :code="code" language="javascript" show-line-numbers />
-        </NScrollbar>
-      </NCollapseTransition>
-    </template>
+    <NCollapseTransition :show="showCode">
+      <NScrollbar x-scrollable style="max-height: 50vh; margin-top: 10px">
+        <NCode :code="code" language="javascript" show-line-numbers />
+      </NScrollbar>
+    </NCollapseTransition>
   </NCard>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.n-card {
+  :deep(.n-card__content) {
+    display: flex;
+    flex-direction: column;
+    .my-canvas {
+      width: 100%;
+
+      height: var(--height, 270px);
+      flex-grow: 1;
+    }
+  }
+}
+</style>

@@ -38,7 +38,6 @@ import { useFps } from "@vueuse/core";
 import _Canvas from "../../canvas/_Canvas/_Canvas";
 import InputMath from "./InputMath/index.vue";
 import SvgGather from "@/assets/icon/gather";
-import DrawChina from "./china";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
 import Media from "@/stores/media";
 
@@ -129,8 +128,6 @@ onMounted(() => {
   // canvas.axisConfig.count = 75;
   canvas.setTheme(Settings.value.theme);
   UpdateCanvasConfig();
-
-  // DrawChina(canvas);
 
   // canvas.drawPoint.addPoints([
   //   { zIndex: 1, location: [75, 75] },

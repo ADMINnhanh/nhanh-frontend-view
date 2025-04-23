@@ -174,10 +174,6 @@ onMounted(() => {
 </template>
 
 <style scoped lang="less">
-.my-canvas {
-  width: 100%;
-  height: 270px;
-}
 .n-input-number {
   :deep(.n-input__input) {
     width: 80px;

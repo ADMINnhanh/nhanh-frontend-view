@@ -19,6 +19,54 @@ function RenderIcon(icon: Component) {
   return h(NIcon, null, { default: () => h(icon) });
 }
 
+/** 画布 */
+const canvas: CustomRouteRecord = {
+  path: "canvas",
+  name: "canvas",
+  meta: {
+    icon: SvgGather({ icon: "canvas" }),
+    name: {
+      zhCN: "Canvas 绘画",
+      enUS: "Canvas Drawing",
+    },
+  },
+  children: [
+    {
+      path: "_Canvas",
+      name: "_Canvas",
+      meta: {
+        name: {
+          zhCN: "我的 Canvas 工具",
+          enUS: "My Canvas Tools",
+        },
+      },
+      component: () => import("@/views/canvas/_Canvas/index.vue"),
+    },
+    {
+      path: "YOLOFormatAnnotator",
+      name: "YOLOFormatAnnotator",
+      meta: {
+        name: {
+          zhCN: "YOLO8 格式标注器",
+          enUS: "YOLO8 Format Annotator",
+        },
+      },
+      component: () => import("@/views/canvas/YOLOFormatAnnotator/index.vue"),
+    },
+    {
+      path: "BasicWebGL",
+      name: "BasicWebGL",
+      meta: {
+        name: {
+          zhCN: "初识 WebGL",
+          enUS: "Basic WebGL",
+        },
+      },
+      component: () => import("@/views/canvas/BasicWebGL/index.vue"),
+    },
+  ],
+};
+
 /** 数学 */
 const math: CustomRouteRecord = {
   path: "math",
@@ -71,54 +119,6 @@ const multimedia: CustomRouteRecord = {
   ],
 };
 
-/** 画布 */
-const canvas: CustomRouteRecord = {
-  path: "canvas",
-  name: "canvas",
-  meta: {
-    icon: SvgGather({ icon: "canvas" }),
-    name: {
-      zhCN: "Canvas 绘画",
-      enUS: "Canvas Drawing",
-    },
-  },
-  children: [
-    {
-      path: "_Canvas",
-      name: "_Canvas",
-      meta: {
-        name: {
-          zhCN: "我的 Canvas 工具",
-          enUS: "My Canvas Tools",
-        },
-      },
-      component: () => import("@/views/canvas/_Canvas/index.vue"),
-    },
-    {
-      path: "YOLOFormatAnnotator",
-      name: "YOLOFormatAnnotator",
-      meta: {
-        name: {
-          zhCN: "YOLO8 格式标注器",
-          enUS: "YOLO8 Format Annotator",
-        },
-      },
-      component: () => import("@/views/canvas/YOLOFormatAnnotator/index.vue"),
-    },
-    {
-      path: "BasicWebGL",
-      name: "BasicWebGL",
-      meta: {
-        name: {
-          zhCN: "初识 WebGL",
-          enUS: "Basic WebGL",
-        },
-      },
-      component: () => import("@/views/canvas/BasicWebGL/index.vue"),
-    },
-  ],
-};
-
 /** 解乏 */
 const relaxRouting: CustomRouteRecord = {
   path: "relax",
@@ -145,7 +145,7 @@ const relaxRouting: CustomRouteRecord = {
   ],
 };
 
-const AllRoute = [math, multimedia, canvas, relaxRouting];
+const AllRoute = [canvas, math, multimedia, relaxRouting];
 
 /** 路由重名检测 */
 function CheckPath(item: CustomRouteRecord[]) {

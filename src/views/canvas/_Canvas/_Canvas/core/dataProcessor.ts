@@ -7,33 +7,26 @@ export default class DataProcessor {
   private static readonly MAX_LAT = 85.05112878;
 
   /** 保留精度 */
-  static preservePrecision(value: string | number, accuracy: number) {
-    value = Number(value);
-    if (value) {
-      if (Number.isInteger(value)) return value;
-      return Number(value.toFixed(accuracy));
-    }
-    return 0;
+  static PreservePrecision(value: string | number, accuracy: number) {
+    const num = Number(value);
+    if (isNaN(num)) return 0;
+    if (Number.isInteger(num)) return num;
+    return Number(num.toFixed(accuracy));
   }
 
   /**
-   * 将纬度转换为平面坐标
+   * 将经纬度转换为平面坐标
    * @param lng 经度
    * @param lat 纬度
    * @returns 平面坐标 [x, y]（米）
    */
   static LngLatToPlane(lng: number, lat: number): [number, number] {
-    // 限制经度范围在 -180 到 180 度之间
     const clampedLng = Math.max(Math.min(lng, 180), -180);
-    // 限制纬度范围在有效范围内
     const clampedLat = Math.max(Math.min(lat, this.MAX_LAT), -this.MAX_LAT);
 
-    // 转换公式  返回转换后的平面坐标（米）
     const x = clampedLng * this.PI_OVER_180 * this.EARTH_RADIUS;
-    // 转换公式  返回转换后的平面坐标（米）
-    const y =
-      Math.log(Math.tan((90 + clampedLat) * this.PI_OVER_180)) *
-      this.EARTH_RADIUS;
+    const phi = clampedLat * this.PI_OVER_180;
+    const y = Math.log(Math.tan(Math.PI / 4 + phi / 2)) * this.EARTH_RADIUS;
     return [x, y];
   }
 
@@ -53,6 +46,33 @@ export default class DataProcessor {
       this.PI_OVER_180;
 
     return [lng, lat];
+  }
+
+  /**
+   * 计算点到线段的距离
+   * @param point 点击位置
+   * @param lineStart 线段起点
+   * @param lineEnd 线段终点
+   * @returns 点到线段的距离
+   */
+  static PointToLineDistance(
+    point: [number, number],
+    lineStart: [number, number],
+    lineEnd: [number, number]
+  ): number {
+    const [x0, y0] = point;
+    const [x1, y1] = lineStart;
+    const [x2, y2] = lineEnd;
+
+    const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
+    if (l2 === 0) return Math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2);
+
+    let t = ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2;
+    t = Math.max(0, Math.min(1, t));
+
+    return Math.sqrt(
+      (x0 - (x1 + t * (x2 - x1))) ** 2 + (y0 - (y1 + t * (y2 - y1))) ** 2
+    );
   }
 
   /** 参数是否合法 */

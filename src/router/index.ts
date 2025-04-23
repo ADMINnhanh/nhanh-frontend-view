@@ -3,7 +3,7 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from "vue-router";
-import home from "../views/main/index.vue";
+import home from "../views/Layout/index.vue";
 import Routes from "./Routes";
 import { _WaitForCondition } from "nhanh-pure-function";
 

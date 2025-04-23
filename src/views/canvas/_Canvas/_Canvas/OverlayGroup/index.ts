@@ -20,7 +20,7 @@ export default class OverlayGroup {
   /** 群组是否显示 */
   show = new Show();
 
-  private overlays = new Set<Overlay>();
+  overlays = new Set<Overlay>();
 
   constructor(name: string) {
     this.name = name;
@@ -34,7 +34,6 @@ export default class OverlayGroup {
   setMainCanvas(mainCanvas?: _Canvas) {
     this.mainCanvas = mainCanvas;
     this.overlays.forEach((overlay) => overlay.setMainCanvas(mainCanvas));
-
     if (mainCanvas && this.overlays.size) this.notifyReload?.();
   }
 
@@ -69,6 +68,7 @@ export default class OverlayGroup {
     });
     this.notifyReload?.();
   }
+
   hasOverlay(overlay: Overlay) {
     return this.overlays.has(overlay);
   }
@@ -90,7 +90,7 @@ export default class OverlayGroup {
   }
 
   /** 获取覆盖物的绘制方法 */
-  getOverlays() {
+  getOverlaysDrawingMethod() {
     const groupArr: [
       number,
       [(ctx: CanvasRenderingContext2D) => void, Overlay]

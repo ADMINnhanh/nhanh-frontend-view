@@ -88,9 +88,4 @@ onMounted(() => {
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 
-<style scoped lang="less">
-.my-canvas {
-  width: 100%;
-  height: 270px;
-}
-</style>
+<style scoped lang="less"></style>

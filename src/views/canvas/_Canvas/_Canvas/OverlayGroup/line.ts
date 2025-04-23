@@ -24,7 +24,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
   /** 处理点击状态变化 */
   notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
-    if (isClick && !this.isShowHandlePoint) return;
+    if (!this.isInteractable || (isClick && !this.isShowHandlePoint)) return;
     if (!this.infinite) super.notifyClick(isClick, offsetX, offsetY);
   }
 
@@ -34,7 +34,8 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
       this.setCanvasStylesLine(Overlay.ctx);
-      Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
+      if (this.draggable)
+        Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
       return Overlay.ctx.isPointInStroke(this.path, x, y);
     }
     return false;
@@ -42,7 +43,8 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
     const isPoint =
-      ((this.isClick && this.isShowHandlePoint) || !!this.infinite) &&
+      (this.isClick || !!this.infinite) &&
+      this.isShowHandlePoint &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
         point.notifyHover(is, x, y);
@@ -146,7 +148,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     ctx.stroke(this.path);
 
     // 绘制 线段控制点
-    if (infinite || (isClick && this.isShowHandlePoint))
+    if ((infinite || isClick) && this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.style = style.point;
         point.draw(ctx);

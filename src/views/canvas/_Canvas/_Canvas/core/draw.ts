@@ -112,7 +112,11 @@ export default class Draw extends Style {
         [[aLayerZIndex, aOverlayZIndex], aOverlay],
         [[bLayerZIndex, bOverlayZIndex], bOverlay]
       ) => {
-        // 首先比较图层 z-index
+        // 确定是否点击
+        if (aOverlay.isClick) return -1;
+        if (bOverlay.isClick) return 1;
+
+        // 再比较图层 z-index
         if (aLayerZIndex !== bLayerZIndex) return bLayerZIndex - aLayerZIndex;
 
         // 然后比较覆盖层的z-index

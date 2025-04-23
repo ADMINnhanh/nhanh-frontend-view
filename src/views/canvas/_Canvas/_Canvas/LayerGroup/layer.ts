@@ -47,17 +47,18 @@ export default class Layer {
         }
       : undefined;
 
-    this.groups.forEach((group) =>
-      group.setNotifyReload(
-        notifyReload
-          ? () => {
-              this.notifyReload?.();
-              this.isReload = true;
-            }
-          : undefined
-      )
-    );
+    this.groups.forEach((group) => this.setGroupNotifyReload(group));
     this.show.notifyReload = this.notifyReload;
+  }
+  setGroupNotifyReload(group: OverlayGroup) {
+    group.setNotifyReload(
+      this.notifyReload
+        ? () => {
+            this.notifyReload?.();
+            this.isReload = true;
+          }
+        : undefined
+    );
   }
   /** 获取覆盖物组 */
   getGroup(name: string) {
@@ -67,7 +68,7 @@ export default class Layer {
   addGroup(groups: OverlayGroup | OverlayGroup[]) {
     [groups].flat().forEach((group) => {
       if (group instanceof OverlayGroup) {
-        group.setNotifyReload(this.notifyReload);
+        this.setGroupNotifyReload(group);
         group.setMainCanvas(this.mainCanvas);
         this.groups.set(group.name, group);
       }
@@ -128,6 +129,7 @@ export default class Layer {
     const { scale, rect, isRecalculate, isThemeUpdated } = this.mainCanvas!;
     const isShow = this.show.shouldRender(scale);
     const size = this.groups.size;
+
     if (isShow && size) {
       if (this.isReload || isRecalculate || isThemeUpdated) {
         this.currentDrawOverlays = [];
@@ -142,7 +144,7 @@ export default class Layer {
         ][] = [];
         this.groups.forEach((group) => {
           if (group.equalsMainCanvas(this.mainCanvas))
-            groupArr.push(...group.getOverlays());
+            groupArr.push(...group.getOverlaysDrawingMethod());
           else this.groups.delete(group.name);
         });
 

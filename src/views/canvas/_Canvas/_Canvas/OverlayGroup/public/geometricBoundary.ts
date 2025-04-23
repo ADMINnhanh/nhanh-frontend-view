@@ -2,36 +2,10 @@ import { _Clone, _GetMidpoint } from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./overlay";
 import Point from "../point";
+import DataProcessor from "../../core/dataProcessor";
 
 // 定义点的类型
 type PointLocation = [number, number];
-
-/**
- * 计算点到线段的距离
- * @param point 点击位置
- * @param lineStart 线段起点
- * @param lineEnd 线段终点
- * @returns 点到线段的距离
- */
-function pointToLineDistance(
-  point: PointLocation,
-  lineStart: PointLocation,
-  lineEnd: PointLocation
-): number {
-  const [x0, y0] = point;
-  const [x1, y1] = lineStart;
-  const [x2, y2] = lineEnd;
-
-  const l2 = (x2 - x1) ** 2 + (y2 - y1) ** 2;
-  if (l2 === 0) return Math.sqrt((x0 - x1) ** 2 + (y0 - y1) ** 2);
-
-  let t = ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / l2;
-  t = Math.max(0, Math.min(1, t));
-
-  return Math.sqrt(
-    (x0 - (x1 + t * (x2 - x1))) ** 2 + (y0 - (y1 + t * (y2 - y1))) ** 2
-  );
-}
 
 /**
  * 查找点击位置应插入的下标
@@ -51,7 +25,7 @@ function findInsertIndex(
   let insertIndex = -1;
 
   for (let i = 0; i < controlPoints.length - 1; i++) {
-    const distance = pointToLineDistance(
+    const distance = DataProcessor.PointToLineDistance(
       clickPosition,
       controlPoints[i],
       controlPoints[i + 1]
@@ -124,102 +98,137 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
   /** 处理悬停状态变化 */
   notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
+    if (!this.isInteractable) return;
     super.notifyHover(isHover, offsetX, offsetY);
   }
-
-  /** 上一个被点击的点位 */
-  private lastClickedPoint?: {
-    time: number;
-    point: Point;
-  };
   /** 处理点击状态变化 */
   notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
+    if (!this.isInteractable) return;
+
+    const oldIsClick = this.isClick;
+    super.notifyClick(isClick, offsetX, offsetY);
+
     if (this.lockedCanCreateOrDeleteHandlePoint) {
-      this.lockedCanCreateOrDeleteHandlePoint = false;
-    } else if (
-      isClick &&
-      this.isClick &&
-      this.isShowHandlePoint &&
-      this.canCreateOrDeleteHandlePoint &&
-      this.draggable
-    ) {
-      const hover_point_index = this.handlePoints.findIndex(
-        (point) => point.isHover
-      );
+      this.resetHandlePointLock();
+    } else {
+      const canEditPoints =
+        oldIsClick &&
+        this.isClick &&
+        this.isShowHandlePoint &&
+        this.canCreateOrDeleteHandlePoint &&
+        this.draggable;
 
-      if (hover_point_index == -1) {
-        const isPointInStroke = this.isPointInStroke(offsetX, offsetY);
-        if (isPointInStroke) {
-          const dynamicPosition = [...this.dynamicPosition!];
-          if (this.isClosed) dynamicPosition.push(this.dynamicPosition![0]);
-          const index = findInsertIndex([offsetX, offsetY], dynamicPosition);
+      if (canEditPoints) {
+        const hoverPointIndex = this.handlePoints.findIndex(
+          (point) => point.isHover
+        );
 
-          const index1 = index - 1;
-          const index2 =
-            this.isClosed && index == this.dynamicPosition!.length ? 0 : index;
-          console.log(index1, index2, dynamicPosition);
-
-          /** 创建新的控制点 */ {
-            const value = getMidpoint(this.value![index1], this.value![index2]);
-            const position = getMidpoint(
-              this.position![index1],
-              this.position![index2]
-            );
-            const dynamicPosition = getMidpoint(
-              this.dynamicPosition![index1],
-              this.dynamicPosition![index2]
-            );
-
-            const point = new Point({
-              value,
-              position,
-              dynamicPosition,
-              draggable: true,
-            });
-            point.mainCanvas = this.mainCanvas;
-            point.setNotifyReload(() => this.notifyReload?.());
-
-            this.handlePoints.splice(index, 0, point);
-            this.value!.splice(index, 0, value);
-            this.position!.splice(index, 0, position);
-            this.dynamicPosition!.splice(index, 0, dynamicPosition);
-          }
-        }
-      } else if (this.minNeededHandlePoints < this.handlePoints.length) {
-        const point = this.handlePoints[hover_point_index];
-        const nowTime = Date.now();
-
-        if (this.lastClickedPoint) {
-          if (
-            point == this.lastClickedPoint.point &&
-            nowTime - this.lastClickedPoint.time < 300
-          ) {
-            this.handlePoints.splice(hover_point_index, 1);
-            this.value!.splice(hover_point_index, 1);
-            this.position!.splice(hover_point_index, 1);
-            this.dynamicPosition!.splice(hover_point_index, 1);
-            this.lastClickedPoint = undefined;
-          } else {
-            this.lastClickedPoint = {
-              point,
-              time: nowTime,
-            };
-          }
+        if (hoverPointIndex === -1) {
+          this.tryCreateNewHandlePoint(offsetX, offsetY);
         } else {
-          this.lastClickedPoint = {
-            point,
-            time: nowTime,
-          };
+          this.tryDeleteHandlePoint(hoverPointIndex);
         }
       }
     }
 
-    super.notifyClick(isClick, offsetX, offsetY);
     this.notifyReload?.();
   }
+
+  /** 尝试在指定位置创建新控制点 */
+  private tryCreateNewHandlePoint(offsetX: number, offsetY: number): void {
+    if (this.isDblClick || !this.isPointInStroke(offsetX, offsetY)) return;
+
+    const dynamicPositions = this.getExtendedDynamicPositions();
+    const insertIndex = findInsertIndex([offsetX, offsetY], dynamicPositions);
+
+    if (insertIndex === -1) return;
+
+    const [prevIndex, nextIndex] = this.getAdjacentIndices(insertIndex);
+    const newPoint = this.createNewHandlePoint(prevIndex, nextIndex);
+
+    this.insertHandlePoint(insertIndex, newPoint);
+    this.lockHandlePointCreationTemporarily();
+  }
+
+  /** 尝试删除指定位置的控制点 */
+  private tryDeleteHandlePoint(index: number): void {
+    if (!this.isDblClick || !this.canDeleteHandlePoint) return;
+
+    this.deleteHandlePoint(index);
+  }
+
+  // ============= 辅助方法 =============
+  private getExtendedDynamicPositions() {
+    return this.isClosed
+      ? [...this.dynamicPosition!, this.dynamicPosition![0]]
+      : this.dynamicPosition!;
+  }
+
+  private getAdjacentIndices(insertIndex: number): [number, number] {
+    const prevIndex = insertIndex - 1;
+    const nextIndex =
+      this.isClosed && insertIndex === this.dynamicPosition!.length
+        ? 0
+        : insertIndex;
+    return [prevIndex, nextIndex];
+  }
+
+  private createNewHandlePoint(prevIndex: number, nextIndex: number): Point {
+    const midpointValue = getMidpoint(
+      this.value![prevIndex],
+      this.value![nextIndex]
+    );
+    const midpointPosition = getMidpoint(
+      this.position![prevIndex],
+      this.position![nextIndex]
+    );
+    const midpointDynamic = getMidpoint(
+      this.dynamicPosition![prevIndex],
+      this.dynamicPosition![nextIndex]
+    );
+
+    return new Point({
+      value: midpointValue,
+      position: midpointPosition,
+      dynamicPosition: midpointDynamic,
+      draggable: true,
+      mainCanvas: this.mainCanvas,
+      notifyReload: () => this.notifyReload?.(),
+    });
+  }
+
+  private insertHandlePoint(index: number, point: Point): void {
+    this.handlePoints.splice(index, 0, point);
+    this.value!.splice(index, 0, point.value!);
+    this.position!.splice(index, 0, point.position!);
+    this.dynamicPosition!.splice(index, 0, point.dynamicPosition!);
+  }
+
+  private deleteHandlePoint(index: number): void {
+    this.handlePoints.splice(index, 1);
+    this.value!.splice(index, 1);
+    this.position!.splice(index, 1);
+    this.dynamicPosition!.splice(index, 1);
+  }
+
+  private lockHandlePointCreationTemporarily(): void {
+    this.lockedCanCreateOrDeleteHandlePoint = true;
+    setTimeout(() => {
+      this.lockedCanCreateOrDeleteHandlePoint = false;
+    }, 300);
+  }
+
+  private resetHandlePointLock(): void {
+    this.lockedCanCreateOrDeleteHandlePoint = false;
+  }
+
+  private get canDeleteHandlePoint(): boolean {
+    return this.handlePoints.length > this.minNeededHandlePoints;
+  }
+
   /** 处理拖动状态变化 */
   notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.draggable) return;
+    if (!this.isInteractable || !this.draggable) return;
 
     /** 移动整体 */
     const moveTheWhole = () => {

@@ -6,19 +6,21 @@ import DataProcessor from "../core/dataProcessor";
 export default class Text extends Overlay<TextStyleType, [number, number]> {
   /** 文字偏差 */
   private textOffset = { x: 0, y: 0 };
+  extraOffset?: { x: number; y: number };
   text?: string;
 
   constructor(
     text: ConstructorParameters<
       typeof Overlay<TextStyleType, [number, number]>
-    >[0] & { text?: string }
+    >[0] & { text?: string; extraOffset?: { x: number; y: number } }
   ) {
     super(text);
     this.text = String(text.text);
+    this.extraOffset = text.extraOffset;
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.mainCanvas || !this.draggable) return;
+    if (!this.isInteractable || !this.mainCanvas || !this.draggable) return;
 
     const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
     this.value = [this.value![0] + x.value, this.value![1] + y.value];
@@ -38,6 +40,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
    * @param isHover 是否悬停
    */
   notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
+    if (!this.isInteractable) return;
     super.notifyHover(isHover, offsetX, offsetY);
     this.notifyReload?.();
   }
@@ -98,6 +101,10 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       if (this.dynamicPosition) this.notifyReload?.();
     }
   }
+  setExtraOffset(extraOffset?: Text["extraOffset"]) {
+    this.extraOffset = extraOffset;
+    this.notifyReload?.();
+  }
 
   /** 设置样式 */
   setCanvasStyles(ctx: CanvasRenderingContext2D) {
@@ -115,6 +122,8 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     // 设置画布的字体样式，包括是否加粗、字体大小和字体家族
     ctx.font = `${style.bold ? "bold" : ""} ${style.size}px ${style.family}`;
+    /** 设置文本的描边宽度为2px */
+    ctx.lineWidth = 2;
     // // 设置文本的描边颜色为背景色，并绘制文本的描边
     ctx.strokeStyle = style.stroke;
     // 根据是否是次要颜色，选择相应的文本填充颜色，并填充文本
@@ -127,11 +136,12 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     const dynamicPosition = this.dynamicPosition!;
     const textOffset = this.textOffset!;
     const text = this.text!;
+    const extraOffset = this.extraOffset || { x: 0, y: 0 };
 
     this.setCanvasStyles(ctx);
 
-    const x = dynamicPosition[0] - textOffset.x;
-    const y = dynamicPosition[1] + textOffset.y;
+    const x = dynamicPosition[0] + extraOffset.x - textOffset.x;
+    const y = dynamicPosition[1] + extraOffset.y + textOffset.y;
 
     // 绘制文本的描边
     ctx.strokeText(text, x, y);
@@ -142,7 +152,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.path = new Path2D();
     this.path.rect(
       x,
-      dynamicPosition[1] - textOffset.y,
+      dynamicPosition[1] + extraOffset.y - textOffset.y,
       textOffset.x * 2,
       textOffset.y * 2
     );

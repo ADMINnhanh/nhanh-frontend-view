@@ -15,6 +15,7 @@ type InitConfig = DeepPartial<{
   axisConfig: _Canvas["axisConfig"];
   axisShow: _Canvas["drawAxis"]["show"];
   defaultCenter: _Canvas["defaultCenter"];
+  offset: _Canvas["offset"];
 }>;
 
 /** 画布类 */
@@ -42,11 +43,15 @@ export default class _Canvas extends QuickMethod {
     this.drawAxis = new Axis(this);
 
     if (config) {
-      const { theme, axisConfig, axisShow, defaultCenter } = config;
+      const { theme, axisConfig, axisShow, defaultCenter, offset } = config;
       if (theme) this.setTheme(theme);
       if (axisConfig) this.setAxis(axisConfig);
       if (axisShow) this.toggleAxis(axisShow);
       if (defaultCenter) this.setDefaultCenter(defaultCenter);
+      if (offset) {
+        this.offset.x = offset.x || 0;
+        this.offset.y = offset.y || 0;
+      }
     }
 
     this.initLayerGroups();
