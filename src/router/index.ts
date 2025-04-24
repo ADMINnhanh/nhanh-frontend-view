@@ -32,16 +32,16 @@ const router = createRouter({
   scrollBehavior(to, from, savedPosition) {
     // 清除所有高亮
     const clearHighlights = () => {
-      document.querySelectorAll(".is-target").forEach((el) => {
-        el.classList.remove("is-target");
-      });
+      document
+        .querySelector(".is-target-css")
+        ?.classList.remove("is-target-css");
     };
     // 高亮元素并滚动到视口
     const highlightAndScroll = (el: Element) => {
       if (!el) return;
 
       clearHighlights();
-      el.classList.add("is-target");
+      el.classList.add("is-target-css");
 
       // 支持 CSS scroll-margin-top（避免固定头部遮挡）
       const scrollMarginTop =

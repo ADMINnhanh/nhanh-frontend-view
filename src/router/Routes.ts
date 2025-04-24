@@ -116,6 +116,17 @@ const multimedia: CustomRouteRecord = {
       },
       component: () => import("@/views/multimedia/Peerjs/index.vue"),
     },
+    {
+      path: "TakeFlow",
+      name: "TakeFlow",
+      meta: {
+        name: {
+          zhCN: "取流",
+          enUS: "TakeFlow",
+        },
+      },
+      component: () => import("@/views/multimedia/TakeFlow/index.vue"),
+    },
   ],
 };
 
