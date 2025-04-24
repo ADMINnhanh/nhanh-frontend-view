@@ -30,18 +30,56 @@ const router = createRouter({
     },
   ],
   scrollBehavior(to, from, savedPosition) {
+    // 清除所有高亮
+    const clearHighlights = () => {
+      document.querySelectorAll(".is-target").forEach((el) => {
+        el.classList.remove("is-target");
+      });
+    };
+    // 高亮元素并滚动到视口
+    const highlightAndScroll = (el: Element) => {
+      if (!el) return;
+
+      clearHighlights();
+      el.classList.add("is-target");
+
+      // 支持 CSS scroll-margin-top（避免固定头部遮挡）
+      const scrollMarginTop =
+        parseInt(window.getComputedStyle(el).scrollMarginTop) || 0;
+
+      el.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      // 手动调整位置（兼容不支持 scroll-margin 的浏览器）
+      if (scrollMarginTop > 0) {
+        window.scrollBy(0, -scrollMarginTop);
+      }
+    };
+
+    // 主逻辑
     if (to.hash) {
-      const el = document.querySelector(to.hash);
-      if (el?.classList.contains("n-skeleton")) {
-        _WaitForCondition(
-          () =>
-            !document.querySelector(to.hash)?.classList.contains("n-skeleton"),
-          1000
-        ).finally(() => {
-          const el = document.querySelector(to.hash);
-          el?.scrollIntoView({ behavior: "smooth" });
+      const targetHash = to.hash; // 例如 "#polygon"
+      const targetEl = document.querySelector(targetHash);
+
+      if (targetEl && !targetEl.classList.contains("n-skeleton")) {
+        // 如果元素存在且已加载，直接滚动
+        highlightAndScroll(targetEl);
+      } else {
+        _WaitForCondition(() => {
+          const targetEl = document.querySelector(targetHash);
+          return Boolean(
+            targetEl && !targetEl.classList.contains("n-skeleton")
+          );
+        }, 1000).finally(() => {
+          const targetEl = document.querySelector(targetHash);
+          targetEl && highlightAndScroll(targetEl);
         });
-      } else el?.scrollIntoView({ behavior: "smooth" });
+      }
+    } else {
+      clearHighlights();
+      return savedPosition || { top: 0, left: 0 };
     }
   },
 });
