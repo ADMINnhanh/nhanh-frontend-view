@@ -39,7 +39,6 @@ const config = ref<_Canvas["axisConfig"]>({
   y: 1 as 1 | -1,
   count: 2,
   min: 100,
-  max: 200,
   size: 100,
 });
 
@@ -54,11 +53,9 @@ watch(
     const _config = { ...config };
     if (_config.min % 5 == 0) {
       _config.size = _config.min;
-      _config.max = _config.min * 2;
     } else {
       Object.assign(_config, {
         min: undefined,
-        max: undefined,
         size: undefined,
       });
     }
@@ -98,7 +95,7 @@ onMounted(() => {
       <NInputNumber v-model:value="config.min" min="5">
         <template #prefix>
           <NFlex style="width: 125px">
-            网格 max size
+            网格 min size
             <NTooltip trigger="hover">
               <template #trigger>
                 <NButton text>
@@ -113,18 +110,10 @@ onMounted(() => {
               </NP>
               <NP>
                 2.
-                为确保网格在绘制时网格线正常显示，且在缩放操作时能实现平滑过渡，max
-                和 min 的取值需要满足以下两个条件：
+                为确保网格在绘制时网格线正常显示，且在缩放操作时能实现平滑过渡
               </NP>
               <NP style="padding-left: 20px">
-                <NSpace vertical>
-                  <NText>
-                    - 条件一：max 必须是 min 的 2 倍，即 max / min === 2。
-                  </NText>
-                  <NText>
-                    - 条件二：min 必须是 5 的整数倍，即 min % 5 === 0。
-                  </NText>
-                </NSpace>
+                <NText> min 必须是 5 的整数倍，即 min % 5 === 0。 </NText>
               </NP>
             </NTooltip>
           </NFlex>
