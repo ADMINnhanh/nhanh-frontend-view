@@ -112,6 +112,8 @@ export default abstract class Overlay<
   }
   /** 是否悬停 */
   isHover = false;
+  /** 共享 hover 状态的集合 */
+  sharedHoverOverlays?: Overlay<any, any>[];
   notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
     this.isHover = isHover;
 
@@ -120,6 +122,8 @@ export default abstract class Overlay<
   }
   /** 是否可拖动 */
   draggable = false;
+  /** 共享 拖动 状态的集合 */
+  sharedDraggableOverlays?: Overlay<any, any>[];
   notifyDraggable(offsetX: number, offsetY: number) {
     if (this.mainCanvas) {
       const { percentage, axisConfig } = this.mainCanvas;

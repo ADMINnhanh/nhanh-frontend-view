@@ -31,10 +31,17 @@ const router = createRouter({
   ],
   scrollBehavior(to, from, savedPosition) {
     if (to.hash) {
-      setTimeout(() => {
-        const el = document.querySelector(to.hash);
-        el?.scrollIntoView({ behavior: "smooth" });
-      }, 500);
+      const el = document.querySelector(to.hash);
+      if (el?.classList.contains("n-skeleton")) {
+        _WaitForCondition(
+          () =>
+            !document.querySelector(to.hash)?.classList.contains("n-skeleton"),
+          1000
+        ).finally(() => {
+          const el = document.querySelector(to.hash);
+          el?.scrollIntoView({ behavior: "smooth" });
+        });
+      } else el?.scrollIntoView({ behavior: "smooth" });
     }
   },
 });

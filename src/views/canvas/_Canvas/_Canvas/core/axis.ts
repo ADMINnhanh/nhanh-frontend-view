@@ -1,3 +1,4 @@
+import Decimal from "decimal.js";
 import type Canvas from "..";
 
 export default class Axis {
@@ -272,7 +273,7 @@ export default class Axis {
         const textW = textWidth(String(v));
         v !== 0 && this.drawText(String(v), x - textW / 2, y, isSecondary);
         x += grid_size;
-        v = canvas.preservePrecision(v + count * axisConfig.x);
+        v = new Decimal(count).mul(axisConfig.x).add(v).toNumber();
       }
     }
 
@@ -295,9 +296,9 @@ export default class Axis {
         let x = center.x - textW - textOffset;
         x = Math.max(Math.min(x, width - textW - textOffset), textOffset);
 
-        v !== 0 && this.drawText(String(v), x, y + textSize / 2, isSecondary);
+        v != 0 && this.drawText(String(v), x, y + textSize / 2, isSecondary);
         y += grid_size;
-        v = canvas.preservePrecision(v + count * axisConfig.y);
+        v = new Decimal(count).mul(axisConfig.y).add(v).toNumber();
       }
     }
   }

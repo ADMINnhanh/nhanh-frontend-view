@@ -3,6 +3,7 @@ import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
 import { _Schedule } from "nhanh-pure-function";
+import Decimal from "decimal.js";
 
 export default class Point extends Overlay<PointStyleType, [number, number]> {
   /** 点的半径值 */
@@ -179,9 +180,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       (style?.width || defaultStyle.width) +
       (style?.radius || defaultStyle.radius);
 
-    this.radiusValue = this.mainCanvas.preservePrecision(
-      (value![0] / position![0]) * radius
-    );
+    this.radiusValue = this.mainCanvas.getAxisValueByPoint(radius, 0).xV;
   }
 
   private setCanvasStyles(ctx?: CanvasRenderingContext2D) {

@@ -9,6 +9,7 @@ import {
   NScrollbar,
   NSpace,
   NTooltip,
+  NText,
 } from "naive-ui";
 import { _CopyToClipboard, _Fullscreen, _Tip } from "nhanh-pure-function";
 import { onMounted, ref } from "vue";
@@ -94,7 +95,6 @@ onMounted(() => {
     flex-direction: column;
     .my-canvas {
       width: 100%;
-
       height: var(--height, 270px);
       flex-grow: 1;
     }

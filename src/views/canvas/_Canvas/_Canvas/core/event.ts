@@ -166,6 +166,7 @@ export default class Event extends Draw {
     if (lockDragAndResize) return;
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
+
     this.redrawOnce();
   }
   /** 上一个被点击的覆盖物 */
@@ -196,56 +197,120 @@ export default class Event extends Draw {
   /** 鼠标移动 */
   private mousemove(event: MouseEvent) {
     const { clientX, clientY } = event;
-    const { mouseIsDown, offset, mouseLastPosition, lockDragAndResize } = this;
 
-    if (mouseIsDown) {
-      if (lockDragAndResize) return;
-      if (this.lastDownOverlay?.draggable) {
-        this.lastDownOverlay.notifyDraggable(
-          clientX - mouseLastPosition.x,
-          clientY - mouseLastPosition.y
-        );
-      } else {
-        offset.x += clientX - mouseLastPosition.x;
-        offset.y += clientY - mouseLastPosition.y;
-
-        this.redrawOnce();
-      }
-      this.mouseLastPosition = { x: clientX, y: clientY };
-    } else {
-      /** hover 覆盖物 */ {
-        const rect = this.rect!.value;
-        const x = clientX - rect.x;
-        const y = clientY - rect.y;
-        if (x < 0 || y < 0 || x > rect.width || y > rect.height) return;
-        const hoverOverlay = this.findOverlayByPoint(
-          event.offsetX,
-          event.offsetY
-        );
-
-        const getClass = (overlay: Overlay) => {
-          if (overlay.draggable) return "_nhanh_canvas_hover_overlay_draggable";
-          else return "_nhanh_canvas_hover_overlay";
-        };
-
-        if (this.lastHoverOverlay != hoverOverlay) {
-          if (this.lastHoverOverlay) {
-            this.canvas.classList.remove(getClass(this.lastHoverOverlay));
-            this.lastHoverOverlay.notifyHover(
-              false,
-              event.offsetX,
-              event.offsetY
-            );
-          }
-          if (hoverOverlay) {
-            this.canvas.classList.add(getClass(hoverOverlay));
-            hoverOverlay.notifyHover(true, event.offsetX, event.offsetY);
-          }
-        }
-
-        this.lastHoverOverlay = hoverOverlay;
-      }
+    // 处理拖拽逻辑
+    if (this.mouseIsDown) {
+      this.handleDragMove(clientX, clientY);
+      return;
     }
+
+    // 处理 hover 逻辑
+    this.handleHover(event);
+  }
+  /** 处理拖拽移动 */
+  private handleDragMove(clientX: number, clientY: number) {
+    const { lockDragAndResize, lastDownOverlay, mouseLastPosition, offset } =
+      this;
+
+    if (lockDragAndResize) return;
+
+    if (lastDownOverlay?.draggable) {
+      this.notifyDraggableOverlays(clientX, clientY);
+    } else {
+      this.handleCanvasPan(clientX, clientY);
+    }
+
+    this.mouseLastPosition = { x: clientX, y: clientY };
+  }
+  /** 通知可拖拽的 overlays */
+  private notifyDraggableOverlays(clientX: number, clientY: number) {
+    const lastDownOverlay = this.lastDownOverlay!;
+    const { mouseLastPosition } = this;
+
+    const targets = lastDownOverlay.sharedHoverOverlays || [];
+    if (!targets.includes(lastDownOverlay)) targets.push(lastDownOverlay);
+
+    targets.forEach((target) => {
+      target.notifyDraggable(
+        clientX - mouseLastPosition.x,
+        clientY - mouseLastPosition.y
+      );
+    });
+  }
+  /** 处理画布平移 */
+  private handleCanvasPan(clientX: number, clientY: number) {
+    const { offset, mouseLastPosition } = this;
+
+    offset.x += clientX - mouseLastPosition.x;
+    offset.y += clientY - mouseLastPosition.y;
+    this.redrawOnce();
+  }
+  /** 处理 hover 逻辑 */
+  private handleHover(event: MouseEvent) {
+    const { clientX, clientY } = event;
+    const rect = this.rect!.value;
+    const x = clientX - rect.x;
+    const y = clientY - rect.y;
+
+    // 检查是否在画布范围内
+    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
+      return;
+    }
+
+    const hoverOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    this.updateHoverState(hoverOverlay, event);
+  }
+  /** 更新 hover 状态 */
+  private updateHoverState(
+    hoverOverlay: Overlay | undefined,
+    event: MouseEvent
+  ) {
+    if (this.lastHoverOverlay === hoverOverlay) return;
+
+    const isSharedHover =
+      this.lastHoverOverlay &&
+      hoverOverlay &&
+      hoverOverlay.sharedHoverOverlays?.includes(this.lastHoverOverlay);
+
+    if (!isSharedHover) {
+      this.clearHoverState(event);
+      this.applyHoverState(hoverOverlay, event);
+    }
+
+    this.lastHoverOverlay = hoverOverlay;
+  }
+  /** 清除旧的 hover 状态 */
+  private clearHoverState(event: MouseEvent) {
+    if (!this.lastHoverOverlay) return;
+
+    this.canvas.classList.remove(this.getHoverClass(this.lastHoverOverlay));
+    this.notifyHoverOverlays(this.lastHoverOverlay, event, false);
+  }
+  /** 应用新的 hover 状态 */
+  private applyHoverState(overlay: Overlay | undefined, event: MouseEvent) {
+    if (!overlay) return;
+
+    this.canvas.classList.add(this.getHoverClass(overlay));
+    this.notifyHoverOverlays(overlay, event, true);
+  }
+  /** 通用 hover 状态通知方法 */
+  private notifyHoverOverlays(
+    overlay: Overlay,
+    event: MouseEvent,
+    isHovering: boolean
+  ) {
+    const targets = overlay.sharedHoverOverlays || [];
+    if (!targets.includes(overlay)) targets.push(overlay);
+
+    targets.forEach((target) => {
+      target.notifyHover(isHovering, event.offsetX, event.offsetY);
+    });
+  }
+  /** 获取 hover 的 CSS class */
+  private getHoverClass(overlay: Overlay): string {
+    return overlay.draggable
+      ? "_nhanh_canvas_hover_overlay_draggable"
+      : "_nhanh_canvas_hover_overlay";
   }
 
   private oldClientX: number[] = [];

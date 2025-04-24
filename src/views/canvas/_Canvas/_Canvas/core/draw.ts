@@ -168,8 +168,8 @@ export default class Draw extends Style {
         this.isRendering = true;
         this.redrawInNextRenderFrame = false;
         this.measureRedrawPerformance();
-        this.isRendering = false;
         // this.redraw();
+        this.isRendering = false;
       });
       // requestAnimationFrame(() => {
       //   this.redrawInNextRenderFrame = false;

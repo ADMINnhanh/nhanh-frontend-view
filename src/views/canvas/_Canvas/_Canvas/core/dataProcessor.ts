@@ -6,14 +6,6 @@ export default class DataProcessor {
   private static readonly EARTH_RADIUS = 6378137;
   private static readonly MAX_LAT = 85.05112878;
 
-  /** 保留精度 */
-  static PreservePrecision(value: string | number, accuracy: number) {
-    const num = Number(value);
-    if (isNaN(num)) return 0;
-    if (Number.isInteger(num)) return num;
-    return Number(num.toFixed(accuracy));
-  }
-
   /**
    * 将经纬度转换为平面坐标
    * @param lng 经度

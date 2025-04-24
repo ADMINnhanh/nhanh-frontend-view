@@ -17,12 +17,6 @@ ChinaData().then((chinaData) => {
   chinaData.forEach((item) => {
     const overlayGroup = new _Canvas.OverlayGroup(item.properties.name);
 
-    const hoverEvent = (state: boolean) => {
-      overlayGroup.overlays.forEach((overlay) => {
-        if (state != overlay.isHover) overlay.notifyHover(state, 0, 0);
-      });
-    };
-
     item.geometry.forEach((polygonData) => {
       const polygon = new _Canvas.Polygon({
         isShowHandlePoint: false,
@@ -35,6 +29,7 @@ ChinaData().then((chinaData) => {
     if (center) {
       /** 省会城市 */
       const capitalCity_point = new _Canvas.Point({ value: center });
+      capitalCity_point.show.setScales([0.9, 1000]);
       const capitalCity_text = new _Canvas.Text({
         text: item.properties.name,
         value: center,
@@ -45,9 +40,10 @@ ChinaData().then((chinaData) => {
       overlayGroup.addOverlays([capitalCity_point, capitalCity_text]);
     }
 
-    overlayGroup.overlays.forEach((overlay) => {
-      overlay.addEventListener("hover", hoverEvent);
-    });
+    const overlays = Array.from(overlayGroup.overlays.values());
+    overlayGroup.overlays.forEach(
+      (overlay) => (overlay.sharedHoverOverlays = overlays)
+    );
 
     overlayGroups.push(overlayGroup);
   });

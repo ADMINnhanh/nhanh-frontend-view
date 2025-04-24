@@ -1,6 +1,7 @@
 import Axis from "./axis";
 import LayerGroup from "../LayerGroup";
 import DataProcessor from "./dataProcessor";
+import Decimal from "decimal.js";
 
 /** 基础数据 */
 export default class BaseData {
@@ -36,17 +37,14 @@ export default class BaseData {
   /**
    * 网格大小设定规则：
    * 1. 基于 count 计算的网格，其内部会被均匀划分为 5 个子网格。
-   * 2. 为确保网格在绘制时网格线正常显示，且在缩放操作时能实现平滑过渡，max 和 min 的取值需要满足以下两个条件：
-   *    - 条件一：max 必须是 min 的 2 倍，即 max / min === 2。
-   *    - 条件二：min 必须是 5 的整数倍，即 min % 5 === 0。
+   * 2. 为确保网格在绘制时网格线正常显示，且在缩放操作时能实现平滑过渡
+   *    min 必须是 5 的整数倍，即 min % 5 === 0。
    */
   axisConfig = {
     /** 滚轮滚动周期为 0 时单网格代表的数字 */
     count: 2,
     /** 网格最小尺寸 */
     min: 100,
-    /** 网格最大尺寸 */
-    max: 200,
     /** 网格当前大小 */
     size: 100,
     /** x 轴方向：1 右增左减，-1 左增右减 */
@@ -179,11 +177,20 @@ export default class BaseData {
   updateSize() {
     const { scale, cycle, delta, axisConfig } = this;
 
-    let size = (Math.abs(scale - 1) % (cycle * delta)) / delta;
-    size = Math.round(scale < 1 ? cycle - size : size);
+    // let size =
+    //   (this.preservePrecision(Math.abs(scale - 1) * 100) %
+    //     (cycle * delta * 100)) /
+    //   (delta * 100);
+    let size = new Decimal(scale)
+      .sub(1)
+      .abs()
+      .mod(cycle * delta)
+      .div(delta)
+      .toNumber();
 
-    axisConfig.size =
-      (size / cycle) * (axisConfig.max - axisConfig.min) + axisConfig.min;
+    size = Math.round(scale < 1 && size != 0 ? cycle - size : size);
+
+    axisConfig.size = (size / cycle) * axisConfig.min + axisConfig.min;
 
     this.percentage =
       this.getAxisPointByValue(axisConfig.count, 0).x / axisConfig.min;
@@ -212,7 +219,7 @@ export default class BaseData {
     const mousePoint = this.getMousePositionOnAxis({ clientX, clientY })!;
     const mouseValue = this.getAxisValueByPoint(mousePoint.x, mousePoint.y);
 
-    this.scale = this.preservePrecision(this.scale + delta);
+    this.scale = new Decimal(this.scale).add(delta).toNumber();
 
     this.updateSize();
 
@@ -233,14 +240,14 @@ export default class BaseData {
     ) as typeof this.axisConfig;
 
     // 2. 解构需要验证的字段
-    const { x, y, count, min, max, size } = numericConfig;
+    const { x, y, count, min, size } = numericConfig;
 
     // 3. 验证条件拆分（带明确变量名）
     const isValidX = [1, -1].includes(x);
     const isValidY = [1, -1].includes(y);
     const isValidCount = count > 0;
-    const isValidRange = min > 0 && min < max;
-    const isValidSize = size >= min && size <= max;
+    const isValidRange = min > 0;
+    const isValidSize = size >= min && size <= min * 2;
 
     // 4. 条件组合与提前返回
     if (
@@ -255,7 +262,6 @@ export default class BaseData {
         y,
         count,
         min,
-        max,
         size,
       });
       return;
@@ -282,17 +288,38 @@ export default class BaseData {
     if (scale === 1) {
       this.nowGridCount = count;
     } else if (scale > 1) {
-      this.nowGridCount =
-        count / Math.pow(2, Math.floor((scale - 1) / scaleFactor));
+      // this.nowGridCount =
+      //   count /
+      //   Math.pow(
+      //     2,
+      //     Math.floor(
+      //       this.preservePrecision(
+      //         this.preservePrecision(scale - 1) / scaleFactor
+      //       )
+      //     )
+
+      //   );
+      this.nowGridCount = new Decimal(count)
+        .div(
+          new Decimal(2).pow(new Decimal(scale).sub(1).div(scaleFactor).floor())
+        )
+        .toNumber();
     } else {
-      const exponent = (1 - scale) / scaleFactor;
-      this.nowGridCount =
-        count *
-        Math.pow(
-          2,
-          Number.isInteger(exponent) ? exponent + 1 : Math.ceil(exponent)
-        );
+      // const exponent = (1 - scale) / scaleFactor;
+      // this.nowGridCount =
+      //   count *
+      //   Math.pow(
+      //     2,
+      //     Number.isInteger(exponent) ? exponent + 1 : Math.ceil(exponent)
+      //   );
+      this.nowGridCount = new Decimal(count)
+        .mul(
+          new Decimal(2).pow(new Decimal(1).sub(scale).div(scaleFactor).ceil())
+        )
+        .toNumber();
     }
+
+    // console.log("nowGridCount", scale, this.nowGridCount);
 
     if (isRendering)
       Promise.resolve().then(() => (this.nowGridCount = undefined));
@@ -323,8 +350,11 @@ export default class BaseData {
       };
 
     const count = this.getGridCount();
-    const xV = this.preservePrecision((x / axisConfig.size) * count);
-    const yV = this.preservePrecision((y / axisConfig.size) * count);
+    // const xV = this.preservePrecision((x / axisConfig.size) * count);
+    // const yV = this.preservePrecision((y / axisConfig.size) * count);
+
+    const xV = new Decimal(x).div(axisConfig.size).mul(count).toNumber();
+    const yV = new Decimal(y).div(axisConfig.size).mul(count).toNumber();
 
     return { xV, yV };
   }
@@ -343,8 +373,11 @@ export default class BaseData {
       };
 
     const count = this.getGridCount();
-    const x = this.preservePrecision((xV / count) * axisConfig.size, 3);
-    const y = this.preservePrecision((yV / count) * axisConfig.size, 3);
+    // const x = this.preservePrecision((xV / count) * axisConfig.size, 3);
+    // const y = this.preservePrecision((yV / count) * axisConfig.size, 3);
+
+    const x = new Decimal(xV).div(count).mul(axisConfig.size).toNumber();
+    const y = new Decimal(yV).div(count).mul(axisConfig.size).toNumber();
 
     return { x, y };
   }
@@ -379,11 +412,6 @@ export default class BaseData {
       minYV,
       maxYV,
     };
-  }
-
-  /** 保留精度 */
-  preservePrecision(value: string | number, accuracy?: number) {
-    return DataProcessor.PreservePrecision(value, accuracy || this.accuracy);
   }
 
   /** 变换坐标 */

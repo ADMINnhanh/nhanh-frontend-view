@@ -2,6 +2,7 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
+import Decimal from "decimal.js";
 
 export default class Custom<
   T,
@@ -107,11 +108,14 @@ export default class Custom<
           true
         );
         positions.push([loc.x, loc.y]);
-        scale = this.mainCanvas!.preservePrecision(loc.x / item[0]);
+        // scale = this.mainCanvas!.preservePrecision(loc.x / item[0]);
+        scale = new Decimal(loc.x).div(item[0]).toNumber();
       } else {
         positions.push([
-          this.mainCanvas!.preservePrecision(scale * item[0]),
-          this.mainCanvas!.preservePrecision(scale * item[1]),
+          // this.mainCanvas!.preservePrecision(scale * item[0]),
+          // this.mainCanvas!.preservePrecision(scale * item[1]),
+          new Decimal(scale).mul(item[0]).toNumber(),
+          new Decimal(scale).mul(item[1]).toNumber(),
         ]);
       }
     });
@@ -130,11 +134,14 @@ export default class Custom<
           true
         );
         values.push([val.xV, val.yV]);
-        scale = this.mainCanvas!.preservePrecision(val.xV / item[0]);
+        // scale = this.mainCanvas!.preservePrecision(val.xV / item[0]);
+        scale = new Decimal(val.xV).div(item[0]).toNumber();
       } else {
         values.push([
-          this.mainCanvas!.preservePrecision(scale * item[0]),
-          this.mainCanvas!.preservePrecision(scale * item[1]),
+          // this.mainCanvas!.preservePrecision(scale * item[0]),
+          // this.mainCanvas!.preservePrecision(scale * item[1]),
+          new Decimal(scale).mul(item[0]).toNumber(),
+          new Decimal(scale).mul(item[1]).toNumber(),
         ]);
       }
     });
