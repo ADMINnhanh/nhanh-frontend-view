@@ -18,6 +18,9 @@ export default abstract class Overlay<
 > {
   static ctx = document.createElement("canvas").getContext("2d")!;
 
+  /** 名称 */
+  name?: string;
+
   /** 是否显示 */
   show = new Show();
   /** 样式 */
@@ -30,8 +33,6 @@ export default abstract class Overlay<
   zIndex: number;
   /** 动态点位 */
   dynamicPosition?: V;
-  /** 名称 */
-  name?: string;
 
   /** 是否可交互 */
   isInteractable = true;
@@ -40,14 +41,6 @@ export default abstract class Overlay<
 
   /** 自定义扩展数据 */
   extData?: any;
-
-  /** 事件管理器 */
-  private eventListener: EventListenerSet = {
-    click: new Set(),
-    dblclick: new Set(),
-    hover: new Set(),
-    draggable: new Set(),
-  };
 
   constructor(overlay: {
     /** 主画布 */
@@ -72,6 +65,8 @@ export default abstract class Overlay<
     draggable?: boolean;
     /** 是否可交互 */
     isInteractable?: boolean;
+    /** 额外偏移 */
+    extraOffset?: { x: number; y: number };
   }) {
     this.mainCanvas = overlay.mainCanvas;
     if (overlay.notifyReload) this.setNotifyReload(overlay.notifyReload);
@@ -84,8 +79,110 @@ export default abstract class Overlay<
     this.name = overlay.name;
     this.draggable = overlay.draggable ?? false;
     this.isInteractable = overlay.isInteractable ?? true;
+    this.setExtraOffset(overlay.extraOffset);
   }
 
+  /** 值范围 */
+  protected valueScope?: {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  };
+  /** 初始化值范围 */
+  protected initValueScope() {
+    const value = this.value!;
+    if (Array.isArray(value[0])) {
+      let minX = Infinity,
+        maxX = -Infinity,
+        minY = Infinity,
+        maxY = -Infinity;
+      (value as [number, number][]).forEach(([x, y]) => {
+        minX = Math.min(minX, x);
+        maxX = Math.max(maxX, x);
+        minY = Math.min(minY, y);
+        maxY = Math.max(maxY, y);
+      });
+      this.valueScope = {
+        minX,
+        maxX,
+        minY,
+        maxY,
+      };
+    } else {
+      const [x, y] = value as [number, number];
+      this.valueScope = {
+        minX: x,
+        maxX: x,
+        minY: y,
+        maxY: y,
+      };
+    }
+  }
+  protected abstract updateValueScope(): void;
+
+  /** 额外偏移 */
+  protected extraOffset = {
+    x: 0,
+    y: 0,
+    xV: 0,
+    yV: 0,
+  };
+  /** 设置额外偏移 */
+  setExtraOffset(extraOffset?: { x: number; y: number }) {
+    extraOffset = extraOffset || { x: 0, y: 0 };
+    if (!this.valueScope) return Object.assign(this.extraOffset, extraOffset);
+
+    const { xV, yV } = this.mainCanvas!.getAxisValueByPoint(
+      extraOffset.x,
+      extraOffset.y
+    );
+
+    const offsetXV = xV - this.extraOffset.xV;
+    const offsetYV = yV - this.extraOffset.yV;
+
+    this.valueScope.minX -= offsetXV;
+    this.valueScope.maxX += offsetXV;
+    this.valueScope.minY -= offsetYV;
+    this.valueScope.maxY += offsetYV;
+
+    Object.assign(this.extraOffset, extraOffset, {
+      xV,
+      yV,
+    });
+
+    this.notifyReload?.();
+  }
+  /** 点位半径值 */
+  protected lastPointRadius = {
+    value: 0,
+    radius: 0,
+  };
+  /** 计算点位半径值 */
+  protected calculatePointRadiusValue(style?: PointStyleType) {
+    if (!this.valueScope) return;
+    const radius = style
+      ? style.radius + style.width / 2
+      : this.lastPointRadius.radius;
+    const radiusValue = this.mainCanvas!.getAxisValueByPoint(radius, 0).xV;
+
+    const offset = radiusValue - this.lastPointRadius.value;
+
+    this.valueScope.minX -= offset;
+    this.valueScope.maxX += offset;
+    this.valueScope.minY -= offset;
+    this.valueScope.maxY += offset;
+
+    this.lastPointRadius = { radius, value: radiusValue };
+  }
+
+  /** 事件管理器 */
+  private eventListener: EventListenerSet = {
+    click: new Set(),
+    dblclick: new Set(),
+    hover: new Set(),
+    draggable: new Set(),
+  };
   addEventListener<T extends EventType>(type: T, listener: EventListener[T]) {
     this.eventListener[type].add(listener);
   }

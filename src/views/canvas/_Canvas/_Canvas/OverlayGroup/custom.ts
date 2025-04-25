@@ -19,6 +19,8 @@ export default class Custom<
     this.redrawOnIsHoverChange = false;
   }
 
+  protected updateValueScope(): void {}
+
   isPointInPath(x: number, y: number) {
     return false;
   }

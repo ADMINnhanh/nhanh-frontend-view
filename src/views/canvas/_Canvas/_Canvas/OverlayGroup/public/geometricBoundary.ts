@@ -262,6 +262,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         this.dynamicPosition![hover_point_index] = point.dynamicPosition!;
       } else moveTheWhole();
     } else moveTheWhole();
+
+    this.updateValueScope();
   }
 
   /** 更新控制点 */

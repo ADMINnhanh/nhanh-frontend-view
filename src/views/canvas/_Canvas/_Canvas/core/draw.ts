@@ -142,8 +142,11 @@ export default class Draw extends Style {
       ([, overlay]) => overlay
     );
 
+    console.log("本次绘制的覆盖物数量： ", this.currentDrawOverlays.length);
+
     this.isRecalculate = false;
     this.isThemeUpdated = false;
+    this.isScaleUpdated = false;
 
     this.notifyReload?.();
   }

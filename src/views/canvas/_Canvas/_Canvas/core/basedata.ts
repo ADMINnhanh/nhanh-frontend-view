@@ -196,6 +196,8 @@ export default class BaseData {
       this.getAxisPointByValue(axisConfig.count, 0).x / axisConfig.min;
   }
 
+  /** 缩放比例是否更新 */
+  isScaleUpdated = false;
   /** 设置缩放 */
   setScale(
     event: "center" | { clientX: number; clientY: number },
@@ -220,6 +222,7 @@ export default class BaseData {
     const mouseValue = this.getAxisValueByPoint(mousePoint.x, mousePoint.y);
 
     this.scale = new Decimal(this.scale).add(delta).toNumber();
+    this.isScaleUpdated = true;
 
     this.updateSize();
 

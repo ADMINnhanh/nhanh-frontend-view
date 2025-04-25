@@ -22,6 +22,12 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.canCreateOrDeleteHandlePoint = !polygon.isRect;
   }
 
+  protected updateValueScope() {
+    this.initValueScope();
+    this.calculatePointRadiusValue(this.setCanvasStyles().point);
+    this.setExtraOffset(this.extraOffset);
+  }
+
   isPointInPath(x: number, y: number) {
     if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
     return false;
@@ -96,6 +102,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.position = position;
 
     this.updateHandlePoints();
+
+    this.updateValueScope();
   }
 
   setRect(isRect: Polygon["isRect"]) {
@@ -109,7 +117,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     }
   }
 
-  private setCanvasStyles(ctx: CanvasRenderingContext2D) {
+  private setCanvasStyles(ctx?: CanvasRenderingContext2D) {
     const isHover = this.isHover;
     const mainCanvas = this.mainCanvas!;
 
@@ -134,12 +142,13 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       stroke_hover,
     } = style;
 
-    ctx.setLineDash(dash ? (dashGap as any) : []);
-    ctx.lineDashOffset = dashOffset;
-    ctx.lineWidth = width;
-    ctx.strokeStyle = isHover ? stroke_hover : stroke;
-    ctx.fillStyle = isHover ? fill_hover : fill;
-
+    if (ctx) {
+      ctx.setLineDash(dash ? (dashGap as any) : []);
+      ctx.lineDashOffset = dashOffset;
+      ctx.lineWidth = width;
+      ctx.strokeStyle = isHover ? stroke_hover : stroke;
+      ctx.fillStyle = isHover ? fill_hover : fill;
+    }
     return style;
   }
 
@@ -200,14 +209,26 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   }
 
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, position, mainCanvas } = this;
+    const { show, dynamicPosition, position, mainCanvas, valueScope } = this;
     if (!mainCanvas) return;
 
-    const { scale, isRecalculate } = mainCanvas;
+    const { scale, isRecalculate, isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = show.shouldRender(scale);
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
+      if (isScaleUpdated) {
+        this.setExtraOffset(this.extraOffset);
+        this.calculatePointRadiusValue();
+      }
+
+      const pointNotWithinRange =
+        maxMinValue.maxXV < valueScope!.minX ||
+        maxMinValue.minXV > valueScope!.maxX ||
+        maxMinValue.maxYV < valueScope!.minY ||
+        maxMinValue.minYV > valueScope!.maxY;
+      if (pointNotWithinRange) return;
+
       if (isRecalculate) {
         this.dynamicPosition = mainCanvas.transformPosition(position!);
         this.handlePoints.forEach(

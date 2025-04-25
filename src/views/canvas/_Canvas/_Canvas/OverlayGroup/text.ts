@@ -6,17 +6,32 @@ import DataProcessor from "../core/dataProcessor";
 export default class Text extends Overlay<TextStyleType, [number, number]> {
   /** 文字偏差 */
   private textOffset = { x: 0, y: 0 };
-  extraOffset?: { x: number; y: number };
+
   text?: string;
 
   constructor(
     text: ConstructorParameters<
       typeof Overlay<TextStyleType, [number, number]>
-    >[0] & { text?: string; extraOffset?: { x: number; y: number } }
+    >[0] & { text?: string }
   ) {
     super(text);
     this.text = String(text.text);
-    this.extraOffset = text.extraOffset;
+  }
+
+  protected updateValueScope() {
+    const { textOffset, value } = this;
+
+    const { xV: width, yV: height } = this.mainCanvas!.getAxisValueByPoint(
+      textOffset.x * 2,
+      textOffset.y * 2
+    );
+    this.valueScope = {
+      minX: value![0] - width / 2,
+      maxX: value![0] + width / 2,
+      minY: value![1] - height / 2,
+      maxY: value![1] + height / 2,
+    };
+    this.setExtraOffset(this.extraOffset);
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
@@ -32,6 +47,8 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       this.dynamicPosition![0] + x.dynamicPosition,
       this.dynamicPosition![1] + y.dynamicPosition,
     ];
+
+    this.updateValueScope();
     this.notifyReload?.();
   }
 
@@ -82,6 +99,20 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       x: textMetrics.width / 2,
       y: textMetrics.actualBoundingBoxAscent / 2,
     };
+
+    // const { xV: width, yV: height } = this.mainCanvas.getAxisValueByPoint(
+    //   textMetrics.width,
+    //   textMetrics.actualBoundingBoxAscent
+    // );
+    // this.valueScope = {
+    //   minX: value![0] - width / 2,
+    //   maxX: value![0] + width / 2,
+    //   minY: value![1] - height / 2,
+    //   maxY: value![1] + height / 2,
+    // };
+    // this.setExtraOffset(this.extraOffset);
+
+    this.updateValueScope();
   }
 
   setText(text: string) {
@@ -90,10 +121,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       this.updateBaseData();
       if (this.dynamicPosition) this.notifyReload?.();
     }
-  }
-  setExtraOffset(extraOffset?: Text["extraOffset"]) {
-    this.extraOffset = extraOffset;
-    this.notifyReload?.();
   }
 
   /** 设置样式 */
@@ -126,7 +153,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     const dynamicPosition = this.dynamicPosition!;
     const textOffset = this.textOffset!;
     const text = this.text!;
-    const extraOffset = this.extraOffset || { x: 0, y: 0 };
+    const extraOffset = this.extraOffset;
 
     this.setCanvasStyles(ctx);
 
@@ -148,27 +175,25 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     );
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, position, value, textOffset, mainCanvas } =
-      this;
+    const { show, dynamicPosition, position, valueScope, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { scale, maxMinValue, isRecalculate } = mainCanvas;
+    const { scale, maxMinValue, isRecalculate, isScaleUpdated } = mainCanvas;
     const isShow = show.shouldRender(scale);
 
     if (isShow && !!dynamicPosition) {
-      const [x, y] = value!;
+      if (isScaleUpdated) this.setExtraOffset(this.extraOffset);
 
-      const isPointWithinRange =
-        maxMinValue.maxXV > x - textOffset.x &&
-        maxMinValue.minXV < x + textOffset.x &&
-        maxMinValue.maxYV > y - textOffset.y &&
-        maxMinValue.minYV < y + textOffset.y;
+      const pointNotWithinRange =
+        maxMinValue.maxXV < valueScope!.minX ||
+        maxMinValue.minXV > valueScope!.maxX ||
+        maxMinValue.maxYV < valueScope!.minY ||
+        maxMinValue.minYV > valueScope!.maxY;
+      if (pointNotWithinRange) return;
 
-      if (isPointWithinRange) {
-        if (isRecalculate)
-          this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
-        return [this.draw, this];
-      }
+      if (isRecalculate)
+        this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
+      return [this.draw, this];
     }
   }
 }

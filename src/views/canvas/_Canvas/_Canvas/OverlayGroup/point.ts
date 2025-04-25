@@ -3,11 +3,8 @@ import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
 import { _Schedule } from "nhanh-pure-function";
-import Decimal from "decimal.js";
 
 export default class Point extends Overlay<PointStyleType, [number, number]> {
-  /** 点的半径值 */
-  radiusValue = 0;
   private angle = 2 * Math.PI;
 
   constructor(
@@ -16,6 +13,12 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     >[0]
   ) {
     super(points);
+  }
+
+  protected updateValueScope() {
+    this.initValueScope();
+    this.calculatePointRadiusValue(this.setCanvasStyles());
+    this.setExtraOffset(this.extraOffset);
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
@@ -33,6 +36,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       this.dynamicPosition![1] + y.dynamicPosition,
     ];
 
+    this.updateValueScope();
     this.notifyReload?.();
   }
 
@@ -140,6 +144,10 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     return false;
   }
 
+  setStyle(style?: string | DeepPartial<PointStyleType> | undefined) {
+    super.setStyle(style);
+    this.calculatePointRadiusValue(this.setCanvasStyles());
+  }
   updateBaseData() {
     if (!this.mainCanvas) return;
     const IsValid = DataProcessor.IsValid;
@@ -170,18 +178,10 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.value = value;
     this.position = position;
 
-    const defaultStyle = this.mainCanvas.style[this.mainCanvas.theme].point;
-    let style = {} as PointStyleType;
-    if (typeof this.style == "string") {
-      style = this.mainCanvas.style[this.style]?.point;
-    } else if (typeof this.style == "object") {
-      style = this.style as any;
-    }
-    const radius =
-      (style?.width || defaultStyle.width) +
-      (style?.radius || defaultStyle.radius);
-
-    this.radiusValue = this.mainCanvas.getAxisValueByPoint(radius, 0).xV;
+    // this.initValueScope()
+    // this.calculatePointRadiusValue(this.setCanvasStyles());
+    // this.setExtraOffset(this.extraOffset);
+    this.updateValueScope();
   }
 
   private setCanvasStyles(ctx?: CanvasRenderingContext2D) {
@@ -209,50 +209,48 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     return { ...style };
   }
   draw(ctx: CanvasRenderingContext2D) {
-    const { dynamicPosition, mainCanvas } = this;
+    const { dynamicPosition, mainCanvas, extraOffset } = this;
     if (!mainCanvas) return;
 
     const { radius, width } = this.setCanvasStyles(ctx);
     const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
+
+    const x = dynamicPosition![0] + extraOffset.x;
+    const y = dynamicPosition![1] + extraOffset.y;
 
     ctx.beginPath();
 
     // ctx.arc(dynamicPosition![0], dynamicPosition![1], radius, 0, this.angle);
     // 创建 Path2D 对象
     this.path = new Path2D();
-    this.path.arc(
-      dynamicPosition![0],
-      dynamicPosition![1],
-      radius + lineWidthOffset / 2,
-      0,
-      this.angle
-    );
+    this.path.arc(x, y, radius + lineWidthOffset / 2, 0, this.angle);
     ctx.fill(this.path);
     if (width != lineWidthOffset) ctx.stroke(this.path);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, position, value, radiusValue, mainCanvas } =
-      this;
+    const { show, dynamicPosition, position, valueScope, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { scale, maxMinValue, isRecalculate } = mainCanvas;
+    const { scale, maxMinValue, isRecalculate, isScaleUpdated } = mainCanvas;
     const isShow = show.shouldRender(scale);
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
-      const [x, y] = value!;
-
-      const isPointWithinRange =
-        maxMinValue.maxXV > x - radiusValue &&
-        maxMinValue.minXV < x + radiusValue &&
-        maxMinValue.maxYV > y - radiusValue &&
-        maxMinValue.minYV < y + radiusValue;
-
-      if (isPointWithinRange) {
-        if (isRecalculate)
-          this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
-        return [this.draw, this];
+      if (isScaleUpdated) {
+        this.setExtraOffset(this.extraOffset);
+        this.calculatePointRadiusValue();
       }
+
+      const pointNotWithinRange =
+        maxMinValue.maxXV < valueScope!.minX ||
+        maxMinValue.minXV > valueScope!.maxX ||
+        maxMinValue.maxYV < valueScope!.minY ||
+        maxMinValue.minYV > valueScope!.maxY;
+      if (pointNotWithinRange) return;
+
+      if (isRecalculate)
+        this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
+      return [this.draw, this];
     }
   }
 }
