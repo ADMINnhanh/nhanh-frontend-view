@@ -22,18 +22,6 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.canCreateOrDeleteHandlePoint = !polygon.isRect;
   }
 
-  /** 处理悬停状态变化 */
-  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
-    if (!this.isInteractable) return;
-    super.notifyHover(isHover, offsetX, offsetY);
-    this.notifyReload?.();
-  }
-  /** 处理点击状态变化 */
-  notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
-    if (!this.isInteractable || (isClick && !this.isShowHandlePoint)) return;
-    super.notifyClick(isClick, offsetX, offsetY);
-  }
-
   isPointInPath(x: number, y: number) {
     if (this.path) return Overlay.ctx.isPointInPath(this.path, x, y);
     return false;
@@ -54,7 +42,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       this.isShowHandlePoint &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
-        point.notifyHover(is, x, y);
+        is != point.isHover && point.notifyHover(is, x, y);
         return is;
       });
 

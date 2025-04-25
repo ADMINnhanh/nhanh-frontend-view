@@ -19,9 +19,10 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.isInteractable || !this.mainCanvas || !this.draggable) return;
+    const data = super.notifyDraggable(offsetX, offsetY);
+    if (!data) return;
+    const { x, y } = data;
 
-    const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
     this.value = [this.value![0] + x.value, this.value![1] + y.value];
     this.position = [
       this.position![0] + x.position,

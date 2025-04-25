@@ -16,9 +16,8 @@ export default class Custom<
   ) {
     super(config);
     this.draw = draw;
+    this.redrawOnIsHoverChange = false;
   }
-
-  notifyDraggable(offsetX: number, offsetY: number): undefined {}
 
   isPointInPath(x: number, y: number) {
     return false;

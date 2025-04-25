@@ -96,17 +96,12 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       boundary.canCreateOrDeleteHandlePoint ?? true;
   }
 
-  /** 处理悬停状态变化 */
-  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
-    if (!this.isInteractable) return;
-    super.notifyHover(isHover, offsetX, offsetY);
-  }
   /** 处理点击状态变化 */
   notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
-    if (!this.isInteractable) return;
-
     const oldIsClick = this.isClick;
     super.notifyClick(isClick, offsetX, offsetY);
+
+    if (!this.isInteractable || !this.isShowHandlePoint) return;
 
     if (this.lockedCanCreateOrDeleteHandlePoint) {
       this.resetHandlePointLock();
@@ -131,7 +126,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       }
     }
 
-    this.notifyReload?.();
+    if (oldIsClick != this.isClick && !(this as any).infinite)
+      this.notifyReload?.();
   }
 
   /** 尝试在指定位置创建新控制点 */
@@ -148,6 +144,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
     this.insertHandlePoint(insertIndex, newPoint);
     this.lockHandlePointCreationTemporarily();
+    this.notifyReload?.();
   }
 
   /** 尝试删除指定位置的控制点 */
@@ -155,15 +152,16 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     if (!this.isDblClick || !this.canDeleteHandlePoint) return;
 
     this.deleteHandlePoint(index);
+    this.notifyReload?.();
   }
 
-  // ============= 辅助方法 =============
+  /** 获取扩展后的动态位置 */
   private getExtendedDynamicPositions() {
     return this.isClosed
       ? [...this.dynamicPosition!, this.dynamicPosition![0]]
       : this.dynamicPosition!;
   }
-
+  /** 获取相邻的索引 */
   private getAdjacentIndices(insertIndex: number): [number, number] {
     const prevIndex = insertIndex - 1;
     const nextIndex =
@@ -172,7 +170,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         : insertIndex;
     return [prevIndex, nextIndex];
   }
-
+  /** 创建新的控制点 */
   private createNewHandlePoint(prevIndex: number, nextIndex: number): Point {
     const midpointValue = getMidpoint(
       this.value![prevIndex],
@@ -196,39 +194,39 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       notifyReload: () => this.notifyReload?.(),
     });
   }
-
+  /** 插入点 */
   private insertHandlePoint(index: number, point: Point): void {
     this.handlePoints.splice(index, 0, point);
     this.value!.splice(index, 0, point.value!);
     this.position!.splice(index, 0, point.position!);
     this.dynamicPosition!.splice(index, 0, point.dynamicPosition!);
   }
-
+  /** 删除点 */
   private deleteHandlePoint(index: number): void {
     this.handlePoints.splice(index, 1);
     this.value!.splice(index, 1);
     this.position!.splice(index, 1);
     this.dynamicPosition!.splice(index, 1);
   }
-
+  /** 锁定点创建 */
   private lockHandlePointCreationTemporarily(): void {
     this.lockedCanCreateOrDeleteHandlePoint = true;
     setTimeout(() => {
       this.lockedCanCreateOrDeleteHandlePoint = false;
     }, 300);
   }
-
+  /** 解锁点创建 */
   private resetHandlePointLock(): void {
     this.lockedCanCreateOrDeleteHandlePoint = false;
   }
-
+  /** 是否可以删除点 */
   private get canDeleteHandlePoint(): boolean {
     return this.handlePoints.length > this.minNeededHandlePoints;
   }
 
   /** 处理拖动状态变化 */
   notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.isInteractable || !this.draggable) return;
+    if (!this.isInteractable || !this.draggable || !this.mainCanvas) return;
 
     /** 移动整体 */
     const moveTheWhole = () => {

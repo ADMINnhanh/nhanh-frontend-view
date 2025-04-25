@@ -17,6 +17,13 @@ ChinaData().then((chinaData) => {
   chinaData.forEach((item) => {
     const overlayGroup = new _Canvas.OverlayGroup(item.properties.name);
 
+    const commonClickEvent = () => {
+      window.$message.success(`这里是 ${item.properties.name}`);
+    };
+    const commonDblClickEvent = () => {
+      window.$message.success(`这里是 ${item.properties.name}`);
+    };
+
     item.geometry.forEach((polygonData) => {
       const polygon = new _Canvas.Polygon({
         isShowHandlePoint: false,
@@ -41,9 +48,11 @@ ChinaData().then((chinaData) => {
     }
 
     const overlays = Array.from(overlayGroup.overlays.values());
-    overlayGroup.overlays.forEach(
-      (overlay) => (overlay.sharedHoverOverlays = overlays)
-    );
+    overlayGroup.overlays.forEach((overlay) => {
+      overlay.sharedHoverOverlays = overlays;
+      overlay.addEventListener("click", commonClickEvent);
+      overlay.addEventListener("dblclick", commonDblClickEvent);
+    });
 
     overlayGroups.push(overlayGroup);
   });

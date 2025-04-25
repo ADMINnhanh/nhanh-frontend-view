@@ -53,8 +53,11 @@ export default class Event extends Draw {
 
   /** 上一个被点击的覆盖物 */
   private lastClickedOverlay?: Overlay;
+  private lockNotifyClick = false;
   /** 鼠标左键点击画布 */
   private click(event: MouseEvent) {
+    if (this.lockNotifyClick) return (this.lockNotifyClick = false);
+
     const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 
     if (this.lastClickedOverlay != clickOverlay)
@@ -209,8 +212,7 @@ export default class Event extends Draw {
   }
   /** 处理拖拽移动 */
   private handleDragMove(clientX: number, clientY: number) {
-    const { lockDragAndResize, lastDownOverlay, mouseLastPosition, offset } =
-      this;
+    const { lockDragAndResize, lastDownOverlay } = this;
 
     if (lockDragAndResize) return;
 
@@ -221,6 +223,7 @@ export default class Event extends Draw {
     }
 
     this.mouseLastPosition = { x: clientX, y: clientY };
+    this.lockNotifyClick = true;
   }
   /** 通知可拖拽的 overlays */
   private notifyDraggableOverlays(clientX: number, clientY: number) {
@@ -258,6 +261,7 @@ export default class Event extends Draw {
     }
 
     const hoverOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+
     this.updateHoverState(hoverOverlay, event);
   }
   /** 更新 hover 状态 */

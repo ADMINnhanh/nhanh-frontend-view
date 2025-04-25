@@ -20,9 +20,9 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.isInteractable || !this.mainCanvas || !this.draggable) return;
-
-    const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
+    const data = super.notifyDraggable(offsetX, offsetY);
+    if (!data) return;
+    const { x, y } = data;
     this.value = [this.value![0] + x.value, this.value![1] + y.value];
     this.position = [
       this.position![0] + x.position,
@@ -32,16 +32,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       this.dynamicPosition![0] + x.dynamicPosition,
       this.dynamicPosition![1] + y.dynamicPosition,
     ];
-    this.notifyReload?.();
-  }
-
-  /**
-   * 处理悬停状态变化
-   * @param isHover 是否悬停
-   */
-  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
-    if (!this.isInteractable) return;
-    super.notifyHover(isHover, offsetX, offsetY);
     this.notifyReload?.();
   }
 

@@ -79,7 +79,6 @@ async function AAddScreenStream() {
     });
     screenStream.getVideoTracks().forEach((track) => {
       console.log(track);
-
       displayMediaStream.addTrack(track);
       updateTrackStats(track, "screen");
     });

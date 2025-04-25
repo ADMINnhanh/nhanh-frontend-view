@@ -20,12 +20,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     super(line);
     this.infinite = line.infinite;
     this.canCreateOrDeleteHandlePoint = !line.infinite;
-  }
-
-  /** 处理点击状态变化 */
-  notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
-    if (!this.isInteractable || (isClick && !this.isShowHandlePoint)) return;
-    if (!this.infinite) super.notifyClick(isClick, offsetX, offsetY);
+    this.redrawOnIsHoverChange = false;
   }
 
   isPointInPath(x: number, y: number) {
@@ -47,7 +42,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       this.isShowHandlePoint &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
-        point.notifyHover(is, x, y);
+        is != point.isHover && point.notifyHover(is, x, y);
         return is;
       });
 

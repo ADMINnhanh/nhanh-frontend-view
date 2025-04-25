@@ -6,20 +6,20 @@ import Media from "@/stores/media";
 
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
-const demoName = [
+const demoName: [string, string][] = [
   ["china", "中国地图"],
-  ["original", "仅需初始化 _Canvas"],
-  ["center", "中心点"],
-  ["shortcutKey", "快捷键"],
-  ["axis", "坐标轴"],
-  ["text", "文字"],
-  ["point", "点"],
-  ["line", "线"],
-  ["polygon", "面"],
-  ["custom", "自定义绘制"],
-  ["layer", "图层 & 层级"],
-  ["show", "显示条件"],
-] as const;
+  // ["original", "仅需初始化 _Canvas"],
+  // ["center", "中心点"],
+  // ["shortcutKey", "快捷键"],
+  // ["axis", "坐标轴"],
+  // ["text", "文字"],
+  // ["point", "点"],
+  // ["line", "线"],
+  // ["polygon", "面"],
+  // ["custom", "自定义绘制"],
+  // ["layer", "图层 & 层级"],
+  // ["show", "显示条件"],
+];
 
 type DemoName = (typeof demoName)[number][0];
 function splitArrayByIndex<T>(arr: readonly T[]) {
