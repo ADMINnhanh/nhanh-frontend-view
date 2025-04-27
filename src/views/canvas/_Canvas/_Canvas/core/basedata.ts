@@ -30,7 +30,17 @@ export default class BaseData {
   /** 精度 */
   accuracy = 5;
 
-  /** 缩放比例 */
+  /**
+   * 缩放比例，用于动态控制坐标轴上数字所对应的实际显示长度，以实现坐标轴显示效果的缩放调整。
+   *
+   * 默认情况下，scale 的初始值设定为 1，此时坐标轴上数值为 1 的刻度在界面上的实际显示长度为 50px。
+   *
+   * scale 的值依据特定的计算逻辑动态变化，其计算公式为：scale = 默认值 1 + 滚动周期 * 滚动值，其中滚动周期和滚动值均为可变参数。
+   * 例如，当滚动周期为 10，滚动值为 0.02 时，scale 的计算结果为 1 + 10 * 0.02 = 1.2 。在此状态下，坐标轴上数值为 1 的刻度在界面上的实际显示长度会变为 100px。
+   *
+   * 一般而言，scale 的值越大，相同数值在坐标轴上显示的长度就越长，在视觉上呈现出放大效果；scale 的值越小，相同数值在坐标轴上显示的长度就越短，视觉上呈现出缩小效果。
+   * 可通过调整滚动周期和滚动值来灵活改变 scale 的大小，进而满足不同的显示需求。
+   */
   scale = 1;
   /** 百分比 */
   percentage = 1;
@@ -111,9 +121,9 @@ export default class BaseData {
     } else throw new Error("canvas is not HTMLCanvasElement");
   }
 
-  /** 更新中心点 */
-  updateCenter() {
-    const { canvas, rect, offset, defaultCenter } = this;
+  /** 获取默认中心点位置 */
+  getDefaultCenterLocation() {
+    const { canvas, rect, defaultCenter } = this;
     if (!canvas) return console.error("canvas is not HTMLCanvasElement");
 
     const { width, height } = rect!.value;
@@ -168,29 +178,22 @@ export default class BaseData {
     const y = calculateCoordinate(top, bottom, height);
     const x = calculateCoordinate(left, right, width);
 
+    return { x, y };
+  }
+  /** 更新中心点 */
+  updateCenter() {
+    const { x, y } = this.getDefaultCenterLocation()!;
+
     this.center = {
-      x: Math.floor(x + offset.x),
-      y: Math.floor(y + offset.y),
+      x: Math.floor(x + this.offset.x),
+      y: Math.floor(y + this.offset.y),
     };
   }
   /** 更新网格大小 */
   updateSize() {
-    const { scale, cycle, delta, axisConfig } = this;
+    const { scale, axisConfig } = this;
 
-    // let size =
-    //   (this.preservePrecision(Math.abs(scale - 1) * 100) %
-    //     (cycle * delta * 100)) /
-    //   (delta * 100);
-    let size = new Decimal(scale)
-      .sub(1)
-      .abs()
-      .mod(cycle * delta)
-      .div(delta)
-      .toNumber();
-
-    size = Math.round(scale < 1 && size != 0 ? cycle - size : size);
-
-    axisConfig.size = (size / cycle) * axisConfig.min + axisConfig.min;
+    axisConfig.size = this.getGridSize(scale);
 
     this.percentage =
       this.getAxisPointByValue(axisConfig.count, 0).x / axisConfig.min;
@@ -278,18 +281,32 @@ export default class BaseData {
     Object.assign(this.defaultCenter, center);
   }
 
-  private nowGridCount?: number;
-  /** 获取每个网格表示的数字 */
-  getGridCount() {
-    const { axisConfig, scale, cycle, delta, nowGridCount, isRendering } = this;
-    const count = axisConfig.count;
+  getGridSize(scale: number) {
+    const { cycle, delta, axisConfig } = this;
 
-    if (nowGridCount && isRendering) return nowGridCount;
+    // let size =
+    //   (this.preservePrecision(Math.abs(scale - 1) * 100) %
+    //     (cycle * delta * 100)) /
+    //   (delta * 100);
+    let size = new Decimal(scale)
+      .sub(1)
+      .abs()
+      .mod(cycle * delta)
+      .div(delta)
+      .toNumber();
+
+    size = Math.round(scale < 1 && size != 0 ? cycle - size : size);
+
+    return (size / cycle) * axisConfig.min + axisConfig.min;
+  }
+  getGridCount(scale: number) {
+    const { axisConfig, cycle, delta } = this;
+    const count = axisConfig.count;
 
     const scaleFactor = cycle * delta;
 
     if (scale === 1) {
-      this.nowGridCount = count;
+      return count;
     } else if (scale > 1) {
       // this.nowGridCount =
       //   count /
@@ -302,7 +319,7 @@ export default class BaseData {
       //     )
 
       //   );
-      this.nowGridCount = new Decimal(count)
+      return new Decimal(count)
         .div(
           new Decimal(2).pow(new Decimal(scale).sub(1).div(scaleFactor).floor())
         )
@@ -315,14 +332,22 @@ export default class BaseData {
       //     2,
       //     Number.isInteger(exponent) ? exponent + 1 : Math.ceil(exponent)
       //   );
-      this.nowGridCount = new Decimal(count)
+      return new Decimal(count)
         .mul(
           new Decimal(2).pow(new Decimal(1).sub(scale).div(scaleFactor).ceil())
         )
         .toNumber();
     }
+  }
+  /** 现在网格计数 */
+  private nowGridCount?: number;
+  /** 获取每个网格表示的数字 */
+  get getNowGridCount() {
+    const { scale, nowGridCount, isRendering } = this;
 
-    // console.log("nowGridCount", scale, this.nowGridCount);
+    if (nowGridCount && isRendering) return nowGridCount;
+
+    this.nowGridCount = this.getGridCount(scale);
 
     if (isRendering)
       Promise.resolve().then(() => (this.nowGridCount = undefined));
@@ -352,7 +377,7 @@ export default class BaseData {
         yV: (y / axisConfig.min) * axisConfig.count,
       };
 
-    const count = this.getGridCount();
+    const count = this.getNowGridCount;
     // const xV = this.preservePrecision((x / axisConfig.size) * count);
     // const yV = this.preservePrecision((y / axisConfig.size) * count);
 
@@ -375,7 +400,7 @@ export default class BaseData {
         y: (yV / axisConfig.count) * axisConfig.min,
       };
 
-    const count = this.getGridCount();
+    const count = this.getNowGridCount;
     // const x = this.preservePrecision((xV / count) * axisConfig.size, 3);
     // const y = this.preservePrecision((yV / count) * axisConfig.size, 3);
 

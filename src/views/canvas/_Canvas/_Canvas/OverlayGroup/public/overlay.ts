@@ -83,7 +83,7 @@ export default abstract class Overlay<
   }
 
   /** 值范围 */
-  protected valueScope?: {
+  valueScope?: {
     minX: number;
     maxX: number;
     minY: number;

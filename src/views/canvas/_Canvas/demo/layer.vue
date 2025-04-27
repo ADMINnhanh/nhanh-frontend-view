@@ -9,9 +9,16 @@ const id = _GenerateUUID();
 
 let myCanvas: _Canvas;
 const custom_1 = new _Canvas.Custom(
-  { value: [-1, -0.8], zIndex: 0, isInteractable: false },
+  {
+    value: [
+      [-1, -0.8],
+      [0, 0],
+    ],
+    zIndex: 0,
+    isInteractable: false,
+  },
   (ctx) => {
-    const [x, y] = custom_1.dynamicPosition!;
+    const [x, y] = custom_1.dynamicPosition![0];
 
     ctx.fillStyle = "#b2d705";
 
@@ -23,9 +30,16 @@ const custom_1 = new _Canvas.Custom(
   }
 );
 const custom_2 = new _Canvas.Custom(
-  { value: [-0.8, -0.2], zIndex: 1, isInteractable: false },
+  {
+    value: [
+      [-0.8, -0.2],
+      [0, 0],
+    ],
+    zIndex: 1,
+    isInteractable: false,
+  },
   (ctx) => {
-    const [x, y] = custom_2.dynamicPosition!;
+    const [x, y] = custom_2.dynamicPosition![0];
 
     ctx.fillStyle = "#de82cb";
 

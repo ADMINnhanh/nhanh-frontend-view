@@ -7,12 +7,18 @@ import { Settings } from "@/components/popups/components/Settings";
 const id = _GenerateUUID();
 
 let myCanvas: _Canvas;
-const overlay = new _Canvas.Custom<any, [number, number]>(
-  { value: [0, 0] },
+const overlay = new _Canvas.Custom<any>(
+  {
+    value: [
+      [0, 0],
+      [-1, -1],
+      [1, 1],
+    ],
+  },
   (ctx: CanvasRenderingContext2D) => {
     const mainCanvas = overlay.mainCanvas!;
     const percentage = mainCanvas.percentage; // 获取缩放比例
-    const [x, y] = overlay.dynamicPosition!; // 获取中心点坐标
+    const [x, y] = overlay.dynamicPosition![0]; // 获取中心点坐标
 
     // 基础尺寸（可根据需要调整）
     const baseSize = 50;

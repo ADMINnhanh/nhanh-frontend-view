@@ -242,11 +242,12 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       }
 
       const pointNotWithinRange =
-        maxMinValue.maxXV < valueScope!.minX ||
-        maxMinValue.minXV > valueScope!.maxX ||
-        maxMinValue.maxYV < valueScope!.minY ||
-        maxMinValue.minYV > valueScope!.maxY;
-      if (!infinite && pointNotWithinRange) return;
+        !infinite &&
+        (maxMinValue.maxXV < valueScope!.minX ||
+          maxMinValue.minXV > valueScope!.maxX ||
+          maxMinValue.maxYV < valueScope!.minY ||
+          maxMinValue.minYV > valueScope!.maxY);
+      if (pointNotWithinRange) return;
 
       if (isRecalculate) {
         this.dynamicPosition = mainCanvas.transformPosition(position!);

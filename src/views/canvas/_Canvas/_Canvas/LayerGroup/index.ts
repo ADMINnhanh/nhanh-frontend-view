@@ -10,7 +10,7 @@ export default class LayerGroup {
   show = new Show();
 
   /** 图层群组 */
-  private layers = new Map<string, Layer>();
+  layers = new Map<string, Layer>();
 
   constructor(name: string) {
     this.name = name;

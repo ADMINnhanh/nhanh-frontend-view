@@ -142,7 +142,7 @@ export default class Draw extends Style {
       ([, overlay]) => overlay
     );
 
-    console.log("本次绘制的覆盖物数量： ", this.currentDrawOverlays.length);
+    // console.log("本次绘制的覆盖物数量： ", this.currentDrawOverlays.length);
 
     this.isRecalculate = false;
     this.isThemeUpdated = false;
@@ -170,8 +170,8 @@ export default class Draw extends Style {
       Promise.resolve().then(() => {
         this.isRendering = true;
         this.redrawInNextRenderFrame = false;
-        this.measureRedrawPerformance();
-        // this.redraw();
+        // this.measureRedrawPerformance();
+        this.redraw();
         this.isRendering = false;
       });
       // requestAnimationFrame(() => {

@@ -3,7 +3,7 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
 import { onMounted, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NA } from "naive-ui";
+import { NA, NButton } from "naive-ui";
 import ChinaData from ".";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
 
@@ -83,6 +83,7 @@ onMounted(() => {
   >
     所有 demo 的源码
   </NA>
+  <NButton ghost @click="myCanvas.setFitView()"> setFitView</NButton>
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 

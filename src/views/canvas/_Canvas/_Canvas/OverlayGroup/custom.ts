@@ -1,17 +1,11 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
-import DataProcessor from "../core/dataProcessor";
 import Decimal from "decimal.js";
 
-export default class Custom<
-  T,
-  V extends [number, number] | [number, number][]
-> extends Overlay<T, V> {
-  /** 是否为多点 */
-  multiple?: boolean = undefined;
+export default class Custom<T> extends Overlay<T, [number, number][]> {
   constructor(
-    config: ConstructorParameters<typeof Overlay<T, V>>[0],
+    config: ConstructorParameters<typeof Overlay<T, [number, number][]>>[0],
     draw: (ctx: CanvasRenderingContext2D) => void
   ) {
     super(config);
@@ -19,7 +13,10 @@ export default class Custom<
     this.redrawOnIsHoverChange = false;
   }
 
-  protected updateValueScope(): void {}
+  protected updateValueScope(): void {
+    this.initValueScope();
+    this.setExtraOffset(this.extraOffset);
+  }
 
   isPointInPath(x: number, y: number) {
     return false;
@@ -28,42 +25,11 @@ export default class Custom<
     return false;
   }
 
-  isMultiple() {
-    if (!this.mainCanvas) return;
-    const IsValid = DataProcessor.IsValid;
-    const IsValids = DataProcessor.IsValids.bind(DataProcessor);
-    let { value, position } = this;
-
-    const checkAndClearInvalidValue = (isValid: Function) => {
-      const isValue = isValid(value);
-      const isPosition = isValid(position);
-      if (isValue || isPosition) {
-        if (!isValue) this.value = undefined;
-        if (!isPosition) this.position = undefined;
-        return true;
-      }
-      return false;
-    };
-
-    if (checkAndClearInvalidValue(IsValid)) this.multiple = false;
-    else if (checkAndClearInvalidValue(IsValids)) this.multiple = true;
-
-    return this.multiple;
-  }
-
   updateBaseData() {
     if (!this.mainCanvas) return;
-    this.isMultiple();
 
     this.dynamicPosition = undefined;
 
-    if (this.multiple === true) {
-      this.handleMultipleData();
-    } else if (this.multiple === false) {
-      this.handleSingleData();
-    }
-  }
-  private handleMultipleData() {
     let value = this.value as any;
     let position = this.position as any;
 
@@ -74,28 +40,8 @@ export default class Custom<
     }
 
     this.updateDataProperties(value, position);
-  }
-  private handleSingleData() {
-    let value = this.value as any;
-    let position = this.position as any;
 
-    if (value) {
-      const loc = this.mainCanvas!.getAxisPointByValue(
-        value[0],
-        value[1],
-        true
-      );
-      position = [loc.x, loc.y];
-    } else {
-      const val = this.mainCanvas!.getAxisValueByPoint(
-        position[0],
-        position[1],
-        true
-      );
-      value = [val.xV, val.yV];
-    }
-
-    this.updateDataProperties(value, position);
+    this.updateValueScope();
   }
   private convertValuesToPositions(values: any[]): [number, number][] {
     const positions: [number, number][] = [];
@@ -150,31 +96,32 @@ export default class Custom<
     return values;
   }
   private updateDataProperties(value: any, position: any) {
-    this.dynamicPosition = (
-      this.multiple
-        ? this.mainCanvas!.transformPosition(position as [number, number][])
-        : this.mainCanvas!.transformPosition([position as [number, number]])[0]
-    ) as any;
+    this.dynamicPosition = this.mainCanvas!.transformPosition(position);
     this.value = value;
     this.position = position;
   }
 
   draw: (ctx: CanvasRenderingContext2D) => void;
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, mainCanvas, multiple, position } = this;
-    if (!mainCanvas || typeof multiple != "boolean") return;
+    const { show, dynamicPosition, mainCanvas, position, valueScope } = this;
+    if (!mainCanvas) return;
 
-    const { scale, isRecalculate } = mainCanvas;
+    const { scale, isRecalculate, isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = show.shouldRender(scale);
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
+      if (isScaleUpdated) this.setExtraOffset(this.extraOffset);
+
+      const pointNotWithinRange =
+        maxMinValue.maxXV < valueScope!.minX ||
+        maxMinValue.minXV > valueScope!.maxX ||
+        maxMinValue.maxYV < valueScope!.minY ||
+        maxMinValue.minYV > valueScope!.maxY;
+      if (pointNotWithinRange) return;
+
       if (isRecalculate)
-        this.dynamicPosition = (
-          multiple
-            ? mainCanvas.transformPosition(position as [number, number][])
-            : mainCanvas.transformPosition([position as [number, number]])[0]
-        ) as any;
+        this.dynamicPosition = mainCanvas.transformPosition(position!);
       return [this.draw, this];
     }
   }

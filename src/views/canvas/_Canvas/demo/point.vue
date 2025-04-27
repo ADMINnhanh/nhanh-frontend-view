@@ -52,6 +52,7 @@ onMounted(() => {
     <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>
     <NButton ghost @click="UpdatePosition(100)"> position + 100 </NButton>
     <NButton ghost @click="UpdatePosition(-100)"> position - 100 </NButton>
+    <NButton ghost @click="myCanvas.setFitView()"> setFitView</NButton>
   </NSpace>
 
   <canvas :id="id" class="my-canvas"></canvas>

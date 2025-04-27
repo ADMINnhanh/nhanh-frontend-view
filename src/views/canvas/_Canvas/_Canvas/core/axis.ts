@@ -248,7 +248,7 @@ export default class Axis {
       }
     }
 
-    const count = canvas.getGridCount();
+    const count = canvas.getNowGridCount;
 
     const grid_size = axisConfig.size;
 

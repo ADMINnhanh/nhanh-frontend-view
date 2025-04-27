@@ -7,12 +7,7 @@ import Polygon from "./polygon";
 import Custom from "./custom";
 import Show from "./public/show";
 
-export type Overlay =
-  | Text
-  | Point
-  | Line
-  | Polygon
-  | Custom<any, [number, number] | [number, number][]>;
+export type Overlay = Text | Point | Line | Polygon | Custom<any>;
 
 export default class OverlayGroup {
   /** 群组名称 */
