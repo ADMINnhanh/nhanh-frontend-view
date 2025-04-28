@@ -294,12 +294,11 @@ export default class BaseData {
       .mod(cycle * delta)
       .div(delta)
       .toNumber();
-    console.log(size, "个 delta");
 
     // size = Math.round(scale < 1 && size != 0 ? cycle - size : size);
     size = scale < 1 && size != 0 ? cycle - size : size;
 
-    return (size / cycle + 1) * axisConfig.min;
+    return Number(((size / cycle + 1) * axisConfig.min).toFixed(0));
   }
   getGridCount(scale: number) {
     const { axisConfig, cycle, delta } = this;

@@ -96,7 +96,6 @@ export default class QuickMethod extends Event {
       avoid,
       maxScale
     );
-    return;
 
     // 计算目标位置偏移
     const targetOffset = this.calculateTargetOffset(
@@ -171,19 +170,48 @@ export default class QuickMethod extends Event {
     const baseScale = axisConfig.count / axisConfig.min;
     const scaleDelta = cycle * delta;
 
+    /**
+     * 缩放量计算公式
+     * scope = ( 0 ~ 100 ) ;
+     * px  = 100 + scope ;
+     * value = 2000000 ;
+     * px_value = value / px ;
+     *
+     * 若 px_value > base_px_value :
+     *    target_scale_max = Math.ceil(px_value / base_px_value) ;
+     *    targetCount = target_scale_max * base_count ;
+     * 若 px_value < base_px_value :
+     *    target_scale_min = Math.pow(2, Math.floor(base_px_value / px_value) - 1) ;
+     *    targetCount = base_count / target_scale_min ;
+     */
+
     // 计算目标缩放比例
-    let targetScale =
-      maxRatio > baseScale
-        ? 1 - (maxRatio / baseScale - 1) * scaleDelta // 需要缩小
-        : 1 + (baseScale / maxRatio - 1) * scaleDelta; // 需要放大
+    let targetScale: number;
+
+    if (maxRatio > baseScale) {
+      const target_scale_max = Math.ceil(maxRatio / baseScale);
+      const targetCount = target_scale_max * axisConfig.count;
+      targetScale =
+        1 -
+        ((targetCount / maxRatio - axisConfig.min) / axisConfig.min +
+          (target_scale_max - 2)) *
+          scaleDelta;
+    } else {
+      const target_scale_min = Math.pow(
+        2,
+        Math.floor(baseScale / maxRatio) - 2
+      );
+      const targetCount = axisConfig.count / target_scale_min;
+      targetScale =
+        1 +
+        ((targetCount / maxRatio - axisConfig.min) / axisConfig.min +
+          (Math.floor(baseScale / maxRatio) - 2)) *
+          scaleDelta;
+    }
 
     // 应用最大缩放限制
     targetScale = maxScale ? Math.min(maxScale, targetScale) : targetScale;
 
-    console.log(targetScale, maxRatio, baseScale);
-    console.log(this.getGridCount(targetScale), this.getGridSize(targetScale));
-
-    // targetScale = parseInt(targetScale / delta + "") * delta;
     targetScale = new Decimal(targetScale)
       .div(delta)
       .round()

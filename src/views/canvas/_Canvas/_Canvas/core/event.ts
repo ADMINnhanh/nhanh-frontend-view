@@ -169,6 +169,10 @@ export default class Event extends Draw {
     if (lockDragAndResize) return;
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
+    console.log(
+      "setScale:" + this.scale,
+      "GridSize:" + this.getGridSize(this.scale)
+    );
 
     this.redrawOnce();
   }
