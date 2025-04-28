@@ -82,6 +82,13 @@ export default abstract class Overlay<
     this.setExtraOffset(overlay.extraOffset);
   }
 
+  /** 静态的值范围 不含偏移、点半径 */
+  staticValueScope?: {
+    minX: number;
+    maxX: number;
+    minY: number;
+    maxY: number;
+  };
   /** 值范围 */
   valueScope?: {
     minX: number;
@@ -118,6 +125,7 @@ export default abstract class Overlay<
         maxY: y,
       };
     }
+    this.staticValueScope = { ...this.valueScope };
   }
   protected abstract updateValueScope(): void;
 

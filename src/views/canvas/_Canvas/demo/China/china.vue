@@ -72,7 +72,7 @@ onMounted(() => {
   myCanvas.setTheme(Settings.value.theme);
   myCanvas.addLayer(layer);
 
-  // console.log(myCanvas);
+  // window.yyp = myCanvas;
 });
 </script>
 
@@ -83,7 +83,7 @@ onMounted(() => {
   >
     所有 demo 的源码
   </NA>
-  <NButton ghost @click="myCanvas.setFitView()"> setFitView</NButton>
+  <NButton ghost @click="myCanvas.setFitView()">setFitView</NButton>
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 

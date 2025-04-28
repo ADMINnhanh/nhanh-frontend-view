@@ -2,6 +2,7 @@ import { _Schedule } from "nhanh-pure-function";
 import Axis from "./axis";
 import Event from "./event";
 import type { Overlay } from "../OverlayGroup";
+import Decimal from "decimal.js";
 
 /** 快速方法 */
 export default class QuickMethod extends Event {
@@ -87,17 +88,15 @@ export default class QuickMethod extends Event {
       this.calculateBoundingBox(targetOverlays);
 
     // 计算目标尺寸和缩放比例
-    const targetWidth = maxX - minX;
-    const targetHeight = maxY - minY;
+    const targetWidth_Value = maxX - minX;
+    const targetHeight_Value = maxY - minY;
     const targetScale = this.calculateOptimalScale(
-      targetWidth,
-      targetHeight,
+      targetWidth_Value,
+      targetHeight_Value,
       avoid,
       maxScale
     );
-
-    // 如果缩放比例未变化则直接返回
-    if (targetScale === this.scale) return;
+    return;
 
     // 计算目标位置偏移
     const targetOffset = this.calculateTargetOffset(
@@ -109,6 +108,16 @@ export default class QuickMethod extends Event {
       avoid
     );
 
+    if (
+      targetScale == this.scale &&
+      targetOffset.x == this.offset.x &&
+      targetOffset.y == this.offset.y
+    )
+      return;
+
+    // console.log(targetScale, targetOffset.x, targetOffset.y);
+    // return console.log(this);
+
     // 立即执行或动画过渡
     if (immediately) {
       this.applyTransformImmediately(targetScale, targetOffset);
@@ -116,9 +125,7 @@ export default class QuickMethod extends Event {
       this.animateTransform(targetScale, targetOffset);
     }
   }
-  /**
-   * 计算所有覆盖层的边界范围
-   */
+  /** 计算所有覆盖层的边界范围 */
   private calculateBoundingBox(overlays: Overlay[]) {
     let minX = Infinity,
       maxX = -Infinity;
@@ -126,7 +133,7 @@ export default class QuickMethod extends Event {
       maxY = -Infinity;
 
     for (const overlay of overlays) {
-      const scope = overlay.valueScope!;
+      const scope = overlay.staticValueScope!;
       minX = Math.min(minX, scope.minX);
       maxX = Math.max(maxX, scope.maxX);
       minY = Math.min(minY, scope.minY);
@@ -135,12 +142,10 @@ export default class QuickMethod extends Event {
 
     return { minX, maxX, minY, maxY };
   }
-  /**
-   * 计算最佳缩放比例
-   */
+  /** 计算最佳缩放比例 */
   private calculateOptimalScale(
-    targetWidth: number,
-    targetHeight: number,
+    targetWidth_Value: number,
+    targetHeight_Value: number,
     avoid: [number, number, number, number],
     maxScale?: number
   ): number {
@@ -155,8 +160,11 @@ export default class QuickMethod extends Event {
       return this.scale;
     }
 
-    const widthRatio = targetWidth / availableWidth;
-    const heightRatio = targetHeight / availableHeight;
+    /** x 轴每 1px 所表示的值 */
+    const widthRatio = targetWidth_Value / availableWidth;
+    /** y 轴每 1px 所表示的值 */
+    const heightRatio = targetHeight_Value / availableHeight;
+    /** 优先满足 缩小 > 放大 */
     const maxRatio = Math.max(widthRatio, heightRatio);
 
     // 根据基准比例计算缩放量
@@ -166,17 +174,25 @@ export default class QuickMethod extends Event {
     // 计算目标缩放比例
     let targetScale =
       maxRatio > baseScale
-        ? 1 - (baseScale / maxRatio) * scaleDelta // 需要缩小
-        : 1 + (baseScale / maxRatio) * scaleDelta; // 需要放大
+        ? 1 - (maxRatio / baseScale - 1) * scaleDelta // 需要缩小
+        : 1 + (baseScale / maxRatio - 1) * scaleDelta; // 需要放大
 
     // 应用最大缩放限制
     targetScale = maxScale ? Math.min(maxScale, targetScale) : targetScale;
 
-    return Number(targetScale.toFixed(5));
+    console.log(targetScale, maxRatio, baseScale);
+    console.log(this.getGridCount(targetScale), this.getGridSize(targetScale));
+
+    // targetScale = parseInt(targetScale / delta + "") * delta;
+    targetScale = new Decimal(targetScale)
+      .div(delta)
+      .round()
+      .mul(delta)
+      .toNumber();
+
+    return targetScale;
   }
-  /**
-   * 计算目标位置偏移
-   */
+  /** 计算目标位置偏移 */
   private calculateTargetOffset(
     minX: number,
     maxX: number,
@@ -202,19 +218,19 @@ export default class QuickMethod extends Event {
     const defaultCenter = this.getDefaultCenterLocation()!;
 
     return {
-      x:
+      x: Math.round(
         width / 2 -
-        defaultCenter.x -
-        (scaledX * axisConfig.x + (avoid[3] - avoid[1])),
-      y:
+          defaultCenter.x -
+          (scaledX * axisConfig.x + (avoid[3] - avoid[1]))
+      ),
+      y: Math.round(
         height / 2 -
-        defaultCenter.y -
-        (scaledY * axisConfig.y + (avoid[0] - avoid[2])),
+          defaultCenter.y -
+          (scaledY * axisConfig.y + (avoid[0] - avoid[2]))
+      ),
     };
   }
-  /**
-   * 立即应用变换
-   */
+  /** 立即应用变换 */
   private applyTransformImmediately(
     targetScale: number,
     targetOffset: { x: number; y: number }
@@ -224,9 +240,7 @@ export default class QuickMethod extends Event {
     this.updateSize();
     this.redrawOnce(true);
   }
-  /**
-   * 执行动画过渡
-   */
+  /** 执行动画过渡 */
   private animateTransform(
     targetScale: number,
     targetOffset: { x: number; y: number }
@@ -234,6 +248,7 @@ export default class QuickMethod extends Event {
     const initialOffset = { ...this.offset };
     const initialScale = this.scale;
     const duration = 300;
+    // const duration = 10000;
 
     this.isAuto = true;
 

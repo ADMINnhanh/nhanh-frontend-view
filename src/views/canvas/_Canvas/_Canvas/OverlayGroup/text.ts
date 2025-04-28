@@ -31,6 +31,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       minY: value![1] - height / 2,
       maxY: value![1] + height / 2,
     };
+    this.staticValueScope = { ...this.valueScope };
     this.setExtraOffset(this.extraOffset);
   }
 

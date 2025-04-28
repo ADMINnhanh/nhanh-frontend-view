@@ -294,10 +294,12 @@ export default class BaseData {
       .mod(cycle * delta)
       .div(delta)
       .toNumber();
+    console.log(size, "个 delta");
 
-    size = Math.round(scale < 1 && size != 0 ? cycle - size : size);
+    // size = Math.round(scale < 1 && size != 0 ? cycle - size : size);
+    size = scale < 1 && size != 0 ? cycle - size : size;
 
-    return (size / cycle) * axisConfig.min + axisConfig.min;
+    return (size / cycle + 1) * axisConfig.min;
   }
   getGridCount(scale: number) {
     const { axisConfig, cycle, delta } = this;
@@ -381,10 +383,10 @@ export default class BaseData {
     // const xV = this.preservePrecision((x / axisConfig.size) * count);
     // const yV = this.preservePrecision((y / axisConfig.size) * count);
 
-    const xV = new Decimal(x).div(axisConfig.size).mul(count).toNumber();
-    const yV = new Decimal(y).div(axisConfig.size).mul(count).toNumber();
+    const xV = new Decimal(x).div(axisConfig.size).mul(count).toFixed(8);
+    const yV = new Decimal(y).div(axisConfig.size).mul(count).toFixed(8);
 
-    return { xV, yV };
+    return { xV: Number(xV), yV: Number(yV) };
   }
   /** 通过坐标轴上的值 获取坐标轴上的点 */
   getAxisPointByValue(
@@ -404,10 +406,10 @@ export default class BaseData {
     // const x = this.preservePrecision((xV / count) * axisConfig.size, 3);
     // const y = this.preservePrecision((yV / count) * axisConfig.size, 3);
 
-    const x = new Decimal(xV).div(count).mul(axisConfig.size).toNumber();
-    const y = new Decimal(yV).div(count).mul(axisConfig.size).toNumber();
+    const x = new Decimal(xV).div(count).mul(axisConfig.size).toFixed(3);
+    const y = new Decimal(yV).div(count).mul(axisConfig.size).toFixed(3);
 
-    return { x, y };
+    return { x: Number(x), y: Number(y) };
   }
 
   /** 获取最大/小的 值 */
