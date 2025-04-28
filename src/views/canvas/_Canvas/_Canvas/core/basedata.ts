@@ -281,6 +281,11 @@ export default class BaseData {
     Object.assign(this.defaultCenter, center);
   }
 
+  /**
+   * 计算当前缩放级别下的网格尺寸
+   * @param scale - 当前缩放比例
+   * @returns 计算得到的网格尺寸（像素单位）
+   */
   getGridSize(scale: number) {
     const { cycle, delta, axisConfig } = this;
 
@@ -300,15 +305,20 @@ export default class BaseData {
 
     return Number(((size / cycle + 1) * axisConfig.min).toFixed(0));
   }
+  /**
+   * 计算当前缩放级别下显示的网格值
+   * @param scale - 当前缩放比例
+   * @returns 计算得到的网格数量
+   */
   getGridCount(scale: number) {
     const { axisConfig, cycle, delta } = this;
-    const count = axisConfig.count;
-
+    const baseCount = axisConfig.count;
     const scaleFactor = cycle * delta;
 
-    if (scale === 1) {
-      return count;
-    } else if (scale > 1) {
+    // 基准比例直接返回配置数量
+    if (scale === 1) return baseCount;
+    // 处理放大情况（scale > 1，网格数量减少）
+    if (scale > 1) {
       // this.nowGridCount =
       //   count /
       //   Math.pow(
@@ -320,12 +330,13 @@ export default class BaseData {
       //     )
 
       //   );
-      return new Decimal(count)
-        .div(
-          new Decimal(2).pow(new Decimal(scale).sub(1).div(scaleFactor).floor())
-        )
+      const zoomLevel = new Decimal(scale).sub(1).div(scaleFactor).floor();
+      return new Decimal(baseCount)
+        .div(new Decimal(2).pow(zoomLevel))
         .toNumber();
-    } else {
+    }
+    // 处理缩小情况（scale < 1，网格数量增加）
+    else {
       // const exponent = (1 - scale) / scaleFactor;
       // this.nowGridCount =
       //   count *
@@ -333,10 +344,9 @@ export default class BaseData {
       //     2,
       //     Number.isInteger(exponent) ? exponent + 1 : Math.ceil(exponent)
       //   );
-      return new Decimal(count)
-        .mul(
-          new Decimal(2).pow(new Decimal(1).sub(scale).div(scaleFactor).ceil())
-        )
+      const shrinkLevel = new Decimal(1).sub(scale).div(scaleFactor).ceil();
+      return new Decimal(baseCount)
+        .mul(new Decimal(2).pow(shrinkLevel))
         .toNumber();
     }
   }

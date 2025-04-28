@@ -141,77 +141,89 @@ export default class QuickMethod extends Event {
 
     return { minX, maxX, minY, maxY };
   }
-  /** 计算最佳缩放比例 */
+  /**
+   * 计算最佳缩放比例（根据坐标轴数值范围与可用显示区域的适配关系）
+   * @param visibleWidthValue - 可见宽度（坐标轴单位）
+   * @param visibleHeightValue - 可见高度（坐标轴单位）
+   * @param margins - [上, 右, 下, 左] 边距（像素单位）
+   * @param maxScale - 允许的最大缩放比例（可选）
+   * @returns 计算得到的最佳缩放比例
+   */
   private calculateOptimalScale(
-    targetWidth_Value: number,
-    targetHeight_Value: number,
-    avoid: [number, number, number, number],
+    visibleWidthValue: number,
+    visibleHeightValue: number,
+    margins: [number, number, number, number],
     maxScale?: number
   ): number {
     const { width, height } = this.rect!.value;
     const { cycle, delta, axisConfig } = this;
-    const availableWidth = width - avoid[1] - avoid[3];
-    const availableHeight = height - avoid[0] - avoid[2];
 
-    // 有效性检查
+    // 计算实际可用绘制区域（减去边距）
+    const availableWidth = width - margins[1] - margins[3]; // 宽 = 总宽 - 右边距 - 左边距
+    const availableHeight = height - margins[0] - margins[2]; // 高 = 总高 - 上边距 - 下边距
+
+    // 区域有效性检查
     if (availableWidth <= 0 || availableHeight <= 0) {
-      console.warn("可用显示区域尺寸异常");
+      console.warn("无效的可视区域尺寸，边距设置可能不合理");
       return this.scale;
     }
 
-    /** x 轴每 1px 所表示的值 */
-    const widthRatio = targetWidth_Value / availableWidth;
-    /** y 轴每 1px 所表示的值 */
-    const heightRatio = targetHeight_Value / availableHeight;
-    /** 优先满足 缩小 > 放大 */
-    const maxRatio = Math.max(widthRatio, heightRatio);
+    /* 核心密度计算 */
+    // 计算单位像素表示的坐标轴数值量（值越大表示内容越密集）
+    const widthValuePerPixel = visibleWidthValue / availableWidth;
+    const heightValuePerPixel = visibleHeightValue / availableHeight;
+    const maxValuePerPixel = Math.max(widthValuePerPixel, heightValuePerPixel);
 
-    // 根据基准比例计算缩放量
-    const baseScale = axisConfig.count / axisConfig.min;
-    const scaleDelta = cycle * delta;
+    // 基准密度比 = 总网格数 / 最小网格值（表示基础显示密度）
+    const baseDensityRatio = axisConfig.count / axisConfig.min;
+    // 缩放步长因子（每个缩放周期的变化量）
+    const scaleStepFactor = cycle * delta;
 
-    /**
-     * 缩放量计算公式
-     * scope = ( 0 ~ 100 ) ;
-     * px  = 100 + scope ;
-     * value = 2000000 ;
-     * px_value = value / px ;
-     *
-     * 若 px_value > base_px_value :
-     *    target_scale_max = Math.ceil(px_value / base_px_value) ;
-     *    targetCount = target_scale_max * base_count ;
-     * 若 px_value < base_px_value :
-     *    target_scale_min = Math.pow(2, Math.floor(base_px_value / px_value) - 1) ;
-     *    targetCount = base_count / target_scale_min ;
-     */
-
-    // 计算目标缩放比例
+    /* 缩放策略选择 */
     let targetScale: number;
 
-    if (maxRatio > baseScale) {
-      const target_scale_max = Math.ceil(maxRatio / baseScale);
-      const targetCount = target_scale_max * axisConfig.count;
+    // 当实际密度 > 基准密度时（需要缩小显示比例以腾出更多空间）
+    if (maxValuePerPixel > baseDensityRatio) {
+      // 计算密度倍数（向上取整保证完全容纳）
+      const densityMultiplier = Math.ceil(maxValuePerPixel / baseDensityRatio);
+      // 所需网格数 = 基准数量 × 倍数
+      const requiredGrids = densityMultiplier * axisConfig.count;
+
+      // 缩放比例公式推导：
+      // 1. (requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min → 基础调整量
+      // 2. (densityMultiplier - 2) → 倍数补偿量
+      // 3. 1 - (总调整量) * 步长因子 → 最终比例（值变小实现缩小效果）
       targetScale =
         1 -
-        ((targetCount / maxRatio - axisConfig.min) / axisConfig.min +
-          (target_scale_max - 2)) *
-          scaleDelta;
-    } else {
-      const target_scale_min = Math.pow(
-        2,
-        Math.floor(baseScale / maxRatio) - 2
-      );
-      const targetCount = axisConfig.count / target_scale_min;
+        ((requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min +
+          (densityMultiplier - 2)) *
+          scaleStepFactor;
+    }
+    // 当实际密度 <= 基准密度时（需要放大显示比例以充分利用空间）
+    else {
+      // 计算缩小级数（2的指数级调整）
+      const shrinkLevel = Math.floor(baseDensityRatio / maxValuePerPixel) - 2;
+      const scaleDivider = Math.pow(2, shrinkLevel);
+      // 所需网格数 = 基准数量 / 缩小系数
+      const requiredGrids = axisConfig.count / scaleDivider;
+
+      // 缩放比例公式推导：
+      // 1. (requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min → 基础调整量
+      // 2. shrinkLevel → 级数补偿量
+      // 3. 1 + (总调整量) * 步长因子 → 最终比例（值变大实现放大效果）
       targetScale =
         1 +
-        ((targetCount / maxRatio - axisConfig.min) / axisConfig.min +
-          (Math.floor(baseScale / maxRatio) - 2)) *
-          scaleDelta;
+        ((requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min +
+          shrinkLevel) *
+          scaleStepFactor;
     }
 
     // 应用最大缩放限制
-    targetScale = maxScale ? Math.min(maxScale, targetScale) : targetScale;
+    if (maxScale !== undefined) {
+      targetScale = Math.min(maxScale, targetScale);
+    }
 
+    // 对齐到最近的步长倍数（保证缩放比例符合预设精度）
     targetScale = new Decimal(targetScale)
       .div(delta)
       .round()
