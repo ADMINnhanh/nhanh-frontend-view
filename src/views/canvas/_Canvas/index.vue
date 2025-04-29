@@ -82,9 +82,8 @@ onUnmounted(() => {
                 :id="item[0]"
                 :title="item[1]"
                 :code="vueFiles[item[0]].code"
-              >
-                <component :is="vueFiles[item[0]].component" />
-              </MyCard>
+                :component="vueFiles[item[0]].component"
+              />
               <NSkeleton v-else :id="item[0]" :sharp="false" />
             </template>
           </NSpace>
@@ -95,9 +94,8 @@ onUnmounted(() => {
                 :id="item[0]"
                 :title="item[1]"
                 :code="vueFiles[item[0]].code"
-              >
-                <component :is="vueFiles[item[0]].component" />
-              </MyCard>
+                :component="vueFiles[item[0]].component"
+              />
               <NSkeleton v-else :id="item[0]" :sharp="false" />
             </template>
           </NSpace>
@@ -109,9 +107,8 @@ onUnmounted(() => {
               :id="item[0]"
               :title="item[1]"
               :code="vueFiles[item[0]].code"
-            >
-              <component :is="vueFiles[item[0]].component" />
-            </MyCard>
+              :component="vueFiles[item[0]].component"
+            />
             <NSkeleton v-else :id="item[0]" :sharp="false" />
           </template>
         </NSpace>

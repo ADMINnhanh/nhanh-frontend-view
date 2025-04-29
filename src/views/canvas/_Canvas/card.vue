@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import { CodeOutline, Contract, CopyOutline, Expand } from "@vicons/ionicons5";
+import {
+  CodeOutline,
+  Contract,
+  CopyOutline,
+  Expand,
+  Refresh,
+} from "@vicons/ionicons5";
 import {
   NButton,
   NCard,
@@ -9,17 +15,24 @@ import {
   NScrollbar,
   NSpace,
   NTooltip,
-  NText,
 } from "naive-ui";
 import { _CopyToClipboard, _Fullscreen, _Tip } from "nhanh-pure-function";
 import { onMounted, ref } from "vue";
+import type _Canvas from "./_Canvas";
 
 interface Props {
   code: string;
+  component: Comment;
 }
 const props = defineProps<Props>();
 
+/** 是否显示代码 */
 const showCode = ref(false);
+
+// 创建一个 ref 对象，用于存储组件的引用
+const componentRef = ref<{
+  myCanvas: _Canvas;
+}>();
 
 /** 当前状态是否是全屏 */
 const isFullScreen = ref(false);
@@ -39,6 +52,16 @@ onMounted(() => {
   <NCard ref="cardRef">
     <template #header-extra>
       <NSpace>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NButton @click="componentRef?.myCanvas.reset()" text>
+              <template #icon>
+                <NIcon :component="Refresh" />
+              </template>
+            </NButton>
+          </template>
+          复位
+        </NTooltip>
         <NTooltip trigger="hover">
           <template #trigger>
             <NButton @click="toggleFullScreen" text>
@@ -79,7 +102,7 @@ onMounted(() => {
         </NTooltip>
       </NSpace>
     </template>
-    <slot></slot>
+    <component :is="component" ref="componentRef" />
     <NCollapseTransition :show="showCode">
       <NScrollbar x-scrollable style="max-height: 50vh; margin-top: 10px">
         <NCode :code="code" language="javascript" show-line-numbers />

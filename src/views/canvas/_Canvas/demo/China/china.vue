@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
-import { onMounted, watch } from "vue";
+import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NA, NButton } from "naive-ui";
+import { NA } from "naive-ui";
 import ChinaData from ".";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
 
 const id = _GenerateUUID();
 
-let myCanvas: _Canvas;
+let myCanvas = shallowRef<_Canvas>();
 const layer = new _Canvas.Layer("中国地图");
 const overlayGroups: OverlayGroup[] = [];
 
@@ -61,16 +61,22 @@ ChinaData().then((chinaData) => {
 
 watch(
   () => Settings.value.theme,
-  (theme) => myCanvas?.setTheme(theme)
+  (theme) => myCanvas.value?.setTheme(theme)
 );
 onMounted(() => {
-  myCanvas = new _Canvas(id, {
+  myCanvas.value = new _Canvas(id, {
     axisConfig: { y: -1, count: 2000000 },
     defaultCenter: { bottom: 0 },
   });
-  myCanvas.setDefaultCenter({ left: -(580 - myCanvas.rect!.value.width / 2) });
-  myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addLayer(layer);
+  myCanvas.value.setDefaultCenter({
+    left: -(580 - myCanvas.value.rect!.value.width / 2),
+  });
+  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value.addLayer(layer);
+});
+
+defineExpose({
+  myCanvas,
 });
 </script>
 
@@ -81,7 +87,6 @@ onMounted(() => {
   >
     所有 demo 的源码
   </NA>
-  <NButton ghost @click="myCanvas.setFitView()">setFitView</NButton>
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 
