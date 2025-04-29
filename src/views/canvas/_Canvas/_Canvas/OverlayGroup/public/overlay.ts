@@ -79,7 +79,7 @@ export default abstract class Overlay<
     this.name = overlay.name;
     this.draggable = overlay.draggable ?? false;
     this.isInteractable = overlay.isInteractable ?? true;
-    this.setExtraOffset(overlay.extraOffset);
+    this.setExtraOffset(overlay.extraOffset, false);
   }
 
   /** 静态的值范围 不含偏移、点半径 */
@@ -137,7 +137,7 @@ export default abstract class Overlay<
     yV: 0,
   };
   /** 设置额外偏移 */
-  setExtraOffset(extraOffset?: { x: number; y: number }) {
+  setExtraOffset(extraOffset?: { x: number; y: number }, reload = true) {
     extraOffset = extraOffset || { x: 0, y: 0 };
     if (!this.valueScope) return Object.assign(this.extraOffset, extraOffset);
 
@@ -158,8 +158,7 @@ export default abstract class Overlay<
       xV,
       yV,
     });
-
-    this.notifyReload?.();
+    reload && this.notifyReload?.();
   }
   /** 点位半径值 */
   protected lastPointRadius = {

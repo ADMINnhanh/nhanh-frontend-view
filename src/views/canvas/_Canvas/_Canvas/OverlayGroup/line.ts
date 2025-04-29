@@ -26,7 +26,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   protected updateValueScope() {
     this.initValueScope();
     this.calculatePointRadiusValue(this.setCanvasStyles().point);
-    this.setExtraOffset(this.extraOffset);
+    this.setExtraOffset(this.extraOffset, false);
   }
 
   isPointInPath(x: number, y: number) {
@@ -92,9 +92,6 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     this.updateHandlePoints();
 
-    // this.valueScope = { minX, maxX, minY, maxY };
-    // this.calculatePointRadiusValue(this.setCanvasStyles().point);
-    // this.setExtraOffset(this.extraOffset);
     this.updateValueScope();
   }
 
@@ -237,7 +234,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     if (isShow && prevDynamicStatus) {
       if (isScaleUpdated) {
-        this.setExtraOffset(this.extraOffset);
+        this.setExtraOffset(this.extraOffset, false);
         this.calculatePointRadiusValue();
       }
 

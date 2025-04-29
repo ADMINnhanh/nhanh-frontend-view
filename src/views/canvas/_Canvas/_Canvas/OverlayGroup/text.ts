@@ -32,7 +32,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       maxY: value![1] + height / 2,
     };
     this.staticValueScope = { ...this.valueScope };
-    this.setExtraOffset(this.extraOffset);
+    this.setExtraOffset(this.extraOffset, false);
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
@@ -100,18 +100,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       x: textMetrics.width / 2,
       y: textMetrics.actualBoundingBoxAscent / 2,
     };
-
-    // const { xV: width, yV: height } = this.mainCanvas.getAxisValueByPoint(
-    //   textMetrics.width,
-    //   textMetrics.actualBoundingBoxAscent
-    // );
-    // this.valueScope = {
-    //   minX: value![0] - width / 2,
-    //   maxX: value![0] + width / 2,
-    //   minY: value![1] - height / 2,
-    //   maxY: value![1] + height / 2,
-    // };
-    // this.setExtraOffset(this.extraOffset);
 
     this.updateValueScope();
   }
@@ -183,7 +171,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     const isShow = show.shouldRender(scale);
 
     if (isShow && !!dynamicPosition) {
-      if (isScaleUpdated) this.setExtraOffset(this.extraOffset);
+      if (isScaleUpdated) this.setExtraOffset(this.extraOffset, false);
 
       const pointNotWithinRange =
         maxMinValue.maxXV < valueScope!.minX ||

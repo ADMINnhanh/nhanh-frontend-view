@@ -15,7 +15,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
 
   protected updateValueScope(): void {
     this.initValueScope();
-    this.setExtraOffset(this.extraOffset);
+    this.setExtraOffset(this.extraOffset, false);
   }
 
   isPointInPath(x: number, y: number) {
@@ -111,7 +111,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
-      if (isScaleUpdated) this.setExtraOffset(this.extraOffset);
+      if (isScaleUpdated) this.setExtraOffset(this.extraOffset, false);
 
       const pointNotWithinRange =
         maxMinValue.maxXV < valueScope!.minX ||

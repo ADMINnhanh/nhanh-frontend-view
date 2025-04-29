@@ -103,9 +103,10 @@ export default class QuickMethod extends Event {
       maxX,
       minY,
       maxY,
-      targetScale,
       avoid
     );
+
+    // return console.log(targetOffset);
 
     if (
       targetScale == this.scale &&
@@ -245,42 +246,39 @@ export default class QuickMethod extends Event {
 
     return targetScale;
   }
-
   /** 计算目标位置偏移 */
   private calculateTargetOffset(
     minX: number,
     maxX: number,
     minY: number,
     maxY: number,
-    targetScale: number,
     avoid: [number, number, number, number]
   ) {
     const { width, height } = this.rect!.value;
-    const { axisConfig } = this;
-    const targetGridCount = this.getGridCount(targetScale);
-    const targetGridSize = this.getGridSize(targetScale);
+    const { axisConfig, center } = this;
 
     // 计算中心点坐标
     const centerX = (maxX + minX) / 2;
     const centerY = (maxY + minY) / 2;
+    const targetCenterPoint = this.getAxisPointByValue(centerX, centerY);
 
-    // 计算基于缩放后的位置偏移
-    const scaledX = (centerX / targetGridCount) * targetGridSize;
-    const scaledY = (centerY / targetGridCount) * targetGridSize;
-
-    // 获取默认中心点位置
-    const defaultCenter = this.getDefaultCenterLocation()!;
+    const nowCenterValue = this.getAxisValueByPoint(
+      (width / 2 - center.x) * axisConfig.x,
+      (height / 2 - center.y) * axisConfig.y
+    );
+    const nowCenterPoint = this.getAxisPointByValue(
+      nowCenterValue.xV,
+      nowCenterValue.yV
+    );
 
     return {
       x: Math.round(
-        width / 2 -
-          defaultCenter.x -
-          (scaledX * axisConfig.x + (avoid[3] - avoid[1]))
+        -(targetCenterPoint.x + (avoid[3] - avoid[1]) - nowCenterPoint.x) *
+          axisConfig.x
       ),
       y: Math.round(
-        height / 2 -
-          defaultCenter.y -
-          (scaledY * axisConfig.y + (avoid[0] - avoid[2]))
+        -(targetCenterPoint.y + (avoid[0] - avoid[2]) - nowCenterPoint.y) *
+          axisConfig.y
       ),
     };
   }
@@ -292,37 +290,76 @@ export default class QuickMethod extends Event {
     this.offset = targetOffset;
     this.scale = targetScale;
     this.updateSize();
-    this.redrawOnce(true);
+    this.redrawOnce();
   }
   /** 执行动画过渡 */
   private animateTransform(
     targetScale: number,
     targetOffset: { x: number; y: number }
   ) {
-    const initialOffset = { ...this.offset };
     const initialScale = this.scale;
+    const initialOffset = { ...this.offset };
     const duration = 300;
-    // const duration = 10000;
-
     this.isAuto = true;
+
+    const finish = () => (this.isAuto = false);
+
+    const animateScale = (onComplete?: () => void) =>
+      this.animateScale(
+        initialScale,
+        targetScale,
+        duration,
+        onComplete || finish
+      );
+    const animateOffset = (onComplete?: () => void) =>
+      this.animateOffset(
+        initialOffset,
+        targetOffset,
+        duration,
+        onComplete || finish
+      );
+
+    animateOffset(animateScale);
+  }
+  /** 执行缩放动画 */
+  private animateScale(
+    initialScale: number,
+    targetScale: number,
+    duration: number,
+    onComplete: () => void
+  ) {
+    const scaleDifference = targetScale - initialScale;
+    let oldSchedule = 0;
 
     _Schedule((schedule) => {
       if (!this.isAuto || !this.canvas || this.lockDragAndResize) return;
 
-      // 插值计算当前值
-      this.offset.x =
-        initialOffset.x + (targetOffset.x - initialOffset.x) * schedule;
-      this.offset.y =
-        initialOffset.y + (targetOffset.y - initialOffset.y) * schedule;
-      this.scale = initialScale + (targetScale - initialScale) * schedule;
+      this.setScale("center", (schedule - oldSchedule) * scaleDifference);
+      oldSchedule = schedule;
+      this.redrawOnce();
 
-      this.updateSize();
-      this.redrawOnce(true);
-
-      if (schedule === 1) this.isAuto = false;
+      if (schedule === 1) onComplete();
     }, duration);
   }
+  /** 执行偏移动画 */
+  private animateOffset(
+    initialOffset: { x: number; y: number },
+    targetOffset: { x: number; y: number },
+    duration: number,
+    onComplete: () => void
+  ) {
+    _Schedule((schedule) => {
+      if (!this.isAuto || !this.canvas || this.lockDragAndResize) return;
 
+      // 插值计算当前偏移量
+      this.offset.x = initialOffset.x + targetOffset.x * schedule;
+      this.offset.y = initialOffset.y + targetOffset.y * schedule;
+
+      this.redrawOnce();
+
+      if (schedule === 1) onComplete();
+    }, duration);
+  }
   /** 重置画布 */
   reset() {
     if (this.lockDragAndResize) return;
@@ -351,7 +388,7 @@ export default class QuickMethod extends Event {
         this.scale = 1 + waitResetData.scale * schedule;
         this.updateSize();
       }
-      this.redrawOnce(true);
+      this.redrawOnce();
     }, time);
   }
   /** 缩放画布 */
@@ -371,7 +408,6 @@ export default class QuickMethod extends Event {
   zoomOut() {
     this.zoom(-this.delta);
   }
-
   /** 添加样式 */
   setStyle(style: DeepPartial<StyleType>) {
     super.setStyle(style);

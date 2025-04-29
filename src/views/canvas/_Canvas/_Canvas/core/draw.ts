@@ -162,9 +162,7 @@ export default class Draw extends Style {
   );
 
   /** 重绘画布 同一个渲染帧只会执行一次 */
-  redrawOnce(isAuto?: boolean) {
-    if (this.isAuto && !isAuto) this.isAuto = false;
-
+  redrawOnce() {
     if (!this.redrawInNextRenderFrame) {
       this.redrawInNextRenderFrame = true;
       Promise.resolve().then(() => {

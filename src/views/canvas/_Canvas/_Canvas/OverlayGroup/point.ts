@@ -18,7 +18,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   protected updateValueScope() {
     this.initValueScope();
     this.calculatePointRadiusValue(this.setCanvasStyles());
-    this.setExtraOffset(this.extraOffset);
+    this.setExtraOffset(this.extraOffset, false);
   }
 
   notifyDraggable(offsetX: number, offsetY: number): undefined {
@@ -127,6 +127,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     const newOffset = Math.ceil(defaultLineWidth * this.fillProgress.progress);
     if (newOffset !== this.fillProgress.lineWidthOffset) {
       this.fillProgress.lineWidthOffset = newOffset;
+
       this.notifyReload?.();
     }
   }
@@ -178,9 +179,6 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.value = value;
     this.position = position;
 
-    // this.initValueScope()
-    // this.calculatePointRadiusValue(this.setCanvasStyles());
-    // this.setExtraOffset(this.extraOffset);
     this.updateValueScope();
   }
 
@@ -237,7 +235,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     if (isShow && prevDynamicStatus) {
       if (isScaleUpdated) {
-        this.setExtraOffset(this.extraOffset);
+        this.setExtraOffset(this.extraOffset, false);
         this.calculatePointRadiusValue();
       }
 

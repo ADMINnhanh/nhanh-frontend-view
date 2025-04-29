@@ -113,7 +113,7 @@ export default class Event extends Draw {
     // console.log(key);
 
     if (mouseInCanvas) {
-      if (!lockDragAndResize) {
+      if (!lockDragAndResize && !this.isAuto) {
         const step = this.getStep(key);
 
         switch (key) {
@@ -166,13 +166,13 @@ export default class Event extends Draw {
     event.preventDefault();
 
     const { delta, lockDragAndResize } = this;
-    if (lockDragAndResize) return;
+    if (lockDragAndResize || this.isAuto) return;
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
-    console.log(
-      "setScale:" + this.scale,
-      "GridSize:" + this.getGridSize(this.scale)
-    );
+    // console.log(
+    //   "setScale:" + this.scale,
+    //   "GridSize:" + this.getGridSize(this.scale)
+    // );
 
     this.redrawOnce();
   }
@@ -205,14 +205,12 @@ export default class Event extends Draw {
   private mousemove(event: MouseEvent) {
     const { clientX, clientY } = event;
 
-    // 处理拖拽逻辑
-    if (this.mouseIsDown) {
-      this.handleDragMove(clientX, clientY);
-      return;
-    }
+    if (this.isAuto) return;
 
+    // 处理拖拽逻辑
+    if (this.mouseIsDown) this.handleDragMove(clientX, clientY);
     // 处理 hover 逻辑
-    this.handleHover(event);
+    else this.handleHover(event);
   }
   /** 处理拖拽移动 */
   private handleDragMove(clientX: number, clientY: number) {
@@ -331,9 +329,10 @@ export default class Event extends Draw {
   private touchmove(event: TouchEvent) {
     const touches = event.touches;
     event.preventDefault();
-    const { oldClientX, oldClientY, offset, delta, lockDragAndResize } = this;
+    const { oldClientX, oldClientY, offset, delta, lockDragAndResize, isAuto } =
+      this;
 
-    if (!lockDragAndResize) {
+    if (!lockDragAndResize && !isAuto) {
       if (touches.length === 1) {
         const { clientX, clientY } = touches[0];
         if (oldClientX.length) {

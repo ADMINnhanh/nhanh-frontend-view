@@ -25,7 +25,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   protected updateValueScope() {
     this.initValueScope();
     this.calculatePointRadiusValue(this.setCanvasStyles().point);
-    this.setExtraOffset(this.extraOffset);
+    this.setExtraOffset(this.extraOffset, false);
   }
 
   isPointInPath(x: number, y: number) {
@@ -218,7 +218,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
     if (isShow && prevDynamicStatus) {
       if (isScaleUpdated) {
-        this.setExtraOffset(this.extraOffset);
+        this.setExtraOffset(this.extraOffset, false);
         this.calculatePointRadiusValue();
       }
 

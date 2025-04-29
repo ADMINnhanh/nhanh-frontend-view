@@ -71,8 +71,6 @@ onMounted(() => {
   myCanvas.setDefaultCenter({ left: -(580 - myCanvas.rect!.value.width / 2) });
   myCanvas.setTheme(Settings.value.theme);
   myCanvas.addLayer(layer);
-
-  // window.yyp = myCanvas;
 });
 </script>
 
