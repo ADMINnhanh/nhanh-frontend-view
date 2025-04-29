@@ -1,6 +1,5 @@
 import Axis from "./axis";
 import LayerGroup from "../LayerGroup";
-import DataProcessor from "./dataProcessor";
 import Decimal from "decimal.js";
 
 /** 基础数据 */

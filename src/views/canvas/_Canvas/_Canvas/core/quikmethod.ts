@@ -142,12 +142,21 @@ export default class QuickMethod extends Event {
     return { minX, maxX, minY, maxY };
   }
   /**
-   * 计算最佳缩放比例（根据坐标轴数值范围与可用显示区域的适配关系）
-   * @param visibleWidthValue - 可见宽度（坐标轴单位）
-   * @param visibleHeightValue - 可见高度（坐标轴单位）
-   * @param margins - [上, 右, 下, 左] 边距（像素单位）
-   * @param maxScale - 允许的最大缩放比例（可选）
-   * @returns 计算得到的最佳缩放比例
+   * 计算最佳缩放比例（基于动态网格系统适配）
+   *
+   * 核心逻辑：
+   * 1. 网格尺寸动态范围：x ~ 2x（axisConfig.min 表示基础尺寸 x）
+   * 2. 计算内容密度 = 单位像素需要表示的数据量
+   * 3. 对比基准密度（网格处于最小尺寸时的密度）
+   * 4. 动态选择缩放策略：
+   *    - 过密内容：扩大网格尺寸（向 2x 方向调整）
+   *    - 过疏内容：收缩网格尺寸（向 x 方向调整）
+   *
+   * @param visibleWidthValue 可见区域宽度（数据单位）
+   * @param visibleHeightValue 可见区域高度（数据单位）
+   * @param margins 安全边距 [top, right, bottom, left]（像素单位）
+   * @param maxScale 最大允许缩放比例
+   * @returns 优化后的缩放比例
    */
   private calculateOptimalScale(
     visibleWidthValue: number,
@@ -155,27 +164,32 @@ export default class QuickMethod extends Event {
     margins: [number, number, number, number],
     maxScale?: number
   ): number {
+    // 获取画布尺寸和轴配置
     const { width, height } = this.rect!.value;
     const { cycle, delta, axisConfig } = this;
 
-    // 计算实际可用绘制区域（减去边距）
-    const availableWidth = width - margins[1] - margins[3]; // 宽 = 总宽 - 右边距 - 左边距
-    const availableHeight = height - margins[0] - margins[2]; // 高 = 总高 - 上边距 - 下边距
+    // 计算实际可用绘制区域（考虑边距后的有效区域）
+    const availableWidth =
+      Math.max(0, width - margins[1] - margins[3]) || width; // 有效宽度 = 总宽 - 右边距 - 左边距
+    const availableHeight =
+      Math.max(0, height - margins[0] - margins[2]) || height; // 有效高度 = 总高 - 上边距 - 下边距
 
-    // 区域有效性检查
+    // 有效性检查：确保可用区域尺寸合法
     if (availableWidth <= 0 || availableHeight <= 0) {
       console.warn("无效的可视区域尺寸，边距设置可能不合理");
       return this.scale;
     }
 
-    /* 核心密度计算 */
-    // 计算单位像素表示的坐标轴数值量（值越大表示内容越密集）
-    const widthValuePerPixel = visibleWidthValue / availableWidth;
-    const heightValuePerPixel = visibleHeightValue / availableHeight;
-    const maxValuePerPixel = Math.max(widthValuePerPixel, heightValuePerPixel);
+    /* 密度计算阶段 */
+    // 单位像素承载的数据量（数值越大越密集）
+    const widthDensity = visibleWidthValue / availableWidth;
+    const heightDensity = visibleHeightValue / availableHeight;
+    const maxDensity = Math.max(widthDensity, heightDensity);
 
-    // 基准密度比 = 总网格数 / 最小网格值（表示基础显示密度）
-    const baseDensityRatio = axisConfig.count / axisConfig.min;
+    // 基准网格代表的值 = 默认网格代表的值 / 最小网格值（表示基础显示密度）
+    const baseCount = axisConfig.count;
+    // 基准密度比 = 默认网格代表的值 / 最小网格值（表示基础显示密度）
+    const baseDensity = baseCount / axisConfig.min;
     // 缩放步长因子（每个缩放周期的变化量）
     const scaleStepFactor = cycle * delta;
 
@@ -183,45 +197,44 @@ export default class QuickMethod extends Event {
     let targetScale: number;
 
     // 当实际密度 > 基准密度时（需要缩小显示比例以腾出更多空间）
-    if (maxValuePerPixel > baseDensityRatio) {
+    if (maxDensity > baseDensity) {
       // 计算密度倍数（向上取整保证完全容纳）
-      const densityMultiplier = Math.ceil(maxValuePerPixel / baseDensityRatio);
-      // 所需网格数 = 基准数量 × 倍数
-      const requiredGrids = densityMultiplier * axisConfig.count;
+      const densityMultiplier = Math.ceil(maxDensity / baseDensity);
+      // 所需网格代表的值 = 基准值 × 倍数
+      const requiredGridMaxValue = baseCount * densityMultiplier;
 
       // 缩放比例公式推导：
-      // 1. (requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min → 基础调整量
+      // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min → 基础调整量
       // 2. (densityMultiplier - 2) → 倍数补偿量
       // 3. 1 - (总调整量) * 步长因子 → 最终比例（值变小实现缩小效果）
       targetScale =
         1 -
-        ((requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min +
+        ((requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min +
           (densityMultiplier - 2)) *
           scaleStepFactor;
     }
     // 当实际密度 <= 基准密度时（需要放大显示比例以充分利用空间）
     else {
-      // 计算缩小级数（2的指数级调整）
-      const shrinkLevel = Math.floor(baseDensityRatio / maxValuePerPixel) - 2;
+      // 计算缩小级数（2 的指数级调整）
+      const shrinkLevel = Math.floor(baseDensity / maxDensity) - 1;
+
       const scaleDivider = Math.pow(2, shrinkLevel);
-      // 所需网格数 = 基准数量 / 缩小系数
-      const requiredGrids = axisConfig.count / scaleDivider;
+      // 所需网格代表的值 = 基准值 / 缩小系数
+      const requiredGridMaxValue = baseCount / scaleDivider;
 
       // 缩放比例公式推导：
-      // 1. (requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min → 基础调整量
+      // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min → 基础调整量
       // 2. shrinkLevel → 级数补偿量
       // 3. 1 + (总调整量) * 步长因子 → 最终比例（值变大实现放大效果）
       targetScale =
         1 +
-        ((requiredGrids / maxValuePerPixel - axisConfig.min) / axisConfig.min +
+        ((requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min +
           shrinkLevel) *
           scaleStepFactor;
     }
 
     // 应用最大缩放限制
-    if (maxScale !== undefined) {
-      targetScale = Math.min(maxScale, targetScale);
-    }
+    if (maxScale !== undefined) targetScale = Math.min(maxScale, targetScale);
 
     // 对齐到最近的步长倍数（保证缩放比例符合预设精度）
     targetScale = new Decimal(targetScale)
@@ -232,6 +245,7 @@ export default class QuickMethod extends Event {
 
     return targetScale;
   }
+
   /** 计算目标位置偏移 */
   private calculateTargetOffset(
     minX: number,
