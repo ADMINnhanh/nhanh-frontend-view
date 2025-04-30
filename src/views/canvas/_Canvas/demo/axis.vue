@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import {
   ArrowBack,
@@ -42,10 +42,10 @@ const config = ref<_Canvas["axisConfig"]>({
   size: 100,
 });
 
-let myCanvas: _Canvas;
+let myCanvas = shallowRef<_Canvas>();
 watch(
   () => Settings.value.theme,
-  (theme) => myCanvas?.setTheme(theme)
+  (theme) => myCanvas.value?.setTheme(theme)
 );
 watch(
   () => [show.value, config.value] as const,
@@ -60,8 +60,8 @@ watch(
       });
     }
 
-    myCanvas.setAxis(_config);
-    myCanvas.toggleAxis({
+    myCanvas.value!.setAxis(_config);
+    myCanvas.value!.toggleAxis({
       all: show.includes("all"),
       grid: {
         main: show.includes("grid.main"),
@@ -74,9 +74,10 @@ watch(
   { deep: true }
 );
 onMounted(() => {
-  myCanvas = new _Canvas(id);
-  myCanvas.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas(id);
+  myCanvas.value!.setTheme(Settings.value.theme);
 });
+defineExpose({ myCanvas });
 </script>
 
 <template>

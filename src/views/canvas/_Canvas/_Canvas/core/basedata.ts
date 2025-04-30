@@ -235,6 +235,8 @@ export default class BaseData {
 
     this.offset.x -= (newMousePoint.x - mousePoint.x) * axisConfig.x;
     this.offset.y -= (newMousePoint.y - mousePoint.y) * axisConfig.y;
+    this.offset.x = Number(this.offset.x.toFixed(0));
+    this.offset.y = Number(this.offset.y.toFixed(0));
   }
   /** 设置坐标轴 */
   setAxis(config: Partial<BaseData["axisConfig"]>) {

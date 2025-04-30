@@ -98,7 +98,7 @@ export default class QuickMethod extends Event {
     );
 
     // 计算目标位置偏移
-    const targetOffset = this.calculateTargetOffset(
+    const offsetDifference = this.calculateOffsetDifference(
       minX,
       maxX,
       minY,
@@ -106,23 +106,18 @@ export default class QuickMethod extends Event {
       avoid
     );
 
-    // return console.log(targetOffset);
-
     if (
       targetScale == this.scale &&
-      targetOffset.x == this.offset.x &&
-      targetOffset.y == this.offset.y
+      offsetDifference.x == 0 &&
+      offsetDifference.y == 0
     )
       return;
 
-    // console.log(targetScale, targetOffset.x, targetOffset.y);
-    // return console.log(this);
-
     // 立即执行或动画过渡
     if (immediately) {
-      this.applyTransformImmediately(targetScale, targetOffset);
+      this.applyTransformImmediately(targetScale, offsetDifference);
     } else {
-      this.animateTransform(targetScale, targetOffset);
+      this.animateTransform(targetScale, offsetDifference);
     }
   }
   /** 计算所有覆盖层的边界范围 */
@@ -247,7 +242,7 @@ export default class QuickMethod extends Event {
     return targetScale;
   }
   /** 计算目标位置偏移 */
-  private calculateTargetOffset(
+  private calculateOffsetDifference(
     minX: number,
     maxX: number,
     minY: number,
@@ -285,9 +280,12 @@ export default class QuickMethod extends Event {
   /** 立即应用变换 */
   private applyTransformImmediately(
     targetScale: number,
-    targetOffset: { x: number; y: number }
+    offsetDifference: { x: number; y: number }
   ) {
-    this.offset = targetOffset;
+    this.offset = {
+      x: this.offset.x + offsetDifference.x,
+      y: this.offset.y + offsetDifference.y,
+    };
     this.scale = targetScale;
     this.updateSize();
     this.redrawOnce();
@@ -295,7 +293,7 @@ export default class QuickMethod extends Event {
   /** 执行动画过渡 */
   private animateTransform(
     targetScale: number,
-    targetOffset: { x: number; y: number }
+    offsetDifference: { x: number; y: number }
   ) {
     const initialScale = this.scale;
     const initialOffset = { ...this.offset };
@@ -314,7 +312,7 @@ export default class QuickMethod extends Event {
     const animateOffset = (onComplete?: () => void) =>
       this.animateOffset(
         initialOffset,
-        targetOffset,
+        offsetDifference,
         duration,
         onComplete || finish
       );
@@ -344,7 +342,7 @@ export default class QuickMethod extends Event {
   /** 执行偏移动画 */
   private animateOffset(
     initialOffset: { x: number; y: number },
-    targetOffset: { x: number; y: number },
+    offsetDifference: { x: number; y: number },
     duration: number,
     onComplete: () => void
   ) {
@@ -352,44 +350,47 @@ export default class QuickMethod extends Event {
       if (!this.isAuto || !this.canvas || this.lockDragAndResize) return;
 
       // 插值计算当前偏移量
-      this.offset.x = initialOffset.x + targetOffset.x * schedule;
-      this.offset.y = initialOffset.y + targetOffset.y * schedule;
+      this.offset = {
+        x: Number((initialOffset.x + offsetDifference.x * schedule).toFixed(0)),
+        y: Number((initialOffset.y + offsetDifference.y * schedule).toFixed(0)),
+      };
 
       this.redrawOnce();
 
       if (schedule === 1) onComplete();
     }, duration);
   }
-  /** 重置画布 */
-  reset() {
+  /** 回归初始位置 */
+  returnToOrigin() {
     if (this.lockDragAndResize) return;
 
-    this.isAuto = true;
-    const time = 300;
-    const waitResetData = {
-      offset: { ...this.offset },
-      scale: this.scale - 1,
-    };
+    if (this.scale == 1 && this.offset.x == 0 && this.offset.y == 0) return;
 
-    _Schedule((schedule) => {
-      if (!this.isAuto || !this.canvas || this.lockDragAndResize) return;
+    const { rect, axisConfig } = this;
 
-      if (schedule === 1) {
-        this.offset = { x: 0, y: 0 };
-        this.scale = 1;
-        this.updateSize();
-        this.isAuto = false;
-      } else if (schedule > 0) {
-        schedule = 1 - schedule;
-        this.offset = {
-          x: waitResetData.offset.x * schedule,
-          y: waitResetData.offset.y * schedule,
-        };
-        this.scale = 1 + waitResetData.scale * schedule;
-        this.updateSize();
-      }
-      this.redrawOnce();
-    }, time);
+    const defaultCenter = this.getDefaultCenterLocation()!;
+
+    // 计算中心点坐标
+    const centerX = (rect!.value.width / 2 - defaultCenter.x) * axisConfig.x;
+    const centerY = (rect!.value.height / 2 - defaultCenter.y) * axisConfig.y;
+    const centerValue = this.getAxisValueByPoint(centerX, centerY, true);
+
+    const canvasPoint = this.getMousePositionOnAxis({
+      clientX: rect!.value.x + rect!.value.width / 2,
+      clientY: rect!.value.y + rect!.value.height / 2,
+    })!;
+    const canvasValue = this.getAxisValueByPoint(canvasPoint.x, canvasPoint.y);
+
+    const valuePx = axisConfig.size / this.getNowGridCount;
+    const xDifference =
+      (canvasValue.xV - centerValue.xV) * axisConfig.x * valuePx;
+    const yDifference =
+      (canvasValue.yV - centerValue.yV) * axisConfig.y * valuePx;
+
+    this.animateTransform(1, {
+      x: xDifference,
+      y: yDifference,
+    });
   }
   /** 缩放画布 */
   zoom(delta: number) {

@@ -4,6 +4,7 @@ import {
   Contract,
   CopyOutline,
   Expand,
+  LogoGithub,
   Refresh,
 } from "@vicons/ionicons5";
 import {
@@ -21,6 +22,7 @@ import { onMounted, ref } from "vue";
 import type _Canvas from "./_Canvas";
 
 interface Props {
+  path: string;
   code: string;
   component: Comment;
 }
@@ -30,9 +32,7 @@ const props = defineProps<Props>();
 const showCode = ref(false);
 
 // 创建一个 ref 对象，用于存储组件的引用
-const componentRef = ref<{
-  myCanvas: _Canvas;
-}>();
+const componentRef = ref<{ myCanvas: _Canvas }>();
 
 /** 当前状态是否是全屏 */
 const isFullScreen = ref(false);
@@ -54,7 +54,7 @@ onMounted(() => {
       <NSpace>
         <NTooltip trigger="hover">
           <template #trigger>
-            <NButton @click="componentRef?.myCanvas.reset()" text>
+            <NButton @click="componentRef?.myCanvas.returnToOrigin()" text>
               <template #icon>
                 <NIcon :component="Refresh" />
               </template>
@@ -71,6 +71,24 @@ onMounted(() => {
             </NButton>
           </template>
           {{ isFullScreen ? "退出全屏" : "全屏" }}
+        </NTooltip>
+        <NTooltip trigger="hover">
+          <template #trigger>
+            <NButton
+              tag="a"
+              :href="
+                'https://github.com/ADMINnhanh/nhanh-frontend-view/tree/main/src/views/canvas/_Canvas/demo/' +
+                path
+              "
+              target="_blank"
+              text
+            >
+              <template #icon>
+                <NIcon :component="LogoGithub" />
+              </template>
+            </NButton>
+          </template>
+          在 GitHub 查看源码
         </NTooltip>
         <NTooltip trigger="hover">
           <template #trigger>

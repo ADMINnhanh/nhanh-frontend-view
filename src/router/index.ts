@@ -60,20 +60,20 @@ const router = createRouter({
 
     // 主逻辑
     if (to.hash) {
-      const targetHash = to.hash; // 例如 "#polygon"
-      const targetEl = document.querySelector(targetHash);
+      const targetHash = to.hash.replace(/\//g, "%2F").slice(1); // 例如 "#polygon"
+      const targetEl = document.getElementById(targetHash);
 
       if (targetEl && !targetEl.classList.contains("n-skeleton")) {
         // 如果元素存在且已加载，直接滚动
         highlightAndScroll(targetEl);
       } else {
         _WaitForCondition(() => {
-          const targetEl = document.querySelector(targetHash);
+          const targetEl = document.getElementById(targetHash);
           return Boolean(
             targetEl && !targetEl.classList.contains("n-skeleton")
           );
         }, 1000).finally(() => {
-          const targetEl = document.querySelector(targetHash);
+          const targetEl = document.getElementById(targetHash);
           targetEl && highlightAndScroll(targetEl);
         });
       }

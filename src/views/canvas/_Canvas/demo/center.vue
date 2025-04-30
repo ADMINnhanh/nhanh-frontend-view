@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import {
   NButton,
@@ -20,10 +20,10 @@ const left = ref<_Canvas["defaultCenter"]["left"]>();
 const right = ref<_Canvas["defaultCenter"]["right"]>();
 const rightUnit = ref<"" | "%">("");
 
-let myCanvas: _Canvas;
+let myCanvas = shallowRef<_Canvas>();
 watch(
   () => Settings.value.theme,
-  (theme) => myCanvas?.setTheme(theme)
+  (theme) => myCanvas.value?.setTheme(theme)
 );
 watch(
   () =>
@@ -36,7 +36,7 @@ watch(
       rightUnit.value,
     ] as const,
   ([top, left, bottom, right, bottomUnit, rightUnit]) =>
-    myCanvas.setDefaultCenter({
+    myCanvas.value!.setDefaultCenter({
       top,
       left,
       bottom: (bottom + bottomUnit) as any,
@@ -44,9 +44,10 @@ watch(
     })
 );
 onMounted(() => {
-  myCanvas = new _Canvas(id);
-  myCanvas.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas(id);
+  myCanvas.value.setTheme(Settings.value.theme);
 });
+defineExpose({ myCanvas });
 </script>
 
 <template>

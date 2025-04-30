@@ -170,7 +170,8 @@ export default class Event extends Draw {
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
     // console.log(
-    //   "setScale:" + this.scale,
+    //   "scale:" + this.scale,
+    //   "offset:" + JSON.stringify(this.offset),
     //   "GridSize:" + this.getGridSize(this.scale)
     // );
 

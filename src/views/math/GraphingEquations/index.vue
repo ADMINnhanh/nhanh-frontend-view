@@ -235,7 +235,7 @@ onUnmounted(() => {
               <template #icon><NIcon :component="Remove" /></template>
             </NButton>
           </NButtonGroup>
-          <NButton :="buttonApi" @click="canvas.reset()">
+          <NButton :="buttonApi" @click="canvas.returnToOrigin()">
             <template #icon><NIcon :component="Home" /></template>
           </NButton>
           <NButton

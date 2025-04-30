@@ -3,7 +3,6 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
 import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NA } from "naive-ui";
 import ChinaData from ".";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
 
@@ -75,18 +74,10 @@ onMounted(() => {
   myCanvas.value.addLayer(layer);
 });
 
-defineExpose({
-  myCanvas,
-});
+defineExpose({ myCanvas });
 </script>
 
 <template>
-  <NA
-    href="https://github.com/ADMINnhanh/nhanh-frontend-view/tree/main/src/views/canvas/_Canvas/demo"
-    target="_blank"
-  >
-    所有 demo 的源码
-  </NA>
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 

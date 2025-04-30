@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
-import { onMounted, watch } from "vue";
+import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { NP, NText } from "naive-ui";
 
 const id = _GenerateUUID();
 
-let myCanvas: _Canvas;
+let myCanvas = shallowRef<_Canvas>();
 const custom_1 = new _Canvas.Custom(
   {
     value: [
@@ -130,13 +130,14 @@ const overlay_arr = [
 
 watch(
   () => Settings.value.theme,
-  (theme) => myCanvas?.setTheme(theme)
+  (theme) => myCanvas.value?.setTheme(theme)
 );
 onMounted(() => {
-  myCanvas = new _Canvas(id);
-  myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addOverlay(overlay_arr);
+  myCanvas.value = new _Canvas(id);
+  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value.addOverlay(overlay_arr);
 });
+defineExpose({ myCanvas });
 </script>
 
 <template>

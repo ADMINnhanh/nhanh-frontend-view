@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
-import { onMounted, watch } from "vue";
+import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { NButton, NSpace, NSwitch } from "naive-ui";
 
 const id = _GenerateUUID();
 
-let myCanvas: _Canvas;
+let myCanvas = shallowRef<_Canvas>();
 const point_value = new _Canvas.Point({ value: [1, 1], draggable: true });
 const point_position = new _Canvas.Point({
   position: [-100, -100],
@@ -33,13 +33,14 @@ function UpdateDraggable(draggable: boolean) {
 
 watch(
   () => Settings.value.theme,
-  (theme) => myCanvas?.setTheme(theme)
+  (theme) => myCanvas.value?.setTheme(theme)
 );
 onMounted(() => {
-  myCanvas = new _Canvas(id);
-  myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addOverlay(point_arr);
+  myCanvas.value = new _Canvas(id);
+  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value.addOverlay(point_arr);
 });
+defineExpose({ myCanvas });
 </script>
 
 <template>
@@ -52,7 +53,6 @@ onMounted(() => {
     <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>
     <NButton ghost @click="UpdatePosition(100)"> position + 100 </NButton>
     <NButton ghost @click="UpdatePosition(-100)"> position - 100 </NButton>
-    <NButton ghost @click="myCanvas.setFitView()"> setFitView</NButton>
   </NSpace>
 
   <canvas :id="id" class="my-canvas"></canvas>

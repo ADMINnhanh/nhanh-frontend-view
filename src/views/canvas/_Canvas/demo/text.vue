@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
-import { onMounted, watch } from "vue";
+import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { NButton, NSpace, NSwitch } from "naive-ui";
 
 const id = _GenerateUUID();
 
-let myCanvas: _Canvas;
+let myCanvas = shallowRef<_Canvas>();
 const text_value = new _Canvas.Text({
   value: [0, 0],
   text: "你好 世界",
@@ -40,13 +40,14 @@ function UpdateDraggable(draggable: boolean) {
 
 watch(
   () => Settings.value.theme,
-  (theme) => myCanvas?.setTheme(theme)
+  (theme) => myCanvas.value?.setTheme(theme)
 );
 onMounted(() => {
-  myCanvas = new _Canvas(id);
-  myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addOverlay(text_arr);
+  myCanvas.value = new _Canvas(id);
+  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value.addOverlay(text_arr);
 });
+defineExpose({ myCanvas });
 </script>
 
 <template>

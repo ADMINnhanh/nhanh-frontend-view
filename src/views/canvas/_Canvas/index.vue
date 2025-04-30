@@ -7,18 +7,18 @@ import Media from "@/stores/media";
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
 const demoName: [string, string][] = [
-  ["china", "中国地图"],
-  // ["original", "仅需初始化 _Canvas"],
-  // ["center", "中心点"],
-  // ["shortcutKey", "快捷键"],
-  // ["axis", "坐标轴"],
-  // ["text", "文字"],
-  // ["point", "点"],
-  // ["line", "线"],
-  // ["polygon", "面"],
-  // ["custom", "自定义绘制"],
-  // ["layer", "图层 & 层级"],
-  // ["show", "显示条件"],
+  ["China%2Findex.vue", "中国地图"],
+  ["original.vue", "仅需初始化 _Canvas"],
+  ["center.vue", "中心点"],
+  ["shortcutKey.vue", "快捷键"],
+  ["axis.vue", "坐标轴"],
+  ["text.vue", "文字"],
+  ["point.vue", "点"],
+  ["line.vue", "线"],
+  ["polygon.vue", "面"],
+  ["custom.vue", "自定义绘制"],
+  ["layer.vue", "图层 & 层级"],
+  ["show.vue", "显示条件"],
 ];
 
 type DemoName = (typeof demoName)[number][0];
@@ -47,7 +47,8 @@ const vueFiles = ref<{
   });
   const componentModules = import.meta.glob("./demo/**/*.vue");
   for (const path in codeModules) {
-    const name = (path.split("/").pop() as string).replace(".vue", "");
+    const name = path.replace("./demo/", "").replace(/\//g, "%2F");
+    // const name = (path.split("/").pop() as string).replace(".vue", "");
     const code = (await codeModules[path]()) as string;
     const component = (await componentModules[path]()) as any;
     vueFiles.value[name as DemoName] = {
@@ -80,6 +81,7 @@ onUnmounted(() => {
               <MyCard
                 v-if="vueFiles[item[0]]"
                 :id="item[0]"
+                :path="item[0]"
                 :title="item[1]"
                 :code="vueFiles[item[0]].code"
                 :component="vueFiles[item[0]].component"
@@ -92,6 +94,7 @@ onUnmounted(() => {
               <MyCard
                 v-if="vueFiles[item[0]]"
                 :id="item[0]"
+                :path="item[0]"
                 :title="item[1]"
                 :code="vueFiles[item[0]].code"
                 :component="vueFiles[item[0]].component"
@@ -105,6 +108,7 @@ onUnmounted(() => {
             <MyCard
               v-if="vueFiles[item[0]]"
               :id="item[0]"
+              :path="item[0]"
               :title="item[1]"
               :code="vueFiles[item[0]].code"
               :component="vueFiles[item[0]].component"

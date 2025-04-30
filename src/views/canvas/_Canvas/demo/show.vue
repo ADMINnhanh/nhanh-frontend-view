@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { NSpace, NSwitch, NText } from "naive-ui";
 
 const id = _GenerateUUID();
 
-let myCanvas: _Canvas;
+let myCanvas = shallowRef<_Canvas>();
 const myCanvasConfig = ref<_Canvas>({} as _Canvas);
 const point_value = new _Canvas.Point({ value: [0, 0] });
 point_value.show.setScales([0.8, 1.2]);
@@ -17,18 +17,19 @@ watch(show, (show) => point_value.show.setShow(show), { immediate: true });
 
 watch(
   () => Settings.value.theme,
-  (theme) => myCanvas?.setTheme(theme)
+  (theme) => myCanvas.value?.setTheme(theme)
 );
 onMounted(() => {
-  myCanvas = new _Canvas(id);
-  myCanvas.notifyReload = () => {
+  myCanvas.value = new _Canvas(id);
+  myCanvas.value.notifyReload = () => {
     (["scale"] as const).forEach((key) => {
-      myCanvasConfig.value[key] = myCanvas[key];
+      myCanvasConfig.value[key] = myCanvas.value![key];
     });
   };
-  myCanvas.setTheme(Settings.value.theme);
-  myCanvas.addOverlay(point_value);
+  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value.addOverlay(point_value);
 });
+defineExpose({ myCanvas });
 </script>
 
 <template>
