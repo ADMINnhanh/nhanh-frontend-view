@@ -1,1 +1,0 @@
-import{f as d,g as r,h as c,cy as u,cz as i}from"./index-DC-Oli1Y.js";function f(n){const{mergedLocaleRef:o,mergedDateLocaleRef:a}=d(r,null)||{},t=c(()=>{var e,l;return(l=(e=o==null?void 0:o.value)===null||e===void 0?void 0:e[n])!==null&&l!==void 0?l:u[n]});return{dateLocaleRef:c(()=>{var e;return(e=a==null?void 0:a.value)!==null&&e!==void 0?e:i}),localeRef:t}}export{f as u};
