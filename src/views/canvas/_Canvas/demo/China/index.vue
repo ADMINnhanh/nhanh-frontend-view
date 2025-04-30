@@ -20,7 +20,8 @@ ChinaData().then((chinaData) => {
       window.$message.success(`这里是 ${item.properties.name}`);
     };
     const commonDblClickEvent = () => {
-      window.$message.success(`这里是 ${item.properties.name}`);
+      myCanvas.value?.setFitView(overlayGroup);
+      // myCanvas.value?.setFitView();
     };
 
     item.geometry.forEach((polygonData) => {

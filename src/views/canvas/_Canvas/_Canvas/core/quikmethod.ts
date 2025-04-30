@@ -1,8 +1,17 @@
 import { _Schedule } from "nhanh-pure-function";
 import Axis from "./axis";
 import Event from "./event";
-import type { Overlay } from "../OverlayGroup";
+import { type Overlay } from "../OverlayGroup";
 import Decimal from "decimal.js";
+import LayerGroup from "../LayerGroup";
+import Layer from "../LayerGroup/layer";
+import OverlayGroup from "../OverlayGroup";
+
+// 定义基础节点类型
+type NodeType = LayerGroup | Layer | OverlayGroup | Overlay;
+
+// 定义单元素或数组的泛型类型
+type SingleOrArray<T> = T | T[];
 
 /** 快速方法 */
 export default class QuickMethod extends Event {
@@ -33,30 +42,34 @@ export default class QuickMethod extends Event {
       overlays_custom,
     };
   }
-
   /**
    * 获取所有可见的覆盖层（Overlay）
-   * 遍历图层组->图层->组->覆盖层结构，筛选出所有可见的覆盖层
+   * 支持从指定源（图层组/图层/覆盖层组/覆盖层数组）开始遍历
    */
-  getAllOverlays(): Overlay[] {
+  getAllOverlays(source?: SingleOrArray<NodeType>): Overlay[] {
     const overlays: Overlay[] = [];
+    // 初始化栈：处理数组类型直接展开
+    const stack: (LayerGroup | Layer | OverlayGroup | Overlay)[] =
+      source !== undefined
+        ? Array.isArray(source)
+          ? [...source]
+          : [source]
+        : Array.from(this.layerGroups.values());
 
-    // 使用循环替代多层map+flat组合，提升性能
-    for (const [, layerGroup] of this.layerGroups) {
-      if (!layerGroup.show.show) continue;
+    while (stack.length > 0) {
+      const current = stack.pop()!;
 
-      for (const [, layer] of layerGroup.layers) {
-        if (!layer.show.show) continue;
-
-        for (const [, group] of layer.groups) {
-          if (!group.show.show) continue;
-
-          for (const overlay of group.overlays.values()) {
-            if (overlay.show.show) {
-              overlays.push(overlay);
-            }
-          }
-        }
+      if (current instanceof LayerGroup) {
+        if (!current.show.show) continue;
+        stack.push(...current.layers.values()); // 图层组→图层
+      } else if (current instanceof Layer) {
+        if (!current.show.show) continue;
+        stack.push(...current.groups.values()); // 图层→覆盖层组
+      } else if (current instanceof OverlayGroup) {
+        if (!current.show.show) continue;
+        stack.push(...current.overlays.values()); // 覆盖层组→覆盖层
+      } else {
+        if (current.show.show) overlays.push(current); // 直接收集可见覆盖层
       }
     }
 
@@ -70,22 +83,20 @@ export default class QuickMethod extends Event {
    * @param maxScale 最大缩放比例限制
    */
   setFitView(
-    overlays: Overlay[] = [],
+    overlays: SingleOrArray<NodeType> | undefined = undefined,
     immediately: boolean = false,
     avoid: [number, number, number, number] = [60, 60, 60, 60],
     maxScale?: number
   ) {
     // 获取目标覆盖层并过滤属于当前画布的覆盖层
-    const targetOverlays =
-      overlays.length === 0
-        ? this.getAllOverlays()
-        : overlays.filter((overlay) => overlay.equalsMainCanvas(this as any));
+    const targetOverlays = this.getAllOverlays(overlays);
 
     if (targetOverlays.length === 0) return;
 
     // 计算所有覆盖层的包围盒
     const { minX, maxX, minY, maxY } =
       this.calculateBoundingBox(targetOverlays);
+    //  return console.log(minX, maxX, minY, maxY);
 
     // 计算目标尺寸和缩放比例
     const targetWidth_Value = maxX - minX;
@@ -96,6 +107,7 @@ export default class QuickMethod extends Event {
       avoid,
       maxScale
     );
+    // return console.log(targetScale);
 
     // 计算目标位置偏移
     const offsetDifference = this.calculateOffsetDifference(
@@ -142,11 +154,11 @@ export default class QuickMethod extends Event {
    *
    * 核心逻辑：
    * 1. 网格尺寸动态范围：x ~ 2x（axisConfig.min 表示基础尺寸 x）
-   * 2. 计算内容密度 = 单位像素需要表示的数据量
-   * 3. 对比基准密度（网格处于最小尺寸时的密度）
+   * 2. 计算内容密度 = 单位像素需要表示的数据量（数值越大表示越密集）
+   * 3. 对比基准密度（网格在最小尺寸时的密度）
    * 4. 动态选择缩放策略：
-   *    - 过密内容：扩大网格尺寸（向 2x 方向调整）
-   *    - 过疏内容：收缩网格尺寸（向 x 方向调整）
+   *    - 过密内容：减小缩放比例使内容更紧凑（网格尺寸向 2x 调整）
+   *    - 过疏内容：增大缩放比例以填充空间（网格尺寸向 x 调整）
    *
    * @param visibleWidthValue 可见区域宽度（数据单位）
    * @param visibleHeightValue 可见区域高度（数据单位）
@@ -177,51 +189,52 @@ export default class QuickMethod extends Event {
     }
 
     /* 密度计算阶段 */
-    // 单位像素承载的数据量（数值越大越密集）
+    // 单位像素数据量 = 可见数据范围 / 可用像素数（数值越大越密集）
     const widthDensity = visibleWidthValue / availableWidth;
     const heightDensity = visibleHeightValue / availableHeight;
     const maxDensity = Math.max(widthDensity, heightDensity);
 
-    // 基准网格代表的值 = 默认网格代表的值 / 最小网格值（表示基础显示密度）
-    const baseCount = axisConfig.count;
-    // 基准密度比 = 默认网格代表的值 / 最小网格值（表示基础显示密度）
-    const baseDensity = baseCount / axisConfig.min;
-    // 缩放步长因子（每个缩放周期的变化量）
-    const scaleStepFactor = cycle * delta;
+    // 基准参数计算
+    const baseCount = axisConfig.count; // 默认网格数量
+    const baseDensity = baseCount / axisConfig.min; // 基准密度 = 默认网格数/基础尺寸
+    const scaleStepFactor = cycle * delta; // 缩放步长 = 周期数 × 单步变化量
 
     /* 缩放策略选择 */
     let targetScale: number;
 
-    // 当实际密度 > 基准密度时（需要缩小显示比例以腾出更多空间）
+    // 情况1：内容过密 → 需要减小缩放比例（使内容更紧凑）
     if (maxDensity > baseDensity) {
-      // 计算密度倍数（向上取整保证完全容纳）
+      // 计算需要放大网格的倍数（向上取整确保完全容纳）
       const densityMultiplier = Math.ceil(maxDensity / baseDensity);
-      // 所需网格代表的值 = 基准值 × 倍数
+      // 所需网格代表的值 = 基准值 × 密度倍数
       const requiredGridMaxValue = baseCount * densityMultiplier;
 
-      // 缩放比例公式推导：
-      // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min → 基础调整量
-      // 2. (densityMultiplier - 2) → 倍数补偿量
-      // 3. 1 - (总调整量) * 步长因子 → 最终比例（值变小实现缩小效果）
+      // 缩放公式分解：
+      // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) → 所需尺寸与基础尺寸差值
+      // 2. 差值 / axisConfig.min → 相对基础尺寸的变化比例
+      // 3. (densityMultiplier - 2) → 密度倍数补偿项
+      // 4. 总调整量 = (变化比例 + 补偿项) × 步长因子
+
       targetScale =
         1 -
         ((requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min +
           (densityMultiplier - 2)) *
           scaleStepFactor;
     }
-    // 当实际密度 <= 基准密度时（需要放大显示比例以充分利用空间）
+    // 情况2：内容过疏 → 需要增大缩放比例（填充可用空间）
     else {
-      // 计算缩小级数（2 的指数级调整）
-      const shrinkLevel = Math.floor(baseDensity / maxDensity) - 1;
-
+      // 计算缩小级数（根据密度比开平方确定调整幅度）
+      const shrinkLevel = Math.floor(Math.sqrt(baseDensity / maxDensity));
+      // 缩小系数 = 2^级数
       const scaleDivider = Math.pow(2, shrinkLevel);
       // 所需网格代表的值 = 基准值 / 缩小系数
       const requiredGridMaxValue = baseCount / scaleDivider;
 
-      // 缩放比例公式推导：
-      // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min → 基础调整量
-      // 2. shrinkLevel → 级数补偿量
-      // 3. 1 + (总调整量) * 步长因子 → 最终比例（值变大实现放大效果）
+      // 缩放公式分解：
+      // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) → 所需尺寸与基础尺寸差值
+      // 2. 差值 / axisConfig.min → 相对基础尺寸的变化比例
+      // 3. shrinkLevel → 级数补偿项
+      // 4. 总调整量 = (变化比例 + 补偿项) × 步长因子
       targetScale =
         1 +
         ((requiredGridMaxValue / maxDensity - axisConfig.min) / axisConfig.min +
@@ -229,7 +242,7 @@ export default class QuickMethod extends Event {
           scaleStepFactor;
     }
 
-    // 应用最大缩放限制
+    // 应用最大缩放限制（若配置）
     if (maxScale !== undefined) targetScale = Math.min(maxScale, targetScale);
 
     // 对齐到最近的步长倍数（保证缩放比例符合预设精度）

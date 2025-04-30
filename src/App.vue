@@ -27,6 +27,24 @@ function UpdateVh() {
 }
 requestAnimationFrame(UpdateVh);
 window.addEventListener("resize", UpdateVh);
+
+// const startTime = Date.now();
+// window.addEventListener("unload", function (event) {
+//   /** 浏览时长 */
+//   const browseTime = String(Date.now() - startTime);
+//   const url = location.origin + "";
+
+//   // fetch(url, {
+//   //   method: "POST",
+//   //   body: browseTime,
+//   //   headers: { "Content-Type": "application/json" },
+//   //   keepalive: true, // 关键参数
+//   // });
+//   const blob = new Blob([browseTime], {
+//     type: "application/json; charset=UTF-8",
+//   });
+//   navigator.sendBeacon(url, blob);
+// });
 </script>
 
 <template>
