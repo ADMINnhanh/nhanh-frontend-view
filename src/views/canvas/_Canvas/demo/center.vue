@@ -44,7 +44,7 @@ watch(
     })
 );
 onMounted(() => {
-  myCanvas.value = new _Canvas(id);
+  myCanvas.value = new _Canvas(id, { axisConfig: { count: 2000000 } });
   myCanvas.value.setTheme(Settings.value.theme);
 });
 defineExpose({ myCanvas });

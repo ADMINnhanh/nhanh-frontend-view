@@ -216,7 +216,7 @@ export default class Axis {
    * @param y 文本绘制的纵坐标
    * @param secondary 是否为次要颜色
    */
-  private drawText(text: string, x: number, y: number, secondary?: boolean) {
+  private drawText(text?: string, x?: number, y?: number, secondary?: boolean) {
     // 获取画布的上下文对象，用于绘制
     const { canvas, ctx } = this;
     const { theme } = canvas;
@@ -229,11 +229,11 @@ export default class Axis {
 
     // 设置文本的描边颜色为背景色，并绘制文本的描边
     ctx.strokeStyle = style.stroke;
-    ctx.strokeText(text, x, y);
+    ![text, x, y].includes(undefined) && ctx.strokeText(text!, x!, y!);
 
     // 根据是否是次要颜色，选择相应的文本填充颜色，并填充文本
     ctx.fillStyle = style[secondary ? "secondary" : "color"];
-    ctx.fillText(text, x, y);
+    ![text, x, y].includes(undefined) && ctx.fillText(text!, x!, y!);
   }
 
   /** 坐标轴 - 文字 */
@@ -242,6 +242,9 @@ export default class Axis {
     const { rect, center, axisConfig, style, theme } = canvas;
 
     const { width, height } = rect!.value;
+
+    /** 初始化文字样式，便于 ctx.measureText 计算 */
+    this.drawText();
 
     /** 文字宽 */
     const textWidth = (text: string) => Math.ceil(ctx.measureText(text).width);
