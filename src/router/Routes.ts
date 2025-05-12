@@ -1,5 +1,5 @@
 import SvgGather from "@/assets/icon/gather";
-import { FishOutline, FootballOutline } from "@vicons/ionicons5";
+import { FishOutline, HomeOutline } from "@vicons/ionicons5";
 import { NIcon } from "naive-ui";
 import { h, type Component } from "vue";
 import type { RouteRecordRaw } from "vue-router";
@@ -18,6 +18,20 @@ type CustomRouteRecord = RouteRecordRaw & {
 function RenderIcon(icon: Component) {
   return h(NIcon, null, { default: () => h(icon) });
 }
+
+/** 首页 */
+const home: CustomRouteRecord = {
+  path: "home",
+  name: "home",
+  meta: {
+    icon: RenderIcon(HomeOutline),
+    name: {
+      zhCN: "首页",
+      enUS: "Home",
+    },
+  },
+  component: () => import("@/views/home/index.vue"),
+};
 
 /** 画布 */
 const canvas: CustomRouteRecord = {
@@ -156,7 +170,7 @@ const relaxRouting: CustomRouteRecord = {
   ],
 };
 
-const AllRoute = [canvas, math, multimedia, relaxRouting];
+const AllRoute = [home, canvas, math, multimedia, relaxRouting];
 
 /** 路由重名检测 */
 function CheckPath(item: CustomRouteRecord[]) {
