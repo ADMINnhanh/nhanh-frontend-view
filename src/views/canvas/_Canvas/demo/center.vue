@@ -21,10 +21,7 @@ const right = ref<_Canvas["defaultCenter"]["right"]>();
 const rightUnit = ref<"" | "%">("");
 
 let myCanvas = shallowRef<_Canvas>();
-watch(
-  () => Settings.value.theme,
-  (theme) => myCanvas.value?.setTheme(theme)
-);
+
 watch(
   () =>
     [

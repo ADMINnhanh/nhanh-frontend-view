@@ -43,10 +43,7 @@ const config = ref<_Canvas["axisConfig"]>({
 });
 
 let myCanvas = shallowRef<_Canvas>();
-watch(
-  () => Settings.value.theme,
-  (theme) => myCanvas.value?.setTheme(theme)
-);
+
 watch(
   () => [show.value, config.value] as const,
   ([show, config]) => {

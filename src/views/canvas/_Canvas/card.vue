@@ -18,8 +18,9 @@ import {
   NTooltip,
 } from "naive-ui";
 import { _CopyToClipboard, _Fullscreen, _Tip } from "nhanh-pure-function";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import type _Canvas from "./_Canvas";
+import { Settings } from "@/components/popups/components/Settings";
 
 interface Props {
   path: string;
@@ -46,6 +47,11 @@ onMounted(() => {
     };
   })(_Fullscreen(cardRef.value.$el));
 });
+
+watch(
+  () => Settings.value.theme,
+  (theme) => componentRef.value?.myCanvas.setTheme(theme)
+);
 </script>
 
 <template>

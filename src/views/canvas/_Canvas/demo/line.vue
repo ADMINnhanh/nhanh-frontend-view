@@ -60,10 +60,6 @@ function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
   line_arr[0].notifyReload!();
 }
 
-watch(
-  () => Settings.value.theme,
-  (theme) => myCanvas.value?.setTheme(theme)
-);
 onMounted(() => {
   myCanvas.value = new _Canvas(id);
   myCanvas.value.setTheme(Settings.value.theme);

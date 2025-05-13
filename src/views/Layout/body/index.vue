@@ -60,7 +60,13 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
       <Menu />
     </n-layout-sider>
     <n-layout class="router-view">
-      <div><router-view></router-view></div>
+      <div>
+        <router-view v-slot="{ Component }">
+          <KeepAlive :max="10">
+            <component :is="Component" />
+          </KeepAlive>
+        </router-view>
+      </div>
       <div v-if="recordNumber" class="record-number">
         <NButton
           @click="_CopyToClipboard(recordNumber)"

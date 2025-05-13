@@ -9,10 +9,7 @@ import SvgGather from "@/assets/icon/gather";
 const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
-watch(
-  () => Settings.value.theme,
-  (theme) => myCanvas.value?.setTheme(theme)
-);
+
 onMounted(() => {
   myCanvas.value = new _Canvas(id);
   myCanvas.value.setTheme(Settings.value.theme);

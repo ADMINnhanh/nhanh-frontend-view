@@ -15,10 +15,6 @@ point_value.show.setScales([0.8, 1.2]);
 const show = ref(true);
 watch(show, (show) => point_value.show.setShow(show), { immediate: true });
 
-watch(
-  () => Settings.value.theme,
-  (theme) => myCanvas.value?.setTheme(theme)
-);
 onMounted(() => {
   myCanvas.value = new _Canvas(id);
   myCanvas.value.notifyReload = () => {

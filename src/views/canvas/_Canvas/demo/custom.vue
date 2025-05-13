@@ -100,10 +100,6 @@ const overlay = new _Canvas.Custom<any>(
   }
 );
 
-watch(
-  () => Settings.value.theme,
-  (theme) => myCanvas.value?.setTheme(theme)
-);
 onMounted(() => {
   myCanvas.value = new _Canvas(id);
   myCanvas.value.setTheme(Settings.value.theme);

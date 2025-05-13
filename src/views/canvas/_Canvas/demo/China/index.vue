@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
-import { onMounted, shallowRef, watch } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import ChinaData from ".";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
@@ -59,10 +59,6 @@ ChinaData().then((chinaData) => {
   layer.addGroup(overlayGroups);
 });
 
-watch(
-  () => Settings.value.theme,
-  (theme) => myCanvas.value?.setTheme(theme)
-);
 onMounted(() => {
   myCanvas.value = new _Canvas(id, {
     axisConfig: { y: -1, count: 2000000 },
