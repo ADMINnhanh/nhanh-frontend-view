@@ -6,7 +6,7 @@ import SessionList from "./sessionList/index.vue";
 
 <template>
   <NScrollbar>
-    <!-- <Echart /> -->
+    <Echart />
     <SessionList />
   </NScrollbar>
 </template>

@@ -184,7 +184,7 @@ const columns = ref<DataTableBaseColumn<WebsiteAccessSessionReturnsData>[]>([
   {
     title: "访问来源",
     key: "visitSource",
-    width: 160,
+    width: 190,
     sorter: true,
   },
   {
@@ -391,7 +391,7 @@ function GetDetails(id: number) {
       flex-height
       :scroll-x="1600"
       @update:sorter="UpdateSort"
-      :style="`height: calc(100vh - 207px - ${formHeight}px);`"
+      :style="`height: calc(100vh - 227px - ${formHeight}px);`"
     />
     <NPagination
       v-model:page="query.pageIndex"

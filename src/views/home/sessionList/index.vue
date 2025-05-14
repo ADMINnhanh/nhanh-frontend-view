@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import service, { token } from "@/utils/axios";
+import { token } from "@/utils/axios";
 import { LockClosedOutline } from "@vicons/ionicons5";
 import { NButton, NCard, NIcon } from "naive-ui";
-import { h, ref } from "vue";
 import List from "./list.vue";
 import { AddUniqueModal } from "@/components/popups/popups";
 </script>
@@ -26,4 +25,9 @@ import { AddUniqueModal } from "@/components/popups/popups";
   </NCard>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.n-card {
+  margin: 10px;
+  width: auto;
+}
+</style>
