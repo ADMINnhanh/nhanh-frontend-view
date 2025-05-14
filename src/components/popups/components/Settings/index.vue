@@ -19,13 +19,13 @@ import SvgGather from "@/assets/icon/gather";
 import Popup from "@/components/layout/Popup.vue";
 
 interface EmitType {
-  (e: "Closure"): void;
+  (e: "closure"): void;
 }
 const Emit = defineEmits<EmitType>();
 
 function Closure() {
   SetOptions();
-  Emit("Closure");
+  Emit("closure");
 }
 _CloseOnOutsideClick([".Settings.center-positioning"], Closure);
 

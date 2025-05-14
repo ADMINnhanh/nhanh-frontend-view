@@ -4,6 +4,7 @@ import {
   NMessageProvider,
   NDialogProvider,
   NSpin,
+  NLoadingBarProvider,
 } from "naive-ui";
 import { NSpinValue } from "@/stores/globalLoading";
 import UseGlobal from "@/views/UseGlobal.vue";
@@ -36,17 +37,20 @@ window.addEventListener("resize", UpdateVh);
     <n-dialog-provider>
       <!-- message 全局消息提示 -->
       <n-message-provider>
-        <!-- 在视图上加个全局 loading -->
-        <n-spin :="NSpinApi">
-          <template #description>
-            <div v-html="NSpinValue.description"></div>
-          </template>
+        <!-- Loading Bar 全局加载条 -->
+        <n-loading-bar-provider>
+          <!-- Spin 全局加载中 -->
+          <n-spin :="NSpinApi">
+            <template #description>
+              <div v-html="NSpinValue.description"></div>
+            </template>
 
-          <!-- 视图 -->
-          <router-view></router-view>
+            <!-- 视图 -->
+            <router-view></router-view>
 
-          <UseGlobal />
-        </n-spin>
+            <UseGlobal />
+          </n-spin>
+        </n-loading-bar-provider>
       </n-message-provider>
     </n-dialog-provider>
   </n-config-provider>

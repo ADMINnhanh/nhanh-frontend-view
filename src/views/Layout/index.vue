@@ -57,7 +57,7 @@ watch(() => router.currentRoute.value.name, UpdateRouterName, {
 });
 
 window.addEventListener("unload", function () {
-  // return;
+  return;
   UpdateRouterName(undefined, router.currentRoute.value.name);
 
   visitSession.visitEndTime = Date.now();

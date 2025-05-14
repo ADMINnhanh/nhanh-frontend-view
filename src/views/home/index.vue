@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import service from "@/utils/axios";
 import { NScrollbar } from "naive-ui";
-//  import Echart from './echarts.vue'
-import SessionList from "./sessionList.vue";
+import Echart from "./echarts.vue";
+import SessionList from "./sessionList/index.vue";
 </script>
 
 <template>
   <NScrollbar>
-    <!-- <Echart/> -->
+    <!-- <Echart /> -->
     <SessionList />
   </NScrollbar>
 </template>

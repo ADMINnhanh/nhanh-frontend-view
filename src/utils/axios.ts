@@ -1,14 +1,20 @@
 import axios, { AxiosError } from "axios";
 import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import { ref } from "vue";
 
 export const baseURL =
   (import.meta.env.DEV ? "http://localhost:5000" : "https://nhanh.xin") +
   "/ruoyi-admin/nhanh";
 
+export const token = ref({
+  ruoyi: "",
+});
+
 // 创建 axios 实例
 const service = axios.create({
   baseURL,
   timeout: 60 * 1000,
+  withCredentials: true,
 });
 
 // 请求拦截器
@@ -24,14 +30,23 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (res: AxiosResponse) => {
+    // 二进制数据则直接返回
+    if (
+      ["application/octet-stream", "blob", "arraybuffer"].includes(
+        res.request.responseType
+      )
+    ) {
+      return res.data;
+    }
+
     // 未设置状态码则默认成功状态
     const { code, msg } = res.data;
 
-    if (code !== 200) {
+    if ([0, 200].includes(code)) {
+      return Promise.resolve(res.data);
+    } else {
       window.$message.error(msg);
       return Promise.reject("error");
-    } else {
-      return Promise.resolve(res.data);
     }
   },
   (error: AxiosError) => {
