@@ -10,11 +10,15 @@ import {
   NPopover,
   useLoadingBar,
 } from "naive-ui";
-import { _CloseOnOutsideClick } from "nhanh-pure-function";
 import { ref } from "vue";
 import Popup from "@/components/layout/Popup.vue";
 import service, { baseURL, token } from "@/utils/axios";
+import { EnhancedCloseOnOutsideClick } from "../../main";
 
+interface Props {
+  zIndex: number;
+}
+const props = defineProps<Props>();
 interface EmitType {
   (e: "closure"): void;
 }
@@ -23,9 +27,10 @@ const Emit = defineEmits<EmitType>();
 function Closure() {
   Emit("closure");
 }
-_CloseOnOutsideClick(
+EnhancedCloseOnOutsideClick(
   [".login.center-positioning", ".open-login-button"],
-  Closure
+  Closure,
+  props.zIndex
 );
 
 const src = ref("");
@@ -72,7 +77,7 @@ function Login() {
 </script>
 
 <template>
-  <Popup class="login center-positioning" @closure="Closure">
+  <Popup class="login center-positioning" @closure="Closure" :zIndex="zIndex">
     <template #header>登录</template>
     <NForm
       ref="formRef"

@@ -27,7 +27,7 @@ function Dele(zIndex: number) {
       <component
         v-show="item.show"
         :is="item.component"
-        @Closure="Closure(item.zIndex)"
+        @closure="Closure(item.zIndex)"
         :style="{ zIndex: item.zIndex }"
         :zIndex="item.zIndex"
         :data-zIndex="item.zIndex"

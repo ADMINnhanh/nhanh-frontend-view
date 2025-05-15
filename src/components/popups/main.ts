@@ -1,6 +1,7 @@
 import type { Component } from "vue";
 import { _CloseOnOutsideClick } from "nhanh-pure-function";
 
+/** 组件列表 */
 type _AllComponent = { [key: string]: () => Promise<Component> };
 const AllComponent = (function (gather) {
   const AllComponent: _AllComponent = {};
@@ -16,6 +17,7 @@ const AllComponent = (function (gather) {
 
 export default AllComponent;
 
+/** 添加点击外部关闭的监听 */
 export function EnhancedCloseOnOutsideClick(
   clickableSelector: string[],
   callback: Function,
@@ -29,5 +31,6 @@ export function EnhancedCloseOnOutsideClick(
       if (Number(popup.dataset.zindex) > zIndex) return true;
     }
   };
+  clickableSelector.push(".layout-header-button-group button");
   _CloseOnOutsideClick(clickableSelector, callback, { isClickAllowed });
 }

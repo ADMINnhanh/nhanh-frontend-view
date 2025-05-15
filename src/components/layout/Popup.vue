@@ -3,7 +3,7 @@ import { Close } from "@vicons/ionicons5";
 import { NIcon, NEllipsis, NSpace } from "naive-ui";
 
 interface EmitType {
-  (e: "Closure"): void;
+  (e: "closure"): void;
 }
 const Emit = defineEmits<EmitType>();
 </script>
@@ -14,7 +14,7 @@ const Emit = defineEmits<EmitType>();
       <NEllipsis><slot name="header"></slot></NEllipsis>
       <NSpace>
         <slot name="tool"></slot>
-        <div class="clickable" @click="Emit('Closure')">
+        <div class="clickable" @click="Emit('closure')">
           <NIcon size="22" :component="Close" />
         </div>
       </NSpace>

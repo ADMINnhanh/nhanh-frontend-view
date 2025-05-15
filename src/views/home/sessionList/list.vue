@@ -391,7 +391,7 @@ function GetDetails(id: number) {
       flex-height
       :scroll-x="1600"
       @update:sorter="UpdateSort"
-      :style="`height: calc(100vh - 227px - ${formHeight}px);`"
+      :style="`height: calc(100vh - 266px - ${formHeight}px);`"
     />
     <NPagination
       v-model:page="query.pageIndex"

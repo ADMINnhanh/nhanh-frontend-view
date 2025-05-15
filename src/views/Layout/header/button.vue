@@ -64,7 +64,7 @@ function GotoGitHub() {
 </script>
 
 <template>
-  <NSpace>
+  <NSpace class="layout-header-button-group">
     <NButton quaternary @click="toggleFullScreen">
       <template #icon>
         <NIcon :component="isFullScreen ? Contract : Expand" />

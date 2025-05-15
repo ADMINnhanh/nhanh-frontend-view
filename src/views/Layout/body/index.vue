@@ -4,22 +4,80 @@ import {
   NLayoutSider,
   NDrawer,
   NDrawerContent,
-  NA,
   NButton,
   NIcon,
+  NTabs,
+  NTabPane,
 } from "naive-ui";
 import Media from "@/stores/media";
 import Menu from "./menu.vue";
 import { showMenu, collapsed } from ".";
-import { CopyOutline } from "@vicons/ionicons5";
+import { Close, CopyOutline } from "@vicons/ionicons5";
 import { _CopyToClipboard } from "nhanh-pure-function";
+import { ref, watch } from "vue";
+import router from "@/router";
+import { Settings } from "@/components/popups/components/Settings";
 
 const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
+
+let oldTab: string[] = [];
+const tab = ref();
+
+const panels = ref([
+  {
+    key: "home",
+    name: {
+      zhCN: "首页",
+      enUS: "Home",
+    },
+    closable: false,
+  },
+]);
+function ClosePanel(key: string) {
+  panels.value = panels.value.filter((item) => item.key != key);
+  oldTab = oldTab.filter((item) => item != key);
+  if (key == tab.value)
+    router.push({ name: oldTab.pop() || panels.value[0].key });
+}
+function CloseOtherPanel() {
+  panels.value.length = 1;
+  oldTab = [];
+  if (tab.value != panels.value[0].key)
+    router.push({ name: panels.value[0].key });
+}
+watch(
+  () => router.currentRoute.value,
+  (currentRoute) => {
+    if (panels.value.some((item) => item.key == tab.value))
+      oldTab.push(tab.value);
+
+    tab.value = currentRoute.name;
+
+    if (panels.value.every((item) => item.key != currentRoute.name)) {
+      panels.value.push({
+        key: currentRoute.name,
+        name: currentRoute.meta.name,
+        closable: true,
+      } as any);
+    }
+  },
+  { immediate: true }
+);
+
+if (import.meta.env.DEV) {
+  panels.value = panels.value.filter((item) => !!item.key);
+}
 </script>
 
 <template>
   <div v-if="Media.isMobileStyle" class="mobile-layout">
-    <div class="router-view"><router-view></router-view></div>
+    <div class="router-view">
+      <router-view v-slot="{ Component }">
+        <KeepAlive :max="5">
+          <component :is="Component" />
+        </KeepAlive>
+      </router-view>
+    </div>
     <div v-if="recordNumber" class="record-number">
       <NButton
         @click="_CopyToClipboard(recordNumber)"
@@ -60,11 +118,31 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
       <Menu />
     </n-layout-sider>
     <n-layout class="router-view">
-      <div>
+      <NTabs
+        :value="tab"
+        @update:value="(key) => router.push({ name: key })"
+        @close="ClosePanel"
+        type="card"
+        size="small"
+      >
+        <NTabPane
+          v-for="item in panels"
+          :key="item.key"
+          :name="item.key"
+          :tab="item.name?.[Settings.language]"
+          :closable="item.closable"
+        />
+        <template #suffix>
+          <NButton size="small" quaternary @click="CloseOtherPanel">
+            <template #icon>
+              <NIcon :component="Close" />
+            </template>
+          </NButton>
+        </template>
+      </NTabs>
+      <div class="router-view-box">
         <router-view v-slot="{ Component }">
-          <KeepAlive :max="10">
-            <component :is="Component" />
-          </KeepAlive>
+          <KeepAlive><component :is="Component" /></KeepAlive>
         </router-view>
       </div>
       <div v-if="recordNumber" class="record-number">
@@ -97,13 +175,19 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
     :deep(.n-layout-scroll-container) {
       width: 100%;
       height: 100%;
-      padding: 10px;
       display: flex;
       flex-direction: column;
-      > div:nth-child(1) {
-        width: 100%;
+      .n-tabs {
+        background-color: var(--background-color);
+        .n-tab-pane {
+          padding: 0;
+        }
+      }
+      .router-view-box {
+        width: calc(100% - 20px);
         height: 100px;
         flex-grow: 1;
+        margin: 10px;
         background-color: var(--background-color);
         border: var(--button-border-radius);
       }
@@ -124,6 +208,8 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
     width: 100%;
     height: 100px;
     flex-grow: 1;
+    background-color: var(--background-color);
+    border: var(--button-border-radius);
   }
 }
 .record-number {

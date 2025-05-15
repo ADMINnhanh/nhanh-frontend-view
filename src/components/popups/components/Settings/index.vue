@@ -2,7 +2,6 @@
 import Scroll from "@/components/singleFile/Scroll.vue";
 import { NTabs, NTabPane, NIcon, NSelect, NButton, NSpace } from "naive-ui";
 import SetItem from "./setItem.vue";
-import { _CloseOnOutsideClick } from "nhanh-pure-function";
 import { Sync, Add } from "@vicons/ionicons5";
 import {
   Settings,
@@ -17,7 +16,12 @@ import { InterfaceText } from "@/assets/Ts/Interface text";
 import { computed, ref } from "vue";
 import SvgGather from "@/assets/icon/gather";
 import Popup from "@/components/layout/Popup.vue";
+import { EnhancedCloseOnOutsideClick } from "../../main";
 
+interface Props {
+  zIndex: number;
+}
+const props = defineProps<Props>();
 interface EmitType {
   (e: "closure"): void;
 }
@@ -27,7 +31,11 @@ function Closure() {
   SetOptions();
   Emit("closure");
 }
-_CloseOnOutsideClick([".Settings.center-positioning"], Closure);
+EnhancedCloseOnOutsideClick(
+  [".Settings.center-positioning"],
+  Closure,
+  props.zIndex
+);
 
 const tabsValue = ref();
 const tabsRef = ref();
