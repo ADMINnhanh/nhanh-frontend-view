@@ -26,7 +26,7 @@ window.addEventListener("click", (ev) => {
 
 <template>
   <header>
-    <div @click="router.push('/home')" class="name">
+    <div @click="router.push('/')" class="name">
       <img src="/nhanh.ico" alt="" />
       你好啊你好
     </div>

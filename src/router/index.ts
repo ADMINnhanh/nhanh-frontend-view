@@ -14,7 +14,7 @@ const router = createRouter({
   routes: [
     {
       path: "/",
-      name: "home",
+      name: "main",
       component: home,
       redirect: { name: Routes[0].name },
       children: Routes,
