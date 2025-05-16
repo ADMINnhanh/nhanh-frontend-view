@@ -12,8 +12,9 @@ import {
 } from "naive-ui";
 import { ref } from "vue";
 import Popup from "@/components/layout/Popup.vue";
-import service, { baseURL, token } from "@/utils/axios";
+import service, { baseURL } from "@/utils/axios";
 import { EnhancedCloseOnOutsideClick } from "../../main";
+import { ruoyiUser } from "@/stores/user";
 
 interface Props {
   zIndex: number;
@@ -42,6 +43,7 @@ function UpdateSrc() {
   service.get(url, { responseType: "arraybuffer" }).then((res) => {
     const blob = new Blob([res as never], { type: "image/jpge" });
     src.value = URL.createObjectURL(blob);
+    form.value.validateCode = "";
   });
 }
 UpdateSrc();
@@ -66,7 +68,7 @@ function Login() {
         })
         .then((res) => {
           window.$message.success("登录成功");
-          token.value.ruoyi = res.data.token;
+          ruoyiUser.value.token = res.data.token;
           loadingBar.finish();
           Closure();
         })

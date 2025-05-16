@@ -12,7 +12,7 @@ import SessionList from "./sessionList/index.vue";
     <NH6>
       <NText depth="3">基于用户会话的 PV/UV、停留时长、跳出率分析</NText>
     </NH6>
-    <Echart />
+    <!-- <Echart /> -->
     <SessionList />
   </NScrollbar>
 </template>
