@@ -37,7 +37,7 @@ EnhancedCloseOnOutsideClick(
 const src = ref("");
 function UpdateSrc() {
   const url = baseURL.replace(
-    "nhanh",
+    /nhanh$/,
     "captcha/captchaImage?type=math&s=" + Math.random()
   );
   service.get(url, { responseType: "arraybuffer" }).then((res) => {
@@ -63,7 +63,7 @@ function Login() {
     } else {
       loadingBar.start();
       service
-        .post(baseURL.replace("nhanh", "login"), form.value, {
+        .post(baseURL.replace(/nhanh$/, "login"), form.value, {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
         })
         .then((res) => {
