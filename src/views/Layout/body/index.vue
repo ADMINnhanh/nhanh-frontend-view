@@ -104,7 +104,7 @@ if (import.meta.env.DEV) {
       </NDrawerContent>
     </NDrawer>
   </div>
-  <n-layout v-else has-sider>
+  <n-layout v-else has-sider :class="[recordNumber && 'cloud']">
     <n-layout-sider
       bordered
       collapse-mode="width"
@@ -133,7 +133,12 @@ if (import.meta.env.DEV) {
           :closable="item.closable"
         />
         <template #suffix>
-          <NButton size="small" quaternary @click="CloseOtherPanel">
+          <NButton
+            :disabled="panels.length == 1"
+            size="small"
+            quaternary
+            @click="CloseOtherPanel"
+          >
             <template #icon>
               <NIcon :component="Close" />
             </template>
@@ -153,6 +158,7 @@ if (import.meta.env.DEV) {
           type="primary"
           href="http://beian.miit.gov.cn/"
           target="_blank"
+          size="small"
         >
           <template #icon>
             <NIcon :component="CopyOutline" />
@@ -192,6 +198,15 @@ if (import.meta.env.DEV) {
         border: var(--button-border-radius);
       }
     }
+  }
+}
+.cloud.n-layout {
+  .router-view-box {
+    margin: 10px 10px 0 !important;
+  }
+  .record-number {
+    margin-top: 0;
+    height: 40px;
   }
 }
 .mobile-layout {

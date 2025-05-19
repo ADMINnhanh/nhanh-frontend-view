@@ -4,17 +4,17 @@ import type { AxiosResponse, InternalAxiosRequestConfig } from "axios";
 
 export const baseURL =
   (import.meta.env.DEV ? "http://localhost:5000" : "https://nhanh.xin") +
-  "/ruoyi-admin/nhanh";
+  "/ruoyi-admin";
 
 // 创建 axios 实例
-const service = axios.create({
-  baseURL,
+const ruoyi = axios.create({
+  baseURL: baseURL + "/nhanh",
   timeout: 60 * 1000,
   withCredentials: true,
 });
 
 // 请求拦截器
-service.interceptors.request.use(
+ruoyi.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     return config;
   },
@@ -24,7 +24,7 @@ service.interceptors.request.use(
 );
 
 // 响应拦截器
-service.interceptors.response.use(
+ruoyi.interceptors.response.use(
   (res: AxiosResponse) => {
     // 二进制数据则直接返回
     if (
@@ -66,4 +66,4 @@ service.interceptors.response.use(
   }
 );
 
-export default service;
+export default ruoyi;

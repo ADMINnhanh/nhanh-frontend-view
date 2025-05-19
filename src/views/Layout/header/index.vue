@@ -7,6 +7,7 @@ import Button from "./button.vue";
 import { showMenu } from "../body";
 import { MenuOutline } from "@vicons/ionicons5";
 import router from "@/router";
+import WeatherInfo from "./weatherInfo/index.vue";
 
 const show = ref(false);
 
@@ -31,6 +32,7 @@ window.addEventListener("click", (ev) => {
       你好啊你好
     </div>
     <NSpace v-if="Media.isMobileStyle">
+      <WeatherInfo />
       <NButton @click="showMenu = !showMenu" quaternary>
         <template #icon>
           <NIcon :component="MenuOutline" />

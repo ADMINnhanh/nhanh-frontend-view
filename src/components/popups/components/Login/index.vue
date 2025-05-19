@@ -12,7 +12,7 @@ import {
 } from "naive-ui";
 import { ref } from "vue";
 import Popup from "@/components/layout/Popup.vue";
-import service, { baseURL } from "@/utils/axios";
+import ruoyi, { baseURL } from "@/utils/ruoyi";
 import { EnhancedCloseOnOutsideClick } from "../../main";
 import { ruoyiUser } from "@/stores/user";
 
@@ -36,11 +36,8 @@ EnhancedCloseOnOutsideClick(
 
 const src = ref("");
 function UpdateSrc() {
-  const url = baseURL.replace(
-    /nhanh$/,
-    "captcha/captchaImage?type=math&s=" + Math.random()
-  );
-  service.get(url, { responseType: "arraybuffer" }).then((res) => {
+  const url = baseURL + "/captcha/captchaImage?type=math&s=" + Math.random();
+  ruoyi.get(url, { responseType: "arraybuffer" }).then((res) => {
     const blob = new Blob([res as never], { type: "image/jpge" });
     src.value = URL.createObjectURL(blob);
     form.value.validateCode = "";
@@ -62,8 +59,8 @@ function Login() {
       window.$message.error("请按要求填写表单");
     } else {
       loadingBar.start();
-      service
-        .post(baseURL.replace(/nhanh$/, "login"), form.value, {
+      ruoyi
+        .post(baseURL + "/login", form.value, {
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
         })
         .then((res) => {

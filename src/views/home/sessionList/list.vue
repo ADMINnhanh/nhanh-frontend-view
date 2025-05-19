@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import service from "@/utils/axios";
+import Media from "@/stores/media";
+import ruoyi from "@/utils/ruoyi";
 import { Refresh, Search } from "@vicons/ionicons5";
 import {
   NButton,
@@ -18,7 +19,9 @@ import {
   useLoadingBar,
   type DataTableBaseColumn,
 } from "naive-ui";
-import { h, ref } from "vue";
+import { computed, h, ref } from "vue";
+
+const isCloud = import.meta.env.VITE_SHOW_RECORD_NUMBER;
 
 interface Query {
   /**
@@ -214,7 +217,40 @@ const columns = ref<DataTableBaseColumn<WebsiteAccessSessionReturnsData>[]>([
 const formHeight = ref(66);
 const formRef = ref();
 requestAnimationFrame(() => {
-  formHeight.value = formRef.value.$el.offsetHeight + 8;
+  formHeight.value = formRef.value.$el.offsetHeight;
+});
+const dataTableStyle = computed(() => {
+  const headerHeight = 61;
+  const tabHeight = Media.value.isMobileStyle ? 0 : 39;
+  const routerViewMargin = isCloud && !Media.value.isMobileStyle ? 10 : 20;
+  const cardMargin = 20;
+  const cardHeaderHeight = 73;
+  const gap = 8 * 2;
+  const pageHeight = 28;
+  const cardPadding = 20;
+  const recordNumber = isCloud ? 40 : 0;
+  const border = 2;
+
+  const height =
+    "calc(100vh " +
+    [
+      headerHeight,
+      tabHeight,
+      routerViewMargin,
+      cardMargin,
+      cardHeaderHeight,
+      formHeight.value,
+      gap,
+      pageHeight,
+      cardPadding,
+      recordNumber,
+      border,
+    ]
+      .map((v) => `- ${v}px`)
+      .join(" ") +
+    ")";
+
+  return { height };
 });
 
 function UpdateSort(option: {
@@ -237,7 +273,7 @@ function UpdateList() {
   query.value.endTime = timeRange.value?.[1];
 
   loadingBar.start();
-  service
+  ruoyi
     .get("/sys-visit-session/list", { params: query.value })
     .then((res) => {
       data.value = res.data;
@@ -316,7 +352,7 @@ function GetDetails(id: number) {
   sessionId.value = id;
   if (!detailsList.value[id]) {
     loadingBar.start();
-    service
+    ruoyi
       .get("/sys-visit-session/detail/" + id)
       .then((res) => {
         detailsList.value[id] = res.data;
@@ -391,7 +427,7 @@ function GetDetails(id: number) {
       flex-height
       :scroll-x="1600"
       @update:sorter="UpdateSort"
-      :style="`height: calc(100vh - 266px - ${formHeight}px);`"
+      :style="dataTableStyle"
     />
     <NPagination
       v-model:page="query.pageIndex"

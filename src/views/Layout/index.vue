@@ -3,7 +3,7 @@ import MyHeader from "./header/index.vue";
 import MyBody from "./body/index.vue";
 import { watch } from "vue";
 import router from "@/router";
-import { baseURL } from "@/utils/axios";
+import { baseURL } from "@/utils/ruoyi";
 
 type VisitSession = {
   /** 访问开始时间 */

@@ -69,8 +69,32 @@ const Keyboard = {
 `,
 };
 
+/** 天气图标 */
+const Weather = {
+  /** 风 */
+  Wind: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h8.5a2.5 2.5 0 1 0-2.34-3.24"></path><path d="M3 12h15.5a2.5 2.5 0 1 1-2.34 3.24"></path><path d="M4 16h5.5a2.5 2.5 0 1 1-2.34 3.24"></path></g></svg>`,
+
+  /** 雾霾 */
+  Haze: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><path d="M19 28H3a1 1 0 0 1 0-2h16a1 1 0 0 1 0 2z" fill="currentColor"></path><path d="M15 20H3a1 1 0 0 1 0-2h12a1 1 0 0 1 0 2z" fill="currentColor"></path><path d="M25.793 22.379l2.828 2.828l-1.414 1.414l-2.828-2.828z" fill="currentColor"></path><path d="M28 15h4v2h-4z" fill="currentColor"></path><path d="M24.379 8.207l2.828-2.828l1.414 1.414l-2.828 2.828z" fill="currentColor"></path><path d="M17 2h2v4h-2z" fill="currentColor"></path><path d="M10.207 9.621L7.38 6.793l1.414-1.414l2.828 2.828z" fill="currentColor"></path><path d="M18 8a8.01 8.01 0 0 0-8 8h2a6 6 0 1 1 6 6H7a1 1 0 0 0 0 2h11a8 8 0 0 0 0-16z" fill="currentColor"></path></svg>`,
+
+  /** 冰雹 */
+  Hail: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><circle cx="21.5" cy="29.5" r="1.5" fill="currentColor"></circle><circle cx="24.5" cy="25.5" r="1.5" fill="currentColor"></circle><circle cx="7.5" cy="25.5" r="1.5" fill="currentColor"></circle><circle cx="4.5" cy="29.5" r="1.5" fill="currentColor"></circle><circle cx="10.499" cy="29.5" r="1.5" fill="currentColor"></circle><path d="M15.868 30.496l-1.736-.992L17.276 24h-5.999l4.855-8.496l1.736.992L14.723 22h6.001l-4.856 8.496z" fill="currentColor"></path><path d="M23.5 22H23v-2h.5a4.497 4.497 0 0 0 .356-8.981l-.815-.064l-.099-.812a6.994 6.994 0 0 0-13.883 0l-.1.812l-.815.064A4.497 4.497 0 0 0 8.5 20H9v2h-.5A6.497 6.497 0 0 1 7.2 9.136a8.994 8.994 0 0 1 17.6 0A6.497 6.497 0 0 1 23.5 22z" fill="currentColor"></path></svg>`,
+
+  /** 雾 */
+  Fog: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><path d="M24.8 11.138a8.994 8.994 0 0 0-17.6 0A6.533 6.533 0 0 0 2 17.5V19a1 1 0 0 0 1 1h12a1 1 0 0 0 0-2H4v-.497a4.518 4.518 0 0 1 4.144-4.482l.816-.064l.099-.812a6.994 6.994 0 0 1 13.883 0l.099.813l.815.063A4.496 4.496 0 0 1 23.5 22H7a1 1 0 0 0 0 2h16.5a6.496 6.496 0 0 0 1.3-12.862z" fill="currentColor"></path><rect x="2" y="26" width="18" height="2" rx="1" fill="currentColor"></rect></svg>`,
+
+  /** 龙卷风 */
+  Tornado: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><path d="M16 26h4v2h-4z" fill="currentColor"></path><path d="M12 22h6v2h-6z" fill="currentColor"></path><path d="M8 18h10v2H8z" fill="currentColor"></path><path d="M8 14h12v2H8z" fill="currentColor"></path><path d="M10 10h14v2H10z" fill="currentColor"></path><path d="M8 6h18v2H8z" fill="currentColor"></path></svg>`,
+
+  /** 浮尘 */
+  WindyDust: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><path d="M23 28a5.006 5.006 0 0 1-5-5h2a3 3 0 1 0 3-3h-1v-2h1a5 5 0 0 1 0 10z" fill="currentColor"></path><path d="M16 18h4v2h-4z" fill="currentColor"></path><path d="M10 18h4v2h-4z" fill="currentColor"></path><path d="M4 18h4v2H4z" fill="currentColor"></path><path d="M21 15h-1v-2h1a3 3 0 1 0-3-3h-2a5 5 0 1 1 5 5z" fill="currentColor"></path><path d="M14 13h4v2h-4z" fill="currentColor"></path><path d="M8 13h4v2H8z" fill="currentColor"></path></svg>`,
+
+  /**  */
+};
+
 export const SystemSvg = {
   ...Keyboard,
+  ...Weather,
 
   /** 画布 */
   canvas:
@@ -106,6 +130,7 @@ export const SystemSvg = {
 type SvgGatherProps = IconProps & {
   icon: keyof typeof SystemSvg;
 };
+
 export default function SvgGather(props: SvgGatherProps) {
   const { icon } = props;
   if (!SystemSvg[icon]) window.$CustomizeError("未定义的SystemSvg " + icon);

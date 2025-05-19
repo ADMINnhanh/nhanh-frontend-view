@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import service from "@/utils/axios";
+import ruoyi from "@/utils/ruoyi";
 import { NScrollbar, NSkeleton } from "naive-ui";
 import { markRaw, onUnmounted, ref, watch } from "vue";
 import * as echarts from "echarts";
@@ -63,7 +63,7 @@ interface AccessQualityStatistics {
    */
   totalVisits: number;
 }
-service.get("/sys-visit-session/visit-quality-stats").then((res) => {
+ruoyi.get("/sys-visit-session/visit-quality-stats").then((res) => {
   const { highQualityCount, lowQualityCount, mediumQualityCount, totalVisits } =
     res.data as AccessQualityStatistics;
   const option = {
@@ -143,7 +143,7 @@ interface DailyAccessToTrendDataItems {
    */
   totalDailyVisits: number;
 }
-service.get("/sys-visit-session/daily-visit-trend").then((res) => {
+ruoyi.get("/sys-visit-session/daily-visit-trend").then((res) => {
   const seriesOption = {
     type: "line",
     showSymbol: false,
@@ -277,7 +277,7 @@ interface PageAccessStatistics {
    */
   totalDailyVisits: number;
 }
-service.get("/sys-visit-session/page-visit-stats").then((res) => {
+ruoyi.get("/sys-visit-session/page-visit-stats").then((res) => {
   const data = res.data as PageAccessStatistics[];
   const dateList = data.map((item) => item.pageName);
   const series = (

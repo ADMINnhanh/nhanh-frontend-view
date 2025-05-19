@@ -1,7 +1,7 @@
 import SvgGather from "@/assets/icon/gather";
+import { RenderIcon } from "@/utils/vue";
 import { FishOutline, HomeOutline } from "@vicons/ionicons5";
-import { NIcon } from "naive-ui";
-import { h, type Component } from "vue";
+import { h } from "vue";
 import type { RouteRecordRaw } from "vue-router";
 
 type CustomRouteRecord = RouteRecordRaw & {
@@ -14,10 +14,6 @@ type CustomRouteRecord = RouteRecordRaw & {
   };
   children?: CustomRouteRecord[];
 };
-
-function RenderIcon(icon: Component) {
-  return h(NIcon, null, { default: () => h(icon) });
-}
 
 /** 首页 */
 const home: CustomRouteRecord = {
