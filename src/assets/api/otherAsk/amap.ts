@@ -1,7 +1,7 @@
 import { GetLocation } from "@/utils/map";
 import otherAsk from "@/utils/otherAsk";
 
-const webApi = "d01e3ce419e8e6c1f3694d1e75271347";
+const amapPrefix = "https://nhanh.xin/amap";
 
 export interface ErrorResponse {
   info: string; // 错误信息描述
@@ -269,13 +269,10 @@ interface AOI {
  */
 export function GetCoordinateInfoByLatLng(data: ReverseGeocodingParams) {
   const params: ReverseGeocodingParams = {
-    key: webApi,
     ...data,
   };
   return otherAsk
-    .get("https://restapi.amap.com/v3/geocode/regeo", {
-      params,
-    })
+    .get(amapPrefix + "/v3/geocode/regeo", { params })
     .then((res) => {
       const data = res as unknown as ReverseGeocodingResponse | ErrorResponse;
       if (data.status == "1") return data;
@@ -413,14 +410,11 @@ interface ForecastDay {
 }
 export function GetWeatherByCityCode(data: WeatherParams) {
   const params: WeatherParams = {
-    key: webApi,
     extensions: "base",
     ...data,
   };
   return otherAsk
-    .get("https://restapi.amap.com/v3/weather/weatherInfo", {
-      params,
-    })
+    .get(amapPrefix + "/v3/weather/weatherInfo", { params })
     .then((res) => {
       const data = res as unknown as WeatherResponse | ErrorResponse;
       if (data.status == "1") return data;
