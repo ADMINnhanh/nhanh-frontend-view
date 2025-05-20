@@ -77,7 +77,7 @@ window.addEventListener("unload", function () {
 
   const data = JSON.stringify(Object.assign(visitSession, { pageVisitLog }));
 
-  const url = baseURL + "/sys-visit-session/create";
+  const url = baseURL + "/nhanh/sys-visit-session/create";
   const blob = new Blob([data], { type: "application/json; charset=UTF-8" });
   navigator.sendBeacon(url, blob);
 });
