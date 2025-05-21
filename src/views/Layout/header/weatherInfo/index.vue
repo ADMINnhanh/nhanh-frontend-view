@@ -44,9 +44,10 @@ const useWeather = computed(() => {
   };
 });
 
-GetWeatherByLocation().then((res) => {
-  weatherInfo.value = res.lives?.[0];
-});
+if (import.meta.env.PROD)
+  GetWeatherByLocation().then((res) => {
+    weatherInfo.value = res.lives?.[0];
+  });
 </script>
 
 <template>

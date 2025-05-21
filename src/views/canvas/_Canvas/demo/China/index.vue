@@ -21,7 +21,6 @@ ChinaData().then((chinaData) => {
     };
     const commonDblClickEvent = () => {
       myCanvas.value?.setFitView(overlayGroup);
-      // myCanvas.value?.setFitView();
     };
 
     item.geometry.forEach((polygonData) => {

@@ -183,6 +183,24 @@ function CheckPath(item: CustomRouteRecord[]) {
 }
 CheckPath(AllRoute);
 
+/** 重命名组件 */
+function RenameComponent(item: CustomRouteRecord[]) {
+  return item.map((item) => {
+    if (item.component) {
+      const oldComponent = item.component as () => Promise<any>;
+      item.component = () =>
+        oldComponent().then((module) => {
+          return h({
+            name: item.name as string,
+            render: () => h(module.default),
+          });
+        });
+    }
+    if (item.children) RenameComponent(item.children);
+  });
+}
+RenameComponent(AllRoute);
+
 /** 添加重定向 */
 function AddRedirect(item: CustomRouteRecord[]) {
   return item.map((item) => {

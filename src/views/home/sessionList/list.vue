@@ -1,6 +1,12 @@
 <script setup lang="ts">
+import {
+  SysVisitSessionDetails,
+  SysVisitSessionList,
+  type PageAccessLogEntity,
+  type QueryParams,
+  type WebsiteAccessSessionReturnsData,
+} from "@/assets/api/ruoyi/sysVisitSession";
 import Media from "@/stores/media";
-import ruoyi from "@/utils/ruoyi";
 import { Refresh, Search } from "@vicons/ionicons5";
 import {
   NButton,
@@ -23,99 +29,12 @@ import { computed, h, ref } from "vue";
 
 const isCloud = import.meta.env.VITE_SHOW_RECORD_NUMBER;
 
-interface Query {
-  /**
-   * 客户端IP地址（模糊匹配）
-   */
-  clientIp?: string;
-  /**
-   * 访问结束时间戳
-   */
-  endTime?: number;
-  /**
-   * 当前页码
-   */
-  pageIndex?: number;
-  /**
-   * 每页数量
-   */
-  pageSize?: number;
-  /**
-   * 访问开始时间戳
-   */
-  startTime?: number;
-  /**
-   * 访问质量（如：0=低质量, 1=中质量, 2=高质量）
-   */
-  visitQuality?: string;
-  /**
-   * 访问来源（如：搜索引擎、直接访问）
-   */
-  visitSource?: string;
-  /**
-   * 是否升序（true=升序，false=降序）
-   */
-  asc?: boolean;
-  /**
-   * 排序字段（如：visitStartTime, clientIp）
-   */
-  sortBy?: string;
-}
-const query = ref<Query>({
+const query = ref<QueryParams>({
   pageIndex: 1,
   pageSize: 10,
 });
 const timeRange = ref<[number, number] | null>();
 
-/**
- * 网站访问会话返回数据
- */
-interface WebsiteAccessSessionReturnsData {
-  /**
-   * 客户端IP地址
-   */
-  clientIp: string;
-  /**
-   * 记录创建时间
-   */
-  createTime: string;
-  /**
-   * 入口页名称
-   */
-  entryName: string;
-  /**
-   * 出口页名称
-   */
-  exitName: string;
-  /**
-   * 会话ID（自增长主键）
-   */
-  sessionId: number;
-  /**
-   * 总访问时长（秒）
-   */
-  totalVisitTime: number;
-  /**
-   * 用户设备信息（User-Agent）
-   */
-  userAgent: string;
-  /**
-   * 访问结束时间
-   */
-  visitEndTime: string;
-  /**
-   * 访问质量: 0=低质量, 1=中质量, 2=高质量
-   */
-  visitQuality: number;
-  /**
-   * 访问来源
-   */
-  visitSource: string;
-  /**
-   * 访问开始时间
-   */
-  visitStartTime: string;
-}
 const data = ref({
   list: [] as WebsiteAccessSessionReturnsData[],
   total: 0,
@@ -273,8 +192,7 @@ function UpdateList() {
   query.value.endTime = timeRange.value?.[1];
 
   loadingBar.start();
-  ruoyi
-    .get("/sys-visit-session/list", { params: query.value })
+  SysVisitSessionList(query.value)
     .then((res) => {
       data.value = res.data;
       loadingBar.finish();
@@ -291,33 +209,6 @@ function RefreshQuery() {
   UpdateList();
 }
 UpdateList();
-
-/**
- * 页面访问日志实体
- */
-interface PageAccessLogEntity {
-  /**
-   * 日志ID（自增长主键）
-   */
-  logId: number;
-  /**
-   * 访问的页面名称
-   */
-  pageName: string;
-  /**
-   * 关联会话ID
-   */
-  sessionId: number;
-  /**
-   * 页面停留时间（秒）
-   */
-  stayTime: number;
-  /**
-   * 访问质量: 0=低质量, 1=中质量, 2=高质量
-   */
-  visitQuality: number;
-  [property: string]: any;
-}
 
 const sessionId = ref();
 const detailsList = ref<{ [sessionId in string]: PageAccessLogEntity[] }>({});
@@ -352,8 +243,7 @@ function GetDetails(id: number) {
   sessionId.value = id;
   if (!detailsList.value[id]) {
     loadingBar.start();
-    ruoyi
-      .get("/sys-visit-session/detail/" + id)
+    SysVisitSessionDetails(id)
       .then((res) => {
         detailsList.value[id] = res.data;
         loadingBar.finish();

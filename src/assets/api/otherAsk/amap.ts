@@ -267,10 +267,7 @@ interface AOI {
  * @param lat 纬度，可以是数字或字符串
  * @returns 返回一个Promise，解析为ApiResponse接口定义的响应数据
  */
-export function GetCoordinateInfoByLatLng(data: ReverseGeocodingParams) {
-  const params: ReverseGeocodingParams = {
-    ...data,
-  };
+export function GetCoordinateInfoByLatLng(params: ReverseGeocodingParams) {
   return otherAsk
     .get(amapPrefix + "/v3/geocode/regeo", { params })
     .then((res) => {

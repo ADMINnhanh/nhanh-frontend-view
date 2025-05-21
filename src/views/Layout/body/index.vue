@@ -147,7 +147,9 @@ if (import.meta.env.DEV) {
       </NTabs>
       <div class="router-view-box">
         <router-view v-slot="{ Component }">
-          <KeepAlive><component :is="Component" /></KeepAlive>
+          <KeepAlive :max="10" :include="panels.map((item) => item.key)">
+            <component :is="Component" :key="tab" />
+          </KeepAlive>
         </router-view>
       </div>
       <div v-if="recordNumber" class="record-number">

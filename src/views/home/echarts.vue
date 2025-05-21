@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import ruoyi from "@/utils/ruoyi";
 import { NScrollbar, NSkeleton } from "naive-ui";
 import { markRaw, onUnmounted, ref, watch } from "vue";
 import * as echarts from "echarts";
 import { _Clone, _Debounce, _GenerateUUID } from "nhanh-pure-function";
 import type { ECBasicOption } from "echarts/types/dist/shared";
 import { Settings } from "@/components/popups/components/Settings";
+import {
+  DailyVisitTrend,
+  PageVisitStats,
+  VisitQualityStats,
+} from "@/assets/api/ruoyi/sysVisitSession";
 
 type Chart = {
   id: string;
@@ -42,30 +46,10 @@ function Init(theme?: string) {
 }
 watch(() => Settings.value.theme, Init);
 
-/**
- * 访问质量统计信息
- */
-interface AccessQualityStatistics {
-  /**
-   * 高质量访问次数
-   */
-  highQualityCount: number;
-  /**
-   * 低质量访问次数
-   */
-  lowQualityCount: number;
-  /**
-   * 中等质量访问次数
-   */
-  mediumQualityCount: number;
-  /**
-   * 总访问次数
-   */
-  totalVisits: number;
-}
-ruoyi.get("/sys-visit-session/visit-quality-stats").then((res) => {
+/** 访问质量统计 */
+VisitQualityStats().then((res) => {
   const { highQualityCount, lowQualityCount, mediumQualityCount, totalVisits } =
-    res.data as AccessQualityStatistics;
+    res.data;
   const option = {
     backgroundColor: "",
     color: [
@@ -117,33 +101,8 @@ ruoyi.get("/sys-visit-session/visit-quality-stats").then((res) => {
   visitQualityStats.value.option = option;
   Init();
 });
-
-/**
- * 每日访问趋势数据项
- */
-interface DailyAccessToTrendDataItems {
-  /**
-   * 日期
-   */
-  date: string;
-  /**
-   * 高质量访问次数
-   */
-  highQualityCount: number;
-  /**
-   * 低质量访问次数
-   */
-  lowQualityCount: number;
-  /**
-   * 中等质量访问次数
-   */
-  mediumQualityCount: number;
-  /**
-   * 总访问次数
-   */
-  totalDailyVisits: number;
-}
-ruoyi.get("/sys-visit-session/daily-visit-trend").then((res) => {
+/** 每日访问趋势 */
+DailyVisitTrend().then((res) => {
   const seriesOption = {
     type: "line",
     showSymbol: false,
@@ -177,7 +136,7 @@ ruoyi.get("/sys-visit-session/daily-visit-trend").then((res) => {
     },
   ];
 
-  (res.data as DailyAccessToTrendDataItems[]).forEach((item) => {
+  res.data.forEach((item) => {
     const {
       date,
       highQualityCount,
@@ -251,34 +210,9 @@ ruoyi.get("/sys-visit-session/daily-visit-trend").then((res) => {
 
   Init();
 });
-
-/**
- * 页面访问统计信息
- */
-interface PageAccessStatistics {
-  /**
-   * 高质量访问次数
-   */
-  highQualityCount: number;
-  /**
-   * 低质量访问次数
-   */
-  lowQualityCount: number;
-  /**
-   * 中等质量访问次数
-   */
-  mediumQualityCount: number;
-  /**
-   * 页面名称
-   */
-  pageName: string;
-  /**
-   * 总访问次数
-   */
-  totalDailyVisits: number;
-}
-ruoyi.get("/sys-visit-session/page-visit-stats").then((res) => {
-  const data = res.data as PageAccessStatistics[];
+/** 页面访问统计 */
+PageVisitStats().then((res) => {
+  const data = res.data;
   const dateList = data.map((item) => item.pageName);
   const series = (
     [

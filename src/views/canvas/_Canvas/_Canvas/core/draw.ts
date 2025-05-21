@@ -189,6 +189,7 @@ export default class Draw extends Style {
 
   /** 销毁resizeObserver监听器 */
   protected destroy() {
+    console.log("destroy");
     this.resizeObserver?.disconnect();
   }
 }

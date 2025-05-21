@@ -2,6 +2,8 @@
 import { NScrollbar, NH1, NH6, NText } from "naive-ui";
 import Echart from "./echarts.vue";
 import SessionList from "./sessionList/index.vue";
+
+const prod = import.meta.env.PROD;
 </script>
 
 <template>
@@ -12,8 +14,10 @@ import SessionList from "./sessionList/index.vue";
     <NH6>
       <NText depth="3">基于用户会话的 PV/UV、停留时长、跳出率分析</NText>
     </NH6>
-    <Echart />
-    <SessionList />
+    <template v-if="prod">
+      <Echart />
+      <SessionList />
+    </template>
   </NScrollbar>
 </template>
 

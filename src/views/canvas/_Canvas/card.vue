@@ -18,7 +18,7 @@ import {
   NTooltip,
 } from "naive-ui";
 import { _CopyToClipboard, _Fullscreen, _Tip } from "nhanh-pure-function";
-import { onMounted, ref, watch } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type _Canvas from "./_Canvas";
 import { Settings } from "@/components/popups/components/Settings";
 
@@ -39,6 +39,11 @@ const componentRef = ref<{ myCanvas: _Canvas }>();
 const isFullScreen = ref(false);
 const toggleFullScreen = ref();
 const cardRef = ref();
+
+watch(
+  () => Settings.value.theme,
+  (theme) => componentRef.value?.myCanvas.setTheme(theme)
+);
 onMounted(() => {
   toggleFullScreen.value = (function (toggle) {
     return () => {
@@ -47,11 +52,9 @@ onMounted(() => {
     };
   })(_Fullscreen(cardRef.value.$el));
 });
-
-watch(
-  () => Settings.value.theme,
-  (theme) => componentRef.value?.myCanvas.setTheme(theme)
-);
+onBeforeUnmount(() => {
+  componentRef.value?.myCanvas.destroy();
+});
 </script>
 
 <template>

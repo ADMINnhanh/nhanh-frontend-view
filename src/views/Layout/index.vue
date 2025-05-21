@@ -56,31 +56,33 @@ watch(() => router.currentRoute.value.name, UpdateRouterName, {
   immediate: true,
 });
 
-window.addEventListener("unload", function () {
-  // return;
-  UpdateRouterName(undefined, router.currentRoute.value.name);
+if (import.meta.env.PROD)
+  window.addEventListener("unload", function () {
+    UpdateRouterName(undefined, router.currentRoute.value.name);
 
-  visitSession.visitEndTime = Date.now();
-  if (visitSession.visitEndTime - visitSession.visitStartTime < 1000 * 10)
-    return;
-  visitSession.exitName = router.currentRoute.value.name!.toString();
+    visitSession.visitEndTime = Date.now();
+    if (visitSession.visitEndTime - visitSession.visitStartTime < 1000 * 10)
+      return;
+    visitSession.exitName = router.currentRoute.value.name!.toString();
 
-  const pageVisitLog: { pageName: string; stayTime: number }[] = [];
-  for (const key in visitSession.pageVisitLog) {
-    if (Object.prototype.hasOwnProperty.call(visitSession.pageVisitLog, key)) {
-      const item = visitSession.pageVisitLog[key];
-      const visitTime = Number((item.visitTime / 1000).toFixed(0));
-      if (visitTime >= 10)
-        pageVisitLog.push({ pageName: key, stayTime: visitTime });
+    const pageVisitLog: { pageName: string; stayTime: number }[] = [];
+    for (const key in visitSession.pageVisitLog) {
+      if (
+        Object.prototype.hasOwnProperty.call(visitSession.pageVisitLog, key)
+      ) {
+        const item = visitSession.pageVisitLog[key];
+        const visitTime = Number((item.visitTime / 1000).toFixed(0));
+        if (visitTime >= 10)
+          pageVisitLog.push({ pageName: key, stayTime: visitTime });
+      }
     }
-  }
 
-  const data = JSON.stringify(Object.assign(visitSession, { pageVisitLog }));
+    const data = JSON.stringify(Object.assign(visitSession, { pageVisitLog }));
 
-  const url = baseURL + "/nhanh/sys-visit-session/create";
-  const blob = new Blob([data], { type: "application/json; charset=UTF-8" });
-  navigator.sendBeacon(url, blob);
-});
+    const url = baseURL + "/nhanh/sys-visit-session/create";
+    const blob = new Blob([data], { type: "application/json; charset=UTF-8" });
+    navigator.sendBeacon(url, blob);
+  });
 </script>
 
 <template>
