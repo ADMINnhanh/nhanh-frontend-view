@@ -136,8 +136,13 @@ export default class Style extends BaseData {
     const { ctx, theme, rect } = this;
     const { width, height } = rect!.value;
 
-    ctx.fillStyle = this.style[theme].background;
-    ctx.fillRect(0, 0, width, height);
+    ctx.clearRect(0, 0, width, height);
+
+    const background = this.style[theme].background;
+    if (background) {
+      ctx.fillStyle = this.style[theme].background;
+      ctx.fillRect(0, 0, width, height);
+    }
   }
   /** 设置样式 */
   setStyle(style: DeepPartial<StyleType>) {

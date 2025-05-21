@@ -63,6 +63,9 @@ onMounted(() => {
     axisConfig: { y: -1, count: 2000000 },
     defaultCenter: { bottom: 0 },
   });
+  // myCanvas.value.style.dark.background = "";
+  // myCanvas.value.style.light.background = "";
+  // myCanvas.value.toggleAxis(false);
   myCanvas.value.setDefaultCenter({
     left: -(580 - myCanvas.value.rect!.value.width / 2),
   });
