@@ -17,6 +17,7 @@ import { NButton, NSpace, NIcon } from "naive-ui";
 import { _IsFullscreen } from "nhanh-pure-function";
 import { onUnmounted, ref } from "vue";
 import WeatherInfo from "./weatherInfo/index.vue";
+import Media from "@/stores/media";
 
 /** 切换语言 */
 function ChangeLanguage() {
@@ -66,7 +67,7 @@ function GotoGitHub() {
 
 <template>
   <NSpace class="layout-header-button-group">
-    <WeatherInfo />
+    <WeatherInfo v-if="!Media.isMobileStyle" />
     <NButton quaternary @click="toggleFullScreen">
       <template #icon>
         <NIcon :component="isFullScreen ? Contract : Expand" />

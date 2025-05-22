@@ -32,7 +32,6 @@ window.addEventListener("click", (ev) => {
       你好啊你好
     </div>
     <NSpace v-if="Media.isMobileStyle">
-      <WeatherInfo />
       <NButton @click="showMenu = !showMenu" quaternary>
         <template #icon>
           <NIcon :component="MenuOutline" />

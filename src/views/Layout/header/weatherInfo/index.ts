@@ -1,6 +1,7 @@
 import SvgGather from "@/assets/icon/gather";
 import { RenderIcon } from "@/utils/vue";
 import {
+  CloudyOutline,
   RainyOutline,
   SnowOutline,
   SunnyOutline,
@@ -91,13 +92,23 @@ const Icon = {
   雨: RenderIcon(RainyOutline),
   雪: RenderIcon(SnowOutline),
   雷阵雨: RenderIcon(ThunderstormOutline),
+  云: RenderIcon(CloudyOutline),
+  多云: SvgGather({ icon: "WeatherCloudy20Regular" }),
+  晴间多云: SvgGather({ icon: "MostlyCloudy" }),
   风: SvgGather({ icon: "Wind" }),
-  雾霾: SvgGather({ icon: "Haze" }),
+  霾: SvgGather({ icon: "Haze" }),
   冰雹: SvgGather({ icon: "Hail" }),
   雾: SvgGather({ icon: "Fog" }),
   龙卷风: SvgGather({ icon: "Tornado" }),
   浮尘: SvgGather({ icon: "WindyDust" }),
+  沙: SvgGather({ icon: "Sandstorm" }),
+  热: SvgGather({ icon: "TemperatureHot" }),
+  冷: SvgGather({ icon: "TemperatureFrigid" }),
+  阴: SvgGather({ icon: "Negative" }),
+  平静: SvgGather({ icon: "WindVane" }),
+  未知: SvgGather({ icon: "Unknown" }),
 };
+
 export function GetWeatherTemperatureIcon(weather: string) {
   const keys = Object.keys(Icon) as (keyof typeof Icon)[];
   keys.sort((a, b) => b.length - a.length);

@@ -10,6 +10,7 @@ import {
   PageVisitStats,
   VisitQualityStats,
 } from "@/assets/api/ruoyi/sysVisitSession";
+import Media from "@/stores/media";
 
 type Chart = {
   id: string;
@@ -66,7 +67,7 @@ VisitQualityStats().then((res) => {
     title: {
       text: "访问质量统计",
       subtext: "总访问次数：" + totalVisits + "次",
-      left: "center",
+      left: Media.value.isMobileStyle ? "right" : "center",
     },
     tooltip: {
       trigger: "item",
@@ -172,8 +173,8 @@ DailyVisitTrend().then((res) => {
     color: ["#ee6666", "#fac858", "#91cc75"],
     visualMap,
     title: {
-      left: "center",
       text: "每日访问趋势数据",
+      left: Media.value.isMobileStyle ? "right" : "center",
     },
     tooltip: {
       trigger: "axis",
@@ -244,8 +245,8 @@ PageVisitStats().then((res) => {
     backgroundColor: "",
     color: ["#ee6666", "#fac858", "#91cc75"],
     title: {
-      left: "center",
       text: "页面访问统计",
+      left: Media.value.isMobileStyle ? "right" : "center",
     },
     tooltip: {
       trigger: "axis",
@@ -260,6 +261,11 @@ PageVisitStats().then((res) => {
     xAxis: {
       type: "category",
       data: dateList,
+      axisLabel: {
+        formatter: function (value: string) {
+          return value.slice(0, 6) + (value.length > 6 ? "..." : "");
+        },
+      },
     },
     grid: {
       top: 100,
@@ -336,6 +342,13 @@ onUnmounted(() => {
     height: 400px;
     :deep(> div:first-child) {
       width: 100% !important;
+    }
+  }
+}
+.is-mobile {
+  .echarts {
+    > div {
+      min-width: 100%;
     }
   }
 }

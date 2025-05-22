@@ -6,6 +6,7 @@ import {
   type QueryParams,
   type WebsiteAccessSessionReturnsData,
 } from "@/assets/api/ruoyi/sysVisitSession";
+import RouterLink_NA from "@/components/singleFile/RouterLink_NA.vue";
 import Media from "@/stores/media";
 import { Refresh, Search } from "@vicons/ionicons5";
 import {
@@ -57,6 +58,11 @@ function FormatDuration(seconds: number) {
 
   return result || "0 秒"; // 防止所有单位都是0的情况
 }
+function GoTo(key: string) {
+  return (rowData: any, rowIndex: number) =>
+    h(RouterLink_NA, { to: { name: rowData[key] } }, () => rowData[key]);
+}
+
 const tableRef = ref<InstanceType<typeof NDataTable>>();
 const columns = ref<DataTableBaseColumn<WebsiteAccessSessionReturnsData>[]>([
   {
@@ -96,12 +102,14 @@ const columns = ref<DataTableBaseColumn<WebsiteAccessSessionReturnsData>[]>([
     key: "entryName",
     width: 160,
     sorter: true,
+    render: GoTo("entryName"),
   },
   {
     title: "出口页",
     key: "exitName",
     width: 160,
     sorter: true,
+    render: GoTo("exitName"),
   },
   {
     title: "访问来源",
@@ -217,6 +225,7 @@ const detailsColumns: DataTableBaseColumn<PageAccessLogEntity>[] = [
     title: "页面名称",
     key: "pageName",
     sorter: "default",
+    render: GoTo("pageName"),
   },
   {
     title: "页面停留时间",

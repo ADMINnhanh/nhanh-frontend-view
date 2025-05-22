@@ -35,6 +35,8 @@ const resize = () => {
   // 屏幕尺寸检测（包含方向自适应）
   const innerWidth = Math.min(window.innerWidth, window.innerHeight);
   Media.value.isMobileStyle = innerWidth < 768;
+
+  document.body.classList.toggle("is-mobile", Media.value.isMobileStyle);
 };
 window.addEventListener("resize", resize);
 resize();
