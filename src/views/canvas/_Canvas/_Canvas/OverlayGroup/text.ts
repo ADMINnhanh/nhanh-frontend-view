@@ -2,21 +2,43 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
+import type { EventHandler } from "./public/event";
+
+type ConstructorOption = ConstructorParameters<
+  typeof Overlay<TextStyleType, [number, number]>
+>[0] & {
+  text?: string;
+};
 
 export default class Text extends Overlay<TextStyleType, [number, number]> {
   /** 文字偏差 */
   private textOffset = { x: 0, y: 0 };
 
+  /** 文字 */
   text?: string;
 
-  constructor(
-    text: ConstructorParameters<
-      typeof Overlay<TextStyleType, [number, number]>
-    >[0] & { text?: string }
-  ) {
-    super(text);
-    this.text = String(text.text);
+  constructor(option: ConstructorOption) {
+    super(option);
+
+    this.addEventListener("draggable", this.defaultDraggable);
   }
+
+  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) => {
+    const { offsetX, offsetY } = event.data;
+    const { x, y } = this.calculateOffset(offsetX, offsetY);
+    this.value = [this.value![0] + x.value, this.value![1] + y.value];
+    this.position = [
+      this.position![0] + x.position,
+      this.position![1] + y.position,
+    ];
+    this.dynamicPosition = [
+      this.dynamicPosition![0] + x.dynamicPosition,
+      this.dynamicPosition![1] + y.dynamicPosition,
+    ];
+
+    this.updateValueScope();
+    this.notifyReload?.();
+  };
 
   protected updateValueScope() {
     const { textOffset, value } = this;
@@ -38,24 +60,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       maxY: value![1],
     };
     this.setExtraOffset(this.extraOffset, false);
-  }
-
-  notifyDraggable(offsetX: number, offsetY: number): undefined {
-    const data = super.notifyDraggable(offsetX, offsetY);
-    if (!data) return;
-    const { x, y } = data;
-    this.value = [this.value![0] + x.value, this.value![1] + y.value];
-    this.position = [
-      this.position![0] + x.position,
-      this.position![1] + y.position,
-    ];
-    this.dynamicPosition = [
-      this.dynamicPosition![0] + x.dynamicPosition,
-      this.dynamicPosition![1] + y.dynamicPosition,
-    ];
-
-    this.updateValueScope();
-    this.notifyReload?.();
   }
 
   isPointInPath(x: number, y: number) {

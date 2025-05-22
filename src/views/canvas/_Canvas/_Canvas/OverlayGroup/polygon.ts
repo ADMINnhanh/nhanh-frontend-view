@@ -4,6 +4,12 @@ import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
 import GeometricBoundary from "./public/geometricBoundary";
 
+type ConstructorOption = ConstructorParameters<
+  typeof GeometricBoundary<PolygonStyleType>
+>[0] & {
+  isRect?: boolean;
+};
+
 export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   /** 是否为矩形 */
   isRect = false;
@@ -12,14 +18,9 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   protected isClosed = true;
   protected minNeededHandlePoints = 3;
 
-  constructor(
-    polygon: ConstructorParameters<
-      typeof GeometricBoundary<PolygonStyleType>
-    >[0] & { isRect?: boolean }
-  ) {
-    super(polygon);
-    this.isRect = polygon.isRect ?? false;
-    this.canCreateOrDeleteHandlePoint = !polygon.isRect;
+  constructor(option: ConstructorOption) {
+    super(option);
+    if (option.isRect) this.canCreateOrDeleteHandlePoint = false;
   }
 
   protected updateValueScope() {
@@ -35,7 +36,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
       this.setCanvasStyles(Overlay.ctx);
-      if (this.draggable)
+      if (this.isDraggable)
         Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
       return Overlay.ctx.isPointInStroke(this.path, x, y);
     }
@@ -48,7 +49,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       this.isShowHandlePoint &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
-        is != point.isHover && point.notifyHover(is, x, y);
+        is != point.isHover && point.notifyHover(is);
         return is;
       });
 

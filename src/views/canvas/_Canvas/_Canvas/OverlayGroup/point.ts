@@ -3,16 +3,20 @@ import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
 import { _Schedule } from "nhanh-pure-function";
+import type { EventHandler } from "./public/event";
+
+type ConstructorOption = ConstructorParameters<
+  typeof Overlay<PointStyleType, [number, number]>
+>[0];
 
 export default class Point extends Overlay<PointStyleType, [number, number]> {
   private angle = 2 * Math.PI;
 
-  constructor(
-    points: ConstructorParameters<
-      typeof Overlay<PointStyleType, [number, number]>
-    >[0]
-  ) {
-    super(points);
+  constructor(option: ConstructorOption) {
+    super(option);
+
+    this.addEventListener("hover", this.defaultHover);
+    this.addEventListener("draggable", this.defaultDraggable);
   }
 
   protected updateValueScope() {
@@ -21,11 +25,9 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.setExtraOffset(this.extraOffset, false);
   }
 
-  notifyDraggable(offsetX: number, offsetY: number): undefined {
-    const data = super.notifyDraggable(offsetX, offsetY);
-    if (!data) return;
-    const { x, y } = data;
-
+  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) => {
+    const { offsetX, offsetY } = event.data;
+    const { x, y } = this.calculateOffset(offsetX, offsetY);
     this.value = [this.value![0] + x.value, this.value![1] + y.value];
     this.position = [
       this.position![0] + x.position,
@@ -38,20 +40,16 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     this.updateValueScope();
     this.notifyReload?.();
-  }
+  };
 
   private fillProgress?: {
     lineWidthOffset: number;
     progress: number;
     scheduleCallback: () => void;
   };
-  /**
-   * 处理悬停状态变化
-   * @param isHover 是否悬停
-   */
-  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
-    if (!this.isInteractable) return;
-    super.notifyHover(isHover, offsetX, offsetY);
+  /** 处理悬停状态变化 */
+  defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {
+    const isHover = event.data;
 
     const animationDuration = 300; // 动画持续时间(ms)
     const defaultLineWidth = this.setCanvasStyles().width;
@@ -68,7 +66,8 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     else if (isHover) {
       this.startNewHoverAnimation(defaultLineWidth, animationDuration);
     }
-  }
+  };
+
   /** 取消当前动画并重新开始相反方向的动画 */
   private cancelAndRestartAnimation(
     isHover: boolean,

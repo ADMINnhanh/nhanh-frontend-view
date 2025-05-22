@@ -1,30 +1,23 @@
 import _Canvas from "..";
 import type { Overlay } from "../OverlayGroup";
-import Show from "../OverlayGroup/public/show";
 import Layer from "./layer";
+import Base from "../OverlayGroup/public/base";
 
-export default class LayerGroup {
-  /** 图层群组名称 */
-  name;
-  /** 图层群组是否显示 */
-  show = new Show();
+type ConstructorOption = ConstructorParameters<typeof Base>[0];
 
+export default class LayerGroup extends Base {
   /** 图层群组 */
   layers = new Map<string, Layer>();
 
-  constructor(name: string) {
-    this.name = name;
+  constructor(option: ConstructorOption) {
+    super(option);
   }
 
-  /** 主画布 */
-  private mainCanvas?: _Canvas;
   setMainCanvas(mainCanvas?: _Canvas) {
-    this.mainCanvas = mainCanvas;
+    super.setMainCanvas(mainCanvas);
     this.layers.forEach((layer) => layer.setMainCanvas(mainCanvas));
   }
 
-  /** 通知重新加载 */
-  private notifyReload?: (needForceExecute?: boolean) => void;
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute) => {

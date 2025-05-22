@@ -1,7 +1,7 @@
 class _CanvasEvent<T = undefined> {
   private propagationStopped = false;
 
-  constructor(public readonly data?: T) {}
+  constructor(public readonly data: T) {}
 
   stopPropagation() {
     this.propagationStopped = true;
@@ -19,9 +19,9 @@ type EventMap = {
   draggable: { offsetX: number; offsetY: number };
 };
 
-type EventHandler<T extends keyof EventMap> = (
+export type EventHandler<T extends keyof EventMap> = (
   event: _CanvasEvent<EventMap[T]>,
-  mouseEvent: MouseEvent
+  mouseEvent?: MouseEvent
 ) => void;
 
 type EventListeners = {
@@ -66,7 +66,7 @@ export default class EventController {
     draggable: new Set(),
   };
 
-  constructor(options: EventControllerOptions = {}) {
+  constructor(options: EventControllerOptions) {
     Object.assign(this, {
       isInteractive: true,
       isHoverable: true,
@@ -112,7 +112,7 @@ export default class EventController {
   private trigger<T extends keyof EventMap>(
     type: T,
     data: EventMap[T],
-    mouseEvent: MouseEvent,
+    mouseEvent: MouseEvent | undefined,
     interaction: InteractionType
   ) {
     if (!this.checkInteraction(interaction)) return;
@@ -153,7 +153,7 @@ export default class EventController {
   get isHover() {
     return this.isHoverable && this._isHover;
   }
-  notifyHover = (state: boolean, event: MouseEvent) =>
+  notifyHover = (state: boolean, event?: MouseEvent) =>
     this.trigger("hover", state, event, "isHoverable");
 
   /** 是否点击 */
@@ -163,12 +163,15 @@ export default class EventController {
   }
   /** 点击时间 */
   private clickTimestamp = 0;
-  notifyClick = (state: boolean, event: MouseEvent) => {
+  /** 双击判定，两次点击之间的间隔（毫秒） */
+  doubleClickInterval = 300;
+  notifyClick = (state: boolean, event?: MouseEvent) => {
     this.trigger("click", state, event, "isClickable");
 
     const oldDblClick = this._isDblClick;
     if (state) {
-      this._isDblClick = Date.now() - this.clickTimestamp < 300;
+      this._isDblClick =
+        Date.now() - this.clickTimestamp < this.doubleClickInterval;
       this.clickTimestamp = this._isDblClick ? 0 : Date.now();
     } else {
       this._isDblClick = false;
@@ -186,6 +189,6 @@ export default class EventController {
 
   notifyDraggable = (
     position: { offsetX: number; offsetY: number },
-    event: MouseEvent
+    event?: MouseEvent
   ) => this.trigger("draggable", position, event, "isDraggable");
 }

@@ -1,10 +1,10 @@
 import _Canvas from "..";
 import OverlayGroup, { type Overlay } from "../OverlayGroup";
-import Show from "../OverlayGroup/public/show";
+import Base from "../OverlayGroup/public/base";
 
-export default class Layer {
-  name: string;
-  show = new Show();
+type ConstructorOption = ConstructorParameters<typeof Base>[0];
+
+export default class Layer extends Base {
   opacity = 1;
   zIndex = 4;
 
@@ -14,25 +14,17 @@ export default class Layer {
 
   groups = new Map<string, OverlayGroup>();
 
-  // 定义构造函数，接收一个包含配置信息的对象
-  constructor(name: string) {
-    this.name = name;
+  constructor(option: ConstructorOption) {
+    super(option);
   }
 
-  /** 主画布 */
-  private mainCanvas?: _Canvas;
-  equalsMainCanvas(mainCanvas?: _Canvas) {
-    return this.mainCanvas === mainCanvas;
-  }
   setMainCanvas(mainCanvas?: _Canvas) {
-    this.mainCanvas = mainCanvas;
+    super.setMainCanvas(mainCanvas);
     this.canvas.width = mainCanvas?.rect?.value.width || 0;
     this.canvas.height = mainCanvas?.rect?.value.height || 0;
     this.groups.forEach((group) => group.setMainCanvas(mainCanvas));
   }
 
-  /** 通知重新加载 */
-  private notifyReload?: (needForceExecute?: boolean) => void;
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute) => {
@@ -60,6 +52,7 @@ export default class Layer {
         : undefined
     );
   }
+
   /** 获取覆盖物组 */
   getGroup(name: string) {
     return this.groups.get(name);

@@ -1,28 +1,31 @@
 import _Canvas from "../..";
-import Show from "./show";
 import { type Overlay as OverlayType } from "../index";
+import Base from "./base";
+import type { EventHandler } from "./event";
 
-type EventListener = {
-  [key in "click" | "dblclick" | "hover"]: (state: boolean) => void;
-} & {
-  [key in "draggable"]: (offsetX: number, offsetY: number) => void;
-};
-type EventType = keyof EventListener;
-type EventListenerSet = {
-  [key in EventType]: Set<EventListener[key]>;
+type ConstructorOption<T, V> = ConstructorParameters<typeof Base>[0] & {
+  /** 样式 */
+  style?: DeepPartial<T> | string;
+  /** 层级 */
+  zIndex?: number;
+  /** 坐标轴上的点位 */
+  position?: V;
+  /** 动态点位 */
+  dynamicPosition?: V;
+  /** 坐标轴上的值 */
+  value?: V;
+  /** 额外偏移 */
+  extraOffset?: { x: number; y: number };
+  /** 鼠标移入时是否重新绘制 */
+  redrawOnIsHoverChange?: boolean;
 };
 
 export default abstract class Overlay<
   T,
   V extends [number, number] | [number, number][]
-> {
+> extends Base {
   static ctx = document.createElement("canvas").getContext("2d")!;
 
-  /** 名称 */
-  name?: string;
-
-  /** 是否显示 */
-  show = new Show();
   /** 样式 */
   style?: DeepPartial<T> | string;
   /** 坐标轴上的点位 */
@@ -30,56 +33,42 @@ export default abstract class Overlay<
   /** 坐标轴上的值 */
   value?: V;
   /** 层级 */
-  zIndex: number;
+  zIndex = 0;
   /** 动态点位 */
   dynamicPosition?: V;
 
-  /** 是否可交互 */
-  isInteractable = true;
   /** 绘制路径 */
   protected path?: Path2D;
 
-  /** 自定义扩展数据 */
-  extData?: any;
+  constructor(option: ConstructorOption<T, V>) {
+    option = { ...option };
 
-  constructor(overlay: {
-    /** 主画布 */
-    mainCanvas?: _Canvas;
-    /** 通知重新加载 */
-    notifyReload?: (needForceExecute?: boolean) => void;
-    /** 是否显示 */
-    show?: boolean;
-    /** 样式 */
-    style?: DeepPartial<T> | string;
-    /** 层级 */
-    zIndex?: number;
-    /** 坐标轴上的点位 */
-    position?: V;
-    /** 动态点位 */
-    dynamicPosition?: V;
-    /** 坐标轴上的值 */
-    value?: V;
-    /** 名称 */
-    name?: string;
-    /** 是否可拖动 */
-    draggable?: boolean;
-    /** 是否可交互 */
-    isInteractable?: boolean;
-    /** 额外偏移 */
-    extraOffset?: { x: number; y: number };
-  }) {
-    this.mainCanvas = overlay.mainCanvas;
-    if (overlay.notifyReload) this.setNotifyReload(overlay.notifyReload);
-    this.show.setShow(overlay.show ?? true);
-    this.style = overlay.style;
-    this.zIndex = overlay.zIndex ?? 0;
-    this.position = overlay.position;
-    this.dynamicPosition = overlay.dynamicPosition;
-    this.value = overlay.value;
-    this.name = overlay.name;
-    this.draggable = overlay.draggable ?? false;
-    this.isInteractable = overlay.isInteractable ?? true;
-    this.setExtraOffset(overlay.extraOffset, false);
+    const { extraOffset } = option;
+    delete option.extraOffset;
+
+    super(option);
+
+    this.setExtraOffset(extraOffset, false);
+
+    this.addEventListener("hover", this.defaultHover);
+  }
+
+  setMainCanvas(mainCanvas?: _Canvas) {
+    super.setMainCanvas(mainCanvas);
+    mainCanvas && this.updateBaseData();
+  }
+  setNotifyReload(notifyReload?: () => void) {
+    this.notifyReload = notifyReload
+      ? (needForceExecute?: boolean) => {
+          if (needForceExecute) {
+            notifyReload();
+          } else if (this.show.shouldRender(this.mainCanvas?.scale)) {
+            notifyReload();
+          }
+        }
+      : undefined;
+
+    this.show.notifyReload = this.notifyReload;
   }
 
   /** 静态的值范围 不含偏移、点半径 */
@@ -183,93 +172,28 @@ export default abstract class Overlay<
     this.lastPointRadius = { radius, value: radiusValue };
   }
 
-  /** 事件管理器 */
-  private eventListener: EventListenerSet = {
-    click: new Set(),
-    dblclick: new Set(),
-    hover: new Set(),
-    draggable: new Set(),
-  };
-  addEventListener<T extends EventType>(type: T, listener: EventListener[T]) {
-    this.eventListener[type].add(listener);
-  }
-  removeEventListener<T extends EventType>(
-    type: T,
-    listener: EventListener[T]
-  ) {
-    this.eventListener[type].delete(listener);
-  }
+  // defaultClick: EventHandler<"click"> = (event, mouseEvent) => {
 
-  /** 是否点击 */
-  isClick = false;
-  /** 点击时间 */
-  clickTime = 0;
-  /** 是否双击 */
-  isDblClick = false;
-  notifyClick(isClick: boolean, offsetX: number, offsetY: number) {
-    if (isClick) {
-      this.isDblClick = Date.now() - this.clickTime < 300;
-      this.clickTime = Date.now();
-    } else {
-      this.isDblClick = false;
-      this.clickTime = 0;
-    }
-
-    if (!this.isInteractable) return;
-
-    this.isClick = isClick;
-
-    if (this.isDblClick) {
-      this.eventListener.dblclick.forEach((listener) => listener(true));
-    } else if (this.isClick) {
-      this.eventListener.click.forEach((listener) => listener(true));
-    }
-  }
-  /** 是否按下 */
-  isDown = false;
-  notifyDown(isDown: boolean, offsetX: number, offsetY: number) {
-    if (!this.isInteractable) return;
-
-    this.isDown = isDown;
-  }
-  /** 是否悬停 */
-  isHover = false;
-  /** 鼠标悬停状态改变时重新绘制 */
-  redrawOnIsHoverChange = true;
-  /** 共享 hover 状态的集合 */
-  sharedHoverOverlays?: Overlay<any, any>[];
-  notifyHover(isHover: boolean, offsetX: number, offsetY: number) {
-    if (!this.isInteractable) return;
-
-    this.isHover = isHover;
-    this.eventListener.hover.forEach((listener) => listener(isHover));
-
+  // };
+  /** 鼠标移入时是否重新绘制 */
+  redrawOnIsHoverChange = false;
+  defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {
     this.redrawOnIsHoverChange && this.notifyReload?.();
-  }
-  /** 是否可拖动 */
-  draggable = false;
-  /** 共享 拖动 状态的集合 */
-  sharedDraggableOverlays?: Overlay<any, any>[];
-  notifyDraggable(offsetX: number, offsetY: number) {
-    if (this.isInteractable && this.draggable && this.mainCanvas) {
-      this.eventListener.draggable.forEach((listener) =>
-        listener(offsetX, offsetY)
-      );
-
-      const { percentage, axisConfig } = this.mainCanvas;
-      const base = axisConfig.count / axisConfig.min / percentage;
-      const x = {
-        value: offsetX * base * axisConfig.x,
-        position: (offsetX / percentage) * axisConfig.x,
-        dynamicPosition: offsetX * axisConfig.x,
-      };
-      const y = {
-        value: offsetY * base * axisConfig.y,
-        position: (offsetY / percentage) * axisConfig.y,
-        dynamicPosition: offsetY * axisConfig.y,
-      };
-      return { x, y };
-    }
+  };
+  calculateOffset(offsetX: number, offsetY: number) {
+    const { percentage, axisConfig } = this.mainCanvas!;
+    const base = axisConfig.count / axisConfig.min / percentage;
+    const x = {
+      value: offsetX * base * axisConfig.x,
+      position: (offsetX / percentage) * axisConfig.x,
+      dynamicPosition: offsetX * axisConfig.x,
+    };
+    const y = {
+      value: offsetY * base * axisConfig.y,
+      position: (offsetY / percentage) * axisConfig.y,
+      dynamicPosition: offsetY * axisConfig.y,
+    };
+    return { x, y };
   }
 
   abstract updateBaseData(): void;
@@ -277,32 +201,6 @@ export default abstract class Overlay<
   abstract isPointInStroke(x: number, y: number): boolean;
   isPointInAnywhere(x: number, y: number) {
     return this.isPointInPath(x, y) || this.isPointInStroke(x, y);
-  }
-
-  /** 主画布 */
-  mainCanvas?: _Canvas;
-  setMainCanvas(mainCanvas?: _Canvas) {
-    this.mainCanvas = mainCanvas;
-    mainCanvas && this.updateBaseData();
-  }
-  equalsMainCanvas(mainCanvas?: _Canvas) {
-    return this.mainCanvas === mainCanvas;
-  }
-
-  /** 通知重新加载 */
-  notifyReload?: (needForceExecute?: boolean) => void;
-  setNotifyReload(notifyReload?: () => void) {
-    this.notifyReload = notifyReload
-      ? (needForceExecute?: boolean) => {
-          if (needForceExecute) {
-            notifyReload();
-          } else if (this.show.shouldRender(this.mainCanvas?.scale)) {
-            notifyReload();
-          }
-        }
-      : undefined;
-
-    this.show.notifyReload = this.notifyReload;
   }
 
   setStyle(style?: Overlay<T, V>["style"]) {

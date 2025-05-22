@@ -14,8 +14,8 @@ import {
   SunnyOutline,
 } from "@vicons/ionicons5";
 import { NButton, NSpace, NIcon } from "naive-ui";
-import { _IsFullscreen } from "nhanh-pure-function";
-import { onUnmounted, ref } from "vue";
+import { _Fullscreen, _IsFullscreen } from "nhanh-pure-function";
+import { onBeforeUnmount, ref } from "vue";
 import WeatherInfo from "./weatherInfo/index.vue";
 import Media from "@/stores/media";
 
@@ -44,25 +44,23 @@ function OpenSettings() {
   });
 }
 
-/** 当前状态是否是全屏 */
-const isFullScreen = ref(false);
-/** 全屏切换 */
-function toggleFullScreen() {
-  if (isFullScreen.value) document.exitFullscreen();
-  else document.documentElement.requestFullscreen();
-}
-/** 全屏切换监测 */
-function onFullScreen() {
-  isFullScreen.value = !!_IsFullscreen();
-}
-onFullScreen();
-window.addEventListener("resize", onFullScreen);
-onUnmounted(() => window.removeEventListener("resize", onFullScreen));
-
 /** 前往 GitHub */
 function GotoGitHub() {
   window.open("https://github.com/ADMINnhanh/nhanh-frontend-view", "_blank");
 }
+
+/** 当前状态是否是全屏 */
+const isFullScreen = ref(false);
+/** 全屏切换 */
+const toggleFullScreen = _Fullscreen();
+/** 全屏切换监测 */
+const resizeObserver = new ResizeObserver(() => {
+  isFullScreen.value = _IsFullscreen();
+});
+resizeObserver.observe(document.documentElement);
+onBeforeUnmount(() => {
+  resizeObserver?.disconnect();
+});
 </script>
 
 <template>

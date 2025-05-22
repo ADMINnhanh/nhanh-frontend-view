@@ -5,35 +5,25 @@ import Point from "./point";
 import Line from "./line";
 import Polygon from "./polygon";
 import Custom from "./custom";
-import Show from "./public/show";
+import Base from "./public/base";
+
+type ConstructorOption = ConstructorParameters<typeof Base>[0];
 
 export type Overlay = Text | Point | Line | Polygon | Custom<any>;
 
-export default class OverlayGroup {
-  /** 群组名称 */
-  name;
-  /** 群组是否显示 */
-  show = new Show();
-
+export default class OverlayGroup extends Base {
   overlays = new Set<Overlay>();
 
-  constructor(name: string) {
-    this.name = name;
+  constructor(option: ConstructorOption) {
+    super(option);
   }
 
-  /** 主画布 */
-  private mainCanvas?: _Canvas;
-  equalsMainCanvas(mainCanvas?: _Canvas) {
-    return this.mainCanvas === mainCanvas;
-  }
   setMainCanvas(mainCanvas?: _Canvas) {
-    this.mainCanvas = mainCanvas;
+    super.setMainCanvas(mainCanvas);
     this.overlays.forEach((overlay) => overlay.setMainCanvas(mainCanvas));
     if (mainCanvas && this.overlays.size) this.notifyReload?.();
   }
 
-  /** 通知重新加载 */
-  private notifyReload?: (needForceExecute?: boolean) => void;
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {

@@ -17,7 +17,12 @@ import {
   NSpace,
   NTooltip,
 } from "naive-ui";
-import { _CopyToClipboard, _Fullscreen, _Tip } from "nhanh-pure-function";
+import {
+  _CopyToClipboard,
+  _Fullscreen,
+  _IsFullscreen,
+  _Tip,
+} from "nhanh-pure-function";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import type _Canvas from "./_Canvas";
 import { Settings } from "@/components/popups/components/Settings";
@@ -32,28 +37,29 @@ const props = defineProps<Props>();
 /** 是否显示代码 */
 const showCode = ref(false);
 
-// 创建一个 ref 对象，用于存储组件的引用
-const componentRef = ref<{ myCanvas: _Canvas }>();
-
-/** 当前状态是否是全屏 */
-const isFullScreen = ref(false);
-const toggleFullScreen = ref();
 const cardRef = ref();
-
+const componentRef = ref<{ myCanvas: _Canvas }>();
 watch(
   () => Settings.value.theme,
   (theme) => componentRef.value?.myCanvas.setTheme(theme)
 );
+
+/** 当前状态是否是全屏 */
+const isFullScreen = ref(false);
+const toggleFullScreen = ref();
+
+/** 全屏切换监测 */
+const resizeObserver = new ResizeObserver(() => {
+  isFullScreen.value = _IsFullscreen(cardRef.value?.$el);
+});
+
 onMounted(() => {
-  toggleFullScreen.value = (function (toggle) {
-    return () => {
-      isFullScreen.value = !isFullScreen.value;
-      toggle();
-    };
-  })(_Fullscreen(cardRef.value.$el));
+  toggleFullScreen.value = _Fullscreen(cardRef.value.$el);
+  resizeObserver.observe(cardRef.value.$el);
 });
 onBeforeUnmount(() => {
   componentRef.value?.myCanvas.destroy();
+  resizeObserver?.disconnect();
 });
 </script>
 

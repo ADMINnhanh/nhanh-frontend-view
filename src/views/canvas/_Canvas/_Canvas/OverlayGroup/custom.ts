@@ -3,13 +3,15 @@ import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import Decimal from "decimal.js";
 
+type ConstructorOption<T> = ConstructorParameters<
+  typeof Overlay<T, [number, number][]>
+>[0] & {
+  draw: (ctx: CanvasRenderingContext2D) => void;
+};
+
 export default class Custom<T> extends Overlay<T, [number, number][]> {
-  constructor(
-    config: ConstructorParameters<typeof Overlay<T, [number, number][]>>[0],
-    draw: (ctx: CanvasRenderingContext2D) => void
-  ) {
-    super(config);
-    this.draw = draw;
+  constructor(option: ConstructorOption<T>) {
+    super(option);
     this.redrawOnIsHoverChange = false;
   }
 
@@ -101,10 +103,10 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     this.position = position;
   }
 
-  draw: (ctx: CanvasRenderingContext2D) => void;
+  draw?: (ctx: CanvasRenderingContext2D) => void;
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, mainCanvas, position, valueScope } = this;
-    if (!mainCanvas) return;
+    if (!mainCanvas || !this.draw) return;
 
     const { scale, isRecalculate, isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = show.shouldRender(scale);

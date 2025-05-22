@@ -7,6 +7,13 @@ import DataProcessor from "../../core/dataProcessor";
 // 定义点的类型
 type PointLocation = [number, number];
 
+type ConstructorOption<T> = ConstructorParameters<
+  typeof Overlay<T, PointLocation[]>
+>[0] & {
+  isShowHandlePoint?: boolean;
+  canCreateOrDeleteHandlePoint?: boolean;
+};
+
 /**
  * 查找点击位置应插入的下标
  * @param clickPosition 点击位置
@@ -82,18 +89,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   /** 锁定是否可创建句柄点 */
   private lockedCanCreateOrDeleteHandlePoint = false;
 
-  constructor(
-    boundary: ConstructorParameters<
-      typeof Overlay<T, [number, number][]>
-    >[0] & {
-      isShowHandlePoint?: boolean;
-      canCreateOrDeleteHandlePoint?: boolean;
-    }
-  ) {
-    super(boundary);
-    this.isShowHandlePoint = boundary.isShowHandlePoint ?? true;
-    this.canCreateOrDeleteHandlePoint =
-      boundary.canCreateOrDeleteHandlePoint ?? true;
+  constructor(option: ConstructorOption<T>) {
+    super(option);
   }
 
   /** 处理点击状态变化 */
