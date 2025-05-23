@@ -21,6 +21,9 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   constructor(option: ConstructorOption) {
     super(option);
 
+    const { text } = option;
+    Object.assign(this, { text });
+
     this.addEventListener("draggable", this.defaultDraggable);
   }
 

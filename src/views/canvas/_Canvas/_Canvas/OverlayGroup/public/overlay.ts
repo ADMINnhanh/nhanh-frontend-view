@@ -41,14 +41,29 @@ export default abstract class Overlay<
   protected path?: Path2D;
 
   constructor(option: ConstructorOption<T, V>) {
-    option = { ...option };
-
-    const { extraOffset } = option;
-    delete option.extraOffset;
-
     super(option);
 
+    const {
+      extraOffset,
+      notifyReload,
+      style,
+      zIndex,
+      position,
+      dynamicPosition,
+      value,
+      redrawOnIsHoverChange,
+    } = option;
+
     this.setExtraOffset(extraOffset, false);
+    this.setNotifyReload(notifyReload);
+    Object.assign(this, {
+      style,
+      zIndex,
+      position,
+      dynamicPosition,
+      value,
+      redrawOnIsHoverChange,
+    });
 
     this.addEventListener("hover", this.defaultHover);
   }

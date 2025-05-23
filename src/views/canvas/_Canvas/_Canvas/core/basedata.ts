@@ -95,15 +95,9 @@ export default class BaseData extends EventController {
   protected layerGroups = new Map<string, LayerGroup>();
 
   constructor(option: ConstructorOption) {
-    option = { ...option };
-    const { id, axisConfig, defaultCenter, offset } = option;
-    /** @ts-ignore */
-    delete option.id;
-    delete option.axisConfig;
-    delete option.defaultCenter;
-    delete option.offset;
-
     super(option);
+
+    const { id, axisConfig, defaultCenter, offset } = option;
 
     if (axisConfig) this.setAxis(axisConfig);
     if (defaultCenter) this.setDefaultCenter(defaultCenter);

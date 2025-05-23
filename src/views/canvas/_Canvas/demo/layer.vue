@@ -129,7 +129,7 @@ const overlay_arr = [
 ];
 
 onMounted(() => {
-  myCanvas.value = new _Canvas(id);
+  myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addOverlay(overlay_arr);
 });

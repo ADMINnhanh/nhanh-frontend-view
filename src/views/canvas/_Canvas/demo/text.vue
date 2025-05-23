@@ -12,13 +12,13 @@ const text_value = new _Canvas.Text({
   value: [0, 0],
   text: "你好 世界",
   style: { color: "#18a058", size: 20 },
-  draggable: true,
+  isDraggable: true,
 });
 const text_position = new _Canvas.Text({
   position: [100, -100],
   text: "Hello World",
   style: { color: "#18a058", size: 20 },
-  draggable: true,
+  isDraggable: true,
 });
 const text_arr = [text_value, text_position];
 
@@ -35,13 +35,14 @@ function UpdatePosition(delta: number) {
   });
 }
 function UpdateDraggable(draggable: boolean) {
-  text_arr.forEach((text) => (text.draggable = draggable));
+  text_arr.forEach((text) => (text.isDraggable = draggable));
 }
 
 onMounted(() => {
-  myCanvas.value = new _Canvas(id);
+  myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addOverlay(text_arr);
+  console.log(myCanvas.value);
 });
 defineExpose({ myCanvas });
 </script>

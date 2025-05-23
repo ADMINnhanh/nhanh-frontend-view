@@ -95,6 +95,9 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   constructor(option: ConstructorOption<T>) {
     super(option);
 
+    const { isShowHandlePoint, canCreateOrDeleteHandlePoint } = option;
+    Object.assign(this, { isShowHandlePoint, canCreateOrDeleteHandlePoint });
+
     this.addEventListener("click", this.defaultClick);
     this.addEventListener("dblclick", this.defaultDblclick);
     this.addEventListener("draggable", this.defaultDraggable);

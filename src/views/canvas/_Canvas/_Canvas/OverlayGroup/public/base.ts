@@ -27,15 +27,11 @@ export default abstract class Base extends EventController {
   protected mainCanvas?: _Canvas;
 
   constructor(option: ConstructorOption) {
-    option = { ...option };
-    option.name = option.name || _GenerateUUID("base-");
-
-    const { notifyReload } = option;
-    delete option.notifyReload;
-
     super(option);
 
-    this.setNotifyReload(notifyReload);
+    option.name = option.name || _GenerateUUID("base-");
+    const { name, extData, mainCanvas } = option;
+    Object.assign(this, { name, extData, mainCanvas });
   }
 
   equalsMainCanvas(mainCanvas?: _Canvas) {

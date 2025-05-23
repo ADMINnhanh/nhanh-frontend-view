@@ -14,6 +14,9 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
   constructor(option: ConstructorOption<T>) {
     super(option);
     this.redrawOnIsHoverChange = false;
+
+    const { draw } = option;
+    Object.assign(this, { draw });
   }
 
   protected updateValueScope(): void {

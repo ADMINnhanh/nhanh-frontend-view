@@ -121,13 +121,11 @@ export default class Style extends BaseData {
   };
 
   constructor(option: ConstructorOption) {
-    option = { ...option };
-    const { theme } = option;
-    delete option.theme;
-
     super(option);
 
+    const { theme } = option;
     theme && this.setTheme(theme);
+
     this.initStyle();
     this.clearScreen();
   }

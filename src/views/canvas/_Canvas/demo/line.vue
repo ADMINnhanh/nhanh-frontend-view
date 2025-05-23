@@ -61,7 +61,7 @@ function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
 }
 
 onMounted(() => {
-  myCanvas.value = new _Canvas(id);
+  myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addOverlay(line_arr);
 });

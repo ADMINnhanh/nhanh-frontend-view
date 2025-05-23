@@ -23,7 +23,10 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   constructor(option: ConstructorOption) {
     super(option);
 
-    if (option.infinite) this.canCreateOrDeleteHandlePoint = false;
+    const { infinite } = option;
+    Object.assign(this, { infinite });
+
+    if (infinite) this.canCreateOrDeleteHandlePoint = false;
     this.redrawOnIsHoverChange = false;
   }
 

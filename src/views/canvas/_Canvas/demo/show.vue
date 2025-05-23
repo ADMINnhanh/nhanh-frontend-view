@@ -16,7 +16,7 @@ const show = ref(true);
 watch(show, (show) => point_value.show.setShow(show), { immediate: true });
 
 onMounted(() => {
-  myCanvas.value = new _Canvas(id);
+  myCanvas.value = new _Canvas({ id });
   myCanvas.value.notifyReload = () => {
     (["scale"] as const).forEach((key) => {
       myCanvasConfig.value[key] = myCanvas.value![key];

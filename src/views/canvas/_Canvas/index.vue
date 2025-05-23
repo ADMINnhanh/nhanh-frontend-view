@@ -7,12 +7,12 @@ import Media from "@/stores/media";
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
 const demoName: [string, string][] = [
-  ["China%2Findex.vue", "中国地图"],
+  // ["China%2Findex.vue", "中国地图"],
   // ["original.vue", "仅需初始化 _Canvas"],
   // ["center.vue", "中心点"],
   // ["shortcutKey.vue", "快捷键"],
   // ["axis.vue", "坐标轴"],
-  // ["text.vue", "文字"],
+  ["text.vue", "文字"],
   // ["point.vue", "点"],
   // ["line.vue", "线"],
   // ["polygon.vue", "面"],

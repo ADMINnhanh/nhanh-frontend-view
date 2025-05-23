@@ -37,11 +37,9 @@ export default class _Canvas extends QuickMethod {
   static Custom = Custom;
 
   constructor(option: ConstructorOption) {
-    option = { ...option };
-    const { axisShow } = option;
-    delete option.axisShow;
-
     super(option);
+
+    const { axisShow } = option;
 
     this.drawAxis = new Axis(this);
     if (axisShow) this.toggleAxis(axisShow);
@@ -79,6 +77,7 @@ export default class _Canvas extends QuickMethod {
       layer_polygon,
       layer_custom,
     ]);
+    console.log(layerGroup);
 
     this.setLayerGroups(layerGroup);
   }
@@ -92,6 +91,7 @@ export default class _Canvas extends QuickMethod {
       this.layerGroups.set(layerGroup.name, layerGroup);
       layerGroup.setNotifyReload(() => this.redrawOnce());
       layerGroup.setMainCanvas(this);
+      layerGroup.parent = this;
     }
   }
   /** 移除图层群组 */
@@ -100,6 +100,7 @@ export default class _Canvas extends QuickMethod {
       this.layerGroups.delete(layerGroup.name);
       layerGroup.setNotifyReload();
       layerGroup.setMainCanvas();
+      layerGroup.parent = undefined;
       this.redrawOnce();
     }
   }

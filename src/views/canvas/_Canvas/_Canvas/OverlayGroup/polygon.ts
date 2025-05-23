@@ -21,6 +21,10 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
   constructor(option: ConstructorOption) {
     super(option);
+
+    const { isRect } = option;
+    Object.assign(this, { isRect });
+
     if (option.isRect) this.canCreateOrDeleteHandlePoint = false;
   }
 

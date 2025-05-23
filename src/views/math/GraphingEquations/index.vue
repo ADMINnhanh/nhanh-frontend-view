@@ -122,7 +122,7 @@ img.onload = () => {
 // console.log(performance.now() - t + "ms");
 
 onMounted(() => {
-  canvas = new _Canvas(id);
+  canvas = new _Canvas({ id });
   // canvas.defaultCenter.top = "top";
   // canvas.defaultCenter.left = "left";
   // canvas.axisConfig.count = 75;

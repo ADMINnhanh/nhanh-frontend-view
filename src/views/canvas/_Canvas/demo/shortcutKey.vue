@@ -11,7 +11,7 @@ const id = _GenerateUUID();
 let myCanvas = shallowRef<_Canvas>();
 
 onMounted(() => {
-  myCanvas.value = new _Canvas(id);
+  myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
 });
 defineExpose({ myCanvas });

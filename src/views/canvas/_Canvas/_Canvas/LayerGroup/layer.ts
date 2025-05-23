@@ -16,6 +16,7 @@ export default class Layer extends Base {
 
   constructor(option: ConstructorOption) {
     super(option);
+    this.setNotifyReload(option.notifyReload);
   }
 
   setMainCanvas(mainCanvas?: _Canvas) {
