@@ -3,6 +3,7 @@ import _Canvas from "..";
 import Overlay from "./overlay";
 import Point from "../point";
 import DataProcessor from "../../core/dataProcessor";
+import type { EventHandler } from "../../core/eventController";
 
 // 定义点的类型
 type PointLocation = [number, number];
@@ -10,7 +11,9 @@ type PointLocation = [number, number];
 type ConstructorOption<T> = ConstructorParameters<
   typeof Overlay<T, PointLocation[]>
 >[0] & {
+  /** 是否可显示控制点 */
   isShowHandlePoint?: boolean;
+  /** 是否可以创建新的 控制点 */
   canCreateOrDeleteHandlePoint?: boolean;
 };
 
@@ -91,41 +94,51 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
   constructor(option: ConstructorOption<T>) {
     super(option);
+
+    this.addEventListener("click", this.defaultClick);
+    this.addEventListener("dblclick", this.defaultDblclick);
+    this.addEventListener("draggable", this.defaultDraggable);
   }
 
-  /** 处理点击状态变化 */
-  notifyClick(isClick: boolean, offsetX: number, offsetY: number): void {
-    const oldIsClick = this.isClick;
-    super.notifyClick(isClick, offsetX, offsetY);
+  /** 默认点击事件 点击后切换控制点显示状态 */
+  defaultClick: EventHandler<"click"> = (event, mouseEvent) => {
+    if (!this.isShowHandlePoint) return;
 
-    if (!this.isInteractable || !this.isShowHandlePoint) return;
+    const { state, oldState } = event.data;
 
-    if (this.lockedCanCreateOrDeleteHandlePoint) {
-      this.resetHandlePointLock();
-    } else {
-      const canEditPoints =
-        oldIsClick &&
-        this.isClick &&
-        this.isShowHandlePoint &&
-        this.canCreateOrDeleteHandlePoint &&
-        this.draggable;
+    if (state != oldState && !(this as any).infinite) this.notifyReload?.();
+  };
+  /** 默认点击事件 点击后 创建/删除 控制点 */
+  defaultDblclick: EventHandler<"dblclick"> = (event, mouseEvent) => {
+    if (mouseEvent) {
+      if (!this.isShowHandlePoint) return;
 
-      if (canEditPoints) {
-        const hoverPointIndex = this.handlePoints.findIndex(
-          (point) => point.isHover
-        );
+      const { offsetX, offsetY } = mouseEvent;
 
-        if (hoverPointIndex === -1) {
-          this.tryCreateNewHandlePoint(offsetX, offsetY);
-        } else {
-          this.tryDeleteHandlePoint(hoverPointIndex);
+      const { state } = event.data;
+
+      if (this.lockedCanCreateOrDeleteHandlePoint) {
+        this.resetHandlePointLock();
+      } else if (state) {
+        const canEditPoints =
+          this.isShowHandlePoint &&
+          this.canCreateOrDeleteHandlePoint &&
+          this.isDraggable;
+
+        if (canEditPoints) {
+          const hoverPointIndex = this.handlePoints.findIndex(
+            (point) => point.isHover
+          );
+
+          if (hoverPointIndex === -1) {
+            this.tryCreateNewHandlePoint(offsetX, offsetY);
+          } else {
+            this.tryDeleteHandlePoint(hoverPointIndex);
+          }
         }
       }
     }
-
-    if (oldIsClick != this.isClick && !(this as any).infinite)
-      this.notifyReload?.();
-  }
+  };
 
   /** 尝试在指定位置创建新控制点 */
   private tryCreateNewHandlePoint(offsetX: number, offsetY: number): void {
@@ -186,7 +199,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       value: midpointValue,
       position: midpointPosition,
       dynamicPosition: midpointDynamic,
-      draggable: true,
+      isDraggable: true,
       mainCanvas: this.mainCanvas,
       notifyReload: () => this.notifyReload?.(),
     });
@@ -222,12 +235,13 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   }
 
   /** 处理拖动状态变化 */
-  notifyDraggable(offsetX: number, offsetY: number): undefined {
-    if (!this.isInteractable || !this.draggable || !this.mainCanvas) return;
+  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) => {
+    if (!this.mainCanvas) return;
 
     /** 移动整体 */
     const moveTheWhole = () => {
-      const { x, y } = super.notifyDraggable(offsetX, offsetY)!;
+      const { offsetX, offsetY } = event.data;
+      const { x, y } = this.calculateOffset(offsetX, offsetY)!;
 
       this.value!.forEach((_, index) => {
         this.value![index][0] += x.value;
@@ -253,7 +267,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       );
       if (hover_point_index != -1) {
         const point = this.handlePoints[hover_point_index];
-        point.notifyDraggable(offsetX, offsetY);
+        point.notifyDraggable(event.data, mouseEvent);
         this.value![hover_point_index] = point.value!;
         this.position![hover_point_index] = point.position!;
         this.dynamicPosition![hover_point_index] = point.dynamicPosition!;
@@ -261,7 +275,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     } else moveTheWhole();
 
     this.updateValueScope();
-  }
+  };
 
   /** 更新控制点 */
   updateHandlePoints() {
@@ -269,12 +283,16 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     if (!dynamicPosition) return;
 
     value?.forEach((_, index) => {
-      const point = this.handlePoints[index] || new Point({ draggable: true });
-      point.value = value![index];
-      point.position = position![index];
-      point.dynamicPosition = dynamicPosition![index];
-      point.mainCanvas = this.mainCanvas;
-      point.setNotifyReload(() => this.notifyReload?.());
+      const point =
+        this.handlePoints[index] ||
+        new Point({
+          isDraggable: true,
+          value: value![index],
+          position: position![index],
+          dynamicPosition: dynamicPosition![index],
+          mainCanvas: this.mainCanvas,
+          notifyReload: () => this.notifyReload?.(),
+        });
       if (!this.handlePoints[index]) this.handlePoints.push(point);
     });
     this.handlePoints.length = value!.length;

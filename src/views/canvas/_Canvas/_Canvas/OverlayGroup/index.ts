@@ -49,6 +49,7 @@ export default class OverlayGroup extends Base {
     [overlays].flat().forEach((overlay) => {
       overlay.setNotifyReload(this.notifyReload);
       overlay.setMainCanvas(this.mainCanvas);
+      overlay.parent = this;
       this.overlays.add(overlay);
     });
     this.notifyReload?.();
@@ -62,6 +63,7 @@ export default class OverlayGroup extends Base {
       this.overlays.delete(overlay);
       overlay.setNotifyReload();
       overlay.setMainCanvas();
+      overlay.parent = undefined;
     });
     this.notifyReload?.();
   }
@@ -70,6 +72,7 @@ export default class OverlayGroup extends Base {
     this.overlays.forEach((overlay) => {
       overlay.setNotifyReload();
       overlay.setMainCanvas();
+      overlay.parent = undefined;
     });
     this.overlays.clear();
   }

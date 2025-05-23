@@ -10,13 +10,11 @@ import Polygon from "./OverlayGroup/polygon";
 import Axis from "./core/axis";
 import Custom from "./OverlayGroup/custom";
 
-type InitConfig = DeepPartial<{
-  theme: _Canvas["theme"];
-  axisConfig: _Canvas["axisConfig"];
-  axisShow: _Canvas["drawAxis"]["show"];
-  defaultCenter: _Canvas["defaultCenter"];
-  offset: _Canvas["offset"];
-}>;
+type ConstructorOption = ConstructorParameters<typeof QuickMethod>[0] &
+  DeepPartial<{
+    /** 轴线显示属性 */
+    axisShow: _Canvas["drawAxis"]["show"];
+  }>;
 
 /** 画布类 */
 export default class _Canvas extends QuickMethod {
@@ -38,48 +36,42 @@ export default class _Canvas extends QuickMethod {
   /** 自定义绘制 */
   static Custom = Custom;
 
-  constructor(id: string, config?: InitConfig) {
-    super(id);
-    this.drawAxis = new Axis(this);
+  constructor(option: ConstructorOption) {
+    option = { ...option };
+    const { axisShow } = option;
+    delete option.axisShow;
 
-    if (config) {
-      const { theme, axisConfig, axisShow, defaultCenter, offset } = config;
-      if (theme) this.setTheme(theme);
-      if (axisConfig) this.setAxis(axisConfig);
-      if (axisShow) this.toggleAxis(axisShow);
-      if (defaultCenter) this.setDefaultCenter(defaultCenter);
-      if (offset) {
-        this.offset.x = offset.x || 0;
-        this.offset.y = offset.y || 0;
-      }
-    }
+    super(option);
+
+    this.drawAxis = new Axis(this);
+    if (axisShow) this.toggleAxis(axisShow);
 
     this.initLayerGroups();
     this.updateCenter();
   }
 
   private initLayerGroups() {
-    const layer_polygon = new Layer("多边形图层");
-    layer_polygon.addGroup(new OverlayGroup("多边形覆盖物群组"));
+    const layer_polygon = new Layer({ name: "多边形图层" });
+    layer_polygon.addGroup(new OverlayGroup({ name: "多边形覆盖物群组" }));
     layer_polygon.setzIndex(1);
 
-    const layer_line = new Layer("线段图层");
-    layer_line.addGroup(new OverlayGroup("线段覆盖物群组"));
+    const layer_line = new Layer({ name: "线段图层" });
+    layer_line.addGroup(new OverlayGroup({ name: "线段覆盖物群组" }));
     layer_line.setzIndex(2);
 
-    const layer_point = new Layer("点位图层");
-    layer_point.addGroup(new OverlayGroup("点位覆盖物群组"));
+    const layer_point = new Layer({ name: "点位图层" });
+    layer_point.addGroup(new OverlayGroup({ name: "点位覆盖物群组" }));
     layer_point.setzIndex(3);
 
-    const layer_text = new Layer("文字图层");
-    layer_text.addGroup(new OverlayGroup("文字覆盖物群组"));
+    const layer_text = new Layer({ name: "文字图层" });
+    layer_text.addGroup(new OverlayGroup({ name: "文字覆盖物群组" }));
     layer_text.setzIndex(4);
 
-    const layer_custom = new Layer("自定义绘制图层");
-    layer_custom.addGroup(new OverlayGroup("自定义绘制覆盖物群组"));
+    const layer_custom = new Layer({ name: "自定义绘制图层" });
+    layer_custom.addGroup(new OverlayGroup({ name: "自定义绘制覆盖物群组" }));
     layer_custom.setzIndex(5);
 
-    const layerGroup = new LayerGroup("默认图层群组");
+    const layerGroup = new LayerGroup({ name: "默认图层群组" });
     layerGroup.addLayer([
       layer_text,
       layer_point,

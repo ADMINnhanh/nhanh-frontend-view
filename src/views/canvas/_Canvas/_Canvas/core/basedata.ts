@@ -1,9 +1,21 @@
 import Axis from "./axis";
 import LayerGroup from "../LayerGroup";
 import Decimal from "decimal.js";
+import EventController from "./eventController";
+
+type ConstructorOption = ConstructorParameters<typeof EventController>[0] & {
+  /** 画布 id */
+  id: string;
+  /** 轴配置 */
+  axisConfig?: BaseData["axisConfig"];
+  /** 默认中心点 */
+  defaultCenter?: BaseData["defaultCenter"];
+  /** 偏移量 */
+  offset?: BaseData["offset"];
+};
 
 /** 基础数据 */
-export default class BaseData {
+export default class BaseData extends EventController {
   /** 画布元素 */
   canvas: HTMLCanvasElement;
   /** 画布上下文 */
@@ -82,7 +94,24 @@ export default class BaseData {
   /** 图层群组 集合 */
   protected layerGroups = new Map<string, LayerGroup>();
 
-  constructor(id: string) {
+  constructor(option: ConstructorOption) {
+    option = { ...option };
+    const { id, axisConfig, defaultCenter, offset } = option;
+    /** @ts-ignore */
+    delete option.id;
+    delete option.axisConfig;
+    delete option.defaultCenter;
+    delete option.offset;
+
+    super(option);
+
+    if (axisConfig) this.setAxis(axisConfig);
+    if (defaultCenter) this.setDefaultCenter(defaultCenter);
+    if (offset) {
+      this.offset.x = offset.x || 0;
+      this.offset.y = offset.y || 0;
+    }
+
     const canvas = document.getElementById(id);
     if (canvas instanceof HTMLCanvasElement) {
       if (canvas.getContext) {

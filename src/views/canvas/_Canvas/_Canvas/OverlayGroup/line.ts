@@ -8,11 +8,12 @@ import GeometricBoundary from "./public/geometricBoundary";
 type ConstructorOption = ConstructorParameters<
   typeof GeometricBoundary<LineStyleType>
 >[0] & {
+  /** 是否是 两点相连向外延展的无限线 */
   infinite?: boolean;
 };
 
 export default class Line extends GeometricBoundary<LineStyleType> {
-  /** 两点相连向外延展的无限线 */
+  /** 是否是 两点相连向外延展的无限线 */
   infinite?: boolean;
 
   /** 是否闭合 */

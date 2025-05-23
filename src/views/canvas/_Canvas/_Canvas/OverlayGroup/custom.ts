@@ -6,6 +6,7 @@ import Decimal from "decimal.js";
 type ConstructorOption<T> = ConstructorParameters<
   typeof Overlay<T, [number, number][]>
 >[0] & {
+  /** 绘制函数 */
   draw: (ctx: CanvasRenderingContext2D) => void;
 };
 

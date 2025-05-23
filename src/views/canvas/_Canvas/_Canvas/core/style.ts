@@ -1,8 +1,13 @@
 import { _Clone, _MergeObjects } from "nhanh-pure-function";
 import BaseData from "./basedata";
 
+type ConstructorOption = ConstructorParameters<typeof BaseData>[0] & {
+  theme?: KnownStyleKeys;
+};
+
 /** 样式管理器 */
 export default class Style extends BaseData {
+  /** 主题 */
   theme: KnownStyleKeys = "light";
   /** 主题是否更新 */
   isThemeUpdated = false;
@@ -115,8 +120,14 @@ export default class Style extends BaseData {
     },
   };
 
-  constructor(id: string) {
-    super(id);
+  constructor(option: ConstructorOption) {
+    option = { ...option };
+    const { theme } = option;
+    delete option.theme;
+
+    super(option);
+
+    theme && this.setTheme(theme);
     this.initStyle();
     this.clearScreen();
   }

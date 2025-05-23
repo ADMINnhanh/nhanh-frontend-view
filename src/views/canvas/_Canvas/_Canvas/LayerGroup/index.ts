@@ -46,6 +46,7 @@ export default class LayerGroup extends Base {
       if (layer instanceof Layer) {
         layer.setNotifyReload(this.notifyReload);
         layer.setMainCanvas(this.mainCanvas);
+        layer.parent = this;
         this.layers.set(layer.name, layer);
       }
     });
@@ -58,6 +59,7 @@ export default class LayerGroup extends Base {
         this.layers.delete(layer.name);
         layer.setNotifyReload();
         layer.setMainCanvas();
+        layer.parent = undefined;
         isReload = true;
       }
     });
@@ -69,6 +71,7 @@ export default class LayerGroup extends Base {
       this.layers.forEach((layer) => {
         layer.setNotifyReload();
         layer.setMainCanvas();
+        layer.parent = undefined;
       });
       this.layers.clear();
       this.notifyReload?.();

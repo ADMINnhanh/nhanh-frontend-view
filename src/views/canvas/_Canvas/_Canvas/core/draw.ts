@@ -9,6 +9,8 @@ import Point from "../OverlayGroup/point";
 import Line from "../OverlayGroup/line";
 import Polygon from "../OverlayGroup/polygon";
 
+type ConstructorOption = ConstructorParameters<typeof Style>[0];
+
 /** 绘制方法 */
 export default class Draw extends Style {
   /** 监听元素大小 */
@@ -24,8 +26,8 @@ export default class Draw extends Style {
   /** 通知重新加载 */
   notifyReload?: () => void;
 
-  constructor(id: string) {
-    super(id);
+  constructor(option: ConstructorOption) {
+    super(option);
     if (this.canvas) {
       this.resizeObserver = new ResizeObserver(
         _Debounce(() => {

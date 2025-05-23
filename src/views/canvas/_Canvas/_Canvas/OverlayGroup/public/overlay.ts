@@ -1,7 +1,7 @@
 import _Canvas from "../..";
 import { type Overlay as OverlayType } from "../index";
 import Base from "./base";
-import type { EventHandler } from "./event";
+import type { EventHandler } from "../../core/eventController";
 
 type ConstructorOption<T, V> = ConstructorParameters<typeof Base>[0] & {
   /** 样式 */

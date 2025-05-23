@@ -7,6 +7,7 @@ import GeometricBoundary from "./public/geometricBoundary";
 type ConstructorOption = ConstructorParameters<
   typeof GeometricBoundary<PolygonStyleType>
 >[0] & {
+  /** 是否为矩形 */
   isRect?: boolean;
 };
 

@@ -1,6 +1,9 @@
 import { _CalculateDistance2D, _GetMidpoint } from "nhanh-pure-function";
 import type { Overlay } from "../OverlayGroup";
 import Draw from "./draw";
+import type { EventHandler } from "./eventController";
+
+type ConstructorOption = ConstructorParameters<typeof Draw>[0];
 
 /** 事件管理器 */
 export default class Event extends Draw {
@@ -13,9 +16,10 @@ export default class Event extends Draw {
 
   private unBind?: () => void;
 
-  constructor(id: string) {
-    super(id);
+  constructor(option: ConstructorOption) {
+    super(option);
     this.initEvent();
+    this.addEventListener("contextmenuable", this.defaultContextmenu);
   }
   /** 初始化事件 */
   private initEvent() {
@@ -61,18 +65,32 @@ export default class Event extends Draw {
     const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 
     if (this.lastClickedOverlay != clickOverlay)
-      this.lastClickedOverlay?.notifyClick(false, event.offsetX, event.offsetY);
+      this.lastClickedOverlay?.notifyClick(false, event);
 
-    clickOverlay?.notifyClick(true, event.offsetX, event.offsetY);
+    clickOverlay?.notifyClick(true, event);
     this.lastClickedOverlay = clickOverlay;
   }
+  /** 上一个被右击的覆盖物 */
+  private lastContextmenuOverlay?: Overlay;
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
     event.preventDefault();
-    console.log("mousecontextmenu");
-    this.lastClickedOverlay?.notifyClick(false, event.offsetX, event.offsetY);
-    this.lastClickedOverlay = undefined;
+    const contextmenuOverlay = this.findOverlayByPoint(
+      event.offsetX,
+      event.offsetY
+    );
+
+    if (this.lastContextmenuOverlay != contextmenuOverlay)
+      this.lastContextmenuOverlay?.notifyContextmenu(false, event);
+
+    contextmenuOverlay?.notifyContextmenu(true, event);
+    this.lastContextmenuOverlay = contextmenuOverlay;
   }
+  defaultContextmenu: EventHandler<"contextmenuable"> = (event, mouseEvent) => {
+    const lastClickedOverlay = this.lastClickedOverlay;
+    if (lastClickedOverlay && lastClickedOverlay.isDraggable)
+      lastClickedOverlay.notifyClick(false, mouseEvent);
+  };
   /** 鼠标进入画布 */
   private mouseenter(event: MouseEvent) {
     this.mouseInCanvas = true;
@@ -188,8 +206,8 @@ export default class Event extends Draw {
     const downOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 
     if (this.lastDownOverlay != downOverlay) {
-      this.lastDownOverlay?.notifyDown(false, event.offsetX, event.offsetY);
-      downOverlay?.notifyDown(true, event.offsetX, event.offsetY);
+      this.lastDownOverlay?.notifyDown(false, event);
+      downOverlay?.notifyDown(true, event);
     }
 
     this.lastDownOverlay = downOverlay;
@@ -204,23 +222,23 @@ export default class Event extends Draw {
   private lastHoverOverlay?: Overlay;
   /** 鼠标移动 */
   private mousemove(event: MouseEvent) {
-    const { clientX, clientY } = event;
-
     if (this.isAuto) return;
 
     // 处理拖拽逻辑
-    if (this.mouseIsDown) this.handleDragMove(clientX, clientY);
+    if (this.mouseIsDown) this.handleDragMove(event);
     // 处理 hover 逻辑
     else this.handleHover(event);
   }
   /** 处理拖拽移动 */
-  private handleDragMove(clientX: number, clientY: number) {
+  private handleDragMove(event: MouseEvent) {
     const { lockDragAndResize, lastDownOverlay } = this;
 
     if (lockDragAndResize) return;
 
-    if (lastDownOverlay?.draggable) {
-      this.notifyDraggableOverlays(clientX, clientY);
+    const { clientX, clientY } = event;
+
+    if (lastDownOverlay?.isDraggable) {
+      this.notifyDraggableOverlays(event);
     } else {
       this.handleCanvasPan(clientX, clientY);
     }
@@ -229,19 +247,18 @@ export default class Event extends Draw {
     this.lockNotifyClick = true;
   }
   /** 通知可拖拽的 overlays */
-  private notifyDraggableOverlays(clientX: number, clientY: number) {
+  private notifyDraggableOverlays(event: MouseEvent) {
     const lastDownOverlay = this.lastDownOverlay!;
     const { mouseLastPosition } = this;
+    const { clientX, clientY } = event;
 
-    const targets = lastDownOverlay.sharedHoverOverlays || [];
-    if (!targets.includes(lastDownOverlay)) targets.push(lastDownOverlay);
-
-    targets.forEach((target) => {
-      target.notifyDraggable(
-        clientX - mouseLastPosition.x,
-        clientY - mouseLastPosition.y
-      );
-    });
+    lastDownOverlay.notifyDraggable(
+      {
+        offsetX: clientX - mouseLastPosition.x,
+        offsetY: clientY - mouseLastPosition.y,
+      },
+      event
+    );
   }
   /** 处理画布平移 */
   private handleCanvasPan(clientX: number, clientY: number) {
@@ -277,7 +294,7 @@ export default class Event extends Draw {
     const isSharedHover =
       this.lastHoverOverlay &&
       hoverOverlay &&
-      hoverOverlay.sharedHoverOverlays?.includes(this.lastHoverOverlay);
+      hoverOverlay.hasController("hover", this.lastHoverOverlay);
 
     if (!isSharedHover) {
       this.clearHoverState(event);
@@ -291,31 +308,18 @@ export default class Event extends Draw {
     if (!this.lastHoverOverlay) return;
 
     this.canvas.classList.remove(this.getHoverClass(this.lastHoverOverlay));
-    this.notifyHoverOverlays(this.lastHoverOverlay, event, false);
+    this.lastHoverOverlay.notifyHover(false, event);
   }
   /** 应用新的 hover 状态 */
   private applyHoverState(overlay: Overlay | undefined, event: MouseEvent) {
     if (!overlay) return;
 
     this.canvas.classList.add(this.getHoverClass(overlay));
-    this.notifyHoverOverlays(overlay, event, true);
-  }
-  /** 通用 hover 状态通知方法 */
-  private notifyHoverOverlays(
-    overlay: Overlay,
-    event: MouseEvent,
-    isHovering: boolean
-  ) {
-    const targets = overlay.sharedHoverOverlays || [];
-    if (!targets.includes(overlay)) targets.push(overlay);
-
-    targets.forEach((target) => {
-      target.notifyHover(isHovering, event.offsetX, event.offsetY);
-    });
+    overlay.notifyHover(true, event);
   }
   /** 获取 hover 的 CSS class */
   private getHoverClass(overlay: Overlay): string {
-    return overlay.draggable
+    return overlay.isDraggable
       ? "_nhanh_canvas_hover_overlay_draggable"
       : "_nhanh_canvas_hover_overlay";
   }

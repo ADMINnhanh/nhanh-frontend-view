@@ -1,12 +1,16 @@
 import { _GenerateUUID } from "nhanh-pure-function";
 import type _Canvas from "../..";
-import EventController from "./event";
+import EventController from "../../core/eventController";
 import Show from "./show";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0] & {
+  /** 名称 */
   name?: string;
+  /** 自定义扩展数据 */
   extData?: any;
+  /** 主画布 */
   mainCanvas?: _Canvas;
+  /** 通知重新加载 */
   notifyReload?: (needForceExecute?: boolean) => void;
 };
 

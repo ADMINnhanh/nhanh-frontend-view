@@ -3,7 +3,7 @@ import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
 import { _Schedule } from "nhanh-pure-function";
-import type { EventHandler } from "./public/event";
+import type { EventHandler } from "../core/eventController";
 
 type ConstructorOption = ConstructorParameters<
   typeof Overlay<PointStyleType, [number, number]>
@@ -49,7 +49,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   };
   /** 处理悬停状态变化 */
   defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {
-    const isHover = event.data;
+    const isHover = event.data.state;
 
     const animationDuration = 300; // 动画持续时间(ms)
     const defaultLineWidth = this.setCanvasStyles().width;
