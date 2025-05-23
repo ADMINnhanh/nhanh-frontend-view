@@ -93,6 +93,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   private lockedCanCreateOrDeleteHandlePoint = false;
 
   constructor(option: ConstructorOption<T>) {
+    option.redrawOnIsHoverChange = option.redrawOnIsHoverChange ?? true;
+
     super(option);
 
     const { isShowHandlePoint, canCreateOrDeleteHandlePoint } = option;

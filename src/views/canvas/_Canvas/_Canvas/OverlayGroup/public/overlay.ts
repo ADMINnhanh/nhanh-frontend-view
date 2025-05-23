@@ -41,6 +41,8 @@ export default abstract class Overlay<
   protected path?: Path2D;
 
   constructor(option: ConstructorOption<T, V>) {
+    option.isDraggable = option.isDraggable ?? false;
+
     super(option);
 
     const {

@@ -74,7 +74,7 @@ export default class EventController {
   /** 是否可以双击 */
   isDoubleClickable = true;
   /** 是否可以拖动 */
-  isDraggable = false;
+  isDraggable = true;
 
   /** 事件管理器 */
   private readonly listeners: EventListeners = {
