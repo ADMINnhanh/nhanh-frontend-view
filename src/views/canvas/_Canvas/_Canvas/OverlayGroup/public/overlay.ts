@@ -49,7 +49,7 @@ export default abstract class Overlay<
       extraOffset,
       notifyReload,
       style,
-      zIndex,
+      zIndex = 0,
       position,
       dynamicPosition,
       value,

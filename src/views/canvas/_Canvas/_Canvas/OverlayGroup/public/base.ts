@@ -29,7 +29,7 @@ export default abstract class Base extends EventController {
   constructor(option: ConstructorOption) {
     super(option);
 
-    option.name = option.name || _GenerateUUID("base-");
+    option.name = option.name || _GenerateUUID("default-name-");
     const { name, extData, mainCanvas } = option;
     Object.assign(this, { name, extData, mainCanvas });
   }
@@ -42,6 +42,6 @@ export default abstract class Base extends EventController {
   }
 
   /** 通知重新加载 */
-  protected notifyReload?: (needForceExecute?: boolean) => void;
+  notifyReload?: (needForceExecute?: boolean) => void;
   abstract setNotifyReload(notifyReload?: () => void): void;
 }

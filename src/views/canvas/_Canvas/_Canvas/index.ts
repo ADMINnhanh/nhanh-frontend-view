@@ -77,7 +77,6 @@ export default class _Canvas extends QuickMethod {
       layer_polygon,
       layer_custom,
     ]);
-    console.log(layerGroup);
 
     this.setLayerGroups(layerGroup);
   }

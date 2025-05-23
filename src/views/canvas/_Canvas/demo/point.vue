@@ -8,10 +8,10 @@ import { NButton, NSpace, NSwitch } from "naive-ui";
 const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
-const point_value = new _Canvas.Point({ value: [1, 1], draggable: true });
+const point_value = new _Canvas.Point({ value: [1, 1], isDraggable: true });
 const point_position = new _Canvas.Point({
   position: [-100, -100],
-  draggable: true,
+  isDraggable: true,
 });
 const point_arr = [point_value, point_position];
 
@@ -28,7 +28,7 @@ function UpdatePosition(delta: number) {
   });
 }
 function UpdateDraggable(draggable: boolean) {
-  point_arr.forEach((point) => (point.draggable = draggable));
+  point_arr.forEach((point) => (point.isDraggable = draggable));
 }
 
 onMounted(() => {

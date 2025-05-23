@@ -23,7 +23,10 @@ export default class Layer extends Base {
     super.setMainCanvas(mainCanvas);
     this.canvas.width = mainCanvas?.rect?.value.width || 0;
     this.canvas.height = mainCanvas?.rect?.value.height || 0;
-    this.groups.forEach((group) => group.setMainCanvas(mainCanvas));
+    this.groups.forEach((group) => {
+      group.setMainCanvas(mainCanvas);
+      group.parent = this;
+    });
   }
 
   setNotifyReload(notifyReload?: () => void) {

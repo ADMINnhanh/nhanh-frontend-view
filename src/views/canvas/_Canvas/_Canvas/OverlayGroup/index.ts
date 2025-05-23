@@ -21,7 +21,10 @@ export default class OverlayGroup extends Base {
 
   setMainCanvas(mainCanvas?: _Canvas) {
     super.setMainCanvas(mainCanvas);
-    this.overlays.forEach((overlay) => overlay.setMainCanvas(mainCanvas));
+    this.overlays.forEach((overlay) => {
+      overlay.setMainCanvas(mainCanvas);
+      overlay.parent = this;
+    });
     if (mainCanvas && this.overlays.size) this.notifyReload?.();
   }
 

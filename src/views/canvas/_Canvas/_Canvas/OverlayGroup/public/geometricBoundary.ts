@@ -97,7 +97,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
     super(option);
 
-    const { isShowHandlePoint, canCreateOrDeleteHandlePoint } = option;
+    const { isShowHandlePoint = true, canCreateOrDeleteHandlePoint = true } =
+      option;
     Object.assign(this, { isShowHandlePoint, canCreateOrDeleteHandlePoint });
 
     this.addEventListener("click", this.defaultClick);

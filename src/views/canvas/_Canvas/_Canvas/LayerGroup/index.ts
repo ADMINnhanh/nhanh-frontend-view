@@ -17,7 +17,10 @@ export default class LayerGroup extends Base {
 
   setMainCanvas(mainCanvas?: _Canvas) {
     super.setMainCanvas(mainCanvas);
-    this.layers.forEach((layer) => layer.setMainCanvas(mainCanvas));
+    this.layers.forEach((layer) => {
+      layer.setMainCanvas(mainCanvas);
+      layer.parent = this;
+    });
   }
 
   setNotifyReload(notifyReload?: () => void) {

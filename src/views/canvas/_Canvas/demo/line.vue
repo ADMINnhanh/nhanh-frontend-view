@@ -14,7 +14,7 @@ const line_value = new _Canvas.Line({
     [2, 2],
     [3, 1],
   ],
-  draggable: true,
+  isDraggable: true,
 });
 const line_position = new _Canvas.Line({
   position: [
@@ -22,7 +22,7 @@ const line_position = new _Canvas.Line({
     [-100, -100],
     [50, -100],
   ],
-  draggable: true,
+  isDraggable: true,
 });
 const line_Infinite = new _Canvas.Line({
   value: [
@@ -30,7 +30,7 @@ const line_Infinite = new _Canvas.Line({
     [-1, 1],
   ],
   infinite: true,
-  draggable: true,
+  isDraggable: true,
 });
 const line_arr = [line_value, line_position, line_Infinite];
 
@@ -53,7 +53,7 @@ function UpdatePosition(delta: number) {
   });
 }
 function UpdateDraggable(draggable: boolean) {
-  line_arr.forEach((line) => (line.draggable = draggable));
+  line_arr.forEach((line) => (line.isDraggable = draggable));
 }
 function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
   line_arr.forEach((line) => (line.isShowHandlePoint = isShowHandlePoint));
