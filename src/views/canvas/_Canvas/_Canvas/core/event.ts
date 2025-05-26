@@ -133,10 +133,8 @@ export default class Event extends Draw {
   private keydown(event: KeyboardEvent) {
     const { mouseInCanvas, offset, delta } = this;
     const key = event.key;
-    // console.log(key);
-
     if (mouseInCanvas) {
-      if (!this.isDraggable && !this.isAuto) {
+      if (this.isDraggable && !this.isAuto) {
         const step = this.getStep(key);
 
         switch (key) {
@@ -352,9 +350,9 @@ export default class Event extends Draw {
   private touchmove(event: TouchEvent) {
     const touches = event.touches;
     event.preventDefault();
-    const { oldClientX, oldClientY, offset, delta, isAuto } = this;
+    const { oldClientX, oldClientY, offset, delta, isAuto, isDraggable } = this;
 
-    if (!this.isDraggable && !isAuto) {
+    if (isDraggable && !isAuto) {
       if (touches.length === 1) {
         const { clientX, clientY } = touches[0];
         if (oldClientX.length) {

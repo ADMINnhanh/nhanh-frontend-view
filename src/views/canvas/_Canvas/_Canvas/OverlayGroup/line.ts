@@ -1,8 +1,7 @@
-import { _Clone } from "nhanh-pure-function";
+import { _AreAllArraysValid, _Clone } from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
-import DataProcessor from "../core/dataProcessor";
 import GeometricBoundary from "./public/geometricBoundary";
 
 type ConstructorOption = ConstructorParameters<
@@ -68,8 +67,8 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     let { value, position } = this;
     const [isValue, isPosition] = [
-      DataProcessor.IsValids(value) && value!.length > 1,
-      DataProcessor.IsValids(position) && position!.length > 1,
+      _AreAllArraysValid(value) && value!.length > 1,
+      _AreAllArraysValid(position) && position!.length > 1,
     ];
 
     if (!isValue && !isPosition) {

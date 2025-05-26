@@ -1,8 +1,8 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
-import DataProcessor from "../core/dataProcessor";
 import GeometricBoundary from "./public/geometricBoundary";
+import { _AreAllArraysValid } from "nhanh-pure-function";
 
 type ConstructorOption = ConstructorParameters<
   typeof GeometricBoundary<PolygonStyleType>
@@ -67,8 +67,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     let { value, position, isRect } = this;
 
     let [isValue, isPosition] = [
-      DataProcessor.IsValids(value) && value!.length > (isRect ? 1 : 2),
-      DataProcessor.IsValids(position) && position!.length > (isRect ? 1 : 2),
+      _AreAllArraysValid(value) && value!.length > (isRect ? 1 : 2),
+      _AreAllArraysValid(position) && position!.length > (isRect ? 1 : 2),
     ];
 
     if (!isValue && !isPosition) return (this.dynamicPosition = undefined);

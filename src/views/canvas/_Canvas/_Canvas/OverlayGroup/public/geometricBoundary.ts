@@ -1,8 +1,11 @@
-import { _Clone, _GetMidpoint } from "nhanh-pure-function";
+import {
+  _Clone,
+  _GetMidpoint,
+  _PointToLineDistance,
+} from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./overlay";
 import Point from "../point";
-import DataProcessor from "../../core/dataProcessor";
 import type { EventHandler } from "../../public/eventController";
 
 // 定义点的类型
@@ -35,7 +38,7 @@ function findInsertIndex(
   let insertIndex = -1;
 
   for (let i = 0; i < controlPoints.length - 1; i++) {
-    const distance = DataProcessor.PointToLineDistance(
+    const distance = _PointToLineDistance(
       clickPosition,
       controlPoints[i],
       controlPoints[i + 1]

@@ -1,8 +1,7 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
-import DataProcessor from "../core/dataProcessor";
-import { _Schedule } from "nhanh-pure-function";
+import { _IsSingleArrayValid, _Schedule } from "nhanh-pure-function";
 import type { EventHandler } from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<
@@ -152,9 +151,11 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
   updateBaseData() {
     if (!this.mainCanvas) return;
-    const IsValid = DataProcessor.IsValid;
     let { value, position } = this;
-    const [isValue, isPosition] = [IsValid(value), IsValid(position)];
+    const [isValue, isPosition] = [
+      _IsSingleArrayValid(value),
+      _IsSingleArrayValid(position),
+    ];
 
     if (!isValue && !isPosition) {
       return (this.dynamicPosition = undefined);

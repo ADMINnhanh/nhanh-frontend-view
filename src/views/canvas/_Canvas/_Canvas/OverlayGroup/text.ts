@@ -1,8 +1,8 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
-import DataProcessor from "../core/dataProcessor";
 import type { EventHandler } from "../public/eventController";
+import { _IsSingleArrayValid } from "nhanh-pure-function";
 
 type ConstructorOption = ConstructorParameters<
   typeof Overlay<TextStyleType, [number, number]>
@@ -80,9 +80,11 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     if (!this.mainCanvas) return;
     if (!this.text || this.text.length == 0)
       return (this.dynamicPosition = undefined);
-    const IsValid = DataProcessor.IsValid;
     let { value, position } = this;
-    const [isValue, isPosition] = [IsValid(value), IsValid(position)];
+    const [isValue, isPosition] = [
+      _IsSingleArrayValid(value),
+      _IsSingleArrayValid(position),
+    ];
 
     if (!isValue && !isPosition) {
       return (this.dynamicPosition = undefined);

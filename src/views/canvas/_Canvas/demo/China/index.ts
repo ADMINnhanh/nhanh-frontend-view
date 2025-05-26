@@ -1,7 +1,5 @@
-import { _ReadFile } from "nhanh-pure-function";
-import DataProcessor from "../../_Canvas/core/dataProcessor";
+import { _LngLatToPlane, _ReadFile } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
-import type OverlayGroup from "../../_Canvas/OverlayGroup";
 
 type FeatureCollection = {
   features: {
@@ -49,23 +47,22 @@ export default function ChinaData() {
       chinaData.push(chinaDataItem);
 
       properties.center =
-        properties.center && DataProcessor.LngLatToPlane(...properties.center);
+        properties.center && _LngLatToPlane(...properties.center);
       properties.centroid =
-        properties.centroid &&
-        DataProcessor.LngLatToPlane(...properties.centroid);
+        properties.centroid && _LngLatToPlane(...properties.centroid);
 
       if (geometry.type == "MultiPolygon")
         geometry.coordinates.forEach((v) => {
           v.forEach((item) => {
             chinaDataItem.geometry.push(
-              item.map((location) => DataProcessor.LngLatToPlane(...location))
+              item.map((location) => _LngLatToPlane(...location))
             );
           });
         });
       else
         geometry.coordinates.forEach((v) =>
           chinaDataItem.geometry.push(
-            v.map((location) => DataProcessor.LngLatToPlane(...location))
+            v.map((location) => _LngLatToPlane(...location))
           )
         );
     });
