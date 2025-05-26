@@ -7,9 +7,9 @@ type ConstructorOption = ConstructorParameters<typeof EventController>[0] & {
   /** 画布 id */
   id: string;
   /** 轴配置 */
-  axisConfig?: BaseData["axisConfig"];
+  axisConfig?: Parameters<BaseData["setAxis"]>[0];
   /** 默认中心点 */
-  defaultCenter?: BaseData["defaultCenter"];
+  defaultCenter?: Parameters<BaseData["setDefaultCenter"]>[0];
   /** 偏移量 */
   offset?: BaseData["offset"];
 };

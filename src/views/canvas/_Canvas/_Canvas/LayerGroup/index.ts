@@ -17,9 +17,9 @@ export default class LayerGroup extends Base {
 
     this.addEventListener("contextmenu", this.defaultContextmenu);
     this.addEventListener("click", this.defaultClick);
-    this.addEventListener("dblclick", this.defaultDblclick);
+    this.addEventListener("doubleClick", this.defaultDoubleClick);
     this.addEventListener("hover", this.defaultHover);
-    this.addEventListener("draggable", this.defaultDraggable);
+    this.addEventListener("dragg", this.defaultDragg);
     this.addEventListener("down", this.defaultDown);
   }
 
@@ -28,11 +28,11 @@ export default class LayerGroup extends Base {
     event.stopPropagation();
   defaultClick: EventHandler<"click"> = (event, mouseEvent) =>
     event.stopPropagation();
-  defaultDblclick: EventHandler<"dblclick"> = (event, mouseEvent) =>
+  defaultDoubleClick: EventHandler<"doubleClick"> = (event, mouseEvent) =>
     event.stopPropagation();
   defaultHover: EventHandler<"hover"> = (event, mouseEvent) =>
     event.stopPropagation();
-  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) =>
+  defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) =>
     event.stopPropagation();
   defaultDown: EventHandler<"down"> = (event, mouseEvent) =>
     event.stopPropagation();

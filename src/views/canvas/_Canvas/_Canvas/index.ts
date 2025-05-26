@@ -10,11 +10,10 @@ import Polygon from "./OverlayGroup/polygon";
 import Axis from "./core/axis";
 import Custom from "./OverlayGroup/custom";
 
-type ConstructorOption = ConstructorParameters<typeof QuickMethod>[0] &
-  DeepPartial<{
-    /** 轴线显示属性 */
-    axisShow: _Canvas["drawAxis"]["show"];
-  }>;
+type ConstructorOption = ConstructorParameters<typeof QuickMethod>[0] & {
+  /** 轴线显示属性 */
+  axisShow?: Parameters<_Canvas["toggleAxis"]>[0];
+};
 
 /** 画布类 */
 export default class _Canvas extends QuickMethod {
@@ -39,10 +38,8 @@ export default class _Canvas extends QuickMethod {
   constructor(option: ConstructorOption) {
     super(option);
 
-    const { axisShow } = option;
-
     this.drawAxis = new Axis(this);
-    if (axisShow) this.toggleAxis(axisShow);
+    if ("axisShow" in option) this.toggleAxis(option.axisShow);
 
     this.initLayerGroups();
     this.updateCenter();

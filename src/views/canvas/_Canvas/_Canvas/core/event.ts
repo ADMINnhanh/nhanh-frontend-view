@@ -112,18 +112,18 @@ export default class Event extends Draw {
     /** 松开的时间 */
     keyupTime: 0,
     /** 是否是双击 */
-    dblclick: false,
+    doubleClick: false,
   };
   /** 获取按键的步长 */
   private getStep(key: string): number {
     const { lastPressedKey } = this;
-    if (lastPressedKey.dblclick) return 4;
+    if (lastPressedKey.doubleClick) return 4;
 
     if (
       lastPressedKey.key === key &&
       Date.now() - lastPressedKey.keyupTime < 300
     ) {
-      lastPressedKey.dblclick = true;
+      lastPressedKey.doubleClick = true;
       return 4;
     }
 
@@ -181,7 +181,7 @@ export default class Event extends Draw {
       const key = event.key;
       lastPressedKey.key = key;
       lastPressedKey.keyupTime = Date.now();
-      lastPressedKey.dblclick = false;
+      lastPressedKey.doubleClick = false;
     }
   }
   /** 滚轮滚动 */
@@ -245,7 +245,7 @@ export default class Event extends Draw {
     if (lockDragAndResize) return;
 
     if (lastDownOverlay?.checkInteraction("isDraggable")) {
-      this.notifyDraggableOverlays(event);
+      this.notifyDraggOverlays(event);
     } else {
       this.handleCanvasPan(event);
     }
@@ -255,12 +255,12 @@ export default class Event extends Draw {
     this.lockNotifyClick = true;
   }
   /** 通知可拖拽的 overlays */
-  private notifyDraggableOverlays(event: MouseEvent) {
+  private notifyDraggOverlays(event: MouseEvent) {
     const lastDownOverlay = this.lastDownOverlay!;
     const { mouseLastPosition } = this;
     const { clientX, clientY } = event;
 
-    lastDownOverlay.notifyDraggable(
+    lastDownOverlay.notifyDragg(
       {
         offsetX: clientX - mouseLastPosition.x,
         offsetY: clientY - mouseLastPosition.y,
@@ -279,7 +279,7 @@ export default class Event extends Draw {
     offset.x += offsetX;
     offset.y += offsetY;
     this.redrawOnce();
-    this.notifyDraggable({ offsetX, offsetY }, event);
+    this.notifyDragg({ offsetX, offsetY }, event);
   }
   /** 处理 hover 逻辑 */
   private handleHover(event: MouseEvent) {

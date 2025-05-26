@@ -18,7 +18,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     super(option);
 
     this.addEventListener("hover", this.defaultHover);
-    this.addEventListener("draggable", this.defaultDraggable);
+    this.addEventListener("dragg", this.defaultDragg);
   }
 
   protected updateValueScope() {
@@ -27,7 +27,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.setExtraOffset(this.extraOffset, false);
   }
 
-  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) => {
+  defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
     const { offsetX, offsetY } = event.data;
     const { x, y } = this.calculateOffset(offsetX, offsetY);
     this.value = [this.value![0] + x.value, this.value![1] + y.value];

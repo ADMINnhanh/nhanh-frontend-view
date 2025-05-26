@@ -115,7 +115,7 @@ export default function ChinaData() {
 //     overlayGroup.overlays.forEach((overlay) => {
 //       overlay.sharedHoverOverlays = overlays;
 //       overlay.addEventListener("click", commonClickEvent);
-//       overlay.addEventListener("dblclick", commonDblClickEvent);
+//       overlay.addEventListener("doubleClick", commonDblClickEvent);
 //     });
 
 //     overlayGroups.push(overlayGroup);

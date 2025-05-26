@@ -102,8 +102,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     Object.assign(this, { isShowHandlePoint, canCreateOrDeleteHandlePoint });
 
     this.addEventListener("click", this.defaultClick);
-    this.addEventListener("dblclick", this.defaultDblclick);
-    this.addEventListener("draggable", this.defaultDraggable);
+    this.addEventListener("doubleClick", this.defaultDoubleClick);
+    this.addEventListener("dragg", this.defaultDragg);
   }
 
   /** 默认点击事件 点击后切换控制点显示状态 */
@@ -115,7 +115,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     if (state != oldState && !(this as any).infinite) this.notifyReload?.();
   };
   /** 默认点击事件 点击后 创建/删除 控制点 */
-  defaultDblclick: EventHandler<"dblclick"> = (event, mouseEvent) => {
+  defaultDoubleClick: EventHandler<"doubleClick"> = (event, mouseEvent) => {
     if (mouseEvent) {
       if (!this.isShowHandlePoint) return;
 
@@ -241,7 +241,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   }
 
   /** 处理拖动状态变化 */
-  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) => {
+  defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
     if (!this.mainCanvas) return;
 
     /** 移动整体 */
@@ -273,7 +273,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       );
       if (hover_point_index != -1) {
         const point = this.handlePoints[hover_point_index];
-        point.notifyDraggable(event.data, mouseEvent);
+        point.notifyDragg(event.data, mouseEvent);
         this.value![hover_point_index] = point.value!;
         this.position![hover_point_index] = point.position!;
         this.dynamicPosition![hover_point_index] = point.dynamicPosition!;

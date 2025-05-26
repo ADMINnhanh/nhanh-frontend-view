@@ -16,9 +16,9 @@ type EventMap = {
   down: State;
   contextmenu: State;
   click: State;
-  dblclick: State;
+  doubleClick: State;
   hover: State;
-  draggable: { offsetX: number; offsetY: number };
+  dragg: { offsetX: number; offsetY: number };
 };
 
 export type EventHandler<T extends keyof EventMap> = (
@@ -29,6 +29,14 @@ export type EventHandler<T extends keyof EventMap> = (
 type EventListeners = {
   [K in keyof EventMap]: Set<EventHandler<K>>;
 };
+
+type NotifyType =
+  | "notifyDown"
+  | "notifyDragg"
+  | "notifyContextmenu"
+  | "notifyClick"
+  | "notifyDoubleClick"
+  | "notifyHover";
 
 type InteractionType =
   | "isDownable"
@@ -82,8 +90,8 @@ export default class EventController {
     down: new Set(),
     contextmenu: new Set(),
     click: new Set(),
-    dblclick: new Set(),
-    draggable: new Set(),
+    doubleClick: new Set(),
+    dragg: new Set(),
   };
 
   constructor(options: EventControllerOptions) {
@@ -143,15 +151,21 @@ export default class EventController {
     const event = new _CanvasEvent(data);
     this.listeners[type].forEach((handler) => handler(event, mouseEvent));
 
-    const notifyHandler =
-      "notify" + (type.charAt(0).toUpperCase() + type.slice(1));
+    const notifyHandler = ("notify" +
+      (type.charAt(0).toUpperCase() + type.slice(1))) as NotifyType;
 
-    /** @ts-ignore */
-    if (event.canPropagate) this.parent?.[notifyHandler](data, mouseEvent);
+    const transferData: any =
+      notifyHandler == "notifyDragg"
+        ? data
+        : (data as EventMap[Exclude<keyof EventMap, "dragg">]).state;
+
+    if (event.canPropagate)
+      this.parent?.[notifyHandler](transferData, mouseEvent);
+
     this.sharedControllers[type]?.forEach(
       (controller) =>
-        /** @ts-ignore */
-        controller !== this && controller[notifyHandler](data, mouseEvent)
+        controller !== this &&
+        controller[notifyHandler](transferData, mouseEvent)
     );
   }
   // 状态更新方法
@@ -170,10 +184,28 @@ export default class EventController {
       case "click":
         this._isClick = _data.state;
         break;
-      case "dblclick":
+      case "doubleClick":
         this._isDblClick = _data.state;
         break;
     }
+  }
+
+  private _eventDate: Partial<Record<keyof EventMap, string>> = {};
+  private _clearEventDate = false;
+  private checkEventDate(key: keyof EventMap, value: any) {
+    const oldValue = this._eventDate[key];
+    const newValue = JSON.stringify(value);
+
+    if (oldValue == newValue) return false;
+    this._eventDate[key] = newValue;
+    if (!this._clearEventDate) {
+      this._clearEventDate = true;
+      Promise.resolve().then(() => {
+        this._clearEventDate = false;
+        this._eventDate = {};
+      });
+    }
+    return true;
   }
 
   /** 是否悬停 */
@@ -182,6 +214,7 @@ export default class EventController {
     return this.isHoverable && this._isHover;
   }
   notifyHover = (state: boolean, event?: MouseEvent) =>
+    this.checkEventDate("hover", state) &&
     this.trigger(
       "hover",
       { state, oldState: this.isHover },
@@ -195,6 +228,7 @@ export default class EventController {
     return this.isDraggable && this._isDown;
   }
   notifyDown = (state: boolean, event?: MouseEvent) =>
+    this.checkEventDate("down", state) &&
     this.trigger("down", { state, oldState: this.isDown }, event, "isDownable");
 
   /** 是否右击 */
@@ -203,6 +237,7 @@ export default class EventController {
     return this.isClickable && this._isContextmenu;
   }
   notifyContextmenu = (state: boolean, event?: MouseEvent) =>
+    this.checkEventDate("contextmenu", state) &&
     this.trigger(
       "contextmenu",
       { state, oldState: this.isContextmenu },
@@ -220,23 +255,24 @@ export default class EventController {
   /** 双击判定，两次点击之间的间隔（毫秒） */
   doubleClickInterval = 300;
   notifyClick = (state: boolean, event?: MouseEvent) => {
-    this.trigger(
-      "click",
-      { state, oldState: this.isClick },
-      event,
-      "isClickable"
-    );
+    if (!this.checkEventDate("click", state)) return;
 
-    const oldDblClick = this._isDblClick;
-    let newDblClick = this._isDblClick;
+    let isDblClick = false;
     if (state) {
-      newDblClick = Date.now() - this.clickTimestamp < this.doubleClickInterval;
-      this.clickTimestamp = newDblClick ? 0 : Date.now();
+      isDblClick = Date.now() - this.clickTimestamp < this.doubleClickInterval;
+      this.clickTimestamp = isDblClick ? 0 : Date.now();
     } else {
       this._isDblClick = false;
       this.clickTimestamp = 0;
     }
-    if (newDblClick != oldDblClick) this.notifyDblclick(newDblClick, event);
+    if (isDblClick) this.notifyDoubleClick(isDblClick, event);
+    else
+      this.trigger(
+        "click",
+        { state, oldState: this.isClick },
+        event,
+        "isClickable"
+      );
   };
 
   /** 是否双击 */
@@ -244,16 +280,19 @@ export default class EventController {
   get isDblClick() {
     return this.isDoubleClickable && this._isDblClick;
   }
-  notifyDblclick = (state: boolean, event?: MouseEvent) =>
+  notifyDoubleClick = (state: boolean, event?: MouseEvent) =>
+    this.checkEventDate("doubleClick", state) &&
     this.trigger(
-      "dblclick",
+      "doubleClick",
       { state, oldState: this.isDblClick },
       event,
       "isDoubleClickable"
     );
 
-  notifyDraggable = (
+  notifyDragg = (
     position: { offsetX: number; offsetY: number },
     event?: MouseEvent
-  ) => this.trigger("draggable", position, event, "isDraggable");
+  ) =>
+    this.checkEventDate("dragg", position) &&
+    this.trigger("dragg", position, event, "isDraggable");
 }

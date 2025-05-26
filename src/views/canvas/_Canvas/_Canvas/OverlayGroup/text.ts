@@ -26,10 +26,10 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     const { text } = option;
     Object.assign(this, { text });
 
-    this.addEventListener("draggable", this.defaultDraggable);
+    this.addEventListener("dragg", this.defaultDragg);
   }
 
-  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) => {
+  defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
     const { offsetX, offsetY } = event.data;
     const { x, y } = this.calculateOffset(offsetX, offsetY);
     this.value = [this.value![0] + x.value, this.value![1] + y.value];

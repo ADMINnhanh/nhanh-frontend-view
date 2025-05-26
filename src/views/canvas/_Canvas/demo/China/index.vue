@@ -5,22 +5,26 @@ import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import ChinaData from ".";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
+import type { EventHandler } from "../../_Canvas/core/eventController";
 
 const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
-const layer = new _Canvas.Layer("中国地图");
+const layer = new _Canvas.Layer({ name: "中国地图" });
 const overlayGroups: OverlayGroup[] = [];
 
 ChinaData().then((chinaData) => {
   chinaData.forEach((item) => {
-    const overlayGroup = new _Canvas.OverlayGroup(item.properties.name);
+    const overlayGroup = new _Canvas.OverlayGroup({
+      name: item.properties.name,
+    });
 
-    const commonClickEvent = () => {
-      window.$message.success(`这里是 ${item.properties.name}`);
+    const commonClickEvent: EventHandler<"click"> = (event) => {
+      if (event.data.state)
+        window.$message.success(`这里是 ${item.properties.name}`);
     };
-    const commonDblClickEvent = () => {
-      myCanvas.value?.setFitView(overlayGroup);
+    const commonDblClickEvent: EventHandler<"doubleClick"> = (event) => {
+      if (event.data.state) myCanvas.value?.setFitView(overlayGroup);
     };
 
     item.geometry.forEach((polygonData) => {
@@ -46,11 +50,12 @@ ChinaData().then((chinaData) => {
       overlayGroup.addOverlays([capitalCity_point, capitalCity_text]);
     }
 
+    overlayGroup.addEventListener("click", commonClickEvent);
+    overlayGroup.addEventListener("doubleClick", commonDblClickEvent);
+
     const overlays = Array.from(overlayGroup.overlays.values());
     overlayGroup.overlays.forEach((overlay) => {
-      overlay.sharedHoverOverlays = overlays;
-      overlay.addEventListener("click", commonClickEvent);
-      overlay.addEventListener("dblclick", commonDblClickEvent);
+      overlay.registerControllers("hover", overlays);
     });
 
     overlayGroups.push(overlayGroup);
@@ -59,7 +64,8 @@ ChinaData().then((chinaData) => {
 });
 
 onMounted(() => {
-  myCanvas.value = new _Canvas(id, {
+  myCanvas.value = new _Canvas({
+    id,
     axisConfig: { y: -1, count: 2000000 },
     defaultCenter: { bottom: 0 },
   });
