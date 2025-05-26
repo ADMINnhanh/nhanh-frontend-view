@@ -107,7 +107,6 @@ export default class QuickMethod extends Event {
       avoid,
       maxScale
     );
-    return console.log(minX, maxX, minY, maxY);
 
     // 计算目标位置偏移
     const offsetDifference = this.calculateOffsetDifference(
@@ -223,15 +222,28 @@ export default class QuickMethod extends Event {
     }
     // 情况2：内容过疏 → 需要增大缩放比例（填充可用空间）
     else {
-      // 计算缩小级数（根据密度比开平方确定调整幅度）
-      const shrinkLevel = Math.floor(Math.sqrt(baseDensity / maxDensity));
+      /**
+       * 递归计算值应处于的层级
+       * @param value - 当前值
+       * @param minValue - 最小值阈值
+       * @param level - 当前层级（初始调用时传入0）
+       * @returns 计算得到的层级
+       */
+      const calculateRecursiveLevel = (
+        value: number,
+        minValue: number,
+        level: number
+      ): number =>
+        value < minValue
+          ? level
+          : calculateRecursiveLevel(value / 2, minValue, level + 1);
+
+      // 计算缩小级数
+      const shrinkLevel = calculateRecursiveLevel(baseDensity, maxDensity, 0);
       // 缩小系数 = 2^级数
       const scaleDivider = Math.pow(2, shrinkLevel);
       // 所需网格代表的值 = 基准值 / 缩小系数
       const requiredGridMaxValue = baseCount / scaleDivider;
-
-      console.log(baseDensity, maxDensity);
-      console.log(shrinkLevel, scaleDivider, requiredGridMaxValue);
 
       // 缩放公式分解：
       // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) → 所需尺寸与基础尺寸差值
