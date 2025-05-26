@@ -343,7 +343,7 @@ export default class QuickMethod extends Event {
     let oldSchedule = 0;
 
     _Schedule((schedule) => {
-      if (!this.isAuto || !this.canvas || this.lockDragAndResize) return;
+      if (!this.isAuto || !this.canvas || !this.isInteractive) return;
 
       this.setScale("center", (schedule - oldSchedule) * scaleDifference);
       oldSchedule = schedule;
@@ -360,7 +360,7 @@ export default class QuickMethod extends Event {
     onComplete: () => void
   ) {
     _Schedule((schedule) => {
-      if (!this.isAuto || !this.canvas || this.lockDragAndResize) return;
+      if (!this.isAuto || !this.canvas || !this.isInteractive) return;
 
       // 插值计算当前偏移量
       this.offset = {
@@ -375,7 +375,7 @@ export default class QuickMethod extends Event {
   }
   /** 回归初始位置 */
   returnToOrigin() {
-    if (this.lockDragAndResize) return;
+    if (!this.isInteractive) return;
 
     if (this.scale == 1 && this.offset.x == 0 && this.offset.y == 0) return;
 
@@ -481,7 +481,7 @@ export default class QuickMethod extends Event {
   }
   /** 切换锁定状态 */
   toggleLock(lock?: boolean) {
-    this.lockDragAndResize = lock ?? !this.lockDragAndResize;
-    return this.lockDragAndResize;
+    this.isInteractive = lock ?? !this.isInteractive;
+    return this.isInteractive;
   }
 }

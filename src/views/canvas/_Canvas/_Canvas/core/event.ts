@@ -1,7 +1,7 @@
 import { _CalculateDistance2D, _GetMidpoint } from "nhanh-pure-function";
 import type { Overlay } from "../OverlayGroup";
 import Draw from "./draw";
-import type { EventHandler } from "./eventController";
+import type { EventHandler } from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<typeof Draw>[0];
 
@@ -93,7 +93,7 @@ export default class Event extends Draw {
   }
   defaultContextmenu: EventHandler<"contextmenu"> = (event, mouseEvent) => {
     const lastClickedOverlay = this.lastClickedOverlay;
-    if (lastClickedOverlay?.checkInteraction("isDraggable"))
+    if (lastClickedOverlay?.isDraggable)
       lastClickedOverlay.notifyClick(false, mouseEvent);
   };
   /** 鼠标进入画布 */
@@ -131,12 +131,12 @@ export default class Event extends Draw {
   }
   /** 键盘按下事件 */
   private keydown(event: KeyboardEvent) {
-    const { mouseInCanvas, offset, delta, lockDragAndResize } = this;
+    const { mouseInCanvas, offset, delta } = this;
     const key = event.key;
     // console.log(key);
 
     if (mouseInCanvas) {
-      if (!lockDragAndResize && !this.isAuto) {
+      if (!this.isDraggable && !this.isAuto) {
         const step = this.getStep(key);
 
         switch (key) {
@@ -188,8 +188,9 @@ export default class Event extends Draw {
   private wheel(event: WheelEvent) {
     event.preventDefault();
 
-    const { delta, lockDragAndResize } = this;
-    if (lockDragAndResize || this.isAuto) return;
+    const { delta, isScaleable, isAuto } = this;
+
+    if (!isScaleable || isAuto) return;
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
     // console.log(
@@ -233,6 +234,8 @@ export default class Event extends Draw {
   private mousemove(event: MouseEvent) {
     if (this.isAuto) return;
 
+    this.canvas.classList.toggle("_nhanh_canvas_draggable", this.isDraggable);
+
     // 处理拖拽逻辑
     if (this.mouseIsDown) this.handleDragMove(event);
     // 处理 hover 逻辑
@@ -240,11 +243,11 @@ export default class Event extends Draw {
   }
   /** 处理拖拽移动 */
   private handleDragMove(event: MouseEvent) {
-    const { lockDragAndResize, lastDownOverlay } = this;
+    const { lastDownOverlay } = this;
 
-    if (lockDragAndResize) return;
+    if (!this.isDraggable) return;
 
-    if (lastDownOverlay?.checkInteraction("isDraggable")) {
+    if (lastDownOverlay?.isDraggable) {
       this.notifyDraggOverlays(event);
     } else {
       this.handleCanvasPan(event);
@@ -334,7 +337,7 @@ export default class Event extends Draw {
   }
   /** 获取 hover 的 CSS class */
   private getHoverClass(overlay: Overlay): string {
-    return overlay?.checkInteraction("isDraggable")
+    return overlay?.isDraggable
       ? "_nhanh_canvas_hover_overlay_draggable"
       : "_nhanh_canvas_hover_overlay";
   }
@@ -349,10 +352,9 @@ export default class Event extends Draw {
   private touchmove(event: TouchEvent) {
     const touches = event.touches;
     event.preventDefault();
-    const { oldClientX, oldClientY, offset, delta, lockDragAndResize, isAuto } =
-      this;
+    const { oldClientX, oldClientY, offset, delta, isAuto } = this;
 
-    if (!lockDragAndResize && !isAuto) {
+    if (!this.isDraggable && !isAuto) {
       if (touches.length === 1) {
         const { clientX, clientY } = touches[0];
         if (oldClientX.length) {

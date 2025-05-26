@@ -3,7 +3,7 @@ import _Canvas from "..";
 import Overlay from "./overlay";
 import Point from "../point";
 import DataProcessor from "../../core/dataProcessor";
-import type { EventHandler } from "../../core/eventController";
+import type { EventHandler } from "../../public/eventController";
 
 // 定义点的类型
 type PointLocation = [number, number];

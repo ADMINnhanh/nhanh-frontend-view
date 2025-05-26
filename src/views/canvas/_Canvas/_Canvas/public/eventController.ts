@@ -1,3 +1,5 @@
+import EventControllerBasedata from "./eventControllerBasedata";
+
 class _CanvasEvent<T = undefined> {
   private propagationStopped = false;
 
@@ -65,25 +67,7 @@ interface EventControllerOptions {
   isDraggable?: boolean;
 }
 
-export default class EventController {
-  /** 父级 */
-  parent?: EventController;
-
-  /** 是否可以交互 */
-  isInteractive = true;
-  /** 是否可以悬停 */
-  isHoverable = true;
-  /** 是否可以按下 */
-  isDownable = true;
-  /** 是否可以右击 */
-  isContextmenuable = true;
-  /** 是否可以点击 */
-  isClickable = true;
-  /** 是否可以双击 */
-  isDoubleClickable = true;
-  /** 是否可以拖动 */
-  isDraggable = true;
-
+export default class EventController extends EventControllerBasedata<EventController> {
   /** 事件管理器 */
   private readonly listeners: EventListeners = {
     hover: new Set(),
@@ -93,10 +77,6 @@ export default class EventController {
     doubleClick: new Set(),
     dragg: new Set(),
   };
-
-  constructor(options: EventControllerOptions) {
-    Object.assign(this, { ...options });
-  }
 
   addEventListener<T extends keyof EventMap>(
     type: T,
@@ -109,19 +89,6 @@ export default class EventController {
     handler: EventHandler<T>
   ) {
     this.listeners[type].delete(handler as EventHandler<keyof EventMap>);
-  }
-
-  /**
-   * 检查特定交互类型是否启用
-   * @param type - 要检查的交互类型
-   * @returns 如果全局交互启用且特定交互类型也启用，则返回 true
-   */
-  checkInteraction(type: InteractionType): boolean {
-    return (
-      (this.parent ? this.parent.checkInteraction(type) : true) &&
-      this.isInteractive &&
-      this[type]
-    );
   }
 
   /** 共享状态集合 控制器 */
@@ -144,7 +111,7 @@ export default class EventController {
     mouseEvent: MouseEvent | undefined,
     interaction: InteractionType
   ) {
-    if (!this.checkInteraction(interaction)) return;
+    if (!this[interaction]) return;
 
     this.updateStates(type, data);
 

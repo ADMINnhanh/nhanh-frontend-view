@@ -1,7 +1,7 @@
 import { _GenerateUUID } from "nhanh-pure-function";
 import type _Canvas from "../..";
-import EventController from "../../core/eventController";
-import Show from "./show";
+import EventController from "../../public/eventController";
+import Show from "../../public/show";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0] & {
   /** 名称 */

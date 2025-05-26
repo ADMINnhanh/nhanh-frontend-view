@@ -5,7 +5,7 @@ import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import ChinaData from ".";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
-import type { EventHandler } from "../../_Canvas/core/eventController";
+import type { EventHandler } from "../../_Canvas/public/eventController";
 
 const id = _GenerateUUID();
 

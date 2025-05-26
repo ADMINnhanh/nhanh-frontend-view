@@ -2,7 +2,7 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
-import type { EventHandler } from "../core/eventController";
+import type { EventHandler } from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<
   typeof Overlay<TextStyleType, [number, number]>

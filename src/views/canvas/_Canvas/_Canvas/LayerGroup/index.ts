@@ -2,7 +2,7 @@ import _Canvas from "..";
 import type { Overlay } from "../OverlayGroup";
 import Layer from "./layer";
 import Base from "../OverlayGroup/public/base";
-import type { EventHandler } from "../core/eventController";
+import type { EventHandler } from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<typeof Base>[0];
 

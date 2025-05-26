@@ -1,19 +1,27 @@
 ._nhanh_canvas {
+  cursor: initial;
+  &:active {
+    cursor: pointer;
+  }
+}
+
+._nhanh_canvas._nhanh_canvas_draggable {
   cursor: grab;
   &:active {
     cursor: grabbing;
   }
 }
-._nhanh_canvas._nhanh_canvas_hover_overlay {
-  cursor: pointer;
+
+._nhanh_canvas_hover_overlay {
+  cursor: pointer !important;
   &:active {
-    cursor: grabbing;
+    cursor: grabbing !important;
   }
 }
 
-._nhanh_canvas._nhanh_canvas_hover_overlay_draggable {
-  cursor: pointer;
+._nhanh_canvas_hover_overlay_draggable {
+  cursor: pointer !important;
   &:active {
-    cursor: move;
+    cursor: move !important;
   }
 }

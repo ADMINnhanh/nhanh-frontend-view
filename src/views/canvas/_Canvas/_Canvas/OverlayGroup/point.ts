@@ -3,7 +3,7 @@ import Overlay from "./public/overlay";
 import { type Overlay as OverlayType } from "./index";
 import DataProcessor from "../core/dataProcessor";
 import { _Schedule } from "nhanh-pure-function";
-import type { EventHandler } from "../core/eventController";
+import type { EventHandler } from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<
   typeof Overlay<PointStyleType, [number, number]>

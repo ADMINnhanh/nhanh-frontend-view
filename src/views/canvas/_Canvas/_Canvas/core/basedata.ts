@@ -1,7 +1,7 @@
 import Axis from "./axis";
 import LayerGroup from "../LayerGroup";
 import Decimal from "decimal.js";
-import EventController from "./eventController";
+import EventController from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0] & {
   /** 画布 id */
@@ -35,8 +35,6 @@ export default class BaseData extends EventController {
     left: undefined,
     right: undefined,
   };
-  /** 是否禁用拖拽和缩放 */
-  lockDragAndResize = false;
 
   /** 精度 */
   accuracy = 5;
@@ -228,11 +226,10 @@ export default class BaseData extends EventController {
     event: "center" | { clientX: number; clientY: number },
     delta: number
   ) {
-    const { canvas, lockDragAndResize, axisConfig } = this;
+    const { canvas, isScaleable, axisConfig } = this;
     const rect = this.rect!.value;
 
-    if (lockDragAndResize) return;
-    if (!canvas || !rect)
+    if (!isScaleable || !canvas || !rect)
       return console.error("canvas is not HTMLCanvasElement");
 
     let clientX, clientY;
