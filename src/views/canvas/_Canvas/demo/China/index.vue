@@ -63,6 +63,14 @@ ChinaData().then((chinaData) => {
   layer.addGroup(overlayGroups);
 });
 
+// 12672978.186225882 2532896.253911909 12735647.60863828 2578797.783666982
+const point1 = new _Canvas.Point({
+  value: [12672978.186225882, 2532896.253911909],
+});
+const point2 = new _Canvas.Point({
+  value: [12735647.60863828, 2578797.783666982],
+});
+
 onMounted(() => {
   myCanvas.value = new _Canvas({
     id,
@@ -77,6 +85,7 @@ onMounted(() => {
   });
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer(layer);
+  myCanvas.value.addOverlay([point1, point2]);
 });
 
 defineExpose({ myCanvas });

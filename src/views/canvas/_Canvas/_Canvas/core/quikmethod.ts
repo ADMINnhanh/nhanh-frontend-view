@@ -96,7 +96,7 @@ export default class QuickMethod extends Event {
     // 计算所有覆盖层的包围盒
     const { minX, maxX, minY, maxY } =
       this.calculateBoundingBox(targetOverlays);
-    //  return console.log(minX, maxX, minY, maxY);
+    // return console.log(minX, maxX, minY, maxY);
 
     // 计算目标尺寸和缩放比例
     const targetWidth_Value = maxX - minX;
@@ -107,7 +107,7 @@ export default class QuickMethod extends Event {
       avoid,
       maxScale
     );
-    // return console.log(targetScale);
+    return console.log(minX, maxX, minY, maxY);
 
     // 计算目标位置偏移
     const offsetDifference = this.calculateOffsetDifference(
@@ -229,6 +229,9 @@ export default class QuickMethod extends Event {
       const scaleDivider = Math.pow(2, shrinkLevel);
       // 所需网格代表的值 = 基准值 / 缩小系数
       const requiredGridMaxValue = baseCount / scaleDivider;
+
+      console.log(baseDensity, maxDensity);
+      console.log(shrinkLevel, scaleDivider, requiredGridMaxValue);
 
       // 缩放公式分解：
       // 1. (requiredGridMaxValue / maxDensity - axisConfig.min) → 所需尺寸与基础尺寸差值

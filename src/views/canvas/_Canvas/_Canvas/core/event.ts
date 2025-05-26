@@ -191,11 +191,11 @@ export default class Event extends Draw {
     if (!isScaleable || isAuto) return;
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
-    // console.log(
-    //   "scale:" + this.scale,
-    //   "offset:" + JSON.stringify(this.offset),
-    //   "GridSize:" + this.getGridSize(this.scale)
-    // );
+    console.log(
+      "scale:" + this.scale,
+      "offset:" + JSON.stringify(this.offset),
+      "GridSize:" + this.getGridSize(this.scale)
+    );
 
     this.redrawOnce();
   }
