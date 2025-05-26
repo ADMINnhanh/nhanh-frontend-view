@@ -1,34 +1,37 @@
 export default class Show {
-  show = true;
-  scales?: [number, number];
+  _isVisible = true;
+  /** 是否显示 */
+  get isVisible() {
+    return this._isVisible;
+  }
+  set isVisible(isVisible: boolean) {
+    if (isVisible != this.isVisible) {
+      this.isVisible = isVisible;
+      this.notifyReload?.(true);
+    }
+  }
 
-  constructor(config?: { show?: boolean; scales?: [number, number] }) {
-    if (config?.show !== undefined) this.show = config.show;
-    if (config?.scales) this.scales = config.scales;
+  _scaleRange?: [number, number];
+  /** 显示范围 缩放比例 */
+  get scaleRange() {
+    return this._scaleRange;
+  }
+  set scaleRange(scaleRange: [number, number] | undefined) {
+    if (scaleRange != this.scaleRange) {
+      this._scaleRange = scaleRange;
+      if (this.isVisible) this.notifyReload?.();
+    }
   }
 
   /** 通知重新加载 */
   notifyReload?: (needForceExecute?: boolean) => void;
 
-  setShow(show: boolean) {
-    if (show != this.show) {
-      this.show = show;
-      this.notifyReload?.(true);
-    }
-  }
-  setScales(scales: [number, number]) {
-    if (scales != this.scales) {
-      this.scales = scales;
-      if (this.show) this.notifyReload?.();
-    }
-  }
-
   shouldRender(scale?: number, opacity?: number) {
-    if (!this.show || scale === undefined || opacity === 0) return false;
+    if (!this.isVisible || scale === undefined || opacity === 0) return false;
 
-    if (this.scales) {
-      const min = Math.min(...this.scales);
-      const max = Math.max(...this.scales);
+    if (this.scaleRange) {
+      const min = Math.min(...this.scaleRange);
+      const max = Math.max(...this.scaleRange);
       return scale >= min && scale <= max;
     }
     return true;

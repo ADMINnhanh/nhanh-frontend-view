@@ -10,10 +10,10 @@ const id = _GenerateUUID();
 let myCanvas = shallowRef<_Canvas>();
 const myCanvasConfig = ref<_Canvas>({} as _Canvas);
 const point_value = new _Canvas.Point({ value: [0, 0] });
-point_value.show.setScales([0.8, 1.2]);
+point_value.show.scaleRange = [0.8, 1.2];
 
 const show = ref(true);
-watch(show, (show) => point_value.show.setShow(show), { immediate: true });
+watch(show, (show) => (point_value.show.isVisible = show), { immediate: true });
 
 onMounted(() => {
   myCanvas.value = new _Canvas({ id });
@@ -33,7 +33,7 @@ defineExpose({ myCanvas });
     <NSpace>
       <NText type="info">show:</NText>
       <NSwitch v-model:value="show" />
-      <NText type="info">scales:</NText>
+      <NText type="info">scaleRange:</NText>
       <NText type="success">0.8 ~ 1.2</NText>
     </NSpace>
     <canvas :id="id" class="my-canvas"></canvas>

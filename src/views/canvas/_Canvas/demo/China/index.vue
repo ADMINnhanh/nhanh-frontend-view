@@ -11,6 +11,7 @@ const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 const layer = new _Canvas.Layer({ name: "中国地图" });
+layer.show.scaleRange = [0.2, 100];
 const overlayGroups: OverlayGroup[] = [];
 
 ChinaData().then((chinaData) => {
@@ -39,13 +40,13 @@ ChinaData().then((chinaData) => {
     if (center) {
       /** 省会城市 */
       const capitalCity_point = new _Canvas.Point({ value: center });
-      capitalCity_point.show.setScales([0.9, 1000]);
+      capitalCity_point.show.scaleRange = [0.9, 100];
       const capitalCity_text = new _Canvas.Text({
         text: item.properties.name,
         value: center,
         extraOffset: { x: 0, y: 20 },
       });
-      capitalCity_text.show.setScales([1.1, 1000]);
+      capitalCity_text.show.scaleRange = [1.1, 100];
 
       overlayGroup.addOverlays([capitalCity_point, capitalCity_text]);
     }

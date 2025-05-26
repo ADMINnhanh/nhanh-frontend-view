@@ -60,16 +60,16 @@ export default class QuickMethod extends Event {
       const current = stack.pop()!;
 
       if (current instanceof LayerGroup) {
-        if (!current.show.show) continue;
+        if (!current.show.isVisible) continue;
         stack.push(...current.layers.values()); // 图层组→图层
       } else if (current instanceof Layer) {
-        if (!current.show.show) continue;
+        if (!current.show.isVisible) continue;
         stack.push(...current.groups.values()); // 图层→覆盖层组
       } else if (current instanceof OverlayGroup) {
-        if (!current.show.show) continue;
+        if (!current.show.isVisible) continue;
         stack.push(...current.overlays.values()); // 覆盖层组→覆盖层
       } else {
-        if (current.show.show) overlays.push(current); // 直接收集可见覆盖层
+        if (current.show.isVisible) overlays.push(current); // 直接收集可见覆盖层
       }
     }
 
@@ -468,7 +468,7 @@ export default class QuickMethod extends Event {
     const { overlays_point } = this.getDefaultOverlayGroup() || {};
 
     if (overlays_point) {
-      overlays_point.show.setShow(show ?? !overlays_point.show);
+      overlays_point.show.isVisible = show ?? !overlays_point.show;
       this.redrawOnce();
       return overlays_point.show;
     }
@@ -478,7 +478,7 @@ export default class QuickMethod extends Event {
   toggleLine(show?: boolean) {
     const { overlays_line } = this.getDefaultOverlayGroup() || {};
     if (overlays_line) {
-      overlays_line.show.setShow(show ?? !overlays_line.show);
+      overlays_line.show.isVisible = show ?? !overlays_line.show;
       this.redrawOnce();
       return overlays_line.show;
     }
@@ -488,7 +488,7 @@ export default class QuickMethod extends Event {
   togglePolygon(show?: boolean) {
     const { overlays_polygon } = this.getDefaultOverlayGroup() || {};
     if (overlays_polygon) {
-      overlays_polygon.show.setShow(show ?? !overlays_polygon.show);
+      overlays_polygon.show.isVisible = show ?? !overlays_polygon.show;
       this.redrawOnce();
       return overlays_polygon.show;
     }
