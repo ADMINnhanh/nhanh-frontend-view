@@ -19,7 +19,8 @@ export default class Event extends Draw {
   constructor(option: ConstructorOption) {
     super(option);
     this.initEvent();
-    this.addEventListener("contextmenuable", this.defaultContextmenu);
+    this.addEventListener("contextmenu", this.defaultContextmenu);
+    this.addEventListener("down", this.defaultDown);
   }
   /** 初始化事件 */
   private initEvent() {
@@ -69,6 +70,8 @@ export default class Event extends Draw {
 
     clickOverlay?.notifyClick(true, event);
     this.lastClickedOverlay = clickOverlay;
+
+    this.notifyClick(true, event);
   }
   /** 上一个被右击的覆盖物 */
   private lastContextmenuOverlay?: Overlay;
@@ -85,10 +88,12 @@ export default class Event extends Draw {
 
     contextmenuOverlay?.notifyContextmenu(true, event);
     this.lastContextmenuOverlay = contextmenuOverlay;
+
+    this.notifyContextmenu(true, event);
   }
-  defaultContextmenu: EventHandler<"contextmenuable"> = (event, mouseEvent) => {
+  defaultContextmenu: EventHandler<"contextmenu"> = (event, mouseEvent) => {
     const lastClickedOverlay = this.lastClickedOverlay;
-    if (lastClickedOverlay && lastClickedOverlay.isDraggable)
+    if (lastClickedOverlay?.checkInteraction("isDraggable"))
       lastClickedOverlay.notifyClick(false, mouseEvent);
   };
   /** 鼠标进入画布 */
@@ -199,7 +204,6 @@ export default class Event extends Draw {
   private lastDownOverlay?: Overlay;
   /** 鼠标按下 */
   private mousedown(event: MouseEvent) {
-    this.mouseIsDown = true;
     const { clientX, clientY } = event;
     this.mouseLastPosition = { x: clientX, y: clientY };
 
@@ -211,7 +215,12 @@ export default class Event extends Draw {
     }
 
     this.lastDownOverlay = downOverlay;
+
+    this.notifyDown(true, event);
   }
+  defaultDown: EventHandler<"down"> = (event, mouseEvent) => {
+    if (mouseEvent?.button == 0) this.mouseIsDown = true;
+  };
   /** 鼠标松开 */
   private mouseup(event: MouseEvent) {
     this.mouseIsDown = false;
@@ -235,14 +244,13 @@ export default class Event extends Draw {
 
     if (lockDragAndResize) return;
 
-    const { clientX, clientY } = event;
-
-    if (lastDownOverlay?.isDraggable) {
+    if (lastDownOverlay?.checkInteraction("isDraggable")) {
       this.notifyDraggableOverlays(event);
     } else {
-      this.handleCanvasPan(clientX, clientY);
+      this.handleCanvasPan(event);
     }
 
+    const { clientX, clientY } = event;
     this.mouseLastPosition = { x: clientX, y: clientY };
     this.lockNotifyClick = true;
   }
@@ -261,12 +269,17 @@ export default class Event extends Draw {
     );
   }
   /** 处理画布平移 */
-  private handleCanvasPan(clientX: number, clientY: number) {
+  private handleCanvasPan(event: MouseEvent) {
+    const { clientX, clientY } = event;
     const { offset, mouseLastPosition } = this;
 
-    offset.x += clientX - mouseLastPosition.x;
-    offset.y += clientY - mouseLastPosition.y;
+    const offsetX = clientX - mouseLastPosition.x;
+    const offsetY = clientY - mouseLastPosition.y;
+
+    offset.x += offsetX;
+    offset.y += offsetY;
     this.redrawOnce();
+    this.notifyDraggable({ offsetX, offsetY }, event);
   }
   /** 处理 hover 逻辑 */
   private handleHover(event: MouseEvent) {
@@ -283,6 +296,8 @@ export default class Event extends Draw {
     const hoverOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 
     this.updateHoverState(hoverOverlay, event);
+
+    this.notifyHover(true, event);
   }
   /** 更新 hover 状态 */
   private updateHoverState(
@@ -319,7 +334,7 @@ export default class Event extends Draw {
   }
   /** 获取 hover 的 CSS class */
   private getHoverClass(overlay: Overlay): string {
-    return overlay.isDraggable
+    return overlay?.checkInteraction("isDraggable")
       ? "_nhanh_canvas_hover_overlay_draggable"
       : "_nhanh_canvas_hover_overlay";
   }

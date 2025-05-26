@@ -148,7 +148,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
   /** 尝试在指定位置创建新控制点 */
   private tryCreateNewHandlePoint(offsetX: number, offsetY: number): void {
-    if (this.isDblClick || !this.isPointInStroke(offsetX, offsetY)) return;
+    if (!this.isPointInStroke(offsetX, offsetY)) return;
 
     const dynamicPositions = this.getExtendedDynamicPositions();
     const insertIndex = findInsertIndex([offsetX, offsetY], dynamicPositions);

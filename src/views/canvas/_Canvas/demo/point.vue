@@ -28,7 +28,7 @@ function UpdatePosition(delta: number) {
   });
 }
 function UpdateDraggable(draggable: boolean) {
-  point_arr.forEach((point) => (point.isDraggable = draggable));
+  myCanvas.value!.isDraggable = draggable;
 }
 
 onMounted(() => {

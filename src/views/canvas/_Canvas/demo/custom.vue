@@ -7,16 +7,14 @@ import { Settings } from "@/components/popups/components/Settings";
 const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
-const overlay = new _Canvas.Custom<any>(
-  {
-    value: [
-      [0, 0],
-      [-1, -1],
-      [1, 1],
-    ],
-  },
-  (ctx: CanvasRenderingContext2D) => {
-    const mainCanvas = overlay.mainCanvas!;
+const overlay = new _Canvas.Custom<any>({
+  value: [
+    [0, 0],
+    [-1, -1],
+    [1, 1],
+  ],
+  draw: (ctx: CanvasRenderingContext2D) => {
+    const mainCanvas = myCanvas.value!;
     const percentage = mainCanvas.percentage; // 获取缩放比例
     const [x, y] = overlay.dynamicPosition![0]; // 获取中心点坐标
 
@@ -97,8 +95,8 @@ const overlay = new _Canvas.Custom<any>(
 
     // 恢复画布状态
     ctx.restore();
-  }
-);
+  },
+});
 
 onMounted(() => {
   myCanvas.value = new _Canvas({ id });

@@ -14,7 +14,7 @@ const polygon_value = new _Canvas.Polygon({
     [2, 2],
     [3, 1],
   ],
-  draggable: true,
+  isDraggable: true,
 });
 const polygon_position = new _Canvas.Polygon({
   position: [
@@ -22,7 +22,7 @@ const polygon_position = new _Canvas.Polygon({
     [-100, -100],
     [50, -100],
   ],
-  draggable: true,
+  isDraggable: true,
 });
 const polygon_rect = new _Canvas.Polygon({
   value: [
@@ -30,7 +30,7 @@ const polygon_rect = new _Canvas.Polygon({
     [3, 0],
   ],
   isRect: true,
-  draggable: true,
+  isDraggable: true,
 });
 const polygon_arr = [polygon_value, polygon_position, polygon_rect];
 
@@ -53,7 +53,7 @@ function UpdatePosition(delta: number) {
   });
 }
 function UpdateDraggable(draggable: boolean) {
-  polygon_arr.forEach((polygon) => (polygon.draggable = draggable));
+  myCanvas.value!.isDraggable = draggable;
 }
 function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
   polygon_arr.forEach(

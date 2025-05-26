@@ -35,14 +35,13 @@ function UpdatePosition(delta: number) {
   });
 }
 function UpdateDraggable(draggable: boolean) {
-  text_arr.forEach((text) => (text.isDraggable = draggable));
+  myCanvas.value!.isDraggable = draggable;
 }
 
 onMounted(() => {
   myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addOverlay(text_arr);
-  console.log(myCanvas.value);
 });
 defineExpose({ myCanvas });
 </script>

@@ -4,6 +4,19 @@ import Base from "../OverlayGroup/public/base";
 
 type ConstructorOption = ConstructorParameters<typeof Base>[0];
 
+/**
+ * 图层事件触发机制说明：
+ *
+ * 注意事项：
+ * 图层级事件监听依赖其内部覆盖物的事件触发，仅当满足以下条件时触发：
+ *    事件发生在该图层包含的覆盖物上
+ *    该覆盖物已触发对应类型的事件
+ *
+ * 原因是：
+ *    若存在位于不同 图层 的两个覆盖物，点击位置上是 zIndex 较小的图层中的覆盖物时，
+ *    事件触发对象就应该是该 图层 中的 覆盖物，这时就不应该再触发其他 图层 的事件了；
+ */
+
 export default class Layer extends Base {
   opacity = 1;
   zIndex = 4;

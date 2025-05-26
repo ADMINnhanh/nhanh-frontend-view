@@ -14,7 +14,7 @@ class _CanvasEvent<T = undefined> {
 type State = { state: boolean; oldState: boolean };
 type EventMap = {
   down: State;
-  contextmenuable: State;
+  contextmenu: State;
   click: State;
   dblclick: State;
   hover: State;
@@ -80,7 +80,7 @@ export default class EventController {
   private readonly listeners: EventListeners = {
     hover: new Set(),
     down: new Set(),
-    contextmenuable: new Set(),
+    contextmenu: new Set(),
     click: new Set(),
     dblclick: new Set(),
     draggable: new Set(),
@@ -108,7 +108,7 @@ export default class EventController {
    * @param type - 要检查的交互类型
    * @returns 如果全局交互启用且特定交互类型也启用，则返回 true
    */
-  private checkInteraction(type: InteractionType): boolean {
+  checkInteraction(type: InteractionType): boolean {
     return (
       (this.parent ? this.parent.checkInteraction(type) : true) &&
       this.isInteractive &&
@@ -164,7 +164,7 @@ export default class EventController {
       case "down":
         this._isDown = _data.state;
         break;
-      case "contextmenuable":
+      case "contextmenu":
         this._isContextmenu = _data.state;
         break;
       case "click":
@@ -204,7 +204,7 @@ export default class EventController {
   }
   notifyContextmenu = (state: boolean, event?: MouseEvent) =>
     this.trigger(
-      "contextmenuable",
+      "contextmenu",
       { state, oldState: this.isContextmenu },
       event,
       "isContextmenuable"
@@ -228,21 +228,15 @@ export default class EventController {
     );
 
     const oldDblClick = this._isDblClick;
+    let newDblClick = this._isDblClick;
     if (state) {
-      this._isDblClick =
-        Date.now() - this.clickTimestamp < this.doubleClickInterval;
-      this.clickTimestamp = this._isDblClick ? 0 : Date.now();
+      newDblClick = Date.now() - this.clickTimestamp < this.doubleClickInterval;
+      this.clickTimestamp = newDblClick ? 0 : Date.now();
     } else {
       this._isDblClick = false;
       this.clickTimestamp = 0;
     }
-    if (this._isDblClick != oldDblClick)
-      this.trigger(
-        "dblclick",
-        { state: this._isDblClick, oldState: this.isDblClick },
-        event,
-        "isDoubleClickable"
-      );
+    if (newDblClick != oldDblClick) this.notifyDblclick(newDblClick, event);
   };
 
   /** 是否双击 */
@@ -250,6 +244,13 @@ export default class EventController {
   get isDblClick() {
     return this.isDoubleClickable && this._isDblClick;
   }
+  notifyDblclick = (state: boolean, event?: MouseEvent) =>
+    this.trigger(
+      "dblclick",
+      { state, oldState: this.isDblClick },
+      event,
+      "isDoubleClickable"
+    );
 
   notifyDraggable = (
     position: { offsetX: number; offsetY: number },

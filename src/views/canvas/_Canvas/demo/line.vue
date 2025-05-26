@@ -53,7 +53,7 @@ function UpdatePosition(delta: number) {
   });
 }
 function UpdateDraggable(draggable: boolean) {
-  line_arr.forEach((line) => (line.isDraggable = draggable));
+  myCanvas.value!.isDraggable = draggable;
 }
 function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
   line_arr.forEach((line) => (line.isShowHandlePoint = isShowHandlePoint));

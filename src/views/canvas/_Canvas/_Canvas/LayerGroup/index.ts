@@ -2,6 +2,7 @@ import _Canvas from "..";
 import type { Overlay } from "../OverlayGroup";
 import Layer from "./layer";
 import Base from "../OverlayGroup/public/base";
+import type { EventHandler } from "../core/eventController";
 
 type ConstructorOption = ConstructorParameters<typeof Base>[0];
 
@@ -13,7 +14,28 @@ export default class LayerGroup extends Base {
     super(option);
 
     this.setNotifyReload(option.notifyReload);
+
+    this.addEventListener("contextmenu", this.defaultContextmenu);
+    this.addEventListener("click", this.defaultClick);
+    this.addEventListener("dblclick", this.defaultDblclick);
+    this.addEventListener("hover", this.defaultHover);
+    this.addEventListener("draggable", this.defaultDraggable);
+    this.addEventListener("down", this.defaultDown);
   }
+
+  /** 地图的事件触发不需要传递 */
+  defaultContextmenu: EventHandler<"contextmenu"> = (event, mouseEvent) =>
+    event.stopPropagation();
+  defaultClick: EventHandler<"click"> = (event, mouseEvent) =>
+    event.stopPropagation();
+  defaultDblclick: EventHandler<"dblclick"> = (event, mouseEvent) =>
+    event.stopPropagation();
+  defaultHover: EventHandler<"hover"> = (event, mouseEvent) =>
+    event.stopPropagation();
+  defaultDraggable: EventHandler<"draggable"> = (event, mouseEvent) =>
+    event.stopPropagation();
+  defaultDown: EventHandler<"down"> = (event, mouseEvent) =>
+    event.stopPropagation();
 
   setMainCanvas(mainCanvas?: _Canvas) {
     super.setMainCanvas(mainCanvas);
