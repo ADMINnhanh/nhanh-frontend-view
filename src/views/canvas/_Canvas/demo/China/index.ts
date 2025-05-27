@@ -1,5 +1,11 @@
 import { _LngLatToPlane, _ReadFile } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
+import { shallowRef } from "vue";
+import type OverlayGroup from "../../_Canvas/OverlayGroup";
+import type { EventHandler } from "../../_Canvas/public/eventController";
+import provinceInfoMap from "./provinceInfoMap";
+
+// #region 中国地图数据
 
 type FeatureCollection = {
   features: {
@@ -35,7 +41,7 @@ type ChinaDataType = {
   geometry: [number, number][][];
 }[];
 
-export default function ChinaData() {
+function ChinaData() {
   const china = new URL("./index.json", import.meta.url);
   return _ReadFile(china.href).then((content) => {
     const data = JSON.parse(content) as FeatureCollection;
@@ -71,54 +77,71 @@ export default function ChinaData() {
   });
 }
 
-// const layer = new _Canvas.Layer("中国地图");
-// const overlayGroups: OverlayGroup[] = [];
+export const myCanvas = shallowRef<_Canvas>();
+export const layer = new _Canvas.Layer({ name: "中国地图" });
+layer.show.scaleRange = [0.2, 100];
+const overlayGroups: OverlayGroup[] = [];
 
-// ChinaData().then((chinaData) => {
-//   chinaData.forEach((item) => {
-//     const overlayGroup = new _Canvas.OverlayGroup(item.properties.name);
+ChinaData().then((chinaData) => {
+  chinaData.forEach((item) => {
+    const name = item.properties.name;
+    const overlayGroup = new _Canvas.OverlayGroup({ name });
 
-//     const commonClickEvent = () => {
-//       window.$message.success(`这里是 ${item.properties.name}`);
-//     };
-//     const commonDblClickEvent = () => {
-//       myCanvas.value?.setFitView(overlayGroup);
-//     };
+    const commonClickEvent: EventHandler<"click"> = (event) => {
+      if (event.data.state)
+        window.$message.success(`这里是 ${item.properties.name}`);
+    };
+    const commonDblClickEvent: EventHandler<"doubleClick"> = (event) => {
+      if (event.data.state) {
+        myCanvas.value?.setFitView(overlayGroup);
+        GetProvinceInfoMap(name);
+      } else {
+        provinceInfo.value = undefined;
+      }
+    };
 
-//     item.geometry.forEach((polygonData) => {
-//       const polygon = new _Canvas.Polygon({
-//         isShowHandlePoint: false,
-//         value: polygonData,
-//       });
-//       overlayGroup.addOverlays(polygon);
-//     });
+    item.geometry.forEach((polygonData) => {
+      const polygon = new _Canvas.Polygon({
+        isShowHandlePoint: false,
+        value: polygonData,
+      });
+      overlayGroup.addOverlays(polygon);
+    });
 
-//     // const center = item.properties.center;
-//     // if (center) {
-//     //   /** 省会城市 */
-//     //   const capitalCity_point = new _Canvas.Point({ value: center });
-//     //   capitalCity_point.show.setScales([0.9, 1000]);
-//     //   const capitalCity_text = new _Canvas.Text({
-//     //     text: item.properties.name,
-//     //     value: center,
-//     //     extraOffset: { x: 0, y: 20 },
-//     //   });
-//     //   capitalCity_text.show.setScales([1.1, 1000]);
+    const center = item.properties.center;
+    if (center) {
+      /** 省会城市 */
+      const capitalCity_point = new _Canvas.Point({ value: center });
+      capitalCity_point.show.scaleRange = [0.9, 100];
+      const capitalCity_text = new _Canvas.Text({
+        text: item.properties.name,
+        value: center,
+        extraOffset: { x: 0, y: 20 },
+      });
+      capitalCity_text.show.scaleRange = [1.1, 100];
 
-//     //   overlayGroup.addOverlays([capitalCity_point, capitalCity_text]);
-//     // }
+      overlayGroup.addOverlays([capitalCity_point, capitalCity_text]);
+    }
 
-//     const overlays = Array.from(overlayGroup.overlays.values());
-//     overlayGroup.overlays.forEach((overlay) => {
-//       overlay.sharedHoverOverlays = overlays;
-//       overlay.addEventListener("click", commonClickEvent);
-//       overlay.addEventListener("doubleClick", commonDblClickEvent);
-//     });
+    overlayGroup.addEventListener("click", commonClickEvent);
+    overlayGroup.addEventListener("doubleClick", commonDblClickEvent);
 
-//     overlayGroups.push(overlayGroup);
-//   });
-//   layer.addGroup(overlayGroups);
-// });
+    const overlays = Array.from(overlayGroup.overlays.values());
+    overlayGroup.overlays.forEach((overlay) => {
+      overlay.registerControllers("hover", overlays);
+    });
 
-/** 地球周长 40075016.686 米 */
-const earthCircumference = 40075016.686;
+    overlayGroups.push(overlayGroup);
+  });
+  layer.addGroup(overlayGroups);
+});
+// #endregion
+
+// #region 中国各省介绍
+export type ProvinceInfo = (typeof provinceInfoMap)[number];
+export const provinceInfo = shallowRef<ProvinceInfo>();
+function GetProvinceInfoMap(name: string) {
+  provinceInfo.value = provinceInfoMap.find((v) => v.name == name);
+}
+
+// #endregion

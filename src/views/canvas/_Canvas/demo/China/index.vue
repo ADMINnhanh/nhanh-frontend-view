@@ -1,68 +1,12 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
-import { onMounted, shallowRef } from "vue";
+import { onMounted } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import ChinaData from ".";
-import type OverlayGroup from "../../_Canvas/OverlayGroup";
-import type { EventHandler } from "../../_Canvas/public/eventController";
+import InfoWindow from "./InfoWindow.vue";
+import { layer, myCanvas, provinceInfo } from ".";
 
 const id = _GenerateUUID();
-
-let myCanvas = shallowRef<_Canvas>();
-const layer = new _Canvas.Layer({ name: "中国地图" });
-layer.show.scaleRange = [0.2, 100];
-const overlayGroups: OverlayGroup[] = [];
-
-ChinaData().then((chinaData) => {
-  chinaData.forEach((item) => {
-    const overlayGroup = new _Canvas.OverlayGroup({
-      name: item.properties.name,
-    });
-
-    const commonClickEvent: EventHandler<"click"> = (event) => {
-      if (event.data.state)
-        window.$message.success(`这里是 ${item.properties.name}`);
-    };
-    const commonDblClickEvent: EventHandler<"doubleClick"> = (event) => {
-      if (event.data.state) myCanvas.value?.setFitView(overlayGroup);
-    };
-
-    item.geometry.forEach((polygonData) => {
-      const polygon = new _Canvas.Polygon({
-        isShowHandlePoint: false,
-        value: polygonData,
-      });
-      overlayGroup.addOverlays(polygon);
-    });
-
-    const center = item.properties.center;
-    if (center) {
-      /** 省会城市 */
-      const capitalCity_point = new _Canvas.Point({ value: center });
-      capitalCity_point.show.scaleRange = [0.9, 100];
-      const capitalCity_text = new _Canvas.Text({
-        text: item.properties.name,
-        value: center,
-        extraOffset: { x: 0, y: 20 },
-      });
-      capitalCity_text.show.scaleRange = [1.1, 100];
-
-      overlayGroup.addOverlays([capitalCity_point, capitalCity_text]);
-    }
-
-    overlayGroup.addEventListener("click", commonClickEvent);
-    overlayGroup.addEventListener("doubleClick", commonDblClickEvent);
-
-    const overlays = Array.from(overlayGroup.overlays.values());
-    overlayGroup.overlays.forEach((overlay) => {
-      overlay.registerControllers("hover", overlays);
-    });
-
-    overlayGroups.push(overlayGroup);
-  });
-  layer.addGroup(overlayGroups);
-});
 
 onMounted(() => {
   myCanvas.value = new _Canvas({
@@ -78,17 +22,29 @@ onMounted(() => {
   });
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer(layer);
+  myCanvas.value.addEventListener("dragg", () => {
+    console.log("dragg");
+  });
 });
 
 defineExpose({ myCanvas });
 </script>
 
 <template>
-  <canvas :id="id" class="my-canvas"></canvas>
+  <div class="my-canvas">
+    <canvas :id="id"></canvas>
+    <InfoWindow v-if="provinceInfo" :info="provinceInfo" />
+  </div>
 </template>
 
 <style scoped lang="less">
 .my-canvas {
   --height: 370px;
+  position: relative;
+  overflow: hidden;
+  canvas {
+    width: 100%;
+    height: 100%;
+  }
 }
 </style>
