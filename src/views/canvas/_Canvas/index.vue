@@ -10,17 +10,17 @@ const independent: [string, string][] = [
   ["China%2Findex.vue", "最佳实现 - 中国地图"],
 ];
 const demoName: [string, string][] = [
-  // ["original.vue", "仅需初始化 _Canvas"],
-  // ["center.vue", "中心点"],
-  // ["shortcutKey.vue", "快捷键"],
-  // ["axis.vue", "坐标轴"],
-  // ["text.vue", "文字"],
-  // ["point.vue", "点"],
-  // ["line.vue", "线"],
-  // ["polygon.vue", "面"],
-  // ["custom.vue", "自定义绘制"],
-  // ["layer.vue", "图层 & 层级"],
-  // ["show.vue", "显示条件"],
+  ["original.vue", "仅需初始化 _Canvas"],
+  ["center.vue", "中心点"],
+  ["shortcutKey.vue", "快捷键"],
+  ["axis.vue", "坐标轴"],
+  ["text.vue", "文字"],
+  ["point.vue", "点"],
+  ["line.vue", "线"],
+  ["polygon.vue", "面"],
+  ["custom.vue", "自定义绘制"],
+  ["layer.vue", "图层 & 层级"],
+  ["show.vue", "显示条件"],
 ];
 
 type DemoName = (typeof demoName)[number][0];
@@ -78,7 +78,7 @@ onUnmounted(() => {
     <NScrollbar>
       <div class="list-box">
         <template v-if="doubleRow">
-          <NSpace style="width: 100%" vertical>
+          <NSpace class="independent-space" vertical>
             <template v-for="item in independent" :key="item[0]">
               <MyCard
                 v-if="vueFiles[item[0]]"
@@ -172,7 +172,12 @@ onUnmounted(() => {
   .list-box {
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
     padding-right: 14px;
+    .independent-space {
+      width: 100%;
+      margin-bottom: 8px;
+    }
     :deep(> div) {
       width: calc(50% - 7px);
     }
