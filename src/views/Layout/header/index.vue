@@ -7,7 +7,6 @@ import Button from "./button.vue";
 import { showMenu } from "../body";
 import { MenuOutline } from "@vicons/ionicons5";
 import router from "@/router";
-import WeatherInfo from "./weatherInfo/index.vue";
 
 const show = ref(false);
 

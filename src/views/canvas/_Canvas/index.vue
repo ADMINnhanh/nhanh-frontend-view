@@ -6,8 +6,10 @@ import Media from "@/stores/media";
 
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
+const independent: [string, string][] = [
+  ["China%2Findex.vue", "最佳实现 - 中国地图"],
+];
 const demoName: [string, string][] = [
-  ["China%2Findex.vue", "中国地图"],
   // ["original.vue", "仅需初始化 _Canvas"],
   // ["center.vue", "中心点"],
   // ["shortcutKey.vue", "快捷键"],
@@ -76,6 +78,19 @@ onUnmounted(() => {
     <NScrollbar>
       <div class="list-box">
         <template v-if="doubleRow">
+          <NSpace style="width: 100%" vertical>
+            <template v-for="item in independent" :key="item[0]">
+              <MyCard
+                v-if="vueFiles[item[0]]"
+                :id="item[0]"
+                :path="item[0]"
+                :title="item[1]"
+                :code="vueFiles[item[0]].code"
+                :component="vueFiles[item[0]].component"
+              />
+              <NSkeleton v-else :id="item[0]" :sharp="false" />
+            </template>
+          </NSpace>
           <NSpace vertical>
             <template v-for="item in evenIndexArray" :key="item[0]">
               <MyCard
@@ -104,7 +119,7 @@ onUnmounted(() => {
           </NSpace>
         </template>
         <NSpace v-else style="width: 100%" vertical>
-          <template v-for="item in demoName" :key="item[0]">
+          <template v-for="item in independent.concat(demoName)" :key="item[0]">
             <MyCard
               v-if="vueFiles[item[0]]"
               :id="item[0]"
@@ -126,7 +141,7 @@ onUnmounted(() => {
         offset-target=".my-canvas-tools"
       >
         <NAnchorLink
-          v-for="item in demoName"
+          v-for="item in independent.concat(demoName)"
           :key="item[0]"
           :href="anchorPrefix + item[0]"
           :title="item[1]"

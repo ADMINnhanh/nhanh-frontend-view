@@ -28,8 +28,6 @@ import {
 } from "naive-ui";
 import { computed, h, ref } from "vue";
 
-const isCloud = import.meta.env.VITE_SHOW_RECORD_NUMBER;
-
 const query = ref<QueryParams>({
   pageIndex: 1,
   pageSize: 10,
@@ -147,30 +145,22 @@ requestAnimationFrame(() => {
   formHeight.value = formRef.value.$el.offsetHeight;
 });
 const dataTableStyle = computed(() => {
-  const headerHeight = 61;
-  const tabHeight = Media.value.isMobileStyle ? 0 : 39;
-  const routerViewMargin = isCloud && !Media.value.isMobileStyle ? 10 : 20;
   const cardMargin = 20;
   const cardHeaderHeight = 73;
   const gap = 8 * 2;
   const pageHeight = 28;
   const cardPadding = 20;
-  const recordNumber = isCloud ? 40 : 0;
   const border = 2;
 
   const height =
-    "calc(100vh " +
+    "calc(var(--router-view-height) " +
     [
-      headerHeight,
-      tabHeight,
-      routerViewMargin,
       cardMargin,
       cardHeaderHeight,
       formHeight.value,
       gap,
       pageHeight,
       cardPadding,
-      recordNumber,
       border,
     ]
       .map((v) => `- ${v}px`)

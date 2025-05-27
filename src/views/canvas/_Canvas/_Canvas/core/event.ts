@@ -285,15 +285,7 @@ export default class Event extends Draw {
   }
   /** 处理 hover 逻辑 */
   private handleHover(event: MouseEvent) {
-    const { clientX, clientY } = event;
-    const rect = this.rect!.value;
-    const x = clientX - rect.x;
-    const y = clientY - rect.y;
-
-    // 检查是否在画布范围内
-    if (x < 0 || y < 0 || x > rect.width || y > rect.height) {
-      return;
-    }
+    if (event.target != this.canvas) return;
 
     const hoverOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
 

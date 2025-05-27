@@ -14,7 +14,7 @@ import Menu from "./menu.vue";
 import { showMenu, collapsed } from ".";
 import { Close, CopyOutline } from "@vicons/ionicons5";
 import { _CopyToClipboard } from "nhanh-pure-function";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import router from "@/router";
 import { Settings } from "@/components/popups/components/Settings";
 
@@ -64,13 +64,30 @@ watch(
   { immediate: true }
 );
 
+const isCloud = import.meta.env.VITE_SHOW_RECORD_NUMBER;
+const baseStyle = computed(() => {
+  const headerHeight = 61;
+  const tabHeight = Media.value.isMobileStyle ? 0 : 39;
+  const routerViewMargin = isCloud && !Media.value.isMobileStyle ? 10 : 20;
+  const recordNumber = isCloud ? 40 : 0;
+
+  const height =
+    "calc(100vh " +
+    [headerHeight, tabHeight, routerViewMargin, recordNumber]
+      .map((v) => `- ${v}px`)
+      .join(" ") +
+    ")";
+
+  return { "--router-view-height": height };
+});
+
 if (import.meta.env.DEV) {
   panels.value = panels.value.filter((item) => !!item.key);
 }
 </script>
 
 <template>
-  <div v-if="Media.isMobileStyle" class="mobile-layout">
+  <div v-if="Media.isMobileStyle" class="mobile-layout" :style="baseStyle">
     <div class="router-view">
       <router-view v-slot="{ Component }">
         <KeepAlive :max="5">
@@ -104,7 +121,12 @@ if (import.meta.env.DEV) {
       </NDrawerContent>
     </NDrawer>
   </div>
-  <n-layout v-else has-sider :class="[recordNumber && 'cloud']">
+  <n-layout
+    v-else
+    has-sider
+    :class="[recordNumber && 'cloud']"
+    :style="baseStyle"
+  >
     <n-layout-sider
       bordered
       collapse-mode="width"

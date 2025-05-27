@@ -97,13 +97,6 @@ export default class BaseData extends EventController {
 
     const { id, axisConfig, defaultCenter, offset } = option;
 
-    if (axisConfig) this.setAxis(axisConfig);
-    if (defaultCenter) this.setDefaultCenter(defaultCenter);
-    if (offset) {
-      this.offset.x = offset.x || 0;
-      this.offset.y = offset.y || 0;
-    }
-
     const canvas = document.getElementById(id);
     if (canvas instanceof HTMLCanvasElement) {
       if (canvas.getContext) {
@@ -139,6 +132,13 @@ export default class BaseData extends EventController {
         [canvas.width, canvas.height] = [clientWidth, clientHeight];
       } else throw new Error("canvas-unsupported code here");
     } else throw new Error("canvas is not HTMLCanvasElement");
+
+    if (axisConfig) this.setAxis(axisConfig);
+    if (defaultCenter) this.setDefaultCenter(defaultCenter);
+    if (offset) {
+      this.offset.x = offset.x || 0;
+      this.offset.y = offset.y || 0;
+    }
   }
 
   /** 获取默认中心点位置 */
@@ -202,8 +202,9 @@ export default class BaseData extends EventController {
   }
   /** 更新中心点 */
   updateCenter() {
-    const { x, y } = this.getDefaultCenterLocation()!;
-
+    const data = this.getDefaultCenterLocation();
+    if (!data) return;
+    const { x, y } = data;
     this.center = {
       x: Math.floor(x + this.offset.x),
       y: Math.floor(y + this.offset.y),
@@ -300,6 +301,7 @@ export default class BaseData extends EventController {
   /** 设置默认中心 */
   setDefaultCenter(center: Partial<BaseData["defaultCenter"]>) {
     Object.assign(this.defaultCenter, center);
+    this.updateCenter();
   }
 
   /**

@@ -12,19 +12,28 @@ onMounted(() => {
   myCanvas.value = new _Canvas({
     id,
     axisConfig: { y: -1, count: 2000000 },
-    defaultCenter: { bottom: 0 },
+    defaultCenter: { bottom: 100 },
   });
-  // myCanvas.value.style.dark.background = "";
-  // myCanvas.value.style.light.background = "";
-  // myCanvas.value.toggleAxis(false);
   myCanvas.value.setDefaultCenter({
     left: -(580 - myCanvas.value.rect!.value.width / 2),
+    bottom: Number((myCanvas.value.rect!.value.height / 4.4).toFixed(0)),
   });
+
+  myCanvas.value.setScale("center", myCanvas.value.delta * 8);
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer(layer);
-  myCanvas.value.addEventListener("dragg", () => {
-    console.log("dragg");
-  });
+  myCanvas.value.notifyReload = () => {
+    if (provinceInfo.value) {
+      const scale = myCanvas.value!.scale;
+      if (scale > 100 || scale < 0.9) {
+        provinceInfo.value = undefined;
+      } else {
+        const point = provinceInfo.value.point;
+        provinceInfo.value.x = point.dynamicPosition?.[0];
+        provinceInfo.value.y = point.dynamicPosition?.[1];
+      }
+    }
+  };
 });
 
 defineExpose({ myCanvas });
@@ -39,7 +48,7 @@ defineExpose({ myCanvas });
 
 <style scoped lang="less">
 .my-canvas {
-  --height: 370px;
+  --height: calc(var(--router-view-height) - 2px - 28px - 68px - 20px);
   position: relative;
   overflow: hidden;
   canvas {
