@@ -235,7 +235,7 @@ export default class QuickMethod extends Event {
         level: number
       ): number =>
         value < minValue
-          ? level
+          ? level - 1
           : calculateRecursiveLevel(value / 2, minValue, level + 1);
 
       // 计算缩小级数
