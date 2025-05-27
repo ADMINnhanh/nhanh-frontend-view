@@ -1,1 +1,0 @@
-import{d as n,aQ as o,ce as t,aI as c,aO as l,o as r,c as m,u as _}from"./index-BRvHpf_g.js";import{_ as i}from"./index-DpQiMFW4.js";const u=["id"],x=n({__name:"original",setup(p,{expose:s}){const a=o();let e=t();return c(()=>{e.value=new i(a),e.value.setTheme(l.value.theme)}),s({myCanvas:e}),(d,f)=>(r(),m("canvas",{id:_(a),class:"my-canvas"},null,8,u))}});export{x as default};

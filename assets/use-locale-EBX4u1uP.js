@@ -1,0 +1,1 @@
+import{q as r,b7 as u,z as d,d0 as c,d1 as i}from"./index-CNq_cRb_.js";function f(n){const{mergedLocaleRef:o,mergedDateLocaleRef:a}=r(u,null)||{},t=d(()=>{var e,l;return(l=(e=o==null?void 0:o.value)===null||e===void 0?void 0:e[n])!==null&&l!==void 0?l:c[n]});return{dateLocaleRef:d(()=>{var e;return(e=a==null?void 0:a.value)!==null&&e!==void 0?e:i}),localeRef:t}}export{f as u};
