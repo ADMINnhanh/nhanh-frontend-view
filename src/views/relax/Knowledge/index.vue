@@ -8,6 +8,8 @@ import {
   NH6,
   NBlockquote,
   NText,
+  NGrid,
+  NGi,
 } from "naive-ui";
 import { UselessFact, uselessFact, loadingBar } from ".";
 import { Add } from "@vicons/ionicons5";
@@ -16,8 +18,8 @@ import Media from "@/stores/media";
 
 loadingBar.value = useLoadingBar();
 
-UselessFact("random");
-UselessFact("today");
+// UselessFact("random");
+// UselessFact("today");
 </script>
 
 <template>
@@ -26,42 +28,35 @@ UselessFact("today");
       <NA href="https://uselessfacts.jsph.pl/" target="_blank">Api 作者</NA>
     </template>
 
-    <NSpace :vertical="Media.isMobileStyle">
-      <NCard
-        v-for="(value, key) in uselessFact"
-        :key="key"
-        :title="value.title"
-      >
-        <template #header-extra>
-          <NButton @click="UselessFact(key)" strong secondary type="info">
-            <template #icon>
-              <NIcon><Add /></NIcon>
-            </template>
-            再来一个
-          </NButton>
-        </template>
-        <template v-for="item in value.list" :key="item.id">
+    <NSpace vertical>
+      <NCard title="今天无用的事实">
+        <template v-for="item in uselessFact.today" :key="item.id">
           <NH6 prefix="bar" align-text>{{ item.en }}</NH6>
           <NBlockquote v-if="item.zh">
             <NText depth="3">翻译: {{ item.zh }}</NText>
           </NBlockquote>
         </template>
       </NCard>
+      <NCard title="随机无用的事实">
+        <template #header-extra>
+          <NButton @click="UselessFact('random')" strong secondary type="info">
+            <template #icon>
+              <NIcon><Add /></NIcon>
+            </template>
+            再来一个
+          </NButton>
+        </template>
+        <NGrid x-gap="30" y-gap="30" :cols="Media.isMobileStyle ? 1 : 2">
+          <NGi v-for="item in uselessFact.random" :key="item.id">
+            <NH6 prefix="bar" align-text>{{ item.en }}</NH6>
+            <NBlockquote v-if="item.zh">
+              <NText depth="3">翻译: {{ item.zh }}</NText>
+            </NBlockquote>
+          </NGi>
+        </NGrid>
+      </NCard>
     </NSpace>
   </NCard>
 </template>
 
-<style scoped lang="less">
-.is-mobile {
-  .n-space {
-    :deep(> div) {
-      width: 100%;
-    }
-  }
-}
-.n-space {
-  :deep(> div) {
-    width: calc(50% - 6px);
-  }
-}
-</style>
+<style scoped lang="less"></style>

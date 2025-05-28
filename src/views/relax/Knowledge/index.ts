@@ -1,4 +1,4 @@
-import { TranslateText } from "@/utils/googleapis";
+import { TranslateTextBaidu } from "@/assets/api/otherAsk/baidu";
 import axios from "axios";
 import type { LoadingBarInst } from "naive-ui/es/loading-bar/src/LoadingBarProvider";
 import { ref } from "vue";
@@ -6,23 +6,14 @@ import { ref } from "vue";
 type UselessFactType = Record<
   "random" | "today",
   {
-    title: string;
-    list: {
-      id: string;
-      en: string;
-      zh: string;
-    }[];
-  }
+    id: string;
+    en: string;
+    zh: string;
+  }[]
 >;
 export const uselessFact = ref<UselessFactType>({
-  today: {
-    title: "今天无用的事实",
-    list: [],
-  },
-  random: {
-    title: "随机无用的事实",
-    list: [],
-  },
+  today: [],
+  random: [],
 });
 const Retry = 3;
 export const loadingBar = { value: undefined as unknown as LoadingBarInst };
@@ -33,22 +24,22 @@ export function UselessFact(type: "today" | "random", retry = 0) {
     .then((res) => {
       const { text, id } = res.data;
       const enText = text;
-      if (uselessFact.value[type].list.some((item) => item.id === id)) {
-        if (retry >= Retry)
+      if (uselessFact.value[type].some((item) => item.id === id)) {
+        if (retry >= Retry) {
+          loadingBar.value.error();
           return window.$message.warning(
             `看来你知道的太多了，已经重复获取了 ${retry} 次，仍未获取到新数据`,
             { duration: 5000 }
           );
-        return UselessFact(type, retry);
+        }
+        return UselessFact(type, retry + 1);
       }
       let zhText = "";
-      TranslateText(enText)
-        .then((text) => {
-          zhText = text;
-        })
+      TranslateTextBaidu(enText)
+        .then((text) => (zhText = text))
         .catch(() => loadingBar.value.error())
         .finally(() => {
-          uselessFact.value[type].list.unshift({
+          uselessFact.value[type].unshift({
             id,
             en: enText,
             zh: zhText,

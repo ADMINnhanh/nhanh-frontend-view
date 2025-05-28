@@ -1,5 +1,5 @@
 /** 谷歌翻译文本 */
-export async function TranslateText(text: string, targetLang = "zh-CN") {
+export async function TranslateTextGoogle(text: string, targetLang = "zh-CN") {
   try {
     // 构建 API 请求 URL
     const encodedText = encodeURIComponent(text);

@@ -2,6 +2,7 @@ import { GetLocation } from "@/utils/map";
 import otherAsk from "@/utils/otherAsk";
 
 const amapPrefix = "https://nhanh.xin/amap";
+const key = "d01e3ce419e8e6c1f3694d1e75271347";
 
 export interface ErrorResponse {
   info: string; // 错误信息描述
@@ -267,7 +268,11 @@ interface AOI {
  * @param lat 纬度，可以是数字或字符串
  * @returns 返回一个Promise，解析为ApiResponse接口定义的响应数据
  */
-export function GetCoordinateInfoByLatLng(params: ReverseGeocodingParams) {
+export function GetCoordinateInfoByLatLng(data: ReverseGeocodingParams) {
+  const params: ReverseGeocodingParams = {
+    key,
+    ...data,
+  };
   return otherAsk
     .get(amapPrefix + "/v3/geocode/regeo", { params })
     .then((res) => {
@@ -407,6 +412,7 @@ interface ForecastDay {
 }
 export function GetWeatherByCityCode(data: WeatherParams) {
   const params: WeatherParams = {
+    key,
     extensions: "base",
     ...data,
   };
