@@ -1,5 +1,6 @@
 import md5 from "@/utils/md5";
 import otherAsk from "@/utils/otherAsk";
+import { TranslateTextGoogle } from "./googleapis";
 
 const baiduPrefix = "https://nhanh.xin/baidu-translate";
 
@@ -55,17 +56,65 @@ function GetParams(data: TranslationRequest): TranslationRequest {
   data.sign = md5(`${data.appid}${data.q}${data.salt}qplXkmjJy14teA83OA6o`);
   return data;
 }
+
+/**
+ * 翻译结果项
+ */
+interface TranslationResultItem {
+  /** 原文 */
+  src: string;
+  /** 译文 */
+  dst: string;
+}
+
+/**
+ * 翻译API成功响应
+ */
+interface TranslationSuccessResponse {
+  /** 源语言 */
+  from: string;
+  /** 目标语言 */
+  to: string;
+  /** 翻译结果 */
+  trans_result: TranslationResultItem[];
+}
+
+/**
+ * 翻译API错误响应
+ */
+interface TranslationErrorResponse {
+  /** 错误码 */
+  error_code: number;
+  /** 错误信息 */
+  error_msg?: string;
+}
+
+/**
+ * 翻译API响应（成功或错误）
+ */
+type TranslationResponse =
+  | TranslationSuccessResponse
+  | TranslationErrorResponse;
 /** 翻译文本 百度 */
-export function TranslateTextBaidu(data: TranslationRequest | string) {
+export function TranslateTextBaidu(
+  data: TranslationRequest | string
+): Promise<string> {
   const params = GetParams({
     from: "en",
     to: "zh",
     ...(typeof data === "string" ? { q: data } : data),
   });
-  return (
+  return new Promise((resolve, reject) => {
     otherAsk
       .get(baiduPrefix + "/api/trans/vip/translate", { params })
       /** @ts-ignore */
-      .then((res) => res.trans_result[0].dst)
-  );
+      .then((res) => {
+        const data = res as unknown as TranslationResponse;
+        if ((data as TranslationErrorResponse).error_code) {
+          TranslateTextGoogle(params.q).then(resolve, reject);
+        } else {
+          resolve((data as TranslationSuccessResponse).trans_result[0].dst);
+        }
+      });
+  });
 }

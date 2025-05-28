@@ -1,62 +1,107 @@
 <script setup lang="ts">
+import { NCard, NSpace, NGrid, NGi, NScrollbar } from "naive-ui";
 import {
-  NCard,
-  NA,
-  NButton,
-  NIcon,
-  NSpace,
-  NH6,
-  NBlockquote,
-  NText,
-  NGrid,
-  NGi,
-} from "naive-ui";
-import { UselessFact, uselessFact, loadingBar } from ".";
-import { Add } from "@vicons/ionicons5";
+  UselessFact,
+  uselessFact,
+  loadingBar,
+  techPhraseList,
+  TechyPhrases,
+  jokeList,
+  RandomJoke,
+  CompanyPhrases,
+  companyPhraseList,
+} from ".";
 import { useLoadingBar } from "naive-ui";
 import Media from "@/stores/media";
+import En_zh from "./en_zh.vue";
+import Header_extra from "./header_extra.vue";
 
 loadingBar.value = useLoadingBar();
 
-// UselessFact("random");
-// UselessFact("today");
+UselessFact("random");
+UselessFact("today");
+TechyPhrases();
+RandomJoke();
+CompanyPhrases();
 </script>
 
 <template>
-  <NCard title="无用但可能有趣的知识">
-    <template #header-extra>
-      <NA href="https://uselessfacts.jsph.pl/" target="_blank">Api 作者</NA>
-    </template>
-
-    <NSpace vertical>
-      <NCard title="今天无用的事实">
-        <template v-for="item in uselessFact.today" :key="item.id">
-          <NH6 prefix="bar" align-text>{{ item.en }}</NH6>
-          <NBlockquote v-if="item.zh">
-            <NText depth="3">翻译: {{ item.zh }}</NText>
-          </NBlockquote>
-        </template>
-      </NCard>
-      <NCard title="随机无用的事实">
-        <template #header-extra>
-          <NButton @click="UselessFact('random')" strong secondary type="info">
-            <template #icon>
-              <NIcon><Add /></NIcon>
+  <NScrollbar>
+    <NGrid
+      x-gap="15"
+      y-gap="15"
+      style="padding: 10px"
+      :cols="Media.isMobileStyle ? 1 : 2"
+    >
+      <NGi>
+        <NSpace vertical :size="15">
+          <NCard title="今天无用的事实" hoverable>
+            <template #header-extra>
+              <Header_extra not-click href="https://uselessfacts.jsph.pl/" />
             </template>
-            再来一个
-          </NButton>
-        </template>
-        <NGrid x-gap="30" y-gap="30" :cols="Media.isMobileStyle ? 1 : 2">
-          <NGi v-for="item in uselessFact.random" :key="item.id">
-            <NH6 prefix="bar" align-text>{{ item.en }}</NH6>
-            <NBlockquote v-if="item.zh">
-              <NText depth="3">翻译: {{ item.zh }}</NText>
-            </NBlockquote>
-          </NGi>
-        </NGrid>
-      </NCard>
-    </NSpace>
-  </NCard>
+            <En_zh :list="uselessFact.today" />
+          </NCard>
+          <NCard title="chuck 笑话" hoverable>
+            <template #header-extra>
+              <Header_extra
+                @click="RandomJoke"
+                href="https://api.chucknorris.io/"
+              />
+            </template>
+
+            <NSpace vertical>
+              <En_zh :list="jokeList" />
+            </NSpace>
+          </NCard>
+          <NCard title="企业流行语" hoverable>
+            <template #header-extra>
+              <Header_extra
+                @click="CompanyPhrases"
+                href="https://github.com/sameerkumar18/corporate-bs-generator-api"
+              />
+            </template>
+            <NSpace vertical>
+              <En_zh :list="companyPhraseList" />
+            </NSpace>
+          </NCard>
+        </NSpace>
+      </NGi>
+
+      <NGi>
+        <NSpace vertical :size="15">
+          <NCard title="随机无用的事实" hoverable>
+            <template #header-extra>
+              <Header_extra
+                @click="UselessFact('random')"
+                href="https://uselessfacts.jsph.pl/"
+              />
+            </template>
+            <En_zh :list="uselessFact.random" />
+          </NCard>
+          <NCard title="技术感十足的短语" hoverable>
+            <template #header-extra>
+              <Header_extra
+                @click="TechyPhrases"
+                href="https://techy-api.vercel.app/"
+              />
+            </template>
+            <NSpace vertical>
+              <En_zh :list="techPhraseList" />
+            </NSpace>
+          </NCard>
+        </NSpace>
+      </NGi>
+    </NGrid>
+  </NScrollbar>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.joke-search {
+  :deep(> div:not(:last-child)) {
+    flex-grow: 1;
+    .n-input-group > *:first-child {
+      flex-grow: 1;
+    }
+  }
+}
+</style>

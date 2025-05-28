@@ -7,7 +7,7 @@ import { ruoyiUser } from "@/stores/user";
 </script>
 
 <template>
-  <NCard title="访问会话列表">
+  <NCard title="访问会话列表" hoverable>
     <template v-if="!ruoyiUser.token" #header-extra>
       <NButton
         @click="AddUniqueModal({ componentName: 'Login' })"
