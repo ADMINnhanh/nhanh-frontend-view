@@ -29,7 +29,7 @@ function Closure() {
   Emit("closure");
 }
 EnhancedCloseOnOutsideClick(
-  [".login.center-positioning", ".open-login-button"],
+  ["#login-popup", ".open-login-button"],
   Closure,
   props.zIndex
 );
@@ -76,7 +76,14 @@ function Login() {
 </script>
 
 <template>
-  <Popup class="login center-positioning" @closure="Closure" :zIndex="zIndex">
+  <Popup
+    id="login-popup"
+    component-name="login"
+    :width="400"
+    :height="331"
+    @closure="Closure"
+    :zIndex="zIndex"
+  >
     <template #header>登录</template>
     <NForm
       ref="formRef"
@@ -133,9 +140,4 @@ function Login() {
   </Popup>
 </template>
 
-<style lang="less" scoped>
-.login {
-  --width: 400px;
-  --height: 331px;
-}
-</style>
+<style lang="less" scoped></style>

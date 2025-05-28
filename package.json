@@ -12,6 +12,7 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@vueuse/components": "^13.3.0",
     "@vueuse/core": "^11.1.0",
     "axios": "^1.7.2",
     "decimal.js": "^10.5.0",

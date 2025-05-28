@@ -3,7 +3,7 @@ import _Canvas from "../../_Canvas";
 import { markRaw, ref, shallowRef } from "vue";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
 import type { EventHandler } from "../../_Canvas/public/eventController";
-import provinceInfoMap from "./provinceInfoMap";
+import provinceInfoMap from "./data/provinceInfoMap";
 import type Point from "../../_Canvas/OverlayGroup/point";
 
 // #region 中国地图数据
@@ -43,7 +43,7 @@ type ChinaDataType = {
 }[];
 
 function ChinaData() {
-  const china = new URL("./index.json", import.meta.url);
+  const china = new URL("./data/index.json", import.meta.url);
   return _ReadFile(china.href).then((content) => {
     const data = JSON.parse(content) as FeatureCollection;
     const chinaData: ChinaDataType = [];

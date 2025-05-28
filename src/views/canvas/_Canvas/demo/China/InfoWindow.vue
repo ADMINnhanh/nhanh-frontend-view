@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NCard, NA, NBlockquote, NText } from "naive-ui";
 import type { ProvinceInfo } from ".";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import Media from "@/stores/media";
 
 interface Props {
@@ -10,8 +10,20 @@ interface Props {
 const props = defineProps<Props>();
 
 const cardRef = ref();
+const cardRect = ref<DOMRect>();
+watch(
+  () => props.info,
+  () => {
+    requestAnimationFrame(() => {
+      cardRect.value = (
+        cardRef.value?.$el as HTMLElement
+      )?.getBoundingClientRect();
+    });
+  },
+  { immediate: true }
+);
 const cardStyle = computed(() => {
-  const rect = (cardRef.value?.$el as HTMLElement)?.getBoundingClientRect();
+  const rect = cardRect.value;
   let { x: left, y: top } = props.info;
 
   if (rect && left && top) {
@@ -44,6 +56,10 @@ const cardStyle = computed(() => {
   max-width: 450px;
   position: absolute;
   box-shadow: var(--n-box-shadow);
+
+  .n-blockquote {
+    margin-bottom: 0;
+  }
 
   .n-popover-arrow {
     --n-arrow-height: 6px;

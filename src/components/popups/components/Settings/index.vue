@@ -31,11 +31,7 @@ function Closure() {
   SetOptions();
   Emit("closure");
 }
-EnhancedCloseOnOutsideClick(
-  [".Settings.center-positioning"],
-  Closure,
-  props.zIndex
-);
+EnhancedCloseOnOutsideClick(["#settings-popup"], Closure, props.zIndex);
 
 const tabsValue = ref();
 const tabsRef = ref();
@@ -52,7 +48,13 @@ const interfaceText = computed(() => {
 </script>
 
 <template>
-  <Popup class="Settings center-positioning" @closure="Closure">
+  <Popup
+    id="settings-popup"
+    component-name="settings"
+    :width="550"
+    :height="700"
+    @closure="Closure"
+  >
     <template #header>{{ interfaceText.header }}</template>
     <NTabs ref="tabsRef" v-model:value="tabsValue" :animated="true">
       <n-tab-pane :name="interfaceText.tabs[0].name">
@@ -124,19 +126,15 @@ const interfaceText = computed(() => {
 </template>
 
 <style lang="less" scoped>
-.Settings {
-  --width: 550px;
-  --height: 700px;
-  .n-tabs {
+.n-tabs {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  :deep(.n-tab-pane) {
     flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    :deep(.n-tab-pane) {
-      flex-grow: 1;
-      .moduls-scroll-section {
-        width: 100%;
-        height: 100%;
-      }
+    .moduls-scroll-section {
+      width: 100%;
+      height: 100%;
     }
   }
 }
