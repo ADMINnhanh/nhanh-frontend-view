@@ -71,10 +71,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    id="/canvas/_Canvas"
-    :class="['my-canvas-tools', Media.isMobileStyle && 'mobile']"
-  >
+  <div id="/canvas/_Canvas" class="my-canvas-tools">
     <NScrollbar>
       <div class="list-box">
         <template v-if="doubleRow">
@@ -152,7 +149,7 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="less">
-.my-canvas-tools.mobile {
+.is-mobile.my-canvas-tools {
   padding: 0;
   .list-box {
     padding-right: 0;

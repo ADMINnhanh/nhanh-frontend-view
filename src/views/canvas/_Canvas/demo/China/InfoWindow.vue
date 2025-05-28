@@ -75,7 +75,7 @@ const cardStyle = computed(() => {
     pointer-events: all;
   }
 }
-.mobile .n-card {
+.is-mobile .n-card {
   width: 75%;
 }
 </style>

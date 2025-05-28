@@ -163,6 +163,17 @@ const relaxRouting: CustomRouteRecord = {
       },
       component: () => import("@/views/relax/Bounce/index.vue"),
     },
+    {
+      path: "Knowledge",
+      name: "Knowledge",
+      meta: {
+        name: {
+          zhCN: "无用的知识",
+          enUS: "Useless knowledge",
+        },
+      },
+      component: () => import("@/views/relax/Knowledge/index.vue"),
+    },
   ],
 };
 

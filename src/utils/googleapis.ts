@@ -1,9 +1,9 @@
 /** 谷歌翻译文本 */
-async function TranslateText(text: string, targetLang = "zh-CN") {
+export async function TranslateText(text: string, targetLang = "zh-CN") {
   try {
     // 构建 API 请求 URL
     const encodedText = encodeURIComponent(text);
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${targetLang}&dt=t&q=${encodedText}`;
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${targetLang}&dt=t&q=${encodedText}`;
 
     // 发送请求
     const response = await fetch(url);
