@@ -5,6 +5,9 @@ import type OverlayGroup from "../../_Canvas/OverlayGroup";
 import type { EventHandler } from "../../_Canvas/public/eventController";
 import provinceInfoMap from "./data/provinceInfoMap";
 import type Point from "../../_Canvas/OverlayGroup/point";
+import attractions from "./data/attractions";
+import HeatMap from "heatmap-ts";
+import type { Overlay } from "../../_Canvas/OverlayGroup";
 
 // #region 中国地图数据
 
@@ -82,7 +85,7 @@ export const myCanvas = shallowRef<_Canvas>();
 export const layer = new _Canvas.Layer({ name: "中国地图" });
 layer.show.scaleRange = [0.2, 100];
 const overlayGroups: OverlayGroup[] = [];
-
+export const provincialAdministrativeRegions: Overlay[] = [];
 ChinaData().then((chinaData) => {
   chinaData.forEach((item) => {
     const name = item.properties.name;
@@ -146,6 +149,7 @@ ChinaData().then((chinaData) => {
       capitalCity_point.addEventListener("click", clickEvent);
       capitalCity_text.addEventListener("click", clickEvent);
 
+      provincialAdministrativeRegions.push(capitalCity_point, capitalCity_text);
       overlayGroup.addOverlays([capitalCity_point, capitalCity_text]);
     }
 
@@ -182,3 +186,56 @@ function GetProvinceInfoMap(name: string, point: Point) {
   } else console.error(`未找到${name}信息`);
 }
 // #endregion
+
+// #region 景区
+
+// #endregion
+
+// requestAnimationFrame(() => {
+//   const heatMap = new HeatMap({
+//     container: document.getElementById("heatMap")!,
+//   });
+
+//   heatMap.setData({
+//     max: 100,
+//     min: 1,
+//     data: [
+//       {
+//         x: 100,
+//         y: 100,
+//         value: 100,
+//         radius: 20,
+//       },
+//       {
+//         x: 100,
+//         y: 120,
+//         value: 50,
+//         radius: 30,
+//       },
+//     ],
+//   });
+
+//   setTimeout(() => {
+//     heatMap.setData({
+//       max: 100,
+//       min: 1,
+//       data: [
+//         {
+//           x: 200,
+//           y: 200,
+//           value: 100,
+//           radius: 20,
+//         },
+//         {
+//           x: 200,
+//           y: 220,
+//           value: 50,
+//           radius: 30,
+//         },
+//       ],
+//     });
+//   }, 3000);
+// });
+
+// https://www.baidu.com/s?wd=
+// https://www.google.com/search?q=

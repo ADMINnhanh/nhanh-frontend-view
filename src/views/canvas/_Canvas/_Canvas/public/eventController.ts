@@ -48,25 +48,6 @@ type InteractionType =
   | "isDoubleClickable"
   | "isHoverable";
 
-interface EventControllerOptions {
-  /** 父级 */
-  parent?: EventController;
-  /** 是否可以交互 */
-  isInteractive?: boolean;
-  /** 是否可以悬停 */
-  isHoverable?: boolean;
-  /** 是否可以按下 */
-  isDownable?: boolean;
-  /** 是否可以右击 */
-  isContextmenuable?: boolean;
-  /** 是否可以点击 */
-  isClickable?: boolean;
-  /** 是否可以双击 */
-  isDoubleClickable?: boolean;
-  /** 是否可以拖动 */
-  isDraggable?: boolean;
-}
-
 export default class EventController extends EventControllerBasedata<EventController> {
   /** 事件管理器 */
   private readonly listeners: EventListeners = {
@@ -91,11 +72,11 @@ export default class EventController extends EventControllerBasedata<EventContro
     this.listeners[type].delete(handler as EventHandler<keyof EventMap>);
   }
 
-  /** 共享状态集合 控制器 */
+  /** 共享事件状态集合 控制器 */
   private sharedControllers: Partial<
     Record<keyof EventMap, EventController[]>
   > = {};
-  /** 注册指定类型的事件控制器集合 */
+  /** 注册指定类型的共享事件状态集合 */
   registerControllers(type: keyof EventMap, controllers: EventController[]) {
     this.sharedControllers[type] = controllers;
   }

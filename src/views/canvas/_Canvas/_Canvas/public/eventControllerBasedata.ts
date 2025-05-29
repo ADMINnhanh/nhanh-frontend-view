@@ -1,6 +1,6 @@
+import BaseData from "./basedata";
+
 interface EventControllerOptions {
-  /** 父级 */
-  parent?: EventControllerOptions;
   /** 是否可以交互 */
   isInteractive?: boolean;
   /** 是否可以悬停 */
@@ -20,10 +20,8 @@ interface EventControllerOptions {
 }
 
 export default class EventControllerBasedata<
-  T extends EventControllerBasedata<any>
-> {
-  parent?: T;
-
+  T extends EventControllerBasedata<T>
+> extends BaseData<T> {
   private _isInteractive = true;
   /** 是否可以交互 */
   get isInteractive() {
@@ -117,6 +115,7 @@ export default class EventControllerBasedata<
   }
 
   constructor(options: EventControllerOptions) {
+    super(options);
     Object.assign(this, { ...options });
   }
 }

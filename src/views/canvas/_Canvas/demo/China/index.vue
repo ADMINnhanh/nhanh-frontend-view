@@ -1,12 +1,33 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
-import { onMounted } from "vue";
+import { onMounted, ref } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import InfoWindow from "./InfoWindow.vue";
-import { layer, myCanvas, provinceInfo } from ".";
+import {
+  layer,
+  myCanvas,
+  provinceInfo,
+  provincialAdministrativeRegions,
+} from ".";
+import { NTabPane, NTabs } from "naive-ui";
 
 const id = _GenerateUUID();
+const tabActive = ref("省级行政区");
+let oldTabActive = "省级行政区";
+function UpdateTabActive(tab: string) {
+  if (oldTabActive == "省级行政区") {
+    provincialAdministrativeRegions.forEach(
+      (overlay) => (overlay.show.isVisible = false)
+    );
+  } else if (tab == "省级行政区") {
+    provincialAdministrativeRegions.forEach(
+      (overlay) => (overlay.show.isVisible = true)
+    );
+  }
+
+  oldTabActive = tab;
+}
 
 onMounted(() => {
   myCanvas.value = new _Canvas({
@@ -41,6 +62,15 @@ defineExpose({ myCanvas });
 
 <template>
   <div class="my-canvas">
+    <NTabs
+      v-model:value="tabActive"
+      @update:value="UpdateTabActive"
+      type="line"
+      animated
+    >
+      <NTabPane name="省级行政区"></NTabPane>
+      <NTabPane name="景区"></NTabPane>
+    </NTabs>
     <canvas :id="id"></canvas>
     <InfoWindow v-if="provinceInfo" :info="provinceInfo" />
   </div>
@@ -51,9 +81,12 @@ defineExpose({ myCanvas });
   --height: calc(var(--router-view-height) - 2px - 28px - 68px - 20px);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
   canvas {
     width: 100%;
-    height: 100%;
+    height: 100px;
+    flex-grow: 1;
   }
 }
 </style>

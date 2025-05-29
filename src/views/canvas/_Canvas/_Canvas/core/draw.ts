@@ -20,8 +20,6 @@ export default class Draw extends Style {
 
   /** 计算坐标所需依赖 */
   private rely = "";
-  /** 是否需要重新计算坐标 */
-  isRecalculate = false;
 
   /** 通知重新加载 */
   notifyReload?: () => void;
