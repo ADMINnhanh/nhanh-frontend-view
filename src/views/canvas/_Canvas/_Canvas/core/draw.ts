@@ -21,9 +21,6 @@ export default class Draw extends Style {
   /** 计算坐标所需依赖 */
   private rely = "";
 
-  /** 通知重新加载 */
-  notifyReload?: () => void;
-
   constructor(option: ConstructorOption) {
     super(option);
     if (this.canvas) {
@@ -66,6 +63,7 @@ export default class Draw extends Style {
 
   /** 重绘画布 */
   private redraw() {
+    if (!this.show.shouldRender(this.scale)) return;
     if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
     if (this.canvas.clientWidth == 0 || this.canvas.clientHeight == 0)
       return console.error(

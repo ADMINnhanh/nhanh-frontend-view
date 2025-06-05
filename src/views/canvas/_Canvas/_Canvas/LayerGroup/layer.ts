@@ -1,8 +1,8 @@
 import _Canvas from "..";
 import OverlayGroup, { type Overlay } from "../OverlayGroup";
-import Base from "../OverlayGroup/public/base";
+import EventController from "../public/eventController";
 
-type ConstructorOption = ConstructorParameters<typeof Base>[0];
+type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 
 /**
  * 图层事件触发机制说明：
@@ -17,7 +17,7 @@ type ConstructorOption = ConstructorParameters<typeof Base>[0];
  *    事件触发对象就应该是该 图层 中的 覆盖物，这时就不应该再触发其他 图层 的事件了；
  */
 
-export default class Layer extends Base {
+export default class Layer extends EventController {
   opacity = 1;
   zIndex = 4;
 

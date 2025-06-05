@@ -26,6 +26,7 @@ export default class Show {
   /** 通知重新加载 */
   notifyReload?: (needForceExecute?: boolean) => void;
 
+  /** 是否需要渲染 */
   shouldRender(scale?: number, opacity?: number) {
     if (!this.isVisible || scale === undefined || opacity === 0) return false;
 

@@ -1,9 +1,11 @@
 import _Canvas from "../..";
 import { type Overlay as OverlayType } from "../index";
-import Base from "./base";
 import type { EventHandler } from "../../public/eventController";
+import EventController from "../../public/eventController";
 
-type ConstructorOption<T, V> = ConstructorParameters<typeof Base>[0] & {
+type ConstructorOption<T, V> = ConstructorParameters<
+  typeof EventController
+>[0] & {
   /** 样式 */
   style?: DeepPartial<T> | string;
   /** 层级 */
@@ -23,7 +25,7 @@ type ConstructorOption<T, V> = ConstructorParameters<typeof Base>[0] & {
 export default abstract class Overlay<
   T,
   V extends [number, number] | [number, number][]
-> extends Base {
+> extends EventController {
   static ctx = document.createElement("canvas").getContext("2d")!;
 
   /** 样式 */

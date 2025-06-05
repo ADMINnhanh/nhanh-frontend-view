@@ -1,25 +1,26 @@
 import BaseData from "./basedata";
 
-interface EventControllerOptions {
-  /** 是否可以交互 */
-  isInteractive?: boolean;
-  /** 是否可以悬停 */
-  isHoverable?: boolean;
-  /** 是否可以按下 */
-  isDownable?: boolean;
-  /** 是否可以右击 */
-  isContextmenuable?: boolean;
-  /** 是否可以点击 */
-  isClickable?: boolean;
-  /** 是否可以双击 */
-  isDoubleClickable?: boolean;
-  /** 是否可以拖动 */
-  isDraggable?: boolean;
-  /** 是否可以缩放 */
-  isScaleable?: boolean;
-}
+type EventControllerOptions<T extends EventControllerBasedata<T>> =
+  ConstructorParameters<typeof BaseData<EventControllerBasedata<T>>>[0] & {
+    /** 是否可以交互 */
+    isInteractive?: boolean;
+    /** 是否可以悬停 */
+    isHoverable?: boolean;
+    /** 是否可以按下 */
+    isDownable?: boolean;
+    /** 是否可以右击 */
+    isContextmenuable?: boolean;
+    /** 是否可以点击 */
+    isClickable?: boolean;
+    /** 是否可以双击 */
+    isDoubleClickable?: boolean;
+    /** 是否可以拖动 */
+    isDraggable?: boolean;
+    /** 是否可以缩放 */
+    isScaleable?: boolean;
+  };
 
-export default class EventControllerBasedata<
+export default abstract class EventControllerBasedata<
   T extends EventControllerBasedata<T>
 > extends BaseData<T> {
   private _isInteractive = true;
@@ -114,7 +115,7 @@ export default class EventControllerBasedata<
     );
   }
 
-  constructor(options: EventControllerOptions) {
+  constructor(options: EventControllerOptions<T>) {
     super(options);
     Object.assign(this, { ...options });
   }

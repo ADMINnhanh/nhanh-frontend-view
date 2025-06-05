@@ -48,7 +48,7 @@ type InteractionType =
   | "isDoubleClickable"
   | "isHoverable";
 
-export default class EventController extends EventControllerBasedata<EventController> {
+export default abstract class EventController extends EventControllerBasedata<EventController> {
   /** 事件管理器 */
   private readonly listeners: EventListeners = {
     hover: new Set(),

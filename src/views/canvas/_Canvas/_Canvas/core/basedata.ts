@@ -141,6 +141,10 @@ export default class BaseData extends EventController {
     }
   }
 
+  setNotifyReload(notifyReload?: () => void): void {
+    this.notifyReload = notifyReload;
+  }
+
   /** 获取默认中心点位置 */
   getDefaultCenterLocation() {
     const { canvas, rect, defaultCenter } = this;

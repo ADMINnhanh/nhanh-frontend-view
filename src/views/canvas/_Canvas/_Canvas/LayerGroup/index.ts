@@ -1,12 +1,12 @@
 import _Canvas from "..";
 import type { Overlay } from "../OverlayGroup";
 import Layer from "./layer";
-import Base from "../OverlayGroup/public/base";
 import type { EventHandler } from "../public/eventController";
+import EventController from "../public/eventController";
 
-type ConstructorOption = ConstructorParameters<typeof Base>[0];
+type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 
-export default class LayerGroup extends Base {
+export default class LayerGroup extends EventController {
   /** 图层群组 */
   layers = new Map<string, Layer>();
 

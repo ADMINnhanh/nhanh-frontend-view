@@ -5,13 +5,13 @@ import Point from "./point";
 import Line from "./line";
 import Polygon from "./polygon";
 import Custom from "./custom";
-import Base from "./public/base";
+import EventController from "../public/eventController";
 
-type ConstructorOption = ConstructorParameters<typeof Base>[0];
+type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 
 export type Overlay = Text | Point | Line | Polygon | Custom<any>;
 
-export default class OverlayGroup extends Base {
+export default class OverlayGroup extends EventController {
   overlays = new Set<Overlay>();
 
   constructor(option: ConstructorOption) {
