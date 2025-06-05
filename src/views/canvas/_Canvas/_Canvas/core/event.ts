@@ -21,6 +21,7 @@ export default class Event extends Draw {
     this.initEvent();
     this.addEventListener("contextmenu", this.defaultContextmenu);
     this.addEventListener("down", this.defaultDown);
+    this.addEventListener("wheel", this.defaultWheel);
   }
   /** 初始化事件 */
   private initEvent() {
@@ -191,11 +192,19 @@ export default class Event extends Draw {
     if (!this.isWheelable) return;
     event.preventDefault();
 
-    const { delta, isWheelable, isAuto } = this;
+    const { delta, isAuto } = this;
 
-    if (!isWheelable || isAuto) return;
+    if (isAuto) return;
 
-    this.setScale(event, event.deltaY < 0 ? delta : -delta);
+    const step = event.deltaY < 0 ? delta : -delta;
+
+    const overlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    overlay?.notifyWheel(step, event);
+
+    this.notifyWheel(step, event);
+  }
+  defaultWheel: EventHandler<"wheel"> = (event, mouseEvent) => {
+    this.setScale(mouseEvent!, event.data);
     // console.log(
     //   "scale:" + this.scale,
     //   "offset:" + JSON.stringify(this.offset),
@@ -204,7 +213,7 @@ export default class Event extends Draw {
     // );
 
     this.redrawOnce();
-  }
+  };
   /** 上一个被点击的覆盖物 */
   private lastDownOverlay?: Overlay;
   /** 鼠标按下 */
