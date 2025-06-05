@@ -149,12 +149,14 @@ onUnmounted(() => {
 </template>
 
 <style scoped lang="less">
-.is-mobile.my-canvas-tools {
-  padding: 0;
+.is-mobile .my-canvas-tools {
   .list-box {
     padding-right: 0;
   }
   :deep(.n-scrollbar) {
+    .n-scrollbar-content {
+      padding: 0;
+    }
     &:nth-child(1) {
       margin-right: 0;
     }
@@ -165,7 +167,6 @@ onUnmounted(() => {
   height: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 14px;
   .list-box {
     display: flex;
     justify-content: space-between;
@@ -184,6 +185,9 @@ onUnmounted(() => {
     }
   }
   :deep(.n-scrollbar) {
+    .n-scrollbar-content {
+      padding: 14px;
+    }
     &:nth-child(1) {
       margin-right: 30px;
     }

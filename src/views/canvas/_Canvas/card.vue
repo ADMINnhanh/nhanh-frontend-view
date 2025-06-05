@@ -64,7 +64,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <NCard ref="cardRef">
+  <NCard ref="cardRef" hoverable>
     <template #header-extra>
       <NSpace>
         <NTooltip trigger="hover">
