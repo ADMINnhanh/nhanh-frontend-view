@@ -23,6 +23,7 @@ export default class Layer extends EventController {
 
   protected canvas = document.createElement("canvas");
   protected ctx = this.canvas.getContext("2d")!;
+  /** 是否需要重新绘制 */
   private isReload = false;
 
   groups = new Map<string, OverlayGroup>();
@@ -46,6 +47,7 @@ export default class Layer extends EventController {
     this.notifyReload = notifyReload
       ? (needForceExecute) => {
           if (needForceExecute) {
+            this.isRecalculate = true;
             notifyReload();
           } else if (
             this.show.shouldRender(this.mainCanvas?.scale) &&
@@ -139,12 +141,12 @@ export default class Layer extends EventController {
     | undefined {
     if (!this.mainCanvas) return;
 
-    const { scale, rect, isRecalculate, isThemeUpdated } = this.mainCanvas!;
+    const { scale, rect, isThemeUpdated } = this.mainCanvas!;
     const isShow = this.show.shouldRender(scale);
     const size = this.groups.size;
 
     if (isShow && size) {
-      if (this.isReload || isRecalculate || isThemeUpdated) {
+      if (this.isReload || this.isRecalculate || isThemeUpdated) {
         this.currentDrawOverlays = [];
         this.isReload = false;
 

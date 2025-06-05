@@ -112,7 +112,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     const { show, dynamicPosition, mainCanvas, position, valueScope } = this;
     if (!mainCanvas || !this.draw) return;
 
-    const { scale, isRecalculate, isScaleUpdated, maxMinValue } = mainCanvas;
+    const { scale, isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = show.shouldRender(scale);
     const prevDynamicStatus = !!dynamicPosition;
 
@@ -126,7 +126,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
         maxMinValue.minYV > valueScope!.maxY;
       if (pointNotWithinRange) return;
 
-      if (isRecalculate)
+      if (this.isRecalculate)
         this.dynamicPosition = mainCanvas.transformPosition(position!);
       return [this.draw, this];
     }

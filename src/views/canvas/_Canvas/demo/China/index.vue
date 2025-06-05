@@ -43,7 +43,7 @@ onMounted(() => {
   myCanvas.value.setScale("center", myCanvas.value.delta * 8);
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer(layer);
-  myCanvas.value.notifyReload = () => {
+  myCanvas.value.setNotifyReload(() => {
     if (provinceInfo.value) {
       const scale = myCanvas.value!.scale;
       if (scale > 100 || scale < 0.9) {
@@ -54,7 +54,7 @@ onMounted(() => {
         provinceInfo.value.y = point.dynamicPosition?.[1];
       }
     }
-  };
+  });
 });
 
 defineExpose({ myCanvas });
@@ -71,22 +71,28 @@ defineExpose({ myCanvas });
       <NTabPane name="省级行政区"></NTabPane>
       <NTabPane name="景区"></NTabPane>
     </NTabs>
-    <canvas :id="id"></canvas>
-    <InfoWindow v-if="provinceInfo" :info="provinceInfo" />
+    <div class="canvas-container">
+      <canvas :id="id"></canvas>
+      <InfoWindow v-if="provinceInfo" :info="provinceInfo" />
+    </div>
   </div>
 </template>
 
 <style scoped lang="less">
 .my-canvas {
   --height: calc(var(--router-view-height) - 2px - 28px - 68px - 20px);
-  position: relative;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  canvas {
+  .canvas-container {
     width: 100%;
     height: 100px;
     flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+    canvas {
+      width: 100%;
+      height: 100%;
+    }
   }
 }
 </style>

@@ -234,7 +234,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     } = this;
     if (!mainCanvas) return;
 
-    const { scale, isRecalculate, isScaleUpdated, maxMinValue } = mainCanvas;
+    const { scale, isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = show.shouldRender(scale);
     const prevDynamicStatus = !!dynamicPosition;
 
@@ -252,7 +252,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
           maxMinValue.minYV > valueScope!.maxY);
       if (pointNotWithinRange) return;
 
-      if (isRecalculate) {
+      if (this.isRecalculate) {
         this.dynamicPosition = mainCanvas.transformPosition(position!);
         this.handlePoints.forEach(
           (point, index) =>

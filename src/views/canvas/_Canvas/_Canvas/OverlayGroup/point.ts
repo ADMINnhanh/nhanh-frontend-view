@@ -231,7 +231,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     const { show, dynamicPosition, position, valueScope, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { scale, maxMinValue, isRecalculate, isScaleUpdated } = mainCanvas;
+    const { scale, maxMinValue, isScaleUpdated } = mainCanvas;
     const isShow = show.shouldRender(scale);
     const prevDynamicStatus = !!dynamicPosition;
 
@@ -248,7 +248,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
         maxMinValue.minYV > valueScope!.maxY;
       if (pointNotWithinRange) return;
 
-      if (isRecalculate)
+      if (this.isRecalculate)
         this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
       return [this.draw, this];
     }

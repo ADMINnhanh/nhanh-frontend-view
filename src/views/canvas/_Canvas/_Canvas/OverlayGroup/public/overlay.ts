@@ -80,6 +80,7 @@ export default abstract class Overlay<
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {
           if (needForceExecute) {
+            this.isRecalculate = true;
             notifyReload();
           } else if (this.show.shouldRender(this.mainCanvas?.scale)) {
             notifyReload();

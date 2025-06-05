@@ -37,7 +37,7 @@ export default abstract class BaseData<T extends BaseData<T>> {
   /** 是否需要重新计算坐标 */
   get isRecalculate(): boolean {
     return (
-      (this.parent ? this.parent.isRecalculate : true) && this._isRecalculate
+      (this.parent ? this.parent.isRecalculate : true) || this._isRecalculate
     );
   }
   set isRecalculate(isRecalculate: boolean) {
@@ -59,7 +59,7 @@ export default abstract class BaseData<T extends BaseData<T>> {
   }
 
   /** 通知重新加载 */
-  notifyReload?: (needForceExecute?: boolean) => void;
+  protected notifyReload?: (needForceExecute?: boolean) => void;
   /** 设置通知重新加载 */
   abstract setNotifyReload(notifyReload?: () => void): void;
 }
