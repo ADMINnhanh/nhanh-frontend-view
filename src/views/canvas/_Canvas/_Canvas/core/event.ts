@@ -61,6 +61,8 @@ export default class Event extends Draw {
   private lockNotifyClick = false;
   /** 鼠标左键点击画布 */
   private click(event: MouseEvent) {
+    if (!this.isClickable) return;
+
     if (this.lockNotifyClick) return (this.lockNotifyClick = false);
 
     const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
@@ -77,6 +79,8 @@ export default class Event extends Draw {
   private lastContextmenuOverlay?: Overlay;
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
+    if (!this.isContextmenuable) return;
+
     event.preventDefault();
     const contextmenuOverlay = this.findOverlayByPoint(
       event.offsetX,
@@ -184,11 +188,12 @@ export default class Event extends Draw {
   }
   /** 滚轮滚动 */
   private wheel(event: WheelEvent) {
+    if (!this.isWheelable) return;
     event.preventDefault();
 
-    const { delta, isScaleable, isAuto } = this;
+    const { delta, isWheelable, isAuto } = this;
 
-    if (!isScaleable || isAuto) return;
+    if (!isWheelable || isAuto) return;
 
     this.setScale(event, event.deltaY < 0 ? delta : -delta);
     // console.log(
@@ -204,6 +209,8 @@ export default class Event extends Draw {
   private lastDownOverlay?: Overlay;
   /** 鼠标按下 */
   private mousedown(event: MouseEvent) {
+    if (!this.isDownable) return;
+
     const { clientX, clientY } = event;
     this.mouseLastPosition = { x: clientX, y: clientY };
 
@@ -242,6 +249,8 @@ export default class Event extends Draw {
   }
   /** 处理拖拽移动 */
   private handleDragMove(event: MouseEvent) {
+    if (!this.isDraggable) return;
+
     const { lastDownOverlay } = this;
 
     if (!this.isDraggable) return;
@@ -285,6 +294,8 @@ export default class Event extends Draw {
   }
   /** 处理 hover 逻辑 */
   private handleHover(event: MouseEvent) {
+    if (!this.isHoverable) return;
+
     if (event.target != this.canvas) return;
 
     const hoverOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
@@ -341,6 +352,8 @@ export default class Event extends Draw {
   }
   /** 移动端 移动 */
   private touchmove(event: TouchEvent) {
+    if (!this.isDraggable) return;
+
     const touches = event.touches;
     event.preventDefault();
     const { oldClientX, oldClientY, offset, delta, isAuto, isDraggable } = this;

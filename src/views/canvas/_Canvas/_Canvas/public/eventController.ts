@@ -14,7 +14,9 @@ class _CanvasEvent<T = undefined> {
   }
 }
 type State = { state: boolean; oldState: boolean };
+//#region  1. 添加事件传值映射
 type EventMap = {
+  wheel: number;
   down: State;
   contextmenu: State;
   click: State;
@@ -32,7 +34,9 @@ type EventListeners = {
   [K in keyof EventMap]: Set<EventHandler<K>>;
 };
 
+//#region  2. 添加事件通知方法声明
 type NotifyType =
+  | "notifyWheel"
   | "notifyDown"
   | "notifyDragg"
   | "notifyContextmenu"
@@ -40,7 +44,9 @@ type NotifyType =
   | "notifyDoubleClick"
   | "notifyHover";
 
+//#region  3. 添加事件是否可用
 type InteractionType =
+  | "isWheelable"
   | "isDownable"
   | "isDraggable"
   | "isContextmenuable"
@@ -49,8 +55,10 @@ type InteractionType =
   | "isHoverable";
 
 export default abstract class EventController extends EventControllerBasedata<EventController> {
+  //#region  4. 添加事件管理器
   /** 事件管理器 */
   private readonly listeners: EventListeners = {
+    wheel: new Set(),
     hover: new Set(),
     down: new Set(),
     contextmenu: new Set(),
@@ -59,12 +67,14 @@ export default abstract class EventController extends EventControllerBasedata<Ev
     dragg: new Set(),
   };
 
+  /** 添加事件监听器 */
   addEventListener<T extends keyof EventMap>(
     type: T,
     handler: EventHandler<T>
   ) {
     this.listeners[type].add(handler as EventHandler<keyof EventMap>);
   }
+  /** 移除事件监听器 */
   removeEventListener<T extends keyof EventMap>(
     type: T,
     handler: EventHandler<T>
@@ -89,7 +99,7 @@ export default abstract class EventController extends EventControllerBasedata<Ev
   private trigger<T extends keyof EventMap>(
     type: T,
     data: EventMap[T],
-    mouseEvent: MouseEvent | undefined,
+    mouseEvent: MouseEvent | WheelEvent | undefined,
     interaction: InteractionType
   ) {
     if (!this[interaction]) return;
@@ -102,18 +112,18 @@ export default abstract class EventController extends EventControllerBasedata<Ev
     const notifyHandler = ("notify" +
       (type.charAt(0).toUpperCase() + type.slice(1))) as NotifyType;
 
-    const transferData: any =
-      notifyHandler == "notifyDragg"
-        ? data
-        : (data as EventMap[Exclude<keyof EventMap, "dragg">]).state;
+    //#region  5. 检查事件值
+    const transferData = ["notifyDragg", "notifyWheel"].includes(notifyHandler)
+      ? data
+      : (data as EventMap[Exclude<keyof EventMap, "dragg" | "wheel">]).state;
 
     if (event.canPropagate)
-      this.parent?.[notifyHandler](transferData, mouseEvent);
+      this.parent?.[notifyHandler](transferData as never, mouseEvent as any);
 
     this.sharedControllers[type]?.forEach(
       (controller) =>
         controller !== this &&
-        controller[notifyHandler](transferData, mouseEvent)
+        controller[notifyHandler](transferData as never, mouseEvent as any)
     );
   }
   // 状态更新方法
@@ -156,8 +166,8 @@ export default abstract class EventController extends EventControllerBasedata<Ev
     return true;
   }
 
-  /** 是否悬停 */
   private _isHover = false;
+  /** 是否触发悬停 */
   get isHover() {
     return this.isHoverable && this._isHover;
   }
@@ -170,8 +180,8 @@ export default abstract class EventController extends EventControllerBasedata<Ev
       "isHoverable"
     );
 
-  /** 是否按下 */
   private _isDown = false;
+  /** 是否触发按下 */
   get isDown() {
     return this.isDraggable && this._isDown;
   }
@@ -179,8 +189,8 @@ export default abstract class EventController extends EventControllerBasedata<Ev
     this.checkEventDate("down", state) &&
     this.trigger("down", { state, oldState: this.isDown }, event, "isDownable");
 
-  /** 是否右击 */
   private _isContextmenu = false;
+  /** 是否触发右击 */
   get isContextmenu() {
     return this.isClickable && this._isContextmenu;
   }
@@ -193,8 +203,8 @@ export default abstract class EventController extends EventControllerBasedata<Ev
       "isContextmenuable"
     );
 
-  /** 是否点击 */
   private _isClick = false;
+  /** 是否触发点击 */
   get isClick() {
     return this.isClickable && this._isClick;
   }
@@ -223,8 +233,8 @@ export default abstract class EventController extends EventControllerBasedata<Ev
       );
   };
 
-  /** 是否双击 */
   private _isDblClick = false;
+  /** 是否触发双击 */
   get isDblClick() {
     return this.isDoubleClickable && this._isDblClick;
   }
@@ -243,4 +253,10 @@ export default abstract class EventController extends EventControllerBasedata<Ev
   ) =>
     this.checkEventDate("dragg", position) &&
     this.trigger("dragg", position, event, "isDraggable");
+
+  notifyWheel = (step: number, event?: WheelEvent) =>
+    this.checkEventDate("wheel", step) &&
+    this.trigger("wheel", step, event, "isWheelable");
+
+  //#region  6. 添加事件通知方法
 }

@@ -192,9 +192,6 @@ export default abstract class Overlay<
     this.lastPointRadius = { radius, value: radiusValue };
   }
 
-  // defaultClick: EventHandler<"click"> = (event, mouseEvent) => {
-
-  // };
   /** 鼠标移入时是否重新绘制 */
   redrawOnIsHoverChange = false;
   defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {

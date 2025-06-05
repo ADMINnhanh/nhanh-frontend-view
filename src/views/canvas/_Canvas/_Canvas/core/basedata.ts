@@ -231,10 +231,10 @@ export default class BaseData extends EventController {
     event: "center" | { clientX: number; clientY: number },
     delta: number
   ) {
-    const { canvas, isScaleable, axisConfig } = this;
+    const { canvas, isWheelable, axisConfig } = this;
     const rect = this.rect!.value;
 
-    if (!isScaleable || !canvas || !rect)
+    if (!isWheelable || !canvas || !rect)
       return console.error("canvas is not HTMLCanvasElement");
 
     let clientX, clientY;

@@ -16,8 +16,8 @@ type EventControllerOptions<T extends EventControllerBasedata<T>> =
     isDoubleClickable?: boolean;
     /** 是否可以拖动 */
     isDraggable?: boolean;
-    /** 是否可以缩放 */
-    isScaleable?: boolean;
+    /** 是否可以滚轮滚动 */
+    isWheelable?: boolean;
   };
 
 export default abstract class EventControllerBasedata<
@@ -86,13 +86,13 @@ export default abstract class EventControllerBasedata<
     this._isDraggable = value;
   }
 
-  private _isScaleable = true;
-  /** 是否可以缩放 */
-  get isScaleable() {
-    return this.getPropValue("isScaleable", this._isScaleable);
+  private _isWheelable = true;
+  /** 是否可以滚轮滚动 */
+  get isWheelable() {
+    return this.getPropValue("isWheelable", this._isWheelable);
   }
-  set isScaleable(value: boolean) {
-    this._isScaleable = value;
+  set isWheelable(value: boolean) {
+    this._isWheelable = value;
   }
 
   /**

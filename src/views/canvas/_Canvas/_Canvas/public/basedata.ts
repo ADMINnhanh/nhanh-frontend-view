@@ -62,4 +62,13 @@ export default abstract class BaseData<T extends BaseData<T>> {
   protected notifyReload?: (needForceExecute?: boolean) => void;
   /** 设置通知重新加载 */
   abstract setNotifyReload(notifyReload?: () => void): void;
+
+  /** 是否需要重新渲染 */
+  shouldRender(scale?: number, opacity?: number): boolean {
+    scale = scale ?? this.mainCanvas?.scale;
+    return (
+      (this.parent ? this.parent.shouldRender(scale, opacity) : true) &&
+      this.show.shouldRender(scale, opacity)
+    );
+  }
 }

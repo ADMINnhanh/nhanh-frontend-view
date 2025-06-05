@@ -177,12 +177,14 @@ export const provinceInfo = ref<ProvinceInfo>();
 function GetProvinceInfoMap(name: string, point: Point) {
   const info = provinceInfoMap.find((v) => v.name == name);
   if (info) {
-    provinceInfo.value = {
-      ...info,
-      point: markRaw(point),
-      x: point.dynamicPosition?.[0],
-      y: point.dynamicPosition?.[1],
-    };
+    if (point.shouldRender()) {
+      provinceInfo.value = {
+        ...info,
+        point: markRaw(point),
+        x: point.dynamicPosition?.[0],
+        y: point.dynamicPosition?.[1],
+      };
+    }
   } else console.error(`未找到${name}信息`);
 }
 // #endregion

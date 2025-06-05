@@ -43,6 +43,7 @@ onMounted(() => {
   myCanvas.value.setScale("center", myCanvas.value.delta * 8);
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer(layer);
+
   myCanvas.value.setNotifyReload(() => {
     if (provinceInfo.value) {
       const scale = myCanvas.value!.scale;
