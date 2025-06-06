@@ -78,7 +78,7 @@ export default class _Canvas extends QuickMethod {
     this.setLayerGroups(layerGroup);
   }
   /** 获取图层群组 集合 */
-  gteLayerGroups(key: string) {
+  gteLayerGroups(key = "默认图层群组") {
     return this.layerGroups.get(key);
   }
   /** 设置图层群组 */

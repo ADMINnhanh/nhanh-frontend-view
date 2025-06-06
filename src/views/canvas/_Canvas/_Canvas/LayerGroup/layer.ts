@@ -18,7 +18,7 @@ type ConstructorOption = ConstructorParameters<typeof EventController>[0];
  */
 
 export default class Layer extends EventController {
-  opacity = 1;
+  /** 层级 */
   zIndex = 4;
 
   protected canvas = document.createElement("canvas");
@@ -121,17 +121,6 @@ export default class Layer extends EventController {
       this.notifyReload?.(false);
     }
   }
-  /** 设置图层的透明度 */
-  setOpacity(opacity: number) {
-    if (this.opacity != opacity) {
-      if (opacity >= 0 && opacity <= 1) {
-        this.opacity = opacity;
-        this.notifyReload?.(false);
-      } else {
-        console.warn("Opacity value should be between 0 and 1.");
-      }
-    }
-  }
 
   /** 本次绘制的覆盖物 */
   private currentDrawOverlays: [[number, number], Overlay][] = [];
@@ -165,7 +154,9 @@ export default class Layer extends EventController {
 
         groupArr.sort((a, b) => a[0] - b[0]);
 
+        const opacity = this.opacity ?? this.parent?.opacity ?? 1;
         groupArr.forEach(([zIndex, [draw, overlay]]) => {
+          this.ctx.globalAlpha = opacity;
           draw.call(overlay, this.ctx);
           this.currentDrawOverlays.push([
             [Number(this.zIndex) || 0, zIndex],

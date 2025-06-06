@@ -141,6 +141,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     const { mainCanvas, infinite, isClick } = this;
     position = position || this.dynamicPosition;
     if (!mainCanvas) return;
+    this.setGlobalAlpha(ctx);
 
     const style = this.setCanvasStyles(ctx);
 
@@ -167,6 +168,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   drawInfiniteStraightLine(ctx: CanvasRenderingContext2D) {
     const { mainCanvas, dynamicPosition } = this;
     if (!mainCanvas) return;
+    this.setGlobalAlpha(ctx);
 
     const { rect } = mainCanvas;
 

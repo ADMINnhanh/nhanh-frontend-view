@@ -220,6 +220,11 @@ export default abstract class Overlay<
     return this.isPointInPath(x, y) || this.isPointInStroke(x, y);
   }
 
+  /** 设置透明度 */
+  setGlobalAlpha(ctx: CanvasRenderingContext2D) {
+    const opacity = this.opacity ?? this.parent?.opacity;
+    if (opacity !== undefined) ctx.globalAlpha = opacity;
+  }
   setStyle(style?: Overlay<T, V>["style"]) {
     this.style = style;
     if (this.dynamicPosition) this.notifyReload?.();

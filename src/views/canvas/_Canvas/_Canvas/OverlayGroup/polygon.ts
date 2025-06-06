@@ -160,6 +160,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
   /** 绘制矩形 */
   drawRect(ctx: CanvasRenderingContext2D) {
+    this.setGlobalAlpha(ctx);
+
     const [[x1, y1], [x2, y2]] = this.dynamicPosition!;
     const width = Math.abs(x2 - x1);
     const height = Math.abs(y2 - y1);
@@ -188,6 +190,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   }
   /** 绘制多边形 */
   drawPolygon(ctx: CanvasRenderingContext2D) {
+    this.setGlobalAlpha(ctx);
+
     const dynamicPosition = this.dynamicPosition!;
 
     const style = this.setCanvasStyles(ctx);

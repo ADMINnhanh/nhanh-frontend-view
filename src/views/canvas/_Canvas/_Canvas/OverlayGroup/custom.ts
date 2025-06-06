@@ -107,7 +107,17 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     this.position = position;
   }
 
-  draw?: (ctx: CanvasRenderingContext2D) => void;
+  private _draw?: (ctx: CanvasRenderingContext2D) => void;
+  /** 传入的自定义绘制函数 */
+  get draw() {
+    return (ctx: CanvasRenderingContext2D) => {
+      this.setGlobalAlpha(ctx);
+      this._draw?.(ctx);
+    };
+  }
+  set draw(draw: (ctx: CanvasRenderingContext2D) => void) {
+    this._draw = draw;
+  }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     const { show, dynamicPosition, mainCanvas, position, valueScope } = this;
     if (!mainCanvas || !this.draw) return;

@@ -155,6 +155,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
   draw(ctx: CanvasRenderingContext2D) {
     if (!this.mainCanvas) return;
+    this.setGlobalAlpha(ctx);
 
     const dynamicPosition = this.dynamicPosition!;
     const textOffset = this.textOffset!;

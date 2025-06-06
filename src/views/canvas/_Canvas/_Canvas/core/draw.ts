@@ -93,6 +93,8 @@ export default class Draw extends Style {
       (layerGroup) => (canvasArr = canvasArr.concat(layerGroup.fetchCanvas()))
     );
     canvasArr.sort((a, b) => a[0] - b[0]);
+
+    this.ctx.globalAlpha = this.opacity ?? 1;
     canvasArr.forEach(([, canvas, overlays], index) => {
       this.ctx.drawImage(canvas, 0, 0);
 

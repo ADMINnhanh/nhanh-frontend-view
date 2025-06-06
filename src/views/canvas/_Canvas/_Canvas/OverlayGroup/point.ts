@@ -211,6 +211,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   draw(ctx: CanvasRenderingContext2D) {
     const { dynamicPosition, mainCanvas, extraOffset } = this;
     if (!mainCanvas) return;
+    this.setGlobalAlpha(ctx);
 
     const { radius, width } = this.setCanvasStyles(ctx);
     const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;

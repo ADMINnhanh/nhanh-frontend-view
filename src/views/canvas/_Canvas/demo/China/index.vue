@@ -46,6 +46,7 @@ onMounted(() => {
   myCanvas.value.setScale("center", myCanvas.value.delta * 8);
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer([layer, attractionLayer]);
+  console.log(myCanvas.value);
 
   myCanvas.value.setNotifyReload(() => {
     [provinceInfo, attractionInfo].forEach((info) => {
