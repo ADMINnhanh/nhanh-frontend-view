@@ -1720,4 +1720,19 @@ export default [
     negativeRate: 5.0,
   },
   // #endregion
-];
+] as {
+  /** 名称 */
+  name: string;
+  /** 坐标 */
+  coordinates: [number, number];
+  /** 访问量 */
+  visitors: number;
+  /** 积极评价数 */
+  positiveReviews: number;
+  /** 消极评价数 */
+  negativeReviews: number;
+  /** 积极评价率 */
+  positiveRate: number;
+  /** 消极评价率 */
+  negativeRate: number;
+}[];

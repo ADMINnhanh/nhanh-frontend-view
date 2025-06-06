@@ -12,13 +12,14 @@ type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 export type Overlay = Text | Point | Line | Polygon | Custom<any>;
 
 export default class OverlayGroup extends EventController {
+  /** 覆盖物集合 */
   overlays = new Set<Overlay>();
 
   constructor(option: ConstructorOption) {
     super(option);
     this.setNotifyReload(option.notifyReload);
   }
-
+  /** 设置主画布 */
   setMainCanvas(mainCanvas?: _Canvas) {
     super.setMainCanvas(mainCanvas);
     this.overlays.forEach((overlay) => {
@@ -27,7 +28,7 @@ export default class OverlayGroup extends EventController {
     });
     if (mainCanvas && this.overlays.size) this.notifyReload?.();
   }
-
+  /** 设置覆盖物重新绘制方法 */
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {
@@ -49,7 +50,7 @@ export default class OverlayGroup extends EventController {
 
     this.show.notifyReload = this.notifyReload;
   }
-
+  /** 添加覆盖物 */
   addOverlays(overlays: Overlay[] | Overlay) {
     [overlays].flat().forEach((overlay) => {
       overlay.setNotifyReload(this.notifyReload);
@@ -59,10 +60,11 @@ export default class OverlayGroup extends EventController {
     });
     this.notifyReload?.();
   }
-
+  /** 是否包含覆盖物 */
   hasOverlay(overlay: Overlay) {
     return this.overlays.has(overlay);
   }
+  /** 移除覆盖物 */
   removeOverlays(overlays: Overlay[] | Overlay) {
     [overlays].flat().forEach((overlay) => {
       this.overlays.delete(overlay);
@@ -72,6 +74,7 @@ export default class OverlayGroup extends EventController {
     });
     this.notifyReload?.();
   }
+  /** 清空覆盖物 */
   clearOverlays() {
     this.notifyReload?.();
     this.overlays.forEach((overlay) => {

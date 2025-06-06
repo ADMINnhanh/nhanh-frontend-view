@@ -3,12 +3,15 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
 import { onMounted, ref } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import InfoWindow from "./InfoWindow.vue";
+import ProvinceInfo from "./InfoWindow/Province.vue";
+import AttractionInfo from "./InfoWindow/Attraction.vue";
 import {
   layer,
   myCanvas,
   provinceInfo,
   provincialAdministrativeRegions,
+  attractionLayer,
+  attractionInfo,
 } from ".";
 import { NTabPane, NTabs } from "naive-ui";
 
@@ -25,7 +28,7 @@ function UpdateTabActive(tab: string) {
       (overlay) => (overlay.show.isVisible = true)
     );
   }
-
+  attractionLayer.show.isVisible = tab == "景区";
   oldTabActive = tab;
 }
 
@@ -42,19 +45,22 @@ onMounted(() => {
 
   myCanvas.value.setScale("center", myCanvas.value.delta * 8);
   myCanvas.value.setTheme(Settings.value.theme);
-  myCanvas.value.addLayer(layer);
+  myCanvas.value.addLayer([layer, attractionLayer]);
 
   myCanvas.value.setNotifyReload(() => {
-    if (provinceInfo.value) {
-      const scale = myCanvas.value!.scale;
-      if (scale > 100 || scale < 0.9) {
-        provinceInfo.value = undefined;
-      } else {
-        const point = provinceInfo.value.point;
-        provinceInfo.value.x = point.dynamicPosition?.[0];
-        provinceInfo.value.y = point.dynamicPosition?.[1];
+    [provinceInfo, attractionInfo].forEach((info) => {
+      if (info.value) {
+        const scale = myCanvas.value!.scale;
+        const point = info.value.point;
+
+        if (point.show.shouldRender(scale)) {
+          info.value.x = point.dynamicPosition?.[0];
+          info.value.y = point.dynamicPosition?.[1];
+        } else {
+          info.value = undefined;
+        }
       }
-    }
+    });
   });
 });
 
@@ -74,7 +80,8 @@ defineExpose({ myCanvas });
     </NTabs>
     <div class="canvas-container">
       <canvas :id="id"></canvas>
-      <InfoWindow v-if="provinceInfo" :info="provinceInfo" />
+      <ProvinceInfo v-if="provinceInfo" :info="provinceInfo" />
+      <AttractionInfo v-if="attractionInfo" :info="attractionInfo" />
     </div>
   </div>
 </template>

@@ -63,7 +63,7 @@ export default abstract class BaseData<T extends BaseData<T>> {
   /** 设置通知重新加载 */
   abstract setNotifyReload(notifyReload?: () => void): void;
 
-  /** 是否需要重新渲染 */
+  /** 是否需要渲染 */
   shouldRender(scale?: number, opacity?: number): boolean {
     scale = scale ?? this.mainCanvas?.scale;
     return (

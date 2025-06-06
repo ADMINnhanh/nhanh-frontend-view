@@ -3,14 +3,13 @@ import _Canvas from "../../_Canvas";
 import { markRaw, ref, shallowRef } from "vue";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
 import type { EventHandler } from "../../_Canvas/public/eventController";
-import provinceInfoMap from "./data/provinceInfoMap";
 import type Point from "../../_Canvas/OverlayGroup/point";
+import provinceInfoMap from "./data/provinceInfoMap";
 import attractions from "./data/attractions";
 import HeatMap from "heatmap-ts";
 import type { Overlay } from "../../_Canvas/OverlayGroup";
 
 // #region 中国地图数据
-
 type FeatureCollection = {
   features: {
     geometry:
@@ -89,14 +88,16 @@ export const provincialAdministrativeRegions: Overlay[] = [];
 ChinaData().then((chinaData) => {
   chinaData.forEach((item) => {
     const name = item.properties.name;
-    const overlayGroup = new _Canvas.OverlayGroup({ name });
+
+    const info = provinceInfoMap.find((v) => v.name == name);
+    const overlayGroup = new _Canvas.OverlayGroup({ name, extData: info });
 
     const openInfoWindow = () => {
       const point = Array.from(overlayGroup.overlays).find(
         (v) => v instanceof _Canvas.Point
       );
       if (point) {
-        GetProvinceInfoMap(name, point as unknown as Point);
+        GetProvinceInfoMap(overlayGroup.extData, point as unknown as Point);
       } else {
         provinceInfo.value = undefined;
       }
@@ -168,14 +169,14 @@ ChinaData().then((chinaData) => {
 // #endregion
 
 // #region 中国各省介绍
-export type ProvinceInfo = (typeof provinceInfoMap)[number] & {
+type Province = (typeof provinceInfoMap)[number];
+export type ProvinceInfo = Province & {
   point: Point;
   x?: number;
   y?: number;
 };
 export const provinceInfo = ref<ProvinceInfo>();
-function GetProvinceInfoMap(name: string, point: Point) {
-  const info = provinceInfoMap.find((v) => v.name == name);
+function GetProvinceInfoMap(info: Province, point: Point) {
   if (info) {
     if (point.shouldRender()) {
       provinceInfo.value = {
@@ -190,7 +191,62 @@ function GetProvinceInfoMap(name: string, point: Point) {
 // #endregion
 
 // #region 景区
+export const attractionLayer = new _Canvas.Layer({ name: "景区" });
+attractions.forEach((attraction) => {
+  const name = attraction.name;
+  const group = new _Canvas.OverlayGroup({ name });
 
+  const value = _LngLatToPlane(...attraction.coordinates);
+  const point = new _Canvas.Point({
+    value,
+    extData: attraction,
+  });
+  const text = new _Canvas.Text({
+    text: name,
+    value,
+    extraOffset: { x: 0, y: 20 },
+  });
+
+  point.show.scaleRange = [1, 100];
+  text.show.scaleRange = [1.4, 100];
+
+  group.addEventListener("click", (event) => {
+    if (event.data.state) {
+      GetAttractionsInfoMap(attraction, point);
+    } else GetAttractionsInfoMap();
+  });
+
+  group.addOverlays([point, text]);
+  attractionLayer.addGroup(group);
+});
+attractionLayer.show.isVisible = false;
+// #endregion
+
+// #region 景点介绍
+type Attraction = (typeof attractions)[number];
+export type AttractionsInfo = Attraction & {
+  point: Point;
+  x?: number;
+  y?: number;
+};
+export const attractionInfo = ref<AttractionsInfo>();
+function GetAttractionsInfoMap(info: Attraction, point: Point): void;
+function GetAttractionsInfoMap(): void;
+function GetAttractionsInfoMap(info?: Attraction, point?: Point) {
+  if (info && point) {
+    if (point.shouldRender()) {
+      attractionInfo.value = {
+        ...info,
+        point: markRaw(point),
+        x: point.dynamicPosition?.[0],
+        y: point.dynamicPosition?.[1],
+      };
+    }
+  } else {
+    attractionInfo.value = undefined;
+    console.error(`未找到${name}信息`);
+  }
+}
 // #endregion
 
 // requestAnimationFrame(() => {

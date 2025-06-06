@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import { NCard, NA, NBlockquote, NText } from "naive-ui";
-import type { ProvinceInfo } from ".";
+import { NCard, NA, NDescriptions, NDescriptionsItem } from "naive-ui";
+import type { AttractionsInfo } from "..";
 import { computed, ref, watch } from "vue";
 import Media from "@/stores/media";
+import { _FormatNumberWithUnit } from "nhanh-pure-function";
 
 interface Props {
-  info: ProvinceInfo;
+  info: AttractionsInfo;
 }
 const props = defineProps<Props>();
 
@@ -33,27 +34,50 @@ const cardStyle = computed(() => {
 
   return { left: (left || 0) + "px", top: (top || 0) + "px" };
 });
+
+/** 谷歌 */
+const hrefGoogle = "https://www.google.com/search?q=";
+/** 百度 */
+const hrefBaidu = "https://www.baidu.com/s?wd=";
 </script>
 
 <template>
   <NCard ref="cardRef" :title="info.name" size="small" :style="cardStyle">
     <template v-if="!Media.isMobileStyle" #header-extra>
-      <NA :href="info.website" target="_blank"> 前往政府网站了解更多 </NA>
+      <NA :href="hrefBaidu + info.name" target="_blank"> 百度一下 </NA>
+      &nbsp;
+      <NA :href="hrefGoogle + info.name" target="_blank"> 谷歌搜索 </NA>
     </template>
-    <NA v-if="Media.isMobileStyle" :href="info.website" target="_blank">
-      前往政府网站了解更多
-    </NA>
-    <NBlockquote>
-      <NText depth="3">{{ info.description }}</NText>
-    </NBlockquote>
+    <template v-if="Media.isMobileStyle">
+      <NA :href="hrefBaidu + info.name" target="_blank"> 百度一下 </NA>
+      &nbsp;
+      <NA :href="hrefGoogle + info.name" target="_blank"> 谷歌搜索 </NA>
+    </template>
+    <NDescriptions bordered size="small" :column="2">
+      <NDescriptionsItem label="坐标">{{ info.coordinates }}</NDescriptionsItem>
+      <NDescriptionsItem label="访问量">
+        {{ _FormatNumberWithUnit(info.visitors, { join: true }) }}人
+      </NDescriptionsItem>
+
+      <NDescriptionsItem label="积极评价">
+        {{ _FormatNumberWithUnit(info.positiveReviews, { join: true }) }}人 ({{
+          info.positiveRate
+        }}%)
+      </NDescriptionsItem>
+      <NDescriptionsItem label="消极评价">
+        {{ _FormatNumberWithUnit(info.negativeReviews, { join: true }) }}人 ({{
+          info.negativeRate
+        }}%)
+      </NDescriptionsItem>
+    </NDescriptions>
     <div class="n-popover-arrow"></div>
   </NCard>
 </template>
 
 <style scoped lang="less">
 .n-card {
-  width: 50%;
-  max-width: 450px;
+  width: 40%;
+  max-width: 350px;
   position: absolute;
   box-shadow: var(--n-box-shadow);
 
