@@ -182,11 +182,11 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     );
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, position, valueScope, mainCanvas } = this;
+    const { dynamicPosition, position, valueScope, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { scale, maxMinValue, isScaleUpdated } = mainCanvas;
-    const isShow = show.shouldRender(scale);
+    const { maxMinValue, isScaleUpdated } = mainCanvas;
+    const isShow = this.shouldRender();
 
     if (isShow && !!dynamicPosition) {
       if (isScaleUpdated) this.setExtraOffset(this.extraOffset, false);

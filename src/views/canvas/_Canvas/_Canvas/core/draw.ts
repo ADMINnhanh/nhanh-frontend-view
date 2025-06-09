@@ -63,12 +63,15 @@ export default class Draw extends Style {
 
   /** 重绘画布 */
   private redraw() {
-    if (!this.show.shouldRender(this.scale)) return;
     if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
     if (this.canvas.clientWidth == 0 || this.canvas.clientHeight == 0)
       return console.error(
         "The image argument is a canvas element with a width or height of 0."
       );
+
+    if (!this.shouldRender()) return this.clearScreen(false);
+
+    this.ctx.globalAlpha = this.opacity ?? 1;
 
     this.updateCenter();
 
@@ -94,7 +97,6 @@ export default class Draw extends Style {
     );
     canvasArr.sort((a, b) => a[0] - b[0]);
 
-    this.ctx.globalAlpha = this.opacity ?? 1;
     canvasArr.forEach(([, canvas, overlays], index) => {
       this.ctx.drawImage(canvas, 0, 0);
 

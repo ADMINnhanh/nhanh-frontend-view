@@ -35,10 +35,7 @@ export default class OverlayGroup extends EventController {
           if (needForceExecute) {
             this.isRecalculate = true;
             notifyReload();
-          } else if (
-            this.show.shouldRender(this.mainCanvas?.scale) &&
-            this.overlays.size
-          ) {
+          } else if (this.shouldRender() && this.overlays.size) {
             notifyReload();
           }
         }
@@ -47,8 +44,6 @@ export default class OverlayGroup extends EventController {
     this.overlays.forEach((overlay) =>
       overlay.setNotifyReload(this.notifyReload)
     );
-
-    this.show.notifyReload = this.notifyReload;
   }
   /** 添加覆盖物 */
   addOverlays(overlays: Overlay[] | Overlay) {
@@ -92,7 +87,7 @@ export default class OverlayGroup extends EventController {
       [(ctx: CanvasRenderingContext2D) => void, Overlay]
     ][] = [];
 
-    if (this.show.shouldRender(this.mainCanvas?.scale) && this.overlays.size) {
+    if (this.shouldRender() && this.overlays.size) {
       let index = 1;
 
       Array.from(this.overlays.values())

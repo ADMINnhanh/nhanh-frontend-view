@@ -82,13 +82,11 @@ export default abstract class Overlay<
           if (needForceExecute) {
             this.isRecalculate = true;
             notifyReload();
-          } else if (this.show.shouldRender(this.mainCanvas?.scale)) {
+          } else if (this.shouldRender()) {
             notifyReload();
           }
         }
       : undefined;
-
-    this.show.notifyReload = this.notifyReload;
   }
 
   /** 静态的值范围 不含偏移、点半径 */

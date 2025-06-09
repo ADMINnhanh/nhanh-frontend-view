@@ -21,14 +21,14 @@ let oldTabActive = "省级行政区";
 function UpdateTabActive(tab: string) {
   if (oldTabActive == "省级行政区") {
     provincialAdministrativeRegions.forEach(
-      (overlay) => (overlay.show.isVisible = false)
+      (overlay) => (overlay.isVisible = false)
     );
   } else if (tab == "省级行政区") {
     provincialAdministrativeRegions.forEach(
-      (overlay) => (overlay.show.isVisible = true)
+      (overlay) => (overlay.isVisible = true)
     );
   }
-  attractionLayer.show.isVisible = tab == "景区";
+  attractionLayer.isVisible = tab == "景区";
   oldTabActive = tab;
 }
 
@@ -46,15 +46,13 @@ onMounted(() => {
   myCanvas.value.setScale("center", myCanvas.value.delta * 8);
   myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer([layer, attractionLayer]);
-  console.log(myCanvas.value);
 
   myCanvas.value.setNotifyReload(() => {
     [provinceInfo, attractionInfo].forEach((info) => {
       if (info.value) {
-        const scale = myCanvas.value!.scale;
         const point = info.value.point;
 
-        if (point.show.shouldRender(scale)) {
+        if (point.shouldRender()) {
           info.value.x = point.dynamicPosition?.[0];
           info.value.y = point.dynamicPosition?.[1];
         } else {

@@ -81,8 +81,10 @@ function ChinaData() {
 }
 
 export const myCanvas = shallowRef<_Canvas>();
-export const layer = new _Canvas.Layer({ name: "中国地图" });
-layer.show.scaleRange = [0.2, 100];
+export const layer = new _Canvas.Layer({
+  name: "中国地图",
+  scaleRange: [0.2, 100],
+});
 const overlayGroups: OverlayGroup[] = [];
 export const provincialAdministrativeRegions: Overlay[] = [];
 ChinaData().then((chinaData) => {
@@ -137,15 +139,15 @@ ChinaData().then((chinaData) => {
       const capitalCity_point = new _Canvas.Point({
         name: "省会城市 " + name,
         value: center,
+        scaleRange: [0.9, 100],
       });
-      capitalCity_point.show.scaleRange = [0.9, 100];
       const capitalCity_text = new _Canvas.Text({
         name: "省会城市 " + name,
         text: item.properties.name,
         value: center,
         extraOffset: { x: 0, y: 20 },
+        scaleRange: [1.1, 100],
       });
-      capitalCity_text.show.scaleRange = [1.1, 100];
 
       capitalCity_point.addEventListener("click", clickEvent);
       capitalCity_text.addEventListener("click", clickEvent);
@@ -191,7 +193,10 @@ function GetProvinceInfoMap(info: Province, point: Point) {
 // #endregion
 
 // #region 景区
-export const attractionLayer = new _Canvas.Layer({ name: "景区" });
+export const attractionLayer = new _Canvas.Layer({
+  name: "景区",
+  isVisible: false,
+});
 attractions.forEach((attraction) => {
   const name = attraction.name;
   const group = new _Canvas.OverlayGroup({ name });
@@ -200,15 +205,14 @@ attractions.forEach((attraction) => {
   const point = new _Canvas.Point({
     value,
     extData: attraction,
+    scaleRange: [1, 100],
   });
   const text = new _Canvas.Text({
     text: name,
     value,
     extraOffset: { x: 0, y: 20 },
+    scaleRange: [1.4, 100],
   });
-
-  point.show.scaleRange = [1, 100];
-  text.show.scaleRange = [1.4, 100];
 
   group.addEventListener("click", (event) => {
     if (event.data.state) {
@@ -219,7 +223,6 @@ attractions.forEach((attraction) => {
   group.addOverlays([point, text]);
   attractionLayer.addGroup(group);
 });
-attractionLayer.show.isVisible = false;
 // #endregion
 
 // #region 景点介绍
@@ -294,6 +297,3 @@ function GetAttractionsInfoMap(info?: Attraction, point?: Point) {
 //     });
 //   }, 3000);
 // });
-
-// https://www.baidu.com/s?wd=
-// https://www.google.com/search?q=

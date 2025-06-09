@@ -49,17 +49,13 @@ export default class Layer extends EventController {
           if (needForceExecute) {
             this.isRecalculate = true;
             notifyReload();
-          } else if (
-            this.show.shouldRender(this.mainCanvas?.scale) &&
-            this.groups.size
-          ) {
+          } else if (this.shouldRender() && this.groups.size) {
             notifyReload();
           }
         }
       : undefined;
 
     this.groups.forEach((group) => this.setGroupNotifyReload(group));
-    this.show.notifyReload = this.notifyReload;
   }
   setGroupNotifyReload(group: OverlayGroup) {
     group.setNotifyReload(
@@ -130,8 +126,8 @@ export default class Layer extends EventController {
     | undefined {
     if (!this.mainCanvas) return;
 
-    const { scale, rect, isThemeUpdated } = this.mainCanvas!;
-    const isShow = this.show.shouldRender(scale);
+    const { rect, isThemeUpdated } = this.mainCanvas!;
+    const isShow = this.shouldRender();
     const size = this.groups.size;
 
     if (isShow && size) {
@@ -154,9 +150,7 @@ export default class Layer extends EventController {
 
         groupArr.sort((a, b) => a[0] - b[0]);
 
-        const opacity = this.opacity ?? this.parent?.opacity ?? 1;
         groupArr.forEach(([zIndex, [draw, overlay]]) => {
-          this.ctx.globalAlpha = opacity;
           draw.call(overlay, this.ctx);
           this.currentDrawOverlays.push([
             [Number(this.zIndex) || 0, zIndex],

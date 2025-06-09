@@ -141,16 +141,18 @@ export default class Style extends BaseData {
     }`;
   }
   /** 清除画布 */
-  clearScreen() {
+  clearScreen(fillBackground = true) {
     const { ctx, theme, rect } = this;
     const { width, height } = rect!.value;
 
     ctx.clearRect(0, 0, width, height);
 
-    const background = this.style[theme].background;
-    if (background) {
-      ctx.fillStyle = this.style[theme].background;
-      ctx.fillRect(0, 0, width, height);
+    if (fillBackground) {
+      const background = this.style[theme].background;
+      if (background) {
+        ctx.fillStyle = this.style[theme].background;
+        ctx.fillRect(0, 0, width, height);
+      }
     }
   }
   /** 设置样式 */

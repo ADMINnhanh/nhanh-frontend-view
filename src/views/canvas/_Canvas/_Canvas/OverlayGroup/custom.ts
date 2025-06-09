@@ -119,11 +119,11 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     this._draw = draw;
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, mainCanvas, position, valueScope } = this;
+    const { dynamicPosition, mainCanvas, position, valueScope } = this;
     if (!mainCanvas || !this.draw) return;
 
-    const { scale, isScaleUpdated, maxMinValue } = mainCanvas;
-    const isShow = show.shouldRender(scale);
+    const { isScaleUpdated, maxMinValue } = mainCanvas;
+    const isShow = this.shouldRender();
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {

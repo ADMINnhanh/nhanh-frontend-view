@@ -13,6 +13,9 @@ export default class LayerGroup extends EventController {
   constructor(option: ConstructorOption) {
     super(option);
 
+    /** 无需继承透明度，主画布的透明度另有用途 */
+    this.inheritOpacity = false;
+
     this.setNotifyReload(option.notifyReload);
 
     this.addEventListener("contextmenu", this.defaultContextmenu);
@@ -51,17 +54,13 @@ export default class LayerGroup extends EventController {
           if (needForceExecute) {
             this.isRecalculate = true;
             notifyReload();
-          } else if (
-            this.show.shouldRender(this.mainCanvas?.scale) &&
-            this.layers.size
-          ) {
+          } else if (this.shouldRender() && this.layers.size) {
             notifyReload();
           }
         }
       : undefined;
 
     this.layers.forEach((layer) => layer.setNotifyReload(this.notifyReload));
-    this.show.notifyReload = this.notifyReload;
   }
 
   /** 获取图层 */
@@ -108,7 +107,7 @@ export default class LayerGroup extends EventController {
 
   /** 收集图层的 canvas */
   fetchCanvas() {
-    if (this.show.shouldRender(this.mainCanvas?.scale) && this.layers.size) {
+    if (this.shouldRender() && this.layers.size) {
       const canvasArr: [
         number,
         HTMLCanvasElement,

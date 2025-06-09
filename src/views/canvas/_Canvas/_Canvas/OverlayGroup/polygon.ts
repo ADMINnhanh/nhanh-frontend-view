@@ -219,11 +219,11 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   }
 
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, position, mainCanvas, valueScope } = this;
+    const { dynamicPosition, position, mainCanvas, valueScope } = this;
     if (!mainCanvas) return;
 
-    const { scale, isScaleUpdated, maxMinValue } = mainCanvas;
-    const isShow = show.shouldRender(scale);
+    const { isScaleUpdated, maxMinValue } = mainCanvas;
+    const isShow = this.shouldRender();
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {

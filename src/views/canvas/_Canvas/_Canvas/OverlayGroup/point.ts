@@ -229,11 +229,11 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     if (width != lineWidthOffset) ctx.stroke(this.path);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { show, dynamicPosition, position, valueScope, mainCanvas } = this;
+    const { dynamicPosition, position, valueScope, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { scale, maxMinValue, isScaleUpdated } = mainCanvas;
-    const isShow = show.shouldRender(scale);
+    const { maxMinValue, isScaleUpdated } = mainCanvas;
+    const isShow = this.shouldRender();
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
