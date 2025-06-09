@@ -9,7 +9,7 @@ import attractions from "./data/attractions";
 import HeatMap from "heatmap-ts";
 import type { Overlay } from "../../_Canvas/OverlayGroup";
 
-// #region 中国地图数据
+//#region 中国地图数据
 type FeatureCollection = {
   features: {
     geometry:
@@ -168,9 +168,9 @@ ChinaData().then((chinaData) => {
   });
   layer.addGroup(overlayGroups);
 });
-// #endregion
+//#endregion
 
-// #region 中国各省介绍
+//#region 中国各省介绍
 type Province = (typeof provinceInfoMap)[number];
 export type ProvinceInfo = Province & {
   point: Point;
@@ -190,18 +190,20 @@ function GetProvinceInfoMap(info: Province, point: Point) {
     }
   } else console.error(`未找到${name}信息`);
 }
-// #endregion
+//#endregion
 
-// #region 景区
+//#region 景区
 export const attractionLayer = new _Canvas.Layer({
   name: "景区",
   isVisible: false,
 });
+const heatMapValue: [number, number][] = [];
 attractions.forEach((attraction) => {
   const name = attraction.name;
   const group = new _Canvas.OverlayGroup({ name });
 
   const value = _LngLatToPlane(...attraction.coordinates);
+  heatMapValue.push(value);
   const point = new _Canvas.Point({
     value,
     extData: attraction,
@@ -223,9 +225,9 @@ attractions.forEach((attraction) => {
   group.addOverlays([point, text]);
   attractionLayer.addGroup(group);
 });
-// #endregion
+//#endregion
 
-// #region 景点介绍
+//#region 景点介绍
 type Attraction = (typeof attractions)[number];
 export type AttractionsInfo = Attraction & {
   point: Point;
@@ -250,50 +252,50 @@ function GetAttractionsInfoMap(info?: Attraction, point?: Point) {
     console.error(`未找到${name}信息`);
   }
 }
-// #endregion
+//#endregion
 
-// requestAnimationFrame(() => {
-//   const heatMap = new HeatMap({
-//     container: document.getElementById("heatMap")!,
-//   });
+//#region 景点热力图
+const maxValue =
+  attractions.reduce((prev, curr) => prev + curr.visitors, 0) /
+  attractions.length;
+export const heatMapOverlay = new _Canvas.Custom({
+  name: "景点热力图",
+  value: heatMapValue,
+  scaleRange: [0.8, 100],
+  draw: (ctx) => {
+    const { width, height } = heatMapOverlay.mainCanvas!.rect!.value;
+    const container = document.createElement("div");
+    const heatMap = new HeatMap({ container, width, height });
 
-//   heatMap.setData({
-//     max: 100,
-//     min: 1,
-//     data: [
-//       {
-//         x: 100,
-//         y: 100,
-//         value: 100,
-//         radius: 20,
-//       },
-//       {
-//         x: 100,
-//         y: 120,
-//         value: 50,
-//         radius: 30,
-//       },
-//     ],
-//   });
-
-//   setTimeout(() => {
-//     heatMap.setData({
-//       max: 100,
-//       min: 1,
-//       data: [
-//         {
-//           x: 200,
-//           y: 200,
-//           value: 100,
-//           radius: 20,
-//         },
-//         {
-//           x: 200,
-//           y: 220,
-//           value: 50,
-//           radius: 30,
-//         },
-//       ],
-//     });
-//   }, 3000);
-// });
+    const radius = 20;
+    const data = heatMapOverlay
+      .dynamicPosition!.map((point, index) => {
+        if (
+          point[0] < -radius ||
+          point[1] < -radius ||
+          point[0] > width + radius ||
+          point[1] > height + radius
+        )
+          return;
+        return {
+          x: Math.round(point[0]),
+          y: Math.round(point[1]),
+          value: attractions[index].visitors,
+          radius,
+        };
+      })
+      .filter(Boolean) as {
+      x: number;
+      y: number;
+      value: number;
+      radius: number;
+    }[];
+    heatMap.setData({ max: maxValue, min: 0, data });
+    const canvas = container.firstElementChild! as HTMLCanvasElement;
+    ctx.drawImage(canvas, 0, 0, width, height);
+  },
+});
+const heatMapGroup = new _Canvas.OverlayGroup({ name: "景点热力图" });
+heatMapGroup.addOverlays(heatMapOverlay);
+attractionLayer.addGroup(heatMapGroup);
+//#endregion

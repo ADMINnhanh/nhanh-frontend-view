@@ -134,6 +134,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
         maxMinValue.minXV > valueScope!.maxX ||
         maxMinValue.maxYV < valueScope!.minY ||
         maxMinValue.minYV > valueScope!.maxY;
+
       if (pointNotWithinRange) return;
 
       if (this.isRecalculate)

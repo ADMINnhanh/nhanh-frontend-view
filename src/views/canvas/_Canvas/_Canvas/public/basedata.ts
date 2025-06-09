@@ -12,7 +12,7 @@ abstract class Base<T extends Base<T>> {
   extData?: any;
 
   /** 主画布 */
-  protected mainCanvas?: _Canvas;
+  mainCanvas?: _Canvas;
 
   private _isRecalculate = false;
   /** 是否需要重新计算坐标 */
@@ -53,7 +53,7 @@ abstract class Show<T extends Show<T>> extends Base<T> {
   }
 
   /** 是否继承父级透明度 */
-  inheritOpacity = true;
+  protected inheritOpacity = true;
   private _opacity: undefined | number = undefined;
   /** 透明度 */
   get opacity() {
@@ -118,7 +118,6 @@ interface BaseDataOptions {
   /** 显示范围 缩放比例 */
   scaleRange?: [number, number];
 }
-
 /** 基础数据 公共 */
 export default abstract class BaseData<T extends BaseData<T>> extends Show<T> {
   constructor(options: BaseDataOptions) {

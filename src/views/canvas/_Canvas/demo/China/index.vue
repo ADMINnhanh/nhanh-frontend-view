@@ -12,8 +12,9 @@ import {
   provincialAdministrativeRegions,
   attractionLayer,
   attractionInfo,
+  heatMapOverlay,
 } from ".";
-import { NTabPane, NTabs } from "naive-ui";
+import { NSpace, NSwitch, NTabPane, NTabs } from "naive-ui";
 
 const id = _GenerateUUID();
 const tabActive = ref("省级行政区");
@@ -32,6 +33,17 @@ function UpdateTabActive(tab: string) {
   oldTabActive = tab;
 }
 
+const heatMapIsVisible = ref(true);
+function UpdateHeatMap(value: boolean) {
+  heatMapOverlay.isVisible = value;
+}
+const heatMapPointIsVisible = ref(true);
+function UpdateHeatMapPoint(value: boolean) {
+  attractionLayer.groups.forEach((group) => {
+    if (group.name != "景点热力图") group.isVisible = value;
+  });
+}
+
 onMounted(() => {
   myCanvas.value = new _Canvas({
     id,
@@ -40,7 +52,7 @@ onMounted(() => {
   });
   myCanvas.value.setDefaultCenter({
     left: -(580 - myCanvas.value.rect!.value.width / 2),
-    bottom: Number((myCanvas.value.rect!.value.height / 4.4).toFixed(0)),
+    bottom: Number((myCanvas.value.rect!.value.height / 4.6).toFixed(0)),
   });
 
   myCanvas.value.setScale("center", myCanvas.value.delta * 8);
@@ -81,6 +93,19 @@ defineExpose({ myCanvas });
       <canvas :id="id"></canvas>
       <ProvinceInfo v-if="provinceInfo" :info="provinceInfo" />
       <AttractionInfo v-if="attractionInfo" :info="attractionInfo" />
+      <NSpace v-if="tabActive == '景区'">
+        <NSwitch
+          v-model:value="heatMapPointIsVisible"
+          @update:value="UpdateHeatMapPoint"
+        >
+          <template #checked>点位</template>
+          <template #unchecked>点位</template>
+        </NSwitch>
+        <NSwitch v-model:value="heatMapIsVisible" @update:value="UpdateHeatMap">
+          <template #checked>热力图</template>
+          <template #unchecked>热力图</template>
+        </NSwitch>
+      </NSpace>
     </div>
   </div>
 </template>
@@ -99,6 +124,11 @@ defineExpose({ myCanvas });
     canvas {
       width: 100%;
       height: 100%;
+    }
+    .n-space {
+      position: absolute;
+      top: 5px;
+      left: 5px;
     }
   }
 }
