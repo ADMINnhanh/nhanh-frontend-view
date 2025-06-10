@@ -51,7 +51,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     const isLine = super.isPointInAnywhere(x, y);
     const isPoint =
       this.isClick &&
-      this.isShowHandlePoint &&
+      this.isHandlePointsVisible &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
         is != point.isHover && point.notifyHover(is);
@@ -132,27 +132,18 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     if (typeof this.style == "string") {
       style = mainCanvas.style[this.style]?.polygon || defaultStyle;
     } else if (typeof this.style == "object") {
-      style = Object.assign({}, defaultStyle, this.style as any);
+      const stroke = this.style.stroke
+        ? Object.assign({}, defaultStyle.stroke, this.style.stroke as any)
+        : defaultStyle.stroke;
+      style = Object.assign({}, defaultStyle, this.style as any, { stroke });
     } else {
       style = defaultStyle;
     }
 
-    const {
-      width,
-      stroke,
-      dash,
-      dashGap,
-      dashOffset,
-      fill,
-      fill_hover,
-      stroke_hover,
-    } = style;
+    const { fill, fill_hover } = style;
 
     if (ctx) {
-      ctx.setLineDash(dash ? (dashGap as any) : []);
-      ctx.lineDashOffset = dashOffset;
-      ctx.lineWidth = width;
-      ctx.strokeStyle = isHover ? stroke_hover : stroke;
+      this.setBaseLineStyle(ctx, style.stroke);
       ctx.fillStyle = isHover ? fill_hover : fill;
     }
     return style;
@@ -182,7 +173,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     ctx.fill(this.path);
 
     // 绘制 线段控制点
-    if (this.isClick && this.isShowHandlePoint)
+    this.isShowHandlePoint = this.isClick && this.isHandlePointsVisible;
+    if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.style = style.point;
         point.draw(ctx);
@@ -211,7 +203,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     ctx.fill(this.path);
 
     // 绘制 线段控制点
-    if (this.isClick && this.isShowHandlePoint)
+    this.isShowHandlePoint = this.isClick && this.isHandlePointsVisible;
+    if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.style = style.point;
         point.draw(ctx);

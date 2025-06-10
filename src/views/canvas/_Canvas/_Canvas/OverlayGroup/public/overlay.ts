@@ -248,6 +248,24 @@ export default abstract class Overlay<
     if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
   }
 
+  /** 绘制线基础样式 */
+  protected setBaseLineStyle(
+    ctx: CanvasRenderingContext2D,
+    style: BaseLineStyle
+  ) {
+    const { width, dash, dashGap, dashOffset, color, color_hover, cap, join } =
+      style;
+
+    ctx.setLineDash(dash ? (dashGap as any) : []);
+    ctx.lineDashOffset = dashOffset;
+    ctx.lineCap = cap;
+    ctx.lineJoin = join;
+    ctx.lineWidth = width;
+    ctx.strokeStyle = this.isHover ? color_hover : color;
+
+    return style;
+  }
+
   /** 获取绘制函数 */
   abstract getDraw():
     | [(ctx: CanvasRenderingContext2D) => void, OverlayType]

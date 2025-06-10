@@ -11,7 +11,7 @@ import type Point from "../../_Canvas/OverlayGroup/point";
 import provinceInfoMap from "./data/provinceInfoMap";
 import attractions from "./data/attractions";
 import HeatMap from "heatmap-ts";
-import type { Overlay } from "../../_Canvas/OverlayGroup";
+import type { OverlayType } from "../../_Canvas/OverlayGroup";
 
 //#region 中国地图数据
 type FeatureCollection = {
@@ -90,7 +90,7 @@ export const layer = new _Canvas.Layer({
   scaleRange: [0.2, 100],
 });
 const overlayGroups: OverlayGroup[] = [];
-export const provincialAdministrativeRegions: Overlay[] = [];
+export const provincialAdministrativeRegions: OverlayType[] = [];
 ChinaData().then((chinaData) => {
   chinaData.forEach((item) => {
     const name = item.properties.name;
@@ -128,7 +128,7 @@ ChinaData().then((chinaData) => {
     item.geometry.forEach((polygonData) => {
       const polygon = new _Canvas.Polygon({
         name: name + "边界",
-        isShowHandlePoint: false,
+        isHandlePointsVisible: false,
         value: polygonData,
       });
       overlayGroup.addOverlays(polygon);

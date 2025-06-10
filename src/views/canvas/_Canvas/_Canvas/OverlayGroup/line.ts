@@ -26,7 +26,6 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     Object.assign(this, { infinite });
 
     if (infinite) this.canCreateOrDeleteHandlePoint = false;
-    this.redrawOnIsHoverChange = false;
   }
 
   protected updateValueScope() {
@@ -51,7 +50,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     const isLine = super.isPointInAnywhere(x, y);
     const isPoint =
       (this.isClick || !!this.infinite) &&
-      this.isShowHandlePoint &&
+      this.isHandlePointsVisible &&
       this.handlePoints.some((point) => {
         const is = point.isPointInAnywhere(x, y);
         is != point.isHover && point.notifyHover(is);
@@ -123,16 +122,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       style = defaultStyle;
     }
 
-    const { width, color, dash, dashGap, dashOffset, cap, join } = style;
-
-    if (ctx) {
-      ctx.setLineDash(dash ? (dashGap as number[]) : []);
-      ctx.lineDashOffset = dashOffset;
-      ctx.lineCap = cap;
-      ctx.lineJoin = join;
-      ctx.lineWidth = width;
-      ctx.strokeStyle = color;
-    }
+    if (ctx) this.setBaseLineStyle(ctx, style);
 
     return style;
   }
@@ -158,7 +148,9 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     ctx.stroke(this.path);
 
     // 绘制 线段控制点
-    if ((infinite || isClick) && this.isShowHandlePoint)
+    this.isShowHandlePoint =
+      (infinite || isClick) && this.isHandlePointsVisible;
+    if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.style = style.point;
         point.draw(ctx);

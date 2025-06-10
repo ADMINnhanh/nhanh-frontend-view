@@ -57,9 +57,8 @@ function UpdateDraggable(draggable: boolean) {
 }
 function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
   polygon_arr.forEach(
-    (polygon) => (polygon.isShowHandlePoint = isShowHandlePoint)
+    (polygon) => (polygon.isHandlePointsVisible = isShowHandlePoint)
   );
-  polygon_arr[0].notifyReload!();
 }
 
 onMounted(() => {

@@ -15,7 +15,7 @@ type ConstructorOption<T> = ConstructorParameters<
   typeof Overlay<T, PointLocation[]>
 >[0] & {
   /** 是否可显示控制点 */
-  isShowHandlePoint?: boolean;
+  isHandlePointsVisible?: boolean;
   /** 是否可以创建新的 控制点 */
   canCreateOrDeleteHandlePoint?: boolean;
 };
@@ -83,8 +83,22 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 > {
   /** 控制点 */
   protected handlePoints: Point[] = [];
+
   /** 是否可显示控制点 */
-  isShowHandlePoint = true;
+  private _isHandlePointsVisible = false;
+  /** 是否可显示控制点 */
+  get isHandlePointsVisible() {
+    return this._isHandlePointsVisible;
+  }
+  set isHandlePointsVisible(value: boolean) {
+    if (this._isHandlePointsVisible !== value) {
+      this._isHandlePointsVisible = value;
+      if (this.isShowHandlePoint != value) this.notifyReload?.();
+    }
+  }
+
+  /** 当前是否渲染了控制点 */
+  protected isShowHandlePoint = false;
 
   /** 是否闭合 */
   protected abstract isClosed: boolean;
@@ -100,9 +114,14 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
     super(option);
 
-    const { isShowHandlePoint = true, canCreateOrDeleteHandlePoint = true } =
-      option;
-    Object.assign(this, { isShowHandlePoint, canCreateOrDeleteHandlePoint });
+    const {
+      isHandlePointsVisible = true,
+      canCreateOrDeleteHandlePoint = true,
+    } = option;
+    Object.assign(this, {
+      isHandlePointsVisible,
+      canCreateOrDeleteHandlePoint,
+    });
 
     this.addEventListener("click", this.defaultClick);
     this.addEventListener("doubleClick", this.defaultDoubleClick);
@@ -111,7 +130,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
   /** 默认点击事件 点击后切换控制点显示状态 */
   defaultClick: EventHandler<"click"> = (event, mouseEvent) => {
-    if (!this.isShowHandlePoint) return;
+    if (!this.isHandlePointsVisible) return;
 
     const { state, oldState } = event.data;
 
@@ -120,7 +139,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   /** 默认点击事件 点击后 创建/删除 控制点 */
   defaultDoubleClick: EventHandler<"doubleClick"> = (event, mouseEvent) => {
     if (mouseEvent) {
-      if (!this.isShowHandlePoint) return;
+      if (!this.isHandlePointsVisible) return;
 
       const { offsetX, offsetY } = mouseEvent;
 
@@ -130,7 +149,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         this.resetHandlePointLock();
       } else if (state) {
         const canEditPoints =
-          this.isShowHandlePoint &&
+          this.isHandlePointsVisible &&
           this.canCreateOrDeleteHandlePoint &&
           this.isDraggable;
 
@@ -270,7 +289,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       this.notifyReload?.();
       this.lockedCanCreateOrDeleteHandlePoint = true;
     };
-    if (this.isShowHandlePoint) {
+    if (this.isHandlePointsVisible) {
       const hover_point_index = this.handlePoints.findIndex(
         (point) => point.isHover
       );

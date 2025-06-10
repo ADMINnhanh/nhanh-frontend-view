@@ -44,9 +44,11 @@ type PointStyleType = {
 };
 
 /** 线样式 */
-type LineStyleType = {
+type BaseLineStyle = {
   /** 颜色 */
   color: string;
+  /** 颜色 - hover */
+  color_hover: string;
   /** 宽度 */
   width: number;
   /** 虚线 */
@@ -59,28 +61,25 @@ type LineStyleType = {
   cap: "butt" | "round" | "square";
   /** 路径中的相连部分的形状 */
   join: "bevel" | "round" | "miter";
+};
+
+/** 线样式 */
+type LineStyleType = BaseLineStyle & {
   /** 点位样式 */
   point: PointStyleType;
 };
+
+/** 圆弧样式 */
+type ArcStyleType = BaseLineStyle & {};
 
 /** 面样式 */
 type PolygonStyleType = {
   /** 填充色 */
   fill: string;
-  /** 描边色 */
-  stroke: string;
   /** 填充色 - hover */
   fill_hover: string;
-  /** 描边色 - hover */
-  stroke_hover: string;
-  /** 宽度 */
-  width: number;
-  /** 虚线 */
-  dash: boolean;
-  /** 虚线间隔 */
-  dashGap: number[];
-  /** 偏移虚线 */
-  dashOffset: number;
+  /** 描边 */
+  stroke: BaseLineStyle;
   /** 点位样式 */
   point: PointStyleType;
 };
@@ -142,7 +141,7 @@ type LineType = CommonDataType<
     /** 无限线 */
     infinite: boolean;
     /** 是否可显示线段控制点 */
-    isShowHandlePoint: boolean;
+    isHandlePointsVisible: boolean;
   }
 >;
 
@@ -154,6 +153,6 @@ type PolygonType = CommonDataType<
     /** 是否为矩形 */
     isRect: boolean;
     /** 是否可显示线段控制点 */
-    isShowHandlePoint: boolean;
+    isHandlePointsVisible: boolean;
   }
 >;
