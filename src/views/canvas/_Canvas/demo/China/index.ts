@@ -1,4 +1,8 @@
-import { _LngLatToPlane, _ReadFile } from "nhanh-pure-function";
+import {
+  _FormatNumberWithUnit,
+  _LngLatToPlane,
+  _ReadFile,
+} from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
 import { markRaw, ref, shallowRef } from "vue";
 import type OverlayGroup from "../../_Canvas/OverlayGroup";
@@ -293,6 +297,38 @@ export const heatMapOverlay = new _Canvas.Custom({
     heatMap.setData({ max: maxValue, min: 0, data });
     const canvas = container.firstElementChild! as HTMLCanvasElement;
     ctx.drawImage(canvas, 0, 0, width, height);
+
+    /** 色块 */
+    const padding = 10;
+    const colorBlokWidth = 36;
+    const colorBlokHeight = 110;
+    const colorBlokX = padding;
+    const colorBlokY = height - padding - colorBlokHeight;
+    const colorBlok = ctx.createLinearGradient(
+      0,
+      colorBlokY + colorBlokHeight,
+      0,
+      colorBlokY
+    );
+    colorBlok.addColorStop(1, "rgb(255,0,0)");
+    colorBlok.addColorStop(0.55, "rgb(0,255,0)");
+    colorBlok.addColorStop(0.25, "rgb(0,0,255)");
+    colorBlok.addColorStop(0, "rgba(0,0,0,0)");
+
+    ctx.fillStyle = colorBlok;
+    ctx.fillRect(colorBlokX, colorBlokY, colorBlokWidth, colorBlokHeight);
+    ctx.fillStyle = "rgb(255,0,0)";
+    ctx.font = "bold 16px monospace";
+    ctx.fillText(
+      "≥" + _FormatNumberWithUnit(maxValue, { join: true }),
+      colorBlokX + colorBlokWidth + padding,
+      colorBlokY + 16
+    );
+    ctx.fillText(
+      "0",
+      colorBlokX + colorBlokWidth + padding,
+      colorBlokY + colorBlokHeight
+    );
   },
 });
 const heatMapGroup = new _Canvas.OverlayGroup({ name: "景点热力图" });
