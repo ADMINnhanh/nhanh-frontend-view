@@ -1,6 +1,6 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
-import { type Overlay as OverlayType } from "./index";
+import { type OverlayType } from "./index";
 import type { EventHandler } from "../public/eventController";
 import { _IsSingleArrayValid } from "nhanh-pure-function";
 

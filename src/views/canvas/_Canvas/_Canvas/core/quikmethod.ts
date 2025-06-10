@@ -1,14 +1,14 @@
 import { _Schedule } from "nhanh-pure-function";
 import Axis from "./axis";
 import Event from "./event";
-import { type Overlay } from "../OverlayGroup";
+import { type OverlayType } from "../OverlayGroup";
 import Decimal from "decimal.js";
 import LayerGroup from "../LayerGroup";
 import Layer from "../LayerGroup/layer";
 import OverlayGroup from "../OverlayGroup";
 
 // 定义基础节点类型
-type NodeType = LayerGroup | Layer | OverlayGroup | Overlay;
+type NodeType = LayerGroup | Layer | OverlayGroup | OverlayType;
 
 // 定义单元素或数组的泛型类型
 type SingleOrArray<T> = T | T[];
@@ -46,10 +46,10 @@ export default class QuickMethod extends Event {
    * 获取所有可见的覆盖层（Overlay）
    * 支持从指定源（图层组/图层/覆盖层组/覆盖层数组）开始遍历
    */
-  getAllOverlays(source?: SingleOrArray<NodeType>): Overlay[] {
-    const overlays: Overlay[] = [];
+  getAllOverlays(source?: SingleOrArray<NodeType>): OverlayType[] {
+    const overlays: OverlayType[] = [];
     // 初始化栈：处理数组类型直接展开
-    const stack: (LayerGroup | Layer | OverlayGroup | Overlay)[] =
+    const stack: (LayerGroup | Layer | OverlayGroup | OverlayType)[] =
       source !== undefined
         ? Array.isArray(source)
           ? [...source]
@@ -132,7 +132,7 @@ export default class QuickMethod extends Event {
     }
   }
   /** 计算所有覆盖层的边界范围 */
-  private calculateBoundingBox(overlays: Overlay[]) {
+  private calculateBoundingBox(overlays: OverlayType[]) {
     let minX = Infinity,
       maxX = -Infinity;
     let minY = Infinity,

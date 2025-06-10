@@ -1,5 +1,5 @@
 import _Canvas from "../..";
-import { type Overlay as OverlayType } from "../index";
+import { type OverlayType } from "../index";
 import type { EventHandler } from "../../public/eventController";
 import EventController from "../../public/eventController";
 

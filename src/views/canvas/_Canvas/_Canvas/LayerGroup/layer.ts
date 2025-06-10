@@ -1,5 +1,5 @@
 import _Canvas from "..";
-import OverlayGroup, { type Overlay } from "../OverlayGroup";
+import OverlayGroup, { type OverlayType } from "../OverlayGroup";
 import EventController from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0];
@@ -119,10 +119,10 @@ export default class Layer extends EventController {
   }
 
   /** 本次绘制的覆盖物 */
-  private currentDrawOverlays: [[number, number], Overlay][] = [];
+  private currentDrawOverlays: [[number, number], OverlayType][] = [];
   /** 获取画布 */
   getCanvas():
-    | [number, HTMLCanvasElement, [[number, number], Overlay][]]
+    | [number, HTMLCanvasElement, [[number, number], OverlayType][]]
     | undefined {
     if (!this.mainCanvas) return;
 
@@ -140,7 +140,7 @@ export default class Layer extends EventController {
 
         const groupArr: [
           number,
-          [(ctx: CanvasRenderingContext2D) => void, Overlay]
+          [(ctx: CanvasRenderingContext2D) => void, OverlayType]
         ][] = [];
         this.groups.forEach((group) => {
           if (group.equalsMainCanvas(this.mainCanvas))

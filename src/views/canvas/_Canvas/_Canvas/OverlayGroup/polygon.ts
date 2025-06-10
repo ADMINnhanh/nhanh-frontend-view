@@ -1,6 +1,6 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
-import { type Overlay as OverlayType } from "./index";
+import { type OverlayType } from "./index";
 import GeometricBoundary from "./public/geometricBoundary";
 import { _AreAllArraysValid } from "nhanh-pure-function";
 

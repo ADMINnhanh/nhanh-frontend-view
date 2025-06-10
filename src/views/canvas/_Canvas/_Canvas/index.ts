@@ -1,7 +1,7 @@
 import "./index.less";
 import QuickMethod from "./core/quikmethod";
 import LayerGroup from "./LayerGroup";
-import OverlayGroup, { type Overlay } from "./OverlayGroup";
+import OverlayGroup, { type OverlayType } from "./OverlayGroup";
 import Layer from "./LayerGroup/layer";
 import Point from "./OverlayGroup/point";
 import Text from "./OverlayGroup/text";
@@ -113,7 +113,7 @@ export default class _Canvas extends QuickMethod {
     layerGroup.removeLayer([layers].flat());
   }
   /** 添加覆盖物 */
-  addOverlay(overlays: Overlay | Overlay[]) {
+  addOverlay(overlays: OverlayType | OverlayType[]) {
     const {
       overlays_text,
       overlays_point,
@@ -131,7 +131,7 @@ export default class _Canvas extends QuickMethod {
     });
   }
   /** 移除覆盖物 */
-  removeOverlay(overlays: Overlay | Overlay[]) {
+  removeOverlay(overlays: OverlayType | OverlayType[]) {
     const {
       overlays_text,
       overlays_point,

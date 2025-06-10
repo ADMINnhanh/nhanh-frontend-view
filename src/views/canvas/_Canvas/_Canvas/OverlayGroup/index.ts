@@ -9,11 +9,11 @@ import EventController from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 
-export type Overlay = Text | Point | Line | Polygon | Custom<any>;
+export type OverlayType = Text | Point | Line | Polygon | Custom<any>;
 
 export default class OverlayGroup extends EventController {
   /** 覆盖物集合 */
-  overlays = new Set<Overlay>();
+  overlays = new Set<OverlayType>();
 
   constructor(option: ConstructorOption) {
     super(option);
@@ -46,7 +46,7 @@ export default class OverlayGroup extends EventController {
     );
   }
   /** 添加覆盖物 */
-  addOverlays(overlays: Overlay[] | Overlay) {
+  addOverlays(overlays: OverlayType[] | OverlayType) {
     [overlays].flat().forEach((overlay) => {
       overlay.setNotifyReload(this.notifyReload);
       overlay.setMainCanvas(this.mainCanvas);
@@ -56,11 +56,11 @@ export default class OverlayGroup extends EventController {
     this.notifyReload?.();
   }
   /** 是否包含覆盖物 */
-  hasOverlay(overlay: Overlay) {
+  hasOverlay(overlay: OverlayType) {
     return this.overlays.has(overlay);
   }
   /** 移除覆盖物 */
-  removeOverlays(overlays: Overlay[] | Overlay) {
+  removeOverlays(overlays: OverlayType[] | OverlayType) {
     [overlays].flat().forEach((overlay) => {
       this.overlays.delete(overlay);
       overlay.setNotifyReload();
@@ -84,7 +84,7 @@ export default class OverlayGroup extends EventController {
   getOverlaysDrawingMethod() {
     const groupArr: [
       number,
-      [(ctx: CanvasRenderingContext2D) => void, Overlay]
+      [(ctx: CanvasRenderingContext2D) => void, OverlayType]
     ][] = [];
 
     if (this.shouldRender() && this.overlays.size) {
