@@ -7,7 +7,7 @@ import Media from "@/stores/media";
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
 const independent: [string, string][] = [
-  ["China%2Findex.vue", "最佳实现 - 中国地图"],
+  // ["China%2Findex.vue", "最佳实现 - 中国地图"],
 ];
 const demoName: [string, string][] = [
   // ["original.vue", "仅需初始化 _Canvas"],
