@@ -2,21 +2,21 @@ import BaseData from "./basedata";
 
 type EventControllerOptions<T extends EventControllerBasedata<T>> =
   ConstructorParameters<typeof BaseData<EventControllerBasedata<T>>>[0] & {
-    /** 是否可以交互 */
+    /** 是否可以触发交互事件 */
     isInteractive?: boolean;
-    /** 是否可以悬停 */
+    /** 是否可以触发悬停事件 */
     isHoverable?: boolean;
-    /** 是否可以按下 */
+    /** 是否可以触发按下事件 */
     isDownable?: boolean;
-    /** 是否可以右击 */
+    /** 是否可以触发右击事件 */
     isContextmenuable?: boolean;
-    /** 是否可以点击 */
+    /** 是否可以触发点击事件 */
     isClickable?: boolean;
-    /** 是否可以双击 */
+    /** 是否可以触发双击事件 */
     isDoubleClickable?: boolean;
-    /** 是否可以拖动 */
+    /** 是否可以触发拖动事件 */
     isDraggable?: boolean;
-    /** 是否可以滚轮滚动 */
+    /** 是否可以触发滚轮滚动事件 */
     isWheelable?: boolean;
   };
 
@@ -24,7 +24,7 @@ export default abstract class EventControllerBasedata<
   T extends EventControllerBasedata<T>
 > extends BaseData<T> {
   private _isInteractive = true;
-  /** 是否可以交互 */
+  /** 是否可以触发交互事件 */
   get isInteractive() {
     return this.getPropValue("isInteractive", this._isInteractive, false);
   }
@@ -33,7 +33,7 @@ export default abstract class EventControllerBasedata<
   }
 
   private _isHoverable = true;
-  /** 是否可以悬停 */
+  /** 是否可以触发悬停事件 */
   get isHoverable() {
     return this.getPropValue("isHoverable", this._isHoverable);
   }
@@ -42,7 +42,7 @@ export default abstract class EventControllerBasedata<
   }
 
   private _isDownable = true;
-  /** 是否可以按下 */
+  /** 是否可以触发按下事件 */
   get isDownable() {
     return this.getPropValue("isDownable", this._isDownable);
   }
@@ -51,7 +51,7 @@ export default abstract class EventControllerBasedata<
   }
 
   private _isContextmenuable = true;
-  /** 是否可以右键 */
+  /** 是否可以触发右击事件 */
   get isContextmenuable() {
     return this.getPropValue("isContextmenuable", this._isContextmenuable);
   }
@@ -60,7 +60,7 @@ export default abstract class EventControllerBasedata<
   }
 
   private _isClickable = true;
-  /** 是否可以点击 */
+  /** 是否可以触发点击事件 */
   get isClickable() {
     return this.getPropValue("isClickable", this._isClickable);
   }
@@ -69,7 +69,7 @@ export default abstract class EventControllerBasedata<
   }
 
   private _isDoubleClickable = true;
-  /** 是否可以双击 */
+  /** 是否可以触发双击事件 */
   get isDoubleClickable() {
     return this.getPropValue("isDoubleClickable", this._isDoubleClickable);
   }
@@ -78,7 +78,7 @@ export default abstract class EventControllerBasedata<
   }
 
   private _isDraggable = true;
-  /** 是否可以拖拽 */
+  /** 是否可以触发拖动事件 */
   get isDraggable() {
     return this.getPropValue("isDraggable", this._isDraggable);
   }
@@ -87,7 +87,7 @@ export default abstract class EventControllerBasedata<
   }
 
   private _isWheelable = true;
-  /** 是否可以滚轮滚动 */
+  /** 是否可以触发滚轮滚动事件 */
   get isWheelable() {
     return this.getPropValue("isWheelable", this._isWheelable);
   }

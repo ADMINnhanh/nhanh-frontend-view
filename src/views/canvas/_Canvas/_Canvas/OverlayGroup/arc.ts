@@ -5,7 +5,7 @@ import { type OverlayType } from "./index";
 import GeometricBoundary from "./public/geometricBoundary";
 
 type ConstructorOption = ConstructorParameters<
-  typeof GeometricBoundary<LineStyleType>
+  typeof GeometricBoundary<ArcStyleType>
 >[0] & {};
 
 // export default class Arc extends GeometricBoundary<LineStyleType> {}

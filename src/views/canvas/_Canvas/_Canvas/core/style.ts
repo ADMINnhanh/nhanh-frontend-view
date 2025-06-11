@@ -37,7 +37,7 @@ export default class Style extends BaseData {
         color: "#f0a020",
         color_hover: "#f2c97d",
         width: 4,
-        dash: true,
+        dash: false,
         dashGap: [5, 10],
         dashOffset: 0,
         cap: "round",
