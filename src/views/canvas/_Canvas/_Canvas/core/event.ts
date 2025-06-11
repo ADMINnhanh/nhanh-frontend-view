@@ -1,5 +1,5 @@
 import { _CalculateDistance2D, _GetMidpoint } from "nhanh-pure-function";
-import type { Overlay } from "../OverlayGroup";
+import type { OverlayType } from "../OverlayGroup";
 import Draw from "./draw";
 import type { EventHandler } from "../public/eventController";
 
@@ -58,7 +58,7 @@ export default class Event extends Draw {
   }
 
   /** 上一个被点击的覆盖物 */
-  private lastClickedOverlay?: Overlay;
+  private lastClickedOverlay?: OverlayType;
   private lockNotifyClick = false;
   /** 鼠标左键点击画布 */
   private click(event: MouseEvent) {
@@ -77,7 +77,7 @@ export default class Event extends Draw {
     this.notifyClick(true, event);
   }
   /** 上一个被右击的覆盖物 */
-  private lastContextmenuOverlay?: Overlay;
+  private lastContextmenuOverlay?: OverlayType;
   /** 鼠标右键点击画布 */
   private contextmenu(event: MouseEvent) {
     if (!this.isContextmenuable) return;
@@ -215,7 +215,7 @@ export default class Event extends Draw {
     this.redrawOnce();
   };
   /** 上一个被点击的覆盖物 */
-  private lastDownOverlay?: Overlay;
+  private lastDownOverlay?: OverlayType;
   /** 鼠标按下 */
   private mousedown(event: MouseEvent) {
     if (!this.isDownable) return;
@@ -244,7 +244,7 @@ export default class Event extends Draw {
   }
 
   /** 上一个被hover的覆盖物 */
-  private lastHoverOverlay?: Overlay;
+  private lastHoverOverlay?: OverlayType;
   /** 鼠标移动 */
   private mousemove(event: MouseEvent) {
     if (this.isAuto) return;
@@ -315,7 +315,7 @@ export default class Event extends Draw {
   }
   /** 更新 hover 状态 */
   private updateHoverState(
-    hoverOverlay: Overlay | undefined,
+    hoverOverlay: OverlayType | undefined,
     event: MouseEvent
   ) {
     if (this.lastHoverOverlay === hoverOverlay) return;
@@ -340,14 +340,14 @@ export default class Event extends Draw {
     this.lastHoverOverlay.notifyHover(false, event);
   }
   /** 应用新的 hover 状态 */
-  private applyHoverState(overlay: Overlay | undefined, event: MouseEvent) {
+  private applyHoverState(overlay: OverlayType | undefined, event: MouseEvent) {
     if (!overlay) return;
 
     this.canvas.classList.add(this.getHoverClass(overlay));
     overlay.notifyHover(true, event);
   }
   /** 获取 hover 的 CSS class */
-  private getHoverClass(overlay: Overlay): string {
+  private getHoverClass(overlay: OverlayType): string {
     return overlay?.isDraggable
       ? "_nhanh_canvas_hover_overlay_draggable"
       : "_nhanh_canvas_hover_overlay";

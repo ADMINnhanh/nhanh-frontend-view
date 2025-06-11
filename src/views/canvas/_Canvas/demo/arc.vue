@@ -7,10 +7,19 @@ import { Settings } from "@/components/popups/components/Settings";
 const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
+const arc_value = new _Canvas.Arc({
+  value: [0, 0],
+  radius: 50,
+  startAngle: 0,
+  endAngle: Math.PI,
+  isDraggable: true,
+});
+const arc_arr = [arc_value];
 
 onMounted(() => {
   myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value.addOverlay(arc_arr);
 });
 defineExpose({ myCanvas });
 </script>

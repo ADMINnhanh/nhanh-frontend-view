@@ -6,10 +6,11 @@ import Line from "./line";
 import Polygon from "./polygon";
 import Custom from "./custom";
 import EventController from "../public/eventController";
+import type Arc from "./arc";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 
-export type OverlayType = Text | Point | Line | Polygon | Custom<any>;
+export type OverlayType = Text | Point | Line | Arc | Polygon | Custom<any>;
 
 export default class OverlayGroup extends EventController {
   /** 覆盖物集合 */

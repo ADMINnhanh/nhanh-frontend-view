@@ -1,5 +1,5 @@
 import _Canvas from "..";
-import type { Overlay } from "../OverlayGroup";
+import type { OverlayType } from "../OverlayGroup";
 import Layer from "./layer";
 import type { EventHandler } from "../public/eventController";
 import EventController from "../public/eventController";
@@ -111,7 +111,7 @@ export default class LayerGroup extends EventController {
       const canvasArr: [
         number,
         HTMLCanvasElement,
-        [[number, number], Overlay][]
+        [[number, number], OverlayType][]
       ][] = [];
       this.layers.forEach((layer) => {
         if (layer.equalsMainCanvas(this.mainCanvas)) {

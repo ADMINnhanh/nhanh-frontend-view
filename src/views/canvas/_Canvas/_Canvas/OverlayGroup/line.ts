@@ -69,7 +69,6 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     return isLine || isPoint;
   }
 
-  /** 更新基础数据 */
   updateBaseData() {
     if (!this.mainCanvas) return;
 

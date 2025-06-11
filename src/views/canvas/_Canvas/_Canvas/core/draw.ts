@@ -1,7 +1,7 @@
 import { _Debounce, _TimeConsumption } from "nhanh-pure-function";
 import Style from "./style";
 import _Canvas from "..";
-import type { Overlay } from "../OverlayGroup";
+import type { OverlayType } from "../OverlayGroup";
 
 import Custom from "../OverlayGroup/custom";
 import Text from "../OverlayGroup/text";
@@ -16,7 +16,7 @@ export default class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
   /** 本次绘制的覆盖物 */
-  protected currentDrawOverlays: Overlay[] = [];
+  protected currentDrawOverlays: OverlayType[] = [];
 
   /** 计算坐标所需依赖 */
   private rely = "";
@@ -63,9 +63,9 @@ export default class Draw extends Style {
 
   /** 重绘画布 */
   private redraw() {
-    if (!this.canvas) return console.error("canvas is not HTMLCanvasElement");
+    if (!this.canvas) return console.warn("canvas is not HTMLCanvasElement");
     if (this.canvas.clientWidth == 0 || this.canvas.clientHeight == 0)
-      return console.error(
+      return console.warn(
         "The image argument is a canvas element with a width or height of 0."
       );
 
@@ -82,11 +82,11 @@ export default class Draw extends Style {
     this.clearScreen();
 
     /** 本次绘制的覆盖物 */
-    const currentDrawOverlays: [[number, number], Overlay][] = [];
+    const currentDrawOverlays: [[number, number], OverlayType][] = [];
     let canvasArr: [
       number,
       HTMLCanvasElement,
-      [[number, number], Overlay][]
+      [[number, number], OverlayType][]
     ][] = [];
 
     const axis_canvas = this.drawAxis?.drawAxisAndGrid();

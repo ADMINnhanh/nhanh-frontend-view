@@ -43,7 +43,7 @@ type PointStyleType = {
   fill: string;
 };
 
-/** 线样式 */
+/** 基础线样式 */
 type BaseLineStyle = {
   /** 颜色 */
   color: string;
@@ -70,7 +70,16 @@ type LineStyleType = BaseLineStyle & {
 };
 
 /** 圆弧样式 */
-type ArcStyleType = BaseLineStyle & {};
+type ArcStyleType = {
+  /** 填充色 */
+  fill: string;
+  /** 填充色 - hover */
+  fill_hover: string;
+  /** 描边 */
+  stroke: BaseLineStyle;
+  /** 点位样式 */
+  point: PointStyleType;
+};
 
 /** 面样式 */
 type PolygonStyleType = {
@@ -96,6 +105,8 @@ type StyleItemType = {
   point: PointStyleType;
   /** 线样式 */
   line: LineStyleType;
+  /** 圆弧样式 */
+  arc: ArcStyleType;
   /** 面样式 */
   polygon: PolygonStyleType;
 };
@@ -107,52 +118,3 @@ type StyleType = Record<KnownStyleKeys, StyleItemType> &
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
-
-type PluralSwitch<T, P extends boolean> = P extends true ? T[] : T;
-/** 公共数据属性 */
-type CommonDataType<STYLE, PLURAL extends boolean, OTHER = {}> = Partial<
-  {
-    /** 样式 */
-    style: DeepPartial<STYLE>;
-    /** 层级 */
-    zIndex: number;
-    /** 是否显示 */
-    show: boolean;
-    /** 未缩放状态下的位置 */
-    position: PluralSwitch<[number, number], PLURAL>;
-    /** 动态位置 */
-    dynamicPosition: PluralSwitch<[number, number], PLURAL>;
-    /** 值 */
-    value: PluralSwitch<[number, number], PLURAL>;
-  } & OTHER
->;
-
-/** 文字 */
-type TextType = CommonDataType<TextStyleType, false>;
-
-/** 点位 */
-type PointType = CommonDataType<PointStyleType, false>;
-
-/** 线 */
-type LineType = CommonDataType<
-  LineStyleType,
-  true,
-  {
-    /** 无限线 */
-    infinite: boolean;
-    /** 是否可显示线段控制点 */
-    isHandlePointsVisible: boolean;
-  }
->;
-
-/** 面 */
-type PolygonType = CommonDataType<
-  PolygonStyleType,
-  true,
-  {
-    /** 是否为矩形 */
-    isRect: boolean;
-    /** 是否可显示线段控制点 */
-    isHandlePointsVisible: boolean;
-  }
->;
