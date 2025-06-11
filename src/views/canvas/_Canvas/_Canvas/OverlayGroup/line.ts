@@ -48,14 +48,23 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   }
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
-    const isPoint =
-      (this.isClick || !!this.infinite) &&
-      this.isHandlePointsVisible &&
-      this.handlePoints.some((point) => {
-        const is = point.isPointInAnywhere(x, y);
-        is != point.isHover && point.notifyHover(is);
-        return is;
+
+    const isPoint = ((allow) => {
+      if (!allow) return false;
+      let point_hover = false;
+      const handlePoints = [...this.handlePoints].sort(
+        (a, b) => (a.isHover ? 0 : 1) - (b.isHover ? 0 : 1)
+      );
+      handlePoints.forEach((point) => {
+        if (point_hover) {
+          point.isHover && point.notifyHover(false);
+        } else {
+          point_hover = point.isPointInAnywhere(x, y);
+          point_hover != point.isHover && point.notifyHover(point_hover);
+        }
       });
+      return point_hover;
+    })((this.isClick || !!this.infinite) && this.isHandlePointsVisible);
 
     return isLine || isPoint;
   }

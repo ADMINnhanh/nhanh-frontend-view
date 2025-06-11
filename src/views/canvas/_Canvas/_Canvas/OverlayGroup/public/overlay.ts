@@ -134,6 +134,7 @@ export default abstract class Overlay<
     }
     this.staticValueScope = { ...this.valueScope };
   }
+  /** 更新值范围 */
   protected abstract updateValueScope(): void;
 
   /** 额外偏移 */
@@ -192,9 +193,11 @@ export default abstract class Overlay<
 
   /** 鼠标移入时是否重新绘制 */
   redrawOnIsHoverChange = false;
+  /** 默认 hover  事件 */
   defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {
     this.redrawOnIsHoverChange && this.notifyReload?.();
   };
+  /** 计算偏移量 */
   calculateOffset(offsetX: number, offsetY: number) {
     const { percentage, axisConfig } = this.mainCanvas!;
     const base = axisConfig.count / axisConfig.min / percentage;
@@ -211,9 +214,13 @@ export default abstract class Overlay<
     return { x, y };
   }
 
+  /** 更新基础数据 */
   abstract updateBaseData(): void;
+  /** 判断当前路径中是否包含指定点 */
   abstract isPointInPath(x: number, y: number): boolean;
+  /** 检测某点是否在路径的描边所在的区域内 */
   abstract isPointInStroke(x: number, y: number): boolean;
+  /** 检测某点是否在当前覆盖物中 */
   isPointInAnywhere(x: number, y: number) {
     return this.isPointInPath(x, y) || this.isPointInStroke(x, y);
   }
@@ -223,14 +230,17 @@ export default abstract class Overlay<
     const opacity = this.opacity ?? this.parent?.opacity;
     if (opacity !== undefined) ctx.globalAlpha = opacity;
   }
+  /** 设置样式 */
   setStyle(style?: Overlay<T, V>["style"]) {
     this.style = style;
     if (this.dynamicPosition) this.notifyReload?.();
   }
+  /** 设置层级 */
   setZIndex(zIndex: Overlay<T, V>["zIndex"]) {
     this.zIndex = zIndex;
     if (this.dynamicPosition) this.notifyReload?.();
   }
+  /** 设置位置 */
   setPosition(position: Overlay<T, V>["position"]) {
     this.position = position;
     /** 位置改变时，清除值信息 */
@@ -239,6 +249,7 @@ export default abstract class Overlay<
     this.updateBaseData();
     if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
   }
+  /** 设置值 */
   setValue(value: Overlay<T, V>["value"]) {
     this.value = value;
     /** 值改变时，清除位置信息 */

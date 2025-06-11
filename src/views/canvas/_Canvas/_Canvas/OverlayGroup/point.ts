@@ -43,6 +43,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.notifyReload?.();
   };
 
+  /** 填充进度 */
   private fillProgress?: {
     lineWidthOffset: number;
     progress: number;
