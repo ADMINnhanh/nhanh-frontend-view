@@ -12,8 +12,23 @@ type ConstructorOption = ConstructorParameters<
 };
 
 export default class Polygon extends GeometricBoundary<PolygonStyleType> {
+  private _isRect = false;
   /** 是否为矩形 */
-  isRect = false;
+  get isRect() {
+    return this._isRect;
+  }
+  set isRect(isRect: boolean) {
+    if (this._isRect != isRect) {
+      this._isRect = isRect;
+      this.canCreateOrDeleteHandlePoint = !isRect;
+
+      if (this.mainCanvas) {
+        const prevDynamicStatus = !!this.dynamicPosition;
+        this.updateBaseData();
+        if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
+      }
+    }
+  }
 
   /** 是否闭合 */
   protected isClosed = true;
@@ -28,9 +43,9 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     if (option.isRect) this.canCreateOrDeleteHandlePoint = false;
   }
 
-  protected updateValueScope() {
+  updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.setCanvasStyles().point);
+    this.calculatePointRadiusValue(this.getHandlePointStyle());
     this.setExtraOffset(this.extraOffset, false);
   }
 
@@ -40,7 +55,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   }
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
-      this.setCanvasStyles(Overlay.ctx);
+      this.setOverlayStyles(Overlay.ctx);
       if (this.isDraggable)
         Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
       return Overlay.ctx.isPointInStroke(this.path, x, y);
@@ -80,7 +95,8 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       _AreAllArraysValid(position) && position!.length > (isRect ? 1 : 2),
     ];
 
-    if (!isValue && !isPosition) return (this.dynamicPosition = undefined);
+    if (!isValue && !isPosition)
+      return this.internalUpdate({ dynamicPosition: undefined });
 
     if (isRect) {
       if (isValue) {
@@ -112,27 +128,18 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
     const dynamicPosition = this.mainCanvas.transformPosition(position!);
 
-    this.dynamicPosition = dynamicPosition;
-    this.value = value;
-    this.position = position;
+    this.internalUpdate({
+      value,
+      position,
+      dynamicPosition,
+    });
 
     this.updateHandlePoints();
 
     this.updateValueScope();
   }
 
-  setRect(isRect: Polygon["isRect"]) {
-    if (this.isRect != isRect) {
-      this.isRect = isRect;
-      this.canCreateOrDeleteHandlePoint = !isRect;
-
-      const prevDynamicStatus = !!this.dynamicPosition;
-      this.updateBaseData();
-      if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
-    }
-  }
-
-  private setCanvasStyles(ctx?: CanvasRenderingContext2D) {
+  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const isHover = this.isHover;
     const mainCanvas = this.mainCanvas!;
 
@@ -157,6 +164,9 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     }
     return style;
   }
+  getHandlePointStyle() {
+    return this.setOverlayStyles().point;
+  }
 
   /** 绘制矩形 */
   drawRect(ctx: CanvasRenderingContext2D) {
@@ -168,7 +178,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     const left = Math.min(x1, x2);
     const top = Math.min(y1, y2);
 
-    const style = this.setCanvasStyles(ctx);
+    const style = this.setOverlayStyles(ctx);
 
     ctx.beginPath();
 
@@ -185,7 +195,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.isShowHandlePoint = this.isClick && this.isHandlePointsVisible;
     if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
-        point.style = style.point;
+        point.internalUpdate({ style: style.point });
         point.draw(ctx);
       });
   }
@@ -195,7 +205,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
     const dynamicPosition = this.dynamicPosition!;
 
-    const style = this.setCanvasStyles(ctx);
+    const style = this.setOverlayStyles(ctx);
 
     ctx.beginPath();
 
@@ -215,7 +225,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.isShowHandlePoint = this.isClick && this.isHandlePointsVisible;
     if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
-        point.style = style.point;
+        point.internalUpdate({ style: style.point });
         point.draw(ctx);
       });
   }
@@ -242,11 +252,13 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       if (pointNotWithinRange) return;
 
       if (this.isRecalculate) {
-        this.dynamicPosition = mainCanvas.transformPosition(position!);
-        this.handlePoints.forEach(
-          (point, index) =>
-            (point.dynamicPosition = this.dynamicPosition![index])
-        );
+        const dynamicPosition = mainCanvas.transformPosition(position!);
+        this.internalUpdate({ dynamicPosition });
+        this.handlePoints.forEach((point, index) => {
+          point.internalUpdate({
+            dynamicPosition: dynamicPosition![index],
+          });
+        });
       }
 
       if (this.isRect) return [this.drawRect, this];

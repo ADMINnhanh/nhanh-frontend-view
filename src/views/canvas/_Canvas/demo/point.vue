@@ -18,13 +18,13 @@ const point_arr = [point_value, point_position];
 function UpdateValue(delta: number) {
   point_arr.forEach((point) => {
     const [x, y] = point.value!;
-    point.setValue([x + delta, y + delta]);
+    point.value = [x + delta, y + delta];
   });
 }
 function UpdatePosition(delta: number) {
   point_arr.forEach((point) => {
     const [x, y] = point.position!;
-    point.setPosition([x + delta, y + delta]);
+    point.position = [x + delta, y + delta];
   });
 }
 function UpdateDraggable(draggable: boolean) {

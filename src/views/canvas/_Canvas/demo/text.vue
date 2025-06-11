@@ -25,13 +25,13 @@ const text_arr = [text_value, text_position];
 function UpdateValue(delta: number) {
   text_arr.forEach((text) => {
     const [x, y] = text.value!;
-    text.setValue([x + delta, y + delta]);
+    text.value = [x + delta, y + delta];
   });
 }
 function UpdatePosition(delta: number) {
   text_arr.forEach((text) => {
     const [x, y] = text.position!;
-    text.setPosition([x + delta, y + delta]);
+    text.position = [x + delta, y + delta];
   });
 }
 function UpdateDraggable(draggable: boolean) {

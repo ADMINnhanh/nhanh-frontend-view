@@ -15,8 +15,20 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   /** 文字偏差 */
   private textOffset = { x: 0, y: 0 };
 
+  private _text?: string;
   /** 文字 */
-  text?: string;
+  get text(): string | undefined {
+    return this._text;
+  }
+  set text(text: string | undefined) {
+    if (this._text != text) {
+      this._text = text;
+      if (this.mainCanvas) {
+        this.updateBaseData();
+        if (this.dynamicPosition) this.notifyReload?.();
+      }
+    }
+  }
 
   constructor(option: ConstructorOption) {
     option.redrawOnIsHoverChange = option.redrawOnIsHoverChange ?? true;
@@ -32,21 +44,24 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
     const { offsetX, offsetY } = event.data;
     const { x, y } = this.calculateOffset(offsetX, offsetY);
-    this.value = [this.value![0] + x.value, this.value![1] + y.value];
-    this.position = [
-      this.position![0] + x.position,
-      this.position![1] + y.position,
-    ];
-    this.dynamicPosition = [
-      this.dynamicPosition![0] + x.dynamicPosition,
-      this.dynamicPosition![1] + y.dynamicPosition,
-    ];
+
+    this.internalUpdate({
+      value: [this.value![0] + x.value, this.value![1] + y.value],
+      position: [
+        this.position![0] + x.position,
+        this.position![1] + y.position,
+      ],
+      dynamicPosition: [
+        this.dynamicPosition![0] + x.dynamicPosition,
+        this.dynamicPosition![1] + y.dynamicPosition,
+      ],
+    });
 
     this.updateValueScope();
     this.notifyReload?.();
   };
 
-  protected updateValueScope() {
+  updateValueScope() {
     const { textOffset, value } = this;
 
     const { xV: width, yV: height } = this.mainCanvas!.getAxisValueByPoint(
@@ -79,7 +94,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   updateBaseData() {
     if (!this.mainCanvas) return;
     if (!this.text || this.text.length == 0)
-      return (this.dynamicPosition = undefined);
+      return this.internalUpdate({ dynamicPosition: undefined });
     let { value, position } = this;
     const [isValue, isPosition] = [
       _IsSingleArrayValid(value),
@@ -87,7 +102,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     ];
 
     if (!isValue && !isPosition) {
-      return (this.dynamicPosition = undefined);
+      return this.internalUpdate({ dynamicPosition: undefined });
     } else if (isValue) {
       const loc = this.mainCanvas.getAxisPointByValue(
         value![0],
@@ -106,12 +121,14 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
 
-    this.dynamicPosition = dynamicPosition;
-    this.value = value;
-    this.position = position;
+    this.internalUpdate({
+      value,
+      position,
+      dynamicPosition,
+    });
 
     const ctx = this.mainCanvas.ctx;
-    this.setCanvasStyles(ctx);
+    this.setOverlayStyles(ctx);
     const textMetrics = ctx.measureText(this.text);
     this.textOffset = {
       x: textMetrics.width / 2,
@@ -121,16 +138,8 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.updateValueScope();
   }
 
-  setText(text: string) {
-    if (text != this.text) {
-      this.text = text;
-      this.updateBaseData();
-      if (this.dynamicPosition) this.notifyReload?.();
-    }
-  }
-
   /** 设置样式 */
-  setCanvasStyles(ctx: CanvasRenderingContext2D) {
+  setOverlayStyles(ctx: CanvasRenderingContext2D) {
     const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].text;
@@ -151,6 +160,11 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     ctx.strokeStyle = style.stroke;
     // 根据是否是次要颜色，选择相应的文本填充颜色，并填充文本
     ctx.fillStyle = style[this.isHover ? "secondary" : "color"];
+
+    return style;
+  }
+  getHandlePointStyle() {
+    return undefined;
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -162,7 +176,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     const text = this.text!;
     const extraOffset = this.extraOffset;
 
-    this.setCanvasStyles(ctx);
+    this.setOverlayStyles(ctx);
 
     const x = dynamicPosition[0] + extraOffset.x - textOffset.x;
     const y = dynamicPosition[1] + extraOffset.y + textOffset.y;
@@ -198,8 +212,12 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
         maxMinValue.minYV > valueScope!.maxY;
       if (pointNotWithinRange) return;
 
-      if (this.isRecalculate)
-        this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
+      if (this.isRecalculate) {
+        this.internalUpdate({
+          dynamicPosition: mainCanvas.transformPosition([position!])[0],
+        });
+      }
+
       return [this.draw, this];
     }
   }

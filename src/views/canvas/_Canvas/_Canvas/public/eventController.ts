@@ -171,6 +171,11 @@ export default abstract class EventController extends EventControllerBasedata<Ev
   get isHover() {
     return this.isHoverable && this._isHover;
   }
+  /**
+   * 接收悬停状态变更通知（由外部事件处理器判断后调用）
+   * @param state - 当前悬停状态（true:进入元素 / false:离开元素）
+   * @param [event] - 可选的关联鼠标事件对象
+   */
   notifyHover = (state: boolean, event?: MouseEvent) =>
     this.checkEventDate("hover", state) &&
     this.trigger(
@@ -185,6 +190,11 @@ export default abstract class EventController extends EventControllerBasedata<Ev
   get isDown() {
     return this.isDraggable && this._isDown;
   }
+  /**
+   * 接收鼠标按下状态变更通知（由外部事件处理器判断后调用）
+   * @param state - 当前按下状态（true:按下开始 / false:按下结束）
+   * @param [event] - 可选的关联鼠标事件对象
+   */
   notifyDown = (state: boolean, event?: MouseEvent) =>
     this.checkEventDate("down", state) &&
     this.trigger("down", { state, oldState: this.isDown }, event, "isDownable");
@@ -194,6 +204,11 @@ export default abstract class EventController extends EventControllerBasedata<Ev
   get isContextmenu() {
     return this.isClickable && this._isContextmenu;
   }
+  /**
+   * 接收右键菜单触发通知（由外部事件处理器判断后调用）
+   * @param state - 右键触发状态（true: 右键开始 / false: 右键结束）
+   * @param [event] - 可选的关联鼠标事件对象
+   */
   notifyContextmenu = (state: boolean, event?: MouseEvent) =>
     this.checkEventDate("contextmenu", state) &&
     this.trigger(
@@ -212,6 +227,11 @@ export default abstract class EventController extends EventControllerBasedata<Ev
   private clickTimestamp = 0;
   /** 双击判定，两次点击之间的间隔（毫秒） */
   doubleClickInterval = 300;
+  /**
+   * 接收单击动作通知（由外部事件处理器判断点击动作后调用）
+   * @param state - 点击状态（true: 单击开始 / false: 单击结束）
+   * @param [event] - 可选的关联鼠标事件对象
+   */
   notifyClick = (state: boolean, event?: MouseEvent) => {
     if (!this.checkEventDate("click", state)) return;
 
@@ -238,6 +258,11 @@ export default abstract class EventController extends EventControllerBasedata<Ev
   get isDblClick() {
     return this.isDoubleClickable && this._isDblClick;
   }
+  /**
+   * 接收双击动作通知（由外部事件处理器判断双击动作后调用）
+   * @param state - 双击状态（true: 双击开始 / false: 双击结束）
+   * @param [event] - 可选的关联鼠标事件对象
+   */
   notifyDoubleClick = (state: boolean, event?: MouseEvent) =>
     this.checkEventDate("doubleClick", state) &&
     this.trigger(
@@ -247,6 +272,13 @@ export default abstract class EventController extends EventControllerBasedata<Ev
       "isDoubleClickable"
     );
 
+  /**
+   * 接收拖拽位置更新通知（由外部事件处理器判断拖拽动作后调用）
+   * @param position - 当前拖拽位置坐标
+   * @param position.offsetX - 相对于元素X轴的偏移量
+   * @param position.offsetY - 相对于元素Y轴的偏移量
+   * @param [event] - 可选的关联鼠标事件对象
+   */
   notifyDragg = (
     position: { offsetX: number; offsetY: number },
     event?: MouseEvent
@@ -254,6 +286,11 @@ export default abstract class EventController extends EventControllerBasedata<Ev
     this.checkEventDate("dragg", position) &&
     this.trigger("dragg", position, event, "isDraggable");
 
+  /**
+   * 接收滚轮滚动通知（由外部事件处理器判断滚轮动作后调用）
+   * @param step - 滚轮滚动步长（正数：向上滚动 / 负数：向下滚动）
+   * @param [event] - 可选的关联滚轮事件对象
+   */
   notifyWheel = (step: number, event?: WheelEvent) =>
     this.checkEventDate("wheel", step) &&
     this.trigger("wheel", step, event, "isWheelable");

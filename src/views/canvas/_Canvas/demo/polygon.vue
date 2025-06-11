@@ -36,20 +36,15 @@ const polygon_arr = [polygon_value, polygon_position, polygon_rect];
 
 function UpdateValue(delta: number) {
   polygon_arr.forEach((polygon) => {
-    const newValue: [number, number][] = polygon.value!.map(([x, y]) => [
-      x + delta,
-      y + delta,
-    ]);
-    polygon.setValue(newValue);
+    polygon.value = polygon.value!.map(([x, y]) => [x + delta, y + delta]);
   });
 }
 function UpdatePosition(delta: number) {
   polygon_arr.forEach((polygon) => {
-    const newPosition: [number, number][] = polygon.position!.map(([x, y]) => [
+    polygon.position = polygon.position!.map(([x, y]) => [
       x + delta,
       y + delta,
     ]);
-    polygon.setPosition(newPosition);
   });
 }
 function UpdateDraggable(draggable: boolean) {

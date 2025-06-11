@@ -2,6 +2,7 @@ import _Canvas from "../..";
 import { type OverlayType } from "../index";
 import type { EventHandler } from "../../public/eventController";
 import EventController from "../../public/eventController";
+import { _Clone } from "nhanh-pure-function";
 
 type ConstructorOption<T, V> = ConstructorParameters<
   typeof EventController
@@ -28,22 +29,78 @@ export default abstract class Overlay<
 > extends EventController {
   static ctx = document.createElement("canvas").getContext("2d")!;
 
+  private _style?: DeepPartial<T> | string;
   /** 样式 */
-  style?: DeepPartial<T> | string;
+  get style() {
+    return this._style;
+  }
+  set style(style: Overlay<T, V>["_style"] | undefined) {
+    this._style = style;
+
+    if (this.dynamicPosition) this.notifyReload?.();
+
+    if (this.mainCanvas) {
+      const handlePointStyle = this.getHandlePointStyle();
+      handlePointStyle && this.calculatePointRadiusValue(handlePointStyle);
+    }
+  }
+
+  private _position?: V;
   /** 坐标轴上的点位 */
-  position?: V;
+  get position() {
+    return this._position;
+  }
+  set position(position: V | undefined) {
+    this._position = position;
+    /** 位置改变时，清除值信息 */
+    this._value = undefined;
+
+    const prevDynamicStatus = !!this.dynamicPosition;
+    this.updateBaseData();
+    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
+  }
+  private _value?: V;
   /** 坐标轴上的值 */
-  value?: V;
+  get value() {
+    return this._value;
+  }
+  set value(value: V | undefined) {
+    this._value = value;
+    /** 值改变时，清除位置信息 */
+    this._position = undefined;
+
+    const prevDynamicStatus = !!this.dynamicPosition;
+    this.updateBaseData();
+    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
+  }
+  private _zIndex = 0;
   /** 层级 */
-  zIndex = 0;
+  get zIndex() {
+    return this._zIndex;
+  }
+  set zIndex(zIndex: number) {
+    if (this._zIndex != zIndex) {
+      this._zIndex = zIndex;
+      if (this.dynamicPosition) this.notifyReload?.();
+    }
+  }
+  private _dynamicPosition?: V;
   /** 动态点位 */
-  dynamicPosition?: V;
+  get dynamicPosition() {
+    return this._dynamicPosition;
+  }
+  private set dynamicPosition(dynamicPosition: V | undefined) {
+    this._dynamicPosition = dynamicPosition;
+  }
 
   /** 绘制路径 */
   protected path?: Path2D;
 
   constructor(option: ConstructorOption<T, V>) {
+    option = { ...option };
     option.isDraggable = option.isDraggable ?? false;
+    const mainCanvas = option.mainCanvas;
+    delete option.mainCanvas;
 
     super(option);
 
@@ -60,16 +117,33 @@ export default abstract class Overlay<
 
     this.setExtraOffset(extraOffset, false);
     this.setNotifyReload(notifyReload);
-    Object.assign(this, {
+    Object.assign(this, { mainCanvas, redrawOnIsHoverChange });
+
+    this.internalUpdate({
       style,
       zIndex,
       position,
       dynamicPosition,
       value,
-      redrawOnIsHoverChange,
     });
 
     this.addEventListener("hover", this.defaultHover);
+  }
+
+  /** 请勿在实体对象中调用此方法，此方法仅用于类内部无副作用更新 （请勿使用！） */
+  internalUpdate(option: {
+    position?: V;
+    value?: V;
+    dynamicPosition?: V;
+    zIndex?: number;
+    style?: DeepPartial<T> | string;
+  }) {
+    option = _Clone(option) as any;
+    for (const key in option) {
+      if (Object.prototype.hasOwnProperty.call(option, key)) {
+        this[("_" + key) as never] = option[key as never];
+      }
+    }
   }
 
   setMainCanvas(mainCanvas?: _Canvas) {
@@ -169,13 +243,14 @@ export default abstract class Overlay<
     reload && this.notifyReload?.();
   }
   /** 点位半径值 */
-  protected lastPointRadius = {
+  private lastPointRadius = {
     value: 0,
     radius: 0,
   };
   /** 计算点位半径值 */
   protected calculatePointRadiusValue(style?: PointStyleType) {
     if (!this.valueScope) return;
+
     const radius = style
       ? style.radius + style.width / 2
       : this.lastPointRadius.radius;
@@ -230,34 +305,6 @@ export default abstract class Overlay<
     const opacity = this.opacity ?? this.parent?.opacity;
     if (opacity !== undefined) ctx.globalAlpha = opacity;
   }
-  /** 设置样式 */
-  setStyle(style?: Overlay<T, V>["style"]) {
-    this.style = style;
-    if (this.dynamicPosition) this.notifyReload?.();
-  }
-  /** 设置层级 */
-  setZIndex(zIndex: Overlay<T, V>["zIndex"]) {
-    this.zIndex = zIndex;
-    if (this.dynamicPosition) this.notifyReload?.();
-  }
-  /** 设置位置 */
-  setPosition(position: Overlay<T, V>["position"]) {
-    this.position = position;
-    /** 位置改变时，清除值信息 */
-    this.value = undefined;
-    const prevDynamicStatus = !!this.dynamicPosition;
-    this.updateBaseData();
-    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
-  }
-  /** 设置值 */
-  setValue(value: Overlay<T, V>["value"]) {
-    this.value = value;
-    /** 值改变时，清除位置信息 */
-    this.position = undefined;
-    const prevDynamicStatus = !!this.dynamicPosition;
-    this.updateBaseData();
-    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
-  }
 
   /** 绘制线基础样式 */
   protected setBaseLineStyle(
@@ -276,6 +323,11 @@ export default abstract class Overlay<
 
     return style;
   }
+
+  /** 设置画布样式 */
+  protected abstract setOverlayStyles(ctx?: CanvasRenderingContext2D): T;
+  /** 获取控制点样式 */
+  protected abstract getHandlePointStyle(): PointStyleType | undefined;
 
   /** 获取绘制函数 */
   abstract getDraw():

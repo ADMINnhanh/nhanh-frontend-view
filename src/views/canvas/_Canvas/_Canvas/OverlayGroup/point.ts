@@ -20,24 +20,27 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.addEventListener("dragg", this.defaultDragg);
   }
 
-  protected updateValueScope() {
+  updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.setCanvasStyles());
+    this.calculatePointRadiusValue(this.getHandlePointStyle());
     this.setExtraOffset(this.extraOffset, false);
   }
 
   defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
     const { offsetX, offsetY } = event.data;
     const { x, y } = this.calculateOffset(offsetX, offsetY);
-    this.value = [this.value![0] + x.value, this.value![1] + y.value];
-    this.position = [
-      this.position![0] + x.position,
-      this.position![1] + y.position,
-    ];
-    this.dynamicPosition = [
-      this.dynamicPosition![0] + x.dynamicPosition,
-      this.dynamicPosition![1] + y.dynamicPosition,
-    ];
+
+    this.internalUpdate({
+      value: [this.value![0] + x.value, this.value![1] + y.value],
+      position: [
+        this.position![0] + x.position,
+        this.position![1] + y.position,
+      ],
+      dynamicPosition: [
+        this.dynamicPosition![0] + x.dynamicPosition,
+        this.dynamicPosition![1] + y.dynamicPosition,
+      ],
+    });
 
     this.updateValueScope();
     this.notifyReload?.();
@@ -54,7 +57,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     const isHover = event.data.state;
 
     const animationDuration = 300; // 动画持续时间(ms)
-    const defaultLineWidth = this.setCanvasStyles().width;
+    const defaultLineWidth = this.setOverlayStyles().width;
 
     // 处理已有动画的情况
     if (this.fillProgress) {
@@ -139,17 +142,13 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
-      const { width } = this.setCanvasStyles(Overlay.ctx);
+      const { width } = this.setOverlayStyles(Overlay.ctx);
       if (this.fillProgress?.lineWidthOffset == width) return false;
       return Overlay.ctx.isPointInStroke(this.path, x, y);
     }
     return false;
   }
 
-  setStyle(style?: string | DeepPartial<PointStyleType> | undefined) {
-    super.setStyle(style);
-    this.calculatePointRadiusValue(this.setCanvasStyles());
-  }
   updateBaseData() {
     if (!this.mainCanvas) return;
     let { value, position } = this;
@@ -159,7 +158,9 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     ];
 
     if (!isValue && !isPosition) {
-      return (this.dynamicPosition = undefined);
+      return this.internalUpdate({
+        dynamicPosition: undefined,
+      });
     } else if (isValue) {
       const loc = this.mainCanvas.getAxisPointByValue(
         value![0],
@@ -178,14 +179,16 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
 
-    this.dynamicPosition = dynamicPosition;
-    this.value = value;
-    this.position = position;
+    this.internalUpdate({
+      value,
+      position,
+      dynamicPosition,
+    });
 
     this.updateValueScope();
   }
 
-  private setCanvasStyles(ctx?: CanvasRenderingContext2D) {
+  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].point;
@@ -209,12 +212,15 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     return { ...style };
   }
+  getHandlePointStyle() {
+    return this.setOverlayStyles();
+  }
   draw(ctx: CanvasRenderingContext2D) {
     const { dynamicPosition, mainCanvas, extraOffset } = this;
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
 
-    const { radius, width } = this.setCanvasStyles(ctx);
+    const { radius, width } = this.setOverlayStyles(ctx);
     const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
 
     const x = dynamicPosition![0] + extraOffset.x;
@@ -250,8 +256,11 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
         maxMinValue.minYV > valueScope!.maxY;
       if (pointNotWithinRange) return;
 
-      if (this.isRecalculate)
-        this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
+      if (this.isRecalculate) {
+        this.internalUpdate({
+          dynamicPosition: mainCanvas.transformPosition([position!])[0],
+        });
+      }
       return [this.draw, this];
     }
   }

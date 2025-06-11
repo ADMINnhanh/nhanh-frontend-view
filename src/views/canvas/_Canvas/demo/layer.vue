@@ -89,7 +89,7 @@ const polygon_rect1 = new _Canvas.Polygon({
     [1, 1],
   ],
   isRect: true,
-  style: { fill: "#f0a020", stroke: "#f0a020" },
+  style: { fill: "#f0a020", stroke: { color: "#f0a020" } },
   zIndex: 8,
 });
 const polygon_rect2 = new _Canvas.Polygon({
@@ -98,7 +98,7 @@ const polygon_rect2 = new _Canvas.Polygon({
     [2, 0.5],
   ],
   isRect: true,
-  style: { fill: "#d03050", stroke: "#d03050" },
+  style: { fill: "#d03050", stroke: { color: "#d03050" } },
   zIndex: 9,
 });
 

@@ -24,33 +24,25 @@ const line_position = new _Canvas.Line({
   ],
   isDraggable: true,
 });
-const line_Infinite = new _Canvas.Line({
+const line_infinite = new _Canvas.Line({
   value: [
     [1, -1],
     [-1, 1],
   ],
-  infinite: true,
+  isInfinite: true,
   isDraggable: true,
 });
 
-const line_arr = [line_value, line_position, line_Infinite];
+const line_arr = [line_value, line_position, line_infinite];
 
 function UpdateValue(delta: number) {
   line_arr.forEach((line) => {
-    const newValue: [number, number][] = line.value!.map(([x, y]) => [
-      x + delta,
-      y + delta,
-    ]);
-    line.setValue(newValue);
+    line.value = line.value!.map(([x, y]) => [x + delta, y + delta]);
   });
 }
 function UpdatePosition(delta: number) {
   line_arr.forEach((line) => {
-    const newPosition: [number, number][] = line.position!.map(([x, y]) => [
-      x + delta,
-      y + delta,
-    ]);
-    line.setPosition(newPosition);
+    line.position = line.position!.map(([x, y]) => [x + delta, y + delta]);
   });
 }
 function UpdateDraggable(draggable: boolean) {

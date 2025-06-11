@@ -134,7 +134,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
     const { state, oldState } = event.data;
 
-    if (state != oldState && !(this as any).infinite) this.notifyReload?.();
+    if (state != oldState && !(this as any).isInfinite) this.notifyReload?.();
   };
   /** 默认点击事件 点击后 创建/删除 控制点 */
   defaultDoubleClick: EventHandler<"doubleClick"> = (event, mouseEvent) => {
@@ -282,9 +282,11 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         this.dynamicPosition![index][1] += y.dynamicPosition;
       });
       this.handlePoints.forEach((point, index) => {
-        point.value = this.value![index];
-        point.position = this.position![index];
-        point.dynamicPosition = this.dynamicPosition![index];
+        point.internalUpdate({
+          value: this.value![index],
+          position: this.position![index],
+          dynamicPosition: this.dynamicPosition![index],
+        });
       });
       this.notifyReload?.();
       this.lockedCanCreateOrDeleteHandlePoint = true;

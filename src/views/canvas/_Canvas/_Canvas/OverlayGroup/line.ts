@@ -8,12 +8,22 @@ type ConstructorOption = ConstructorParameters<
   typeof GeometricBoundary<LineStyleType>
 >[0] & {
   /** 是否是 两点相连向外延展的无限线 */
-  infinite?: boolean;
+  isInfinite?: boolean;
 };
 
 export default class Line extends GeometricBoundary<LineStyleType> {
+  private _isInfinite?: boolean;
   /** 是否是 两点相连向外延展的无限线 */
-  infinite?: boolean;
+  get isInfinite() {
+    return this._isInfinite;
+  }
+  set isInfinite(isInfinite: boolean | undefined) {
+    if (this._isInfinite != isInfinite) {
+      this._isInfinite = isInfinite;
+      this.canCreateOrDeleteHandlePoint = !isInfinite;
+      if (this.dynamicPosition) this.notifyReload?.();
+    }
+  }
 
   /** 是否闭合 */
   protected isClosed = false;
@@ -22,15 +32,15 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   constructor(option: ConstructorOption) {
     super(option);
 
-    const { infinite } = option;
-    Object.assign(this, { infinite });
+    const { isInfinite } = option;
+    Object.assign(this, { isInfinite });
 
-    if (infinite) this.canCreateOrDeleteHandlePoint = false;
+    if (isInfinite) this.canCreateOrDeleteHandlePoint = false;
   }
 
-  protected updateValueScope() {
+  updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.setCanvasStyles().point);
+    this.calculatePointRadiusValue(this.getHandlePointStyle());
     this.setExtraOffset(this.extraOffset, false);
   }
 
@@ -39,7 +49,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   }
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
-      this.setCanvasStyles(Overlay.ctx);
+      this.setOverlayStyles(Overlay.ctx);
       if (this.isDraggable)
         Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
       return Overlay.ctx.isPointInStroke(this.path, x, y);
@@ -64,7 +74,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
         }
       });
       return point_hover;
-    })((this.isClick || !!this.infinite) && this.isHandlePointsVisible);
+    })((this.isClick || !!this.isInfinite) && this.isHandlePointsVisible);
 
     return isLine || isPoint;
   }
@@ -80,7 +90,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     if (!isValue && !isPosition) {
       this.handlePoints = [];
-      return (this.dynamicPosition = undefined);
+      return this.internalUpdate({ dynamicPosition: undefined });
     } else if (isValue) {
       position = [];
       for (let i = 0; i < value!.length; i++) {
@@ -99,25 +109,18 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     const dynamicPosition = this.mainCanvas.transformPosition(position!);
 
-    this.dynamicPosition = dynamicPosition;
-    this.value = value;
-    this.position = position;
+    this.internalUpdate({
+      value,
+      position,
+      dynamicPosition,
+    });
 
     this.updateHandlePoints();
 
     this.updateValueScope();
   }
 
-  /** 设置无限线段 */
-  setInfinite(infinite: Line["infinite"]) {
-    if (infinite != this.infinite) {
-      this.infinite = infinite;
-      this.canCreateOrDeleteHandlePoint = !infinite;
-      if (this.dynamicPosition) this.notifyReload?.();
-    }
-  }
-
-  private setCanvasStyles(ctx?: CanvasRenderingContext2D) {
+  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].line;
@@ -134,14 +137,17 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     return style;
   }
+  getHandlePointStyle() {
+    return this.setOverlayStyles().point;
+  }
   /** 绘制线段 */
   drawLine(ctx: CanvasRenderingContext2D, position?: [number, number][]) {
-    const { mainCanvas, infinite, isClick } = this;
+    const { mainCanvas, isInfinite, isClick } = this;
     position = position || this.dynamicPosition;
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
 
-    const style = this.setCanvasStyles(ctx);
+    const style = this.setOverlayStyles(ctx);
 
     ctx.beginPath();
 
@@ -157,7 +163,8 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     // 绘制 线段控制点
     this.isShowHandlePoint =
-      (infinite || isClick) && this.isHandlePointsVisible;
+      (isInfinite || isClick) && this.isHandlePointsVisible;
+
     if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.style = style.point;
@@ -165,7 +172,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       });
   }
   /** 绘制无限延伸线段 */
-  drawInfiniteStraightLine(ctx: CanvasRenderingContext2D) {
+  drawisInfiniteStraightLine(ctx: CanvasRenderingContext2D) {
     const { mainCanvas, dynamicPosition } = this;
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
@@ -226,7 +233,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     this.drawLine(ctx, [extendedStart, extendedEnd]);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, infinite, mainCanvas, valueScope } =
+    const { dynamicPosition, position, isInfinite, mainCanvas, valueScope } =
       this;
     if (!mainCanvas) return;
 
@@ -241,7 +248,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       }
 
       const pointNotWithinRange =
-        !infinite &&
+        !isInfinite &&
         (maxMinValue.maxXV < valueScope!.minX ||
           maxMinValue.minXV > valueScope!.maxX ||
           maxMinValue.maxYV < valueScope!.minY ||
@@ -249,13 +256,15 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       if (pointNotWithinRange) return;
 
       if (this.isRecalculate) {
-        this.dynamicPosition = mainCanvas.transformPosition(position!);
-        this.handlePoints.forEach(
-          (point, index) =>
-            (point.dynamicPosition = this.dynamicPosition![index])
-        );
+        const dynamicPosition = mainCanvas.transformPosition(position!);
+        this.internalUpdate({ dynamicPosition });
+        this.handlePoints.forEach((point, index) => {
+          point.internalUpdate({
+            dynamicPosition: dynamicPosition![index],
+          });
+        });
       }
-      if (infinite) return [this.drawInfiniteStraightLine, this];
+      if (isInfinite) return [this.drawisInfiniteStraightLine, this];
       return [this.drawLine, this];
     }
   }

@@ -19,7 +19,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     Object.assign(this, { draw });
   }
 
-  protected updateValueScope(): void {
+  updateValueScope(): void {
     this.initValueScope();
     this.setExtraOffset(this.extraOffset, false);
   }
@@ -34,7 +34,9 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
   updateBaseData() {
     if (!this.mainCanvas) return;
 
-    this.dynamicPosition = undefined;
+    this.internalUpdate({
+      dynamicPosition: undefined,
+    });
 
     let value = this.value as any;
     let position = this.position as any;
@@ -102,9 +104,16 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     return values;
   }
   private updateDataProperties(value: any, position: any) {
-    this.dynamicPosition = this.mainCanvas!.transformPosition(position);
-    this.value = value;
-    this.position = position;
+    this.internalUpdate({
+      value,
+      position,
+      dynamicPosition: this.mainCanvas!.transformPosition(position),
+    });
+  }
+
+  setOverlayStyles(ctx?: CanvasRenderingContext2D): any {}
+  getHandlePointStyle() {
+    return undefined;
   }
 
   private _draw?: (ctx: CanvasRenderingContext2D) => void;
@@ -137,8 +146,11 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
 
       if (pointNotWithinRange) return;
 
-      if (this.isRecalculate)
-        this.dynamicPosition = mainCanvas.transformPosition(position!);
+      if (this.isRecalculate) {
+        this.internalUpdate({
+          dynamicPosition: mainCanvas.transformPosition(position!),
+        });
+      }
       return [this.draw, this];
     }
   }

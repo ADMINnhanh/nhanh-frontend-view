@@ -150,31 +150,28 @@ export default class Draw extends Style {
   }
 
   /** 测量重绘性能 */
-  private measureRedrawPerformance = _TimeConsumption(
-    () => this.redraw(),
-    [
-      [1, "#F56C6C"],
-      [0.5, "#E6A23C"],
-      [0, "#67C23A"],
-    ]
-  );
+  private measureRedrawPerformance = _TimeConsumption(() => {
+    this.isRendering = true;
+    this.redraw();
+    this.redrawInNextRenderFrame = false;
+    this.isRendering = false;
+  }, [
+    [1, "#F56C6C"],
+    [0.5, "#E6A23C"],
+    [0, "#67C23A"],
+  ]);
 
   /** 重绘画布 同一个渲染帧只会执行一次 */
   redrawOnce() {
     if (!this.redrawInNextRenderFrame) {
       this.redrawInNextRenderFrame = true;
       Promise.resolve().then(() => {
-        this.isRendering = true;
-        this.redrawInNextRenderFrame = false;
         // this.measureRedrawPerformance();
+        this.isRendering = true;
         this.redraw();
+        this.redrawInNextRenderFrame = false;
         this.isRendering = false;
       });
-      // requestAnimationFrame(() => {
-      //   this.redrawInNextRenderFrame = false;
-      //   this.measureRedrawPerformance();
-      //   // this.redraw();
-      // });
     }
   }
 

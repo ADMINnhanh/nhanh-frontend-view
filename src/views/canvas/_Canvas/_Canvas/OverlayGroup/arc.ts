@@ -49,9 +49,9 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     });
   }
 
-  protected updateValueScope() {
+  updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.setCanvasStyles().point);
+    this.calculatePointRadiusValue(this.getHandlePointStyle());
     this.setExtraOffset(this.extraOffset, false);
   }
 
@@ -62,7 +62,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   }
   isPointInStroke(x: number, y: number) {
     if (this.path && this.mainCanvas) {
-      this.setCanvasStyles(Overlay.ctx);
+      this.setOverlayStyles(Overlay.ctx);
       if (this.isDraggable)
         Overlay.ctx.lineWidth = Math.max(Overlay.ctx.lineWidth, 20);
       return Overlay.ctx.isPointInStroke(this.path, x, y);
@@ -74,7 +74,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     return isLine;
   }
 
-  private setCanvasStyles(ctx?: CanvasRenderingContext2D) {
+  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const isHover = this.isHover;
     const mainCanvas = this.mainCanvas!;
 
@@ -99,6 +99,9 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
     return style;
   }
+  getHandlePointStyle() {
+    return this.setOverlayStyles().point;
+  }
 
   updateBaseData() {
     if (!this.mainCanvas) return;
@@ -109,7 +112,9 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     ];
 
     if (!isValue && !isPosition) {
-      return (this.dynamicPosition = undefined);
+      return this.internalUpdate({
+        dynamicPosition: undefined,
+      });
     } else if (isValue) {
       const loc = this.mainCanvas.getAxisPointByValue(
         value![0],
@@ -128,9 +133,11 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
 
-    this.dynamicPosition = dynamicPosition;
-    this.value = value;
-    this.position = position;
+    this.internalUpdate({
+      value,
+      position,
+      dynamicPosition,
+    });
 
     this.updateValueScope();
   }
@@ -149,7 +156,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     if (!mainCanvas && radius > 0) return;
     this.setGlobalAlpha(ctx);
 
-    this.setCanvasStyles(ctx);
+    this.setOverlayStyles(ctx);
 
     const x = dynamicPosition![0] + extraOffset.x;
     const y = dynamicPosition![1] + extraOffset.y;
@@ -157,7 +164,14 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     ctx.beginPath();
 
     this.path = new Path2D();
-    this.path.arc(x, y, radius, startAngle, endAngle, counterclockwise);
+    this.path.arc(
+      x,
+      y,
+      radius * mainCanvas!.percentage,
+      startAngle,
+      endAngle,
+      counterclockwise
+    );
     ctx.stroke(this.path);
     isFill && ctx.fill(this.path);
   }
@@ -182,8 +196,11 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         maxMinValue.minYV > valueScope!.maxY;
       if (pointNotWithinRange) return;
 
-      if (this.isRecalculate)
-        this.dynamicPosition = mainCanvas.transformPosition([position!])[0];
+      if (this.isRecalculate) {
+        this.internalUpdate({
+          dynamicPosition: mainCanvas.transformPosition([position!])[0],
+        });
+      }
       return [this.draw, this];
     }
   }
