@@ -233,27 +233,14 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     this.drawLine(ctx, [extendedStart, extendedEnd]);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, isInfinite, mainCanvas, valueScope } =
-      this;
+    const { dynamicPosition, position, isInfinite, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = this.shouldRender();
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
-      if (isScaleUpdated) {
-        this.setExtraOffset(this.extraOffset, false);
-        this.calculatePointRadiusValue();
-      }
-
-      const pointNotWithinRange =
-        !isInfinite &&
-        (maxMinValue.maxXV < valueScope!.minX ||
-          maxMinValue.minXV > valueScope!.maxX ||
-          maxMinValue.maxYV < valueScope!.minY ||
-          maxMinValue.minYV > valueScope!.maxY);
-      if (pointNotWithinRange) return;
+      if (!isInfinite && !this.isWithinRange()) return;
 
       if (this.isRecalculate) {
         const dynamicPosition = mainCanvas.transformPosition(position!);

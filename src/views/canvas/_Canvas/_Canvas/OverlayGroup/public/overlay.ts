@@ -99,14 +99,14 @@ export default abstract class Overlay<
   constructor(option: ConstructorOption<T, V>) {
     option = { ...option };
     option.isDraggable = option.isDraggable ?? false;
-    const mainCanvas = option.mainCanvas;
+    const { mainCanvas, notifyReload } = option;
     delete option.mainCanvas;
+    delete option.notifyReload;
 
     super(option);
 
     const {
       extraOffset,
-      notifyReload,
       style,
       zIndex = 0,
       position,
@@ -153,6 +153,7 @@ export default abstract class Overlay<
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {
+          if (!this.isWithinRange()) return;
           if (needForceExecute) {
             this.isRecalculate = true;
             notifyReload();
@@ -177,6 +178,8 @@ export default abstract class Overlay<
     minY: number;
     maxY: number;
   };
+  /** 更新值范围 */
+  protected abstract updateValueScope(): void;
   /** 初始化值范围 */
   protected initValueScope() {
     const value = this.value!;
@@ -207,9 +210,60 @@ export default abstract class Overlay<
       };
     }
     this.staticValueScope = { ...this.valueScope };
+
+    ["extraScope", "extraOffset", "lastPointRadius"].forEach((item) => {
+      /** @ts-ignore */
+      Object.keys(this[item]).forEach((key) => (this[item][key] = 0));
+    });
   }
-  /** 更新值范围 */
-  protected abstract updateValueScope(): void;
+
+  /** 额外范围 */
+  protected extraScope = {
+    topV: 0,
+    bottomV: 0,
+    leftV: 0,
+    rightV: 0,
+  };
+  /** 设置额外范围 */
+  setExtraScope(extraScope?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  }) {
+    extraScope = extraScope || { top: 0, bottom: 0, left: 0, right: 0 };
+    if (this.valueScope) {
+      const { xV: topV, yV: bottomV } = this.mainCanvas!.getAxisValueByPoint(
+        extraScope.top,
+        extraScope.bottom
+      );
+      const { xV: leftV, yV: rightV } = this.mainCanvas!.getAxisValueByPoint(
+        extraScope.left,
+        extraScope.right
+      );
+
+      this.setExtraScopeByValue({ topV, bottomV, leftV, rightV });
+    }
+  }
+  /** 设置额外范围 */
+  setExtraScopeByValue(extraScope?: {
+    topV: number;
+    bottomV: number;
+    leftV: number;
+    rightV: number;
+  }) {
+    extraScope = extraScope || { topV: 0, bottomV: 0, leftV: 0, rightV: 0 };
+    if (this.valueScope) {
+      const { leftV, rightV, topV, bottomV } = extraScope;
+
+      this.valueScope.minX -= leftV - this.extraScope.leftV;
+      this.valueScope.maxX += rightV - this.extraScope.rightV;
+      this.valueScope.minY -= topV - this.extraScope.topV;
+      this.valueScope.maxY += bottomV - this.extraScope.bottomV;
+
+      Object.assign(this.extraScope, extraScope);
+    }
+  }
 
   /** 额外偏移 */
   protected extraOffset = {
@@ -242,6 +296,7 @@ export default abstract class Overlay<
     });
     reload && this.notifyReload?.();
   }
+
   /** 点位半径值 */
   private lastPointRadius = {
     value: 0,
@@ -250,6 +305,7 @@ export default abstract class Overlay<
   /** 计算点位半径值 */
   protected calculatePointRadiusValue(style?: PointStyleType) {
     if (!this.valueScope) return;
+    if (!style && this.lastPointRadius.value == 0) return;
 
     const radius = style
       ? style.radius + style.width / 2
@@ -298,6 +354,26 @@ export default abstract class Overlay<
   /** 检测某点是否在当前覆盖物中 */
   isPointInAnywhere(x: number, y: number) {
     return this.isPointInPath(x, y) || this.isPointInStroke(x, y);
+  }
+
+  /** 判断是否在可视范围内 */
+  protected isWithinRange() {
+    const { mainCanvas, valueScope, extraOffset } = this;
+    if (!mainCanvas) return false;
+
+    const { isScaleUpdated, maxMinValue } = mainCanvas;
+
+    if (isScaleUpdated) {
+      this.setExtraOffset(extraOffset, false);
+      this.calculatePointRadiusValue();
+    }
+
+    return !(
+      maxMinValue.maxXV < valueScope!.minX ||
+      maxMinValue.minXV > valueScope!.maxX ||
+      maxMinValue.maxYV < valueScope!.minY ||
+      maxMinValue.minYV > valueScope!.maxY
+    );
   }
 
   /** 设置透明度 */

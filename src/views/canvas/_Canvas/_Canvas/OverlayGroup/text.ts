@@ -196,21 +196,13 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     );
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, valueScope, mainCanvas } = this;
+    const { dynamicPosition, position, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { maxMinValue, isScaleUpdated } = mainCanvas;
     const isShow = this.shouldRender();
 
     if (isShow && !!dynamicPosition) {
-      if (isScaleUpdated) this.setExtraOffset(this.extraOffset, false);
-
-      const pointNotWithinRange =
-        maxMinValue.maxXV < valueScope!.minX ||
-        maxMinValue.minXV > valueScope!.maxX ||
-        maxMinValue.maxYV < valueScope!.minY ||
-        maxMinValue.minYV > valueScope!.maxY;
-      if (pointNotWithinRange) return;
+      if (!this.isWithinRange()) return;
 
       if (this.isRecalculate) {
         this.internalUpdate({

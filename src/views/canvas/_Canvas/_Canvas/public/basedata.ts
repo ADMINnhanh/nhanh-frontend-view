@@ -18,7 +18,7 @@ abstract class Base<T extends Base<T>> {
   /** 是否需要重新计算坐标 */
   get isRecalculate(): boolean {
     return (
-      (this.parent ? this.parent.isRecalculate : true) || this._isRecalculate
+      (this.parent ? this.parent.isRecalculate : false) || this._isRecalculate
     );
   }
   set isRecalculate(isRecalculate: boolean) {

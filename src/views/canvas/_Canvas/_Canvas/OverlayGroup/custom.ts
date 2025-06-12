@@ -128,23 +128,14 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     this._draw = draw;
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, mainCanvas, position, valueScope } = this;
+    const { dynamicPosition, mainCanvas, position } = this;
     if (!mainCanvas || !this.draw) return;
 
-    const { isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = this.shouldRender();
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
-      if (isScaleUpdated) this.setExtraOffset(this.extraOffset, false);
-
-      const pointNotWithinRange =
-        maxMinValue.maxXV < valueScope!.minX ||
-        maxMinValue.minXV > valueScope!.maxX ||
-        maxMinValue.maxYV < valueScope!.minY ||
-        maxMinValue.minYV > valueScope!.maxY;
-
-      if (pointNotWithinRange) return;
+      if (!this.isWithinRange()) return;
 
       if (this.isRecalculate) {
         this.internalUpdate({

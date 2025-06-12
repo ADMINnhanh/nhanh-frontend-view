@@ -231,25 +231,14 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   }
 
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, mainCanvas, valueScope } = this;
+    const { dynamicPosition, position, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { isScaleUpdated, maxMinValue } = mainCanvas;
     const isShow = this.shouldRender();
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
-      if (isScaleUpdated) {
-        this.setExtraOffset(this.extraOffset, false);
-        this.calculatePointRadiusValue();
-      }
-
-      const pointNotWithinRange =
-        maxMinValue.maxXV < valueScope!.minX ||
-        maxMinValue.minXV > valueScope!.maxX ||
-        maxMinValue.maxYV < valueScope!.minY ||
-        maxMinValue.minYV > valueScope!.maxY;
-      if (pointNotWithinRange) return;
+      if (!this.isWithinRange()) return;
 
       if (this.isRecalculate) {
         const dynamicPosition = mainCanvas.transformPosition(position!);

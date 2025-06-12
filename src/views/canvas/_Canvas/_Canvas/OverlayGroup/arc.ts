@@ -48,18 +48,62 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   set radiusType(radiusType: "position" | "value") {
     if (this._radiusType != radiusType) {
       this._radiusType = radiusType;
-      this.notifyReload?.();
+      this.updateRadius();
     }
   }
 
+  /** 动态圆弧半径 */
+  private dynamicRadius = 0;
+  private _radius = 0;
   /** 圆弧的半径。必须为正值。 */
-  radius = 0;
+  get radius() {
+    return this._radius;
+  }
+  set radius(radius: number) {
+    if (this._radius != radius) {
+      this._radius = radius;
+      this.updateRadius();
+    }
+  }
+  private _startAngle = 0;
   /** 圆弧的起始点，从 x 轴方向开始计算，以弧度为单位。 */
-  startAngle = 0;
+  get startAngle() {
+    return this._startAngle;
+  }
+  set startAngle(startAngle: number) {
+    if (this._startAngle != startAngle) {
+      this._startAngle = startAngle;
+      this.updateDynamicRadius();
+      this.updateHandlePoints();
+      this.notifyReload?.();
+    }
+  }
+  private _endAngle = 0;
   /** 圆弧的终点，从 x 轴方向开始计算，以弧度为单位。 */
-  endAngle = 0;
+  get endAngle() {
+    return this._endAngle;
+  }
+  set endAngle(endAngle: number) {
+    if (this._endAngle != endAngle) {
+      this._endAngle = endAngle;
+      this.updateDynamicRadius();
+      this.updateHandlePoints();
+      this.notifyReload?.();
+    }
+  }
+  private _counterclockwise = false;
   /** 如果为 true，逆时针绘制圆弧，反之，顺时针绘制。默认为 false（顺时针）。 */
-  counterclockwise = false;
+  get counterclockwise() {
+    return this._counterclockwise;
+  }
+  set counterclockwise(counterclockwise: boolean) {
+    if (this._counterclockwise != counterclockwise) {
+      this._counterclockwise = counterclockwise;
+      this.updateDynamicRadius();
+      this.updateHandlePoints();
+      this.notifyReload?.();
+    }
+  }
 
   /** 是否可显示控制点 */
   private _isHandlePointsVisible = true;
@@ -113,22 +157,28 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
     if (!this.mainCanvas) return;
 
+    const { start, end, radius } = this.handlePoints;
+
     /** 移动整体 */
     const moveTheWhole = () => {
       const { offsetX, offsetY } = event.data;
       const { x, y } = this.calculateOffset(offsetX, offsetY)!;
-      this.internalUpdate({
-        value: [this.value![0] + x.value, this.value![1] + y.value],
-        position: [
-          this.position![0] + x.position,
-          this.position![1] + y.position,
-        ],
-        dynamicPosition: [
-          this.dynamicPosition![0] + x.dynamicPosition,
-          this.dynamicPosition![1] + y.dynamicPosition,
-        ],
+
+      const points = [this, start, end, radius] as (Point | Arc)[];
+      points.forEach((item) => {
+        item.internalUpdate({
+          value: [item.value![0] + x.value, item.value![1] + y.value],
+          position: [
+            item.position![0] + x.position,
+            item.position![1] + y.position,
+          ],
+          dynamicPosition: [
+            item.dynamicPosition![0] + x.dynamicPosition,
+            item.dynamicPosition![1] + y.dynamicPosition,
+          ],
+        });
       });
-      this.updateHandlePoints();
+      this.notifyReload?.();
     };
     if (this.isHandlePointsVisible) {
       const { start, end, radius } = this.handlePoints;
@@ -137,22 +187,33 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       ).find((point) => point.isHover);
 
       if (handlePoint) {
-        // const point = this.handlePoints[hover_point_index];
-        // point.notifyDragg(event.data, mouseEvent);
-        // this.value![hover_point_index] = point.value!;
-        // this.position![hover_point_index] = point.position!;
-        // this.dynamicPosition![hover_point_index] = point.dynamicPosition!;
+        const offsetX = event.data.offsetX;
+        if (handlePoint == start) {
+          this.startAngle =
+            (this.startAngle + (-offsetX / 180) * Math.PI) % (Math.PI * 2);
+        } else if (handlePoint == end) {
+          this.endAngle =
+            (this.endAngle + (-offsetX / 180) * Math.PI) % (Math.PI * 2);
+        } else if (handlePoint == radius) {
+          if (this.radiusType == "position") {
+            this.radius += offsetX / 2;
+          } else {
+            this.radius +=
+              this.mainCanvas.getAxisValueByPoint(offsetX, 0).xV / 2;
+          }
+          this.updateDynamicRadius();
+        }
       } else moveTheWhole();
     } else moveTheWhole();
 
     this.updateValueScope();
-    this.notifyReload?.();
   };
 
   updateValueScope() {
     this.initValueScope();
     this.calculatePointRadiusValue(this.getHandlePointStyle());
     this.setExtraOffset(this.extraOffset, false);
+    this.updateExtraScope();
   }
 
   isPointInPath(x: number, y: number) {
@@ -241,17 +302,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     if (!mainCanvas || !dynamicPosition) return;
 
-    const radiusValue =
-      radiusType == "value"
-        ? radius
-        : mainCanvas.getAxisValueByPoint(radius, 0, true).xV;
-
-    const [start, end] = GetArcPoints(
-      ...value!,
-      radiusValue,
-      startAngle,
-      endAngle
-    );
+    const data = this[radiusType]!;
+    const [start, end] = GetArcPoints(...data, radius, startAngle, endAngle);
 
     const getPoint = () =>
       new Point({
@@ -262,11 +314,11 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     const startPoint = this.handlePoints.start || getPoint();
     const endPoint = this.handlePoints.end || getPoint();
     const radiusPoint = this.handlePoints.radius || getPoint();
-    startPoint.value = start;
-    endPoint.value = end;
+    startPoint[radiusType] = start;
+    endPoint[radiusType] = end;
 
-    const x = value![0] + radiusValue * 2;
-    radiusPoint.value = [x, value![1]];
+    const x = data![0] + radius * 2;
+    radiusPoint[radiusType] = [x, data![1]];
 
     this.handlePoints = {
       start: startPoint,
@@ -274,7 +326,51 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       radius: radiusPoint,
     };
   }
+  /** 更新半径 */
+  private updateRadius() {
+    if (this.mainCanvas) {
+      this.updateDynamicRadius();
+      this.updateHandlePoints();
+      this.updateExtraScope();
+    }
+  }
+  /** 更新额外范围 */
+  private updateExtraScope() {
+    const { mainCanvas, radius, radiusType } = this;
+    if (mainCanvas) {
+      if (radius == 0) this.setExtraScopeByValue();
+      else if (radiusType == "position") {
+        const xV = mainCanvas.getAxisValueByPoint(radius, 0).xV;
+        this.setExtraScopeByValue({
+          topV: xV,
+          bottomV: xV,
+          leftV: xV,
+          rightV: xV * 2,
+        });
+      } else if (radiusType == "value") {
+        this.setExtraScopeByValue({
+          topV: radius,
+          bottomV: radius,
+          leftV: radius,
+          rightV: radius * 2,
+        });
+      }
+    }
+  }
 
+  /** 更新动态半径 */
+  updateDynamicRadius() {
+    const { mainCanvas, radius, radiusType } = this;
+    if (!mainCanvas || radius <= 0) {
+      this.dynamicRadius = 0;
+    } else {
+      if (radiusType == "position") {
+        this.dynamicRadius = radius * mainCanvas.percentage;
+      } else {
+        this.dynamicRadius = mainCanvas.getAxisPointByValue(radius, 0).x;
+      }
+    }
+  }
   updateBaseData() {
     if (!this.mainCanvas) return;
     let { value, position } = this;
@@ -311,30 +407,25 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       dynamicPosition,
     });
 
+    this.updateDynamicRadius();
+
     this.updateHandlePoints();
 
     this.updateValueScope();
   }
 
-  calculateRadius() {
-    const { mainCanvas, radius, radiusType } = this;
-    if (!mainCanvas || radius <= 0) return 0;
-
-    if (radiusType == "position") return radius * mainCanvas.percentage;
-    return mainCanvas.getAxisPointByValue(radius, 0).x;
-  }
   draw(ctx: CanvasRenderingContext2D) {
     const {
       dynamicPosition,
       mainCanvas,
       extraOffset,
-      radius,
+      dynamicRadius,
       startAngle,
       endAngle,
       counterclockwise,
       isFill,
     } = this;
-    if (!mainCanvas || radius <= 0) return;
+    if (!mainCanvas || dynamicRadius <= 0) return;
     this.setGlobalAlpha(ctx);
 
     const style = this.setOverlayStyles(ctx);
@@ -345,14 +436,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     ctx.beginPath();
 
     this.path = new Path2D();
-    this.path.arc(
-      x,
-      y,
-      this.calculateRadius(),
-      startAngle,
-      endAngle,
-      counterclockwise
-    );
+    this.path.arc(x, y, dynamicRadius, startAngle, endAngle, counterclockwise);
     ctx.stroke(this.path);
     isFill && ctx.fill(this.path);
 
@@ -369,43 +453,21 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, valueScope, mainCanvas } = this;
+    const { dynamicPosition, position, mainCanvas } = this;
     if (!mainCanvas) return;
 
-    const { maxMinValue, isScaleUpdated } = mainCanvas;
     const isShow = this.shouldRender();
     const prevDynamicStatus = !!dynamicPosition;
 
     if (isShow && prevDynamicStatus) {
-      if (isScaleUpdated) {
-        this.setExtraOffset(this.extraOffset, false);
-        this.calculatePointRadiusValue();
-      }
-
-      const pointNotWithinRange =
-        maxMinValue.maxXV < valueScope!.minX ||
-        maxMinValue.minXV > valueScope!.maxX ||
-        maxMinValue.maxYV < valueScope!.minY ||
-        maxMinValue.minYV > valueScope!.maxY;
-      if (pointNotWithinRange) return;
+      if (!this.isWithinRange()) return;
 
       if (this.isRecalculate) {
-        const dynamicPosition = mainCanvas.transformPosition([position!])[0];
-        const offset = {
-          x: dynamicPosition![0] - this.dynamicPosition![0],
-          y: dynamicPosition![1] - this.dynamicPosition![1],
-        };
-        this.internalUpdate({ dynamicPosition });
-        const { start, end, radius } = this.handlePoints;
-        const handlePoints = [start, end, radius].filter(Boolean) as Point[];
-        handlePoints.forEach((point) => {
-          point.internalUpdate({
-            dynamicPosition: [
-              point.dynamicPosition![0] + offset.x,
-              point.dynamicPosition![1] + offset.y,
-            ],
-          });
+        this.updateDynamicRadius();
+        this.internalUpdate({
+          dynamicPosition: mainCanvas.transformPosition([position!])[0],
         });
+        this.updateHandlePoints();
       }
       return [this.draw, this];
     }
