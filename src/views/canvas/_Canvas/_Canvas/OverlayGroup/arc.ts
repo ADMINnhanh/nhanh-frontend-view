@@ -98,6 +98,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     });
 
     this.addEventListener("click", this.defaultClick);
+    this.addEventListener("dragg", this.defaultDragg);
   }
 
   /** 默认点击事件 点击后切换控制点显示状态 */
@@ -107,6 +108,45 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     const { state, oldState } = event.data;
 
     if (state != oldState) this.notifyReload?.();
+  };
+  /** 处理拖动状态变化 */
+  defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
+    if (!this.mainCanvas) return;
+
+    /** 移动整体 */
+    const moveTheWhole = () => {
+      const { offsetX, offsetY } = event.data;
+      const { x, y } = this.calculateOffset(offsetX, offsetY)!;
+      this.internalUpdate({
+        value: [this.value![0] + x.value, this.value![1] + y.value],
+        position: [
+          this.position![0] + x.position,
+          this.position![1] + y.position,
+        ],
+        dynamicPosition: [
+          this.dynamicPosition![0] + x.dynamicPosition,
+          this.dynamicPosition![1] + y.dynamicPosition,
+        ],
+      });
+      this.updateHandlePoints();
+    };
+    if (this.isHandlePointsVisible) {
+      const { start, end, radius } = this.handlePoints;
+      const handlePoint = (
+        [start, end, radius].filter(Boolean) as Point[]
+      ).find((point) => point.isHover);
+
+      if (handlePoint) {
+        // const point = this.handlePoints[hover_point_index];
+        // point.notifyDragg(event.data, mouseEvent);
+        // this.value![hover_point_index] = point.value!;
+        // this.position![hover_point_index] = point.position!;
+        // this.dynamicPosition![hover_point_index] = point.dynamicPosition!;
+      } else moveTheWhole();
+    } else moveTheWhole();
+
+    this.updateValueScope();
+    this.notifyReload?.();
   };
 
   updateValueScope() {
@@ -350,8 +390,21 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       if (pointNotWithinRange) return;
 
       if (this.isRecalculate) {
-        this.internalUpdate({
-          dynamicPosition: mainCanvas.transformPosition([position!])[0],
+        const dynamicPosition = mainCanvas.transformPosition([position!])[0];
+        const offset = {
+          x: dynamicPosition![0] - this.dynamicPosition![0],
+          y: dynamicPosition![1] - this.dynamicPosition![1],
+        };
+        this.internalUpdate({ dynamicPosition });
+        const { start, end, radius } = this.handlePoints;
+        const handlePoints = [start, end, radius].filter(Boolean) as Point[];
+        handlePoints.forEach((point) => {
+          point.internalUpdate({
+            dynamicPosition: [
+              point.dynamicPosition![0] + offset.x,
+              point.dynamicPosition![1] + offset.y,
+            ],
+          });
         });
       }
       return [this.draw, this];
