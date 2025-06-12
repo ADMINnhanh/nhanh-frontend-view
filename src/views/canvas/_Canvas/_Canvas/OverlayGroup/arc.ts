@@ -301,7 +301,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     if (!mainCanvas || !dynamicPosition) return;
 
     const data = this[radiusType]!;
-    const [start, end] = GetArcPoints(...data, radius, startAngle, endAngle);
+    const [start, end] = _GetArcPoints(...data, radius, startAngle, endAngle);
 
     const getPoint = () =>
       new Point({
@@ -491,7 +491,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
  * @param endAngle 结束角度（弧度制）
  * @returns [起点坐标, 终点坐标]
  */
-function GetArcPoints(
+function _GetArcPoints(
   x: number,
   y: number,
   radius: number,
