@@ -332,7 +332,7 @@ export default abstract class Overlay<
     this.redrawOnIsHoverChange && this.notifyReload?.();
   };
   /** 计算偏移量 */
-  calculateOffset(offsetX: number, offsetY: number) {
+  protected calculateOffset(offsetX: number, offsetY: number) {
     const { percentage, axisConfig } = this.mainCanvas!;
     const base = axisConfig.count / axisConfig.min / percentage;
     const x = {

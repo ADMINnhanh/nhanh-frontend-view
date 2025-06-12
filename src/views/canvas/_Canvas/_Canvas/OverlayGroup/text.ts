@@ -61,7 +61,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.notifyReload?.();
   };
 
-  updateValueScope() {
+  protected updateValueScope() {
     const { textOffset, value } = this;
 
     const { xV: width, yV: height } = this.mainCanvas!.getAxisValueByPoint(
@@ -163,7 +163,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     return style;
   }
-  get handlePointStyle() {
+  protected get handlePointStyle() {
     return undefined;
   }
 

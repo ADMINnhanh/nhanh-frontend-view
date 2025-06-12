@@ -20,7 +20,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.addEventListener("dragg", this.defaultDragg);
   }
 
-  updateValueScope() {
+  protected updateValueScope() {
     this.initValueScope();
   }
 
@@ -186,7 +186,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.updateValueScope();
   }
 
-  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
+  protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].point;
@@ -211,7 +211,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     return { ...style };
   }
-  get handlePointStyle() {
+  protected get handlePointStyle() {
     return this.setOverlayStyles();
   }
   draw(ctx: CanvasRenderingContext2D) {

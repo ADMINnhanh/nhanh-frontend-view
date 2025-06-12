@@ -19,7 +19,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     Object.assign(this, { draw });
   }
 
-  updateValueScope(): void {
+  protected updateValueScope(): void {
     this.initValueScope();
   }
 
@@ -110,8 +110,8 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     });
   }
 
-  setOverlayStyles(ctx?: CanvasRenderingContext2D): any {}
-  get handlePointStyle() {
+  protected setOverlayStyles(ctx?: CanvasRenderingContext2D): any {}
+  protected get handlePointStyle() {
     return undefined;
   }
 

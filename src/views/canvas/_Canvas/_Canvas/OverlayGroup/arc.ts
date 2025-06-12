@@ -209,7 +209,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     this.updateValueScope();
   };
 
-  updateValueScope() {
+  protected updateValueScope() {
     this.initValueScope();
     this.updateExtraScope();
   }
@@ -252,7 +252,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     return isLine || isPoint;
   }
 
-  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
+  protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const isHover = this.isHover;
     const mainCanvas = this.mainCanvas!;
 
@@ -277,7 +277,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
     return style;
   }
-  get handlePointStyle() {
+  protected get handlePointStyle() {
     return this.setOverlayStyles().point;
   }
 

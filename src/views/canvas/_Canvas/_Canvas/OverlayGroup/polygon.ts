@@ -30,7 +30,6 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     }
   }
 
-  /** 是否闭合 */
   protected isClosed = true;
   protected minNeededHandlePoints = 3;
 
@@ -43,7 +42,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     if (option.isRect) this.canCreateOrDeleteHandlePoint = false;
   }
 
-  updateValueScope() {
+  protected updateValueScope() {
     this.initValueScope();
   }
 
@@ -137,7 +136,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.updateValueScope();
   }
 
-  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
+  protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const isHover = this.isHover;
     const mainCanvas = this.mainCanvas!;
 
@@ -162,7 +161,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     }
     return style;
   }
-  get handlePointStyle() {
+  protected get handlePointStyle() {
     return this.setOverlayStyles().point;
   }
 

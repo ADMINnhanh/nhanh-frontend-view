@@ -25,7 +25,6 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     }
   }
 
-  /** 是否闭合 */
   protected isClosed = false;
   protected minNeededHandlePoints = 2;
 
@@ -38,7 +37,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     if (isInfinite) this.canCreateOrDeleteHandlePoint = false;
   }
 
-  updateValueScope() {
+  protected updateValueScope() {
     this.initValueScope();
   }
 
@@ -118,7 +117,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     this.updateValueScope();
   }
 
-  setOverlayStyles(ctx?: CanvasRenderingContext2D) {
+  protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const mainCanvas = this.mainCanvas!;
 
     const defaultStyle = mainCanvas.style[mainCanvas.theme].line;
@@ -135,7 +134,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     return style;
   }
-  get handlePointStyle() {
+  protected get handlePointStyle() {
     return this.setOverlayStyles().point;
   }
   /** 绘制线段 */
