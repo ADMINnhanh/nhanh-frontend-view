@@ -21,7 +21,6 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
 
   updateValueScope(): void {
     this.initValueScope();
-    this.setExtraOffset(this.extraOffset, false);
   }
 
   isPointInPath(x: number, y: number) {
@@ -112,7 +111,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
   }
 
   setOverlayStyles(ctx?: CanvasRenderingContext2D): any {}
-  getHandlePointStyle() {
+  get handlePointStyle() {
     return undefined;
   }
 
@@ -128,18 +127,11 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     this._draw = draw;
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, mainCanvas, position } = this;
-    if (!mainCanvas || !this.draw) return;
-
-    const isShow = this.shouldRender();
-    const prevDynamicStatus = !!dynamicPosition;
-
-    if (isShow && prevDynamicStatus) {
-      if (!this.isWithinRange()) return;
-
+    if (this.isNeedRender) {
+      const { mainCanvas, position } = this;
       if (this.isRecalculate) {
         this.internalUpdate({
-          dynamicPosition: mainCanvas.transformPosition(position!),
+          dynamicPosition: mainCanvas!.transformPosition(position!),
         });
       }
       return [this.draw, this];

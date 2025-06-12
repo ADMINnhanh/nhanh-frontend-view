@@ -37,11 +37,9 @@ export default abstract class Overlay<
   set style(style: Overlay<T, V>["_style"] | undefined) {
     this._style = style;
 
-    if (this.dynamicPosition) this.notifyReload?.();
-
     if (this.mainCanvas) {
-      const handlePointStyle = this.getHandlePointStyle();
-      handlePointStyle && this.calculatePointRadiusValue(handlePointStyle);
+      if (this.dynamicPosition) this.notifyReload?.();
+      this.calculatePointRadiusValue();
     }
   }
 
@@ -154,11 +152,8 @@ export default abstract class Overlay<
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {
           if (needForceExecute) this.isRecalculate = true;
-          if (this.mainCanvas?.redrawInNextRenderFrame || !this.isWithinRange())
-            return;
-          if (needForceExecute || this.shouldRender()) {
-            notifyReload();
-          }
+          if (this.mainCanvas?.redrawInNextRenderFrame) return;
+          if (needForceExecute || this.isNeedRender) notifyReload();
         }
       : undefined;
   }
@@ -214,6 +209,9 @@ export default abstract class Overlay<
       /** @ts-ignore */
       Object.keys(this[item]).forEach((key) => (this[item][key] = 0));
     });
+
+    this.calculatePointRadiusValue();
+    this.setExtraOffset(this.extraOffset, false);
   }
 
   /** 额外范围 */
@@ -296,19 +294,25 @@ export default abstract class Overlay<
     reload && this.notifyReload?.();
   }
 
+  /** 获取控制点样式 */
+  protected abstract get handlePointStyle(): PointStyleType | undefined;
   /** 点位半径值 */
   private lastPointRadius = {
     value: 0,
     radius: 0,
   };
   /** 计算点位半径值 */
-  protected calculatePointRadiusValue(style?: PointStyleType) {
+  protected calculatePointRadiusValue(uselastFact = false) {
     if (!this.valueScope) return;
-    if (!style && this.lastPointRadius.value == 0) return;
+    if (uselastFact && this.lastPointRadius.value == 0) return;
 
-    const radius = style
-      ? style.radius + style.width / 2
-      : this.lastPointRadius.radius;
+    const radius = (() => {
+      if (uselastFact) return this.lastPointRadius.radius;
+      const style = this.handlePointStyle;
+      if (style) return style.radius + style.width / 2;
+    })();
+    if (radius === undefined) return;
+
     const radiusValue = this.mainCanvas!.getAxisValueByPoint(radius, 0).xV;
 
     const offset = radiusValue - this.lastPointRadius.value;
@@ -356,7 +360,7 @@ export default abstract class Overlay<
   }
 
   /** 判断是否在可视范围内 */
-  protected isWithinRange() {
+  protected get isWithinRange() {
     const { mainCanvas, valueScope, extraOffset } = this;
     if (!mainCanvas) return false;
 
@@ -364,7 +368,7 @@ export default abstract class Overlay<
 
     if (isScaleUpdated) {
       this.setExtraOffset(extraOffset, false);
-      this.calculatePointRadiusValue();
+      this.calculatePointRadiusValue(true);
     }
 
     return !(
@@ -373,6 +377,17 @@ export default abstract class Overlay<
       maxMinValue.maxYV < valueScope!.minY ||
       maxMinValue.minYV > valueScope!.maxY
     );
+  }
+  /** 判断是否需要渲染 */
+  protected get isNeedRender() {
+    if (
+      this.mainCanvas &&
+      this.shouldRender() &&
+      !!this.dynamicPosition &&
+      this.isWithinRange
+    )
+      return true;
+    return false;
   }
 
   /** 设置透明度 */
@@ -401,8 +416,6 @@ export default abstract class Overlay<
 
   /** 设置画布样式 */
   protected abstract setOverlayStyles(ctx?: CanvasRenderingContext2D): T;
-  /** 获取控制点样式 */
-  protected abstract getHandlePointStyle(): PointStyleType | undefined;
 
   /** 获取绘制函数 */
   abstract getDraw():

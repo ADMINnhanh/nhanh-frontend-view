@@ -195,13 +195,13 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
           this.endAngle =
             (this.endAngle + (-offsetX / 180) * Math.PI) % (Math.PI * 2);
         } else if (handlePoint == radius) {
+          let v = 0;
           if (this.radiusType == "position") {
-            this.radius += offsetX / 2;
+            v = offsetX / 2;
           } else {
-            this.radius +=
-              this.mainCanvas.getAxisValueByPoint(offsetX, 0).xV / 2;
+            v = this.mainCanvas.getAxisValueByPoint(offsetX, 0).xV / 2;
           }
-          this.updateDynamicRadius();
+          if (this.radius + v > 0) this.radius += v;
         }
       } else moveTheWhole();
     } else moveTheWhole();
@@ -211,8 +211,6 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
   updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.getHandlePointStyle());
-    this.setExtraOffset(this.extraOffset, false);
     this.updateExtraScope();
   }
 
@@ -279,7 +277,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
     return style;
   }
-  getHandlePointStyle() {
+  get handlePointStyle() {
     return this.setOverlayStyles().point;
   }
 
@@ -414,6 +412,21 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     this.updateValueScope();
   }
 
+  /** 绘制从中心点到半径控制点的虚线 */
+  private drawCenterToRadiusLine(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    stroke: BaseLineStyle
+  ) {
+    this.setBaseLineStyle(ctx, { ...stroke, dash: true });
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    const radiusPoint = this.handlePoints.radius!.dynamicPosition!;
+    ctx.lineTo(radiusPoint[0], radiusPoint[1]);
+    ctx.stroke();
+  }
+
   draw(ctx: CanvasRenderingContext2D) {
     const {
       dynamicPosition,
@@ -444,6 +457,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     this.isShowHandlePoint = this.isClick && this.isHandlePointsVisible;
 
     if (this.isShowHandlePoint) {
+      this.drawCenterToRadiusLine(ctx, x, y, style.stroke);
+
       Object.values(this.handlePoints).forEach((point) => {
         if (point) {
           point.internalUpdate({ style: style.point });
@@ -453,19 +468,12 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, mainCanvas } = this;
-    if (!mainCanvas) return;
-
-    const isShow = this.shouldRender();
-    const prevDynamicStatus = !!dynamicPosition;
-
-    if (isShow && prevDynamicStatus) {
-      if (!this.isWithinRange()) return;
-
+    if (this.isNeedRender) {
       if (this.isRecalculate) {
+        const { position, mainCanvas } = this;
         this.updateDynamicRadius();
         this.internalUpdate({
-          dynamicPosition: mainCanvas.transformPosition([position!])[0],
+          dynamicPosition: mainCanvas!.transformPosition([position!])[0],
         });
         this.updateHandlePoints();
       }
@@ -491,12 +499,12 @@ function GetArcPoints(
   endAngle: number
 ): [[number, number], [number, number]] {
   // 计算起点坐标并保留两位小数
-  const startX = parseFloat((x + radius * Math.cos(startAngle)).toFixed(2));
-  const startY = parseFloat((y + radius * Math.sin(startAngle)).toFixed(2));
+  const startX = x + radius * Math.cos(startAngle);
+  const startY = y + radius * Math.sin(startAngle);
 
   // 计算终点坐标并保留两位小数
-  const endX = parseFloat((x + radius * Math.cos(endAngle)).toFixed(2));
-  const endY = parseFloat((y + radius * Math.sin(endAngle)).toFixed(2));
+  const endX = x + radius * Math.cos(endAngle);
+  const endY = y + radius * Math.sin(endAngle);
 
   return [
     [startX, startY],

@@ -163,7 +163,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     return style;
   }
-  getHandlePointStyle() {
+  get handlePointStyle() {
     return undefined;
   }
 
@@ -196,17 +196,11 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     );
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, mainCanvas } = this;
-    if (!mainCanvas) return;
-
-    const isShow = this.shouldRender();
-
-    if (isShow && !!dynamicPosition) {
-      if (!this.isWithinRange()) return;
-
+    if (this.isNeedRender) {
       if (this.isRecalculate) {
+        const { position, mainCanvas } = this;
         this.internalUpdate({
-          dynamicPosition: mainCanvas.transformPosition([position!])[0],
+          dynamicPosition: mainCanvas!.transformPosition([position!])[0],
         });
       }
 

@@ -45,8 +45,6 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
   updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.getHandlePointStyle());
-    this.setExtraOffset(this.extraOffset, false);
   }
 
   isPointInPath(x: number, y: number) {
@@ -164,7 +162,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     }
     return style;
   }
-  getHandlePointStyle() {
+  get handlePointStyle() {
     return this.setOverlayStyles().point;
   }
 
@@ -231,17 +229,11 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   }
 
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, mainCanvas } = this;
-    if (!mainCanvas) return;
-
-    const isShow = this.shouldRender();
-    const prevDynamicStatus = !!dynamicPosition;
-
-    if (isShow && prevDynamicStatus) {
-      if (!this.isWithinRange()) return;
+    if (this.isNeedRender) {
+      const { mainCanvas, position } = this;
 
       if (this.isRecalculate) {
-        const dynamicPosition = mainCanvas.transformPosition(position!);
+        const dynamicPosition = mainCanvas!.transformPosition(position!);
         this.internalUpdate({ dynamicPosition });
         this.handlePoints.forEach((point, index) => {
           point.internalUpdate({

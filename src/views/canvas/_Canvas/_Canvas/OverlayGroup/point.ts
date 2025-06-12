@@ -22,8 +22,6 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
   updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.getHandlePointStyle());
-    this.setExtraOffset(this.extraOffset, false);
   }
 
   defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
@@ -204,6 +202,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     const { width, stroke, fill } = style;
 
     if (ctx) {
+      ctx.setLineDash([]);
       const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
       ctx.lineWidth = width - lineWidthOffset;
       ctx.strokeStyle = stroke;
@@ -212,7 +211,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     return { ...style };
   }
-  getHandlePointStyle() {
+  get handlePointStyle() {
     return this.setOverlayStyles();
   }
   draw(ctx: CanvasRenderingContext2D) {
@@ -236,18 +235,12 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     if (width != lineWidthOffset) ctx.stroke(this.path);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, mainCanvas } = this;
-    if (!mainCanvas) return;
-
-    const isShow = this.shouldRender();
-    const prevDynamicStatus = !!dynamicPosition;
-
-    if (isShow && prevDynamicStatus) {
-      if (!this.isWithinRange()) return;
+    if (this.isNeedRender) {
+      const { mainCanvas, position } = this;
 
       if (this.isRecalculate) {
         this.internalUpdate({
-          dynamicPosition: mainCanvas.transformPosition([position!])[0],
+          dynamicPosition: mainCanvas!.transformPosition([position!])[0],
         });
       }
       return [this.draw, this];

@@ -40,8 +40,6 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
   updateValueScope() {
     this.initValueScope();
-    this.calculatePointRadiusValue(this.getHandlePointStyle());
-    this.setExtraOffset(this.extraOffset, false);
   }
 
   isPointInPath(x: number, y: number) {
@@ -137,7 +135,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     return style;
   }
-  getHandlePointStyle() {
+  get handlePointStyle() {
     return this.setOverlayStyles().point;
   }
   /** 绘制线段 */
@@ -233,17 +231,11 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     this.drawLine(ctx, [extendedStart, extendedEnd]);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
-    const { dynamicPosition, position, isInfinite, mainCanvas } = this;
-    if (!mainCanvas) return;
-
-    const isShow = this.shouldRender();
-    const prevDynamicStatus = !!dynamicPosition;
-
-    if (isShow && prevDynamicStatus) {
-      if (!isInfinite && !this.isWithinRange()) return;
+    if (this.isNeedRender) {
+      const { mainCanvas, position, isInfinite } = this;
 
       if (this.isRecalculate) {
-        const dynamicPosition = mainCanvas.transformPosition(position!);
+        const dynamicPosition = mainCanvas!.transformPosition(position!);
         this.internalUpdate({ dynamicPosition });
         this.handlePoints.forEach((point, index) => {
           point.internalUpdate({
