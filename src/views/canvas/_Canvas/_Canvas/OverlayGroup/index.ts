@@ -33,10 +33,9 @@ export default class OverlayGroup extends EventController {
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {
-          if (needForceExecute) {
-            this.isRecalculate = true;
-            notifyReload();
-          } else if (this.shouldRender() && this.overlays.size) {
+          if (needForceExecute) this.isRecalculate = true;
+          if (this.mainCanvas?.redrawInNextRenderFrame) return;
+          if (needForceExecute || (this.shouldRender() && this.overlays.size)) {
             notifyReload();
           }
         }

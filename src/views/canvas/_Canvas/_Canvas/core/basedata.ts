@@ -79,8 +79,14 @@ export default class BaseData extends EventController {
   cycle = 10;
   /** 滚轮滚动的值 */
   delta = 0.02;
+  private _redrawInNextRenderFrame = false;
   /** 是否在当前渲染帧进行重绘 */
-  protected redrawInNextRenderFrame = false;
+  get redrawInNextRenderFrame() {
+    return this._redrawInNextRenderFrame;
+  }
+  protected set redrawInNextRenderFrame(value: boolean) {
+    this._redrawInNextRenderFrame = value;
+  }
   /** 是否正在自动调整 */
   protected isAuto = false;
   /** 是否正在绘制 */

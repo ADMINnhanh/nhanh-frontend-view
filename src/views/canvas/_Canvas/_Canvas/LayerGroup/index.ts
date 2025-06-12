@@ -51,10 +51,9 @@ export default class LayerGroup extends EventController {
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute) => {
-          if (needForceExecute) {
-            this.isRecalculate = true;
-            notifyReload();
-          } else if (this.shouldRender() && this.layers.size) {
+          if (needForceExecute) this.isRecalculate = true;
+          if (this.mainCanvas?.redrawInNextRenderFrame) return;
+          if (needForceExecute || (this.shouldRender() && this.layers.size)) {
             notifyReload();
           }
         }

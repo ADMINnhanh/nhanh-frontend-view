@@ -137,7 +137,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     ].forEach((key) => {
       if (key in option) {
         /** @ts-ignore */
-        this[key] = option[key];
+        this["_" + key] = option[key];
       }
     });
 

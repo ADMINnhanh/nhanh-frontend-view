@@ -153,11 +153,10 @@ export default abstract class Overlay<
   setNotifyReload(notifyReload?: () => void) {
     this.notifyReload = notifyReload
       ? (needForceExecute?: boolean) => {
-          if (!this.isWithinRange()) return;
-          if (needForceExecute) {
-            this.isRecalculate = true;
-            notifyReload();
-          } else if (this.shouldRender()) {
+          if (needForceExecute) this.isRecalculate = true;
+          if (this.mainCanvas?.redrawInNextRenderFrame || !this.isWithinRange())
+            return;
+          if (needForceExecute || this.shouldRender()) {
             notifyReload();
           }
         }
