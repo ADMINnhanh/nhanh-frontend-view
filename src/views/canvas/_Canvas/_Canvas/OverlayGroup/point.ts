@@ -147,7 +147,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     return false;
   }
 
-  updateBaseData() {
+  protected updateBaseData() {
     if (!this.mainCanvas) return;
     let { value, position } = this;
     const [isValue, isPosition] = [

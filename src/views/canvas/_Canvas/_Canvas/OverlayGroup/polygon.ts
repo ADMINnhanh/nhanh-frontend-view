@@ -83,7 +83,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   }
 
   /** 更新基础数据 */
-  updateBaseData() {
+  protected updateBaseData() {
     if (!this.mainCanvas) return;
     let { value, position, isRect } = this;
 

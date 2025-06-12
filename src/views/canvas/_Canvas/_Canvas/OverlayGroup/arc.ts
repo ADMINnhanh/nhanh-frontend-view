@@ -369,7 +369,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       }
     }
   }
-  updateBaseData() {
+  protected updateBaseData() {
     if (!this.mainCanvas) return;
     let { value, position } = this;
     const [isValue, isPosition] = [

@@ -349,7 +349,7 @@ export default abstract class Overlay<
   }
 
   /** 更新基础数据 */
-  abstract updateBaseData(): void;
+  protected abstract updateBaseData(): void;
   /** 判断当前路径中是否包含指定点 */
   abstract isPointInPath(x: number, y: number): boolean;
   /** 检测某点是否在路径的描边所在的区域内 */

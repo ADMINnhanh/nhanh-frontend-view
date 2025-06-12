@@ -91,7 +91,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     return false;
   }
 
-  updateBaseData() {
+  protected updateBaseData() {
     if (!this.mainCanvas) return;
     if (!this.text || this.text.length == 0)
       return this.internalUpdate({ dynamicPosition: undefined });

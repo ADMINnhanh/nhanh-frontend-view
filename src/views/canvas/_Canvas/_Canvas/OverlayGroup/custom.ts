@@ -30,7 +30,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     return false;
   }
 
-  updateBaseData() {
+  protected updateBaseData() {
     if (!this.mainCanvas) return;
 
     this.internalUpdate({

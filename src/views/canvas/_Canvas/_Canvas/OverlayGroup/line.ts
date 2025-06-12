@@ -76,7 +76,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     return isLine || isPoint;
   }
 
-  updateBaseData() {
+  protected updateBaseData() {
     if (!this.mainCanvas) return;
 
     let { value, position } = this;
