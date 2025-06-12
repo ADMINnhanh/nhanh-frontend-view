@@ -20,63 +20,6 @@ type ConstructorOption<T> = ConstructorParameters<
   canCreateOrDeleteHandlePoint?: boolean;
 };
 
-/**
- * 查找点击位置应插入的下标
- * @param clickPosition 点击位置
- * @param controlPoints 线段控制点数组
- * @returns 应插入的下标
- */
-function findInsertIndex(
-  clickPosition: PointLocation,
-  controlPoints: PointLocation[],
-  threshold: number = 10 // 可配置的阈值
-): number {
-  if (controlPoints.length === 0) return 0;
-  if (controlPoints.length === 1) return 1;
-
-  let minDistance = Infinity;
-  let insertIndex = -1;
-
-  for (let i = 0; i < controlPoints.length - 1; i++) {
-    const distance = _PointToLineDistance(
-      clickPosition,
-      controlPoints[i],
-      controlPoints[i + 1]
-    );
-
-    // 如果找到足够近的点，可以提前返回
-    if (distance < threshold) {
-      return i + 1;
-    }
-
-    if (distance < minDistance) {
-      minDistance = distance;
-      insertIndex = i + 1;
-    }
-  }
-
-  return insertIndex;
-}
-
-/**
- * 计算两个点的中点坐标
- * 该函数接收两对坐标（起点和终点），并计算它们的中点坐标
- * 主要用途是在图形学或游戏中确定两个位置之间的中间位置
- *
- * @param value1 - 第一个点的坐标，格式为 [x1, y1]
- * @param value2 - 第二个点的坐标，格式为 [x2, y2]
- * @returns 返回一个元组，包含中点的 x 和 y 坐标
- */
-function getMidpoint(
-  value1: [number, number],
-  value2: [number, number]
-): [number, number] {
-  // 调用 _GetMidpoint 函数计算中点，并将结果解构为 x 和 y
-  const { x, y } = _GetMidpoint(...value1, ...value2);
-  // 返回中点坐标作为常量元组，确保返回值类型不会被意外修改
-  return [x, y];
-}
-
 export default abstract class GeometricBoundary<T> extends Overlay<
   T,
   PointLocation[]
@@ -85,7 +28,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   protected handlePoints: Point[] = [];
 
   /** 是否可显示控制点 */
-  private _isHandlePointsVisible = false;
+  private _isHandlePointsVisible = true;
   /** 是否可显示控制点 */
   get isHandlePointsVisible() {
     return this._isHandlePointsVisible;
@@ -114,13 +57,11 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
     super(option);
 
-    const {
-      isHandlePointsVisible = true,
-      canCreateOrDeleteHandlePoint = true,
-    } = option;
-    Object.assign(this, {
-      isHandlePointsVisible,
-      canCreateOrDeleteHandlePoint,
+    ["isHandlePointsVisible", "canCreateOrDeleteHandlePoint"].forEach((key) => {
+      if (key in option) {
+        /** @ts-ignore */
+        this[key] = option[key];
+      }
     });
 
     this.addEventListener("click", this.defaultClick);
@@ -316,15 +257,72 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       const point =
         this.handlePoints[index] ||
         new Point({
+          mainCanvas: this.mainCanvas,
           isDraggable: true,
           value: value![index],
           position: position![index],
           dynamicPosition: dynamicPosition![index],
-          mainCanvas: this.mainCanvas,
           notifyReload: () => this.notifyReload?.(),
         });
       if (!this.handlePoints[index]) this.handlePoints.push(point);
     });
     this.handlePoints.length = value!.length;
   }
+}
+
+/**
+ * 查找点击位置应插入的下标
+ * @param clickPosition 点击位置
+ * @param controlPoints 线段控制点数组
+ * @returns 应插入的下标
+ */
+function findInsertIndex(
+  clickPosition: PointLocation,
+  controlPoints: PointLocation[],
+  threshold: number = 10 // 可配置的阈值
+): number {
+  if (controlPoints.length === 0) return 0;
+  if (controlPoints.length === 1) return 1;
+
+  let minDistance = Infinity;
+  let insertIndex = -1;
+
+  for (let i = 0; i < controlPoints.length - 1; i++) {
+    const distance = _PointToLineDistance(
+      clickPosition,
+      controlPoints[i],
+      controlPoints[i + 1]
+    );
+
+    // 如果找到足够近的点，可以提前返回
+    if (distance < threshold) {
+      return i + 1;
+    }
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      insertIndex = i + 1;
+    }
+  }
+
+  return insertIndex;
+}
+
+/**
+ * 计算两个点的中点坐标
+ * 该函数接收两对坐标（起点和终点），并计算它们的中点坐标
+ * 主要用途是在图形学或游戏中确定两个位置之间的中间位置
+ *
+ * @param value1 - 第一个点的坐标，格式为 [x1, y1]
+ * @param value2 - 第二个点的坐标，格式为 [x2, y2]
+ * @returns 返回一个元组，包含中点的 x 和 y 坐标
+ */
+function getMidpoint(
+  value1: [number, number],
+  value2: [number, number]
+): [number, number] {
+  // 调用 _GetMidpoint 函数计算中点，并将结果解构为 x 和 y
+  const { x, y } = _GetMidpoint(...value1, ...value2);
+  // 返回中点坐标作为常量元组，确保返回值类型不会被意外修改
+  return [x, y];
 }
