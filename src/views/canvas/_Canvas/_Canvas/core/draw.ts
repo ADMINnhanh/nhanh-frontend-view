@@ -16,7 +16,7 @@ export default class Draw extends Style {
   /** 监听元素大小 */
   private resizeObserver?: ResizeObserver;
   /** 本次绘制的覆盖物 */
-  protected currentDrawOverlays: OverlayType[] = [];
+  currentDrawOverlays: OverlayType[] = [];
 
   /** 计算坐标所需依赖 */
   private rely = "";
