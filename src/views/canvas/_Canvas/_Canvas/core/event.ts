@@ -313,12 +313,23 @@ export default class Event extends Draw {
 
     this.notifyHover(true, event);
   }
+  /** 最后的光标样式 */
+  private lastCursorStyle?: string;
   /** 更新 hover 状态 */
   private updateHoverState(
     hoverOverlay: OverlayType | undefined,
     event: MouseEvent
   ) {
-    if (this.lastHoverOverlay === hoverOverlay) return;
+    if (this.lastHoverOverlay === hoverOverlay) {
+      const cursorStyle = hoverOverlay?.cursorStyle;
+      if (cursorStyle !== this.lastCursorStyle) {
+        this.lastCursorStyle &&
+          this.canvas.classList.remove(this.lastCursorStyle);
+        cursorStyle && this.canvas.classList.add(cursorStyle);
+        this.lastCursorStyle = cursorStyle;
+      }
+      return;
+    }
 
     const isSharedHover =
       this.lastHoverOverlay &&
@@ -336,21 +347,16 @@ export default class Event extends Draw {
   private clearHoverState(event: MouseEvent) {
     if (!this.lastHoverOverlay) return;
 
-    this.canvas.classList.remove(this.getHoverClass(this.lastHoverOverlay));
     this.lastHoverOverlay.notifyHover(false, event);
+    this.canvas.classList.remove(this.lastHoverOverlay.cursorStyle);
   }
   /** 应用新的 hover 状态 */
   private applyHoverState(overlay: OverlayType | undefined, event: MouseEvent) {
     if (!overlay) return;
 
-    this.canvas.classList.add(this.getHoverClass(overlay));
     overlay.notifyHover(true, event);
-  }
-  /** 获取 hover 的 CSS class */
-  private getHoverClass(overlay: OverlayType): string {
-    return overlay?.isDraggable
-      ? "_nhanh_canvas_hover_overlay_draggable"
-      : "_nhanh_canvas_hover_overlay";
+    this.lastCursorStyle = overlay.cursorStyle;
+    this.canvas.classList.add(this.lastCursorStyle);
   }
 
   private oldClientX: number[] = [];

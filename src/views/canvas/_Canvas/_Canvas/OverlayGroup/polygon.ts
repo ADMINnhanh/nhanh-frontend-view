@@ -125,15 +125,9 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
     const dynamicPosition = this.mainCanvas.transformPosition(position!);
 
-    this.internalUpdate({
-      value,
-      position,
-      dynamicPosition,
-    });
+    this.internalUpdate({ value, position, dynamicPosition });
 
     this.updateHandlePoints();
-
-    this.updateValueScope();
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
@@ -193,7 +187,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.internalUpdate({ style: style.point });
-        point.draw(ctx);
+        point.getDraw()?.[0].call(point, ctx);
       });
   }
   /** 绘制多边形 */
@@ -223,7 +217,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.internalUpdate({ style: style.point });
-        point.draw(ctx);
+        point.getDraw()?.[0].call(point, ctx);
       });
   }
 
@@ -235,9 +229,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
         const dynamicPosition = mainCanvas!.transformPosition(position!);
         this.internalUpdate({ dynamicPosition });
         this.handlePoints.forEach((point, index) => {
-          point.internalUpdate({
-            dynamicPosition: dynamicPosition![index],
-          });
+          point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
         });
       }
 

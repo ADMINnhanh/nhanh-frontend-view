@@ -47,8 +47,6 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
     }
 
     this.updateDataProperties(value, position);
-
-    this.updateValueScope();
   }
   private convertValuesToPositions(values: any[]): [number, number][] {
     const positions: [number, number][] = [];

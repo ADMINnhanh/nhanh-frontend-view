@@ -57,7 +57,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       ],
     });
 
-    this.updateValueScope();
     this.notifyReload?.();
   };
 
@@ -121,12 +120,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
 
-    this.internalUpdate({
-      value,
-      position,
-      dynamicPosition,
-    });
-
     const ctx = this.mainCanvas.ctx;
     this.setOverlayStyles(ctx);
     const textMetrics = ctx.measureText(this.text);
@@ -135,7 +128,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       y: textMetrics.actualBoundingBoxAscent / 2,
     };
 
-    this.updateValueScope();
+    this.internalUpdate({ value, position, dynamicPosition });
   }
 
   /** 设置样式 */

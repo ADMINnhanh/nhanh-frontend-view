@@ -106,15 +106,9 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     const dynamicPosition = this.mainCanvas.transformPosition(position!);
 
-    this.internalUpdate({
-      value,
-      position,
-      dynamicPosition,
-    });
+    this.internalUpdate({ value, position, dynamicPosition });
 
     this.updateHandlePoints();
-
-    this.updateValueScope();
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
@@ -165,7 +159,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     if (this.isShowHandlePoint)
       this.handlePoints.forEach((point) => {
         point.style = style.point;
-        point.draw(ctx);
+        point.getDraw()?.[0].call(point, ctx);
       });
   }
   /** 绘制无限延伸线段 */
@@ -237,9 +231,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
         const dynamicPosition = mainCanvas!.transformPosition(position!);
         this.internalUpdate({ dynamicPosition });
         this.handlePoints.forEach((point, index) => {
-          point.internalUpdate({
-            dynamicPosition: dynamicPosition![index],
-          });
+          point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
         });
       }
       if (isInfinite) return [this.drawisInfiniteStraightLine, this];

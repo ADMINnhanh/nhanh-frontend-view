@@ -25,3 +25,11 @@
     cursor: move !important;
   }
 }
+
+._nhanh_canvas_hover_overlay_draggable_ew {
+  cursor: pointer !important;
+  &:active {
+    cursor: e-resize !important; /* 适用于不支持 ew-resize 的旧浏览器 */
+    cursor: ew-resize !important; /* 现代浏览器优先使用这个更合适的样式 */
+  }
+}

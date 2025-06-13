@@ -177,8 +177,11 @@ export default class Draw extends Style {
 
   /** 根据坐标查找覆盖物 */
   protected findOverlayByPoint(x: number, y: number) {
-    return this.currentDrawOverlays.find((overlay) =>
-      overlay.isPointInAnywhere(x, y)
+    return (
+      [...this.currentDrawOverlays]
+        /** 优先触发处于  isClick 状态的覆盖物 */
+        .sort((a, b) => (a.isClick ? 0 : 1) - (b.isClick ? 0 : 1))
+        .find((overlay) => overlay.isPointInAnywhere(x, y))
     );
   }
 

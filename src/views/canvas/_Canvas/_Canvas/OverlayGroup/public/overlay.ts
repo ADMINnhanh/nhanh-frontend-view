@@ -129,20 +129,35 @@ export default abstract class Overlay<
   }
 
   /** 请勿在实体对象中调用此方法，此方法仅用于类内部无副作用更新 （请勿使用！） */
-  internalUpdate(option: {
-    position?: V;
-    value?: V;
-    dynamicPosition?: V;
-    zIndex?: number;
-    style?: DeepPartial<T> | string;
-  }) {
+  internalUpdate(
+    option: {
+      position?: V;
+      value?: V;
+      dynamicPosition?: V;
+      zIndex?: number;
+      style?: DeepPartial<T> | string;
+    },
+    updateValueScope?: boolean
+  ) {
     option = _Clone(option) as any;
     for (const key in option) {
       if (Object.prototype.hasOwnProperty.call(option, key)) {
         this[("_" + key) as never] = option[key as never];
+
+        if (updateValueScope === undefined)
+          updateValueScope = ["value", "position"].includes(key);
       }
     }
+
+    updateValueScope && this.updateValueScope();
   }
+
+  /** 鼠标移入时是否重新绘制 */
+  redrawOnIsHoverChange = false;
+  /** 默认 hover  事件 */
+  defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {
+    this.redrawOnIsHoverChange && this.notifyReload?.();
+  };
 
   setMainCanvas(mainCanvas?: _Canvas) {
     super.setMainCanvas(mainCanvas);
@@ -325,40 +340,6 @@ export default abstract class Overlay<
     this.lastPointRadius = { radius, value: radiusValue };
   }
 
-  /** 鼠标移入时是否重新绘制 */
-  redrawOnIsHoverChange = false;
-  /** 默认 hover  事件 */
-  defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {
-    this.redrawOnIsHoverChange && this.notifyReload?.();
-  };
-  /** 计算偏移量 */
-  protected calculateOffset(offsetX: number, offsetY: number) {
-    const { percentage, axisConfig } = this.mainCanvas!;
-    const base = axisConfig.count / axisConfig.min / percentage;
-    const x = {
-      value: offsetX * base * axisConfig.x,
-      position: (offsetX / percentage) * axisConfig.x,
-      dynamicPosition: offsetX * axisConfig.x,
-    };
-    const y = {
-      value: offsetY * base * axisConfig.y,
-      position: (offsetY / percentage) * axisConfig.y,
-      dynamicPosition: offsetY * axisConfig.y,
-    };
-    return { x, y };
-  }
-
-  /** 更新基础数据 */
-  protected abstract updateBaseData(): void;
-  /** 判断当前路径中是否包含指定点 */
-  abstract isPointInPath(x: number, y: number): boolean;
-  /** 检测某点是否在路径的描边所在的区域内 */
-  abstract isPointInStroke(x: number, y: number): boolean;
-  /** 检测某点是否在当前覆盖物中 */
-  isPointInAnywhere(x: number, y: number) {
-    return this.isPointInPath(x, y) || this.isPointInStroke(x, y);
-  }
-
   /** 判断是否在可视范围内 */
   protected get isWithinRange() {
     const { mainCanvas, valueScope, extraOffset } = this;
@@ -390,6 +371,34 @@ export default abstract class Overlay<
     return false;
   }
 
+  /** 计算偏移量 */
+  protected calculateOffset(offsetX: number, offsetY: number) {
+    const { percentage, axisConfig } = this.mainCanvas!;
+    const base = axisConfig.count / axisConfig.min / percentage;
+    const x = {
+      value: offsetX * base * axisConfig.x,
+      position: (offsetX / percentage) * axisConfig.x,
+      dynamicPosition: offsetX * axisConfig.x,
+    };
+    const y = {
+      value: offsetY * base * axisConfig.y,
+      position: (offsetY / percentage) * axisConfig.y,
+      dynamicPosition: offsetY * axisConfig.y,
+    };
+    return { x, y };
+  }
+
+  /** 更新基础数据 */
+  protected abstract updateBaseData(): void;
+  /** 判断当前路径中是否包含指定点 */
+  abstract isPointInPath(x: number, y: number): boolean;
+  /** 检测某点是否在路径的描边所在的区域内 */
+  abstract isPointInStroke(x: number, y: number): boolean;
+  /** 检测某点是否在当前覆盖物中 */
+  isPointInAnywhere(x: number, y: number) {
+    return this.isPointInPath(x, y) || this.isPointInStroke(x, y);
+  }
+
   /** 设置透明度 */
   setGlobalAlpha(ctx: CanvasRenderingContext2D) {
     const opacity = this.opacity ?? this.parent?.opacity;
@@ -416,6 +425,13 @@ export default abstract class Overlay<
 
   /** 设置画布样式 */
   protected abstract setOverlayStyles(ctx?: CanvasRenderingContext2D): T;
+
+  /** 光标样式 */
+  get cursorStyle(): string {
+    return this.isDraggable
+      ? "_nhanh_canvas_hover_overlay_draggable"
+      : "_nhanh_canvas_hover_overlay";
+  }
 
   /** 获取绘制函数 */
   abstract getDraw():

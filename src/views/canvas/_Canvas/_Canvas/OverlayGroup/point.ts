@@ -40,7 +40,6 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       ],
     });
 
-    this.updateValueScope();
     this.notifyReload?.();
   };
 
@@ -156,9 +155,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     ];
 
     if (!isValue && !isPosition) {
-      return this.internalUpdate({
-        dynamicPosition: undefined,
-      });
+      return this.internalUpdate({ dynamicPosition: undefined });
     } else if (isValue) {
       const loc = this.mainCanvas.getAxisPointByValue(
         value![0],
@@ -177,13 +174,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
 
-    this.internalUpdate({
-      value,
-      position,
-      dynamicPosition,
-    });
-
-    this.updateValueScope();
+    this.internalUpdate({ value, position, dynamicPosition });
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
@@ -216,6 +207,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
   draw(ctx: CanvasRenderingContext2D) {
     const { dynamicPosition, mainCanvas, extraOffset } = this;
+
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
 

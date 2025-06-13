@@ -8,14 +8,14 @@ const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 const arc_value = new _Canvas.Arc({
-  value: [-4, 0],
+  value: [-10, 0],
   radius: 2,
   radiusType: "value",
   startAngle: 0.5,
   endAngle: Math.PI - 0.5,
   isDraggable: true,
 });
-const arc_value2 = new _Canvas.Arc({
+const arc_value_counterclockwise = new _Canvas.Arc({
   value: [0, 0],
   radius: 2,
   radiusType: "value",
@@ -34,7 +34,7 @@ const arc_position = new _Canvas.Arc({
   isClosed: true,
   isClosedThroughCenter: true,
 });
-const arc_arr = [arc_value, arc_value2, arc_position];
+const arc_arr = [arc_value, arc_value_counterclockwise, arc_position];
 
 onMounted(() => {
   myCanvas.value = new _Canvas({ id });

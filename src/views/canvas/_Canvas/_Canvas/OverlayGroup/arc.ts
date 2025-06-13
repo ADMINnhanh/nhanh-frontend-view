@@ -235,8 +235,6 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         }
       } else moveTheWhole();
     } else moveTheWhole();
-
-    this.updateValueScope();
   };
 
   protected updateValueScope() {
@@ -282,6 +280,12 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     return isLine || isPoint;
   }
 
+  get cursorStyle() {
+    const point = this.handlePointsArr.some((point) => point?.isHover);
+    return this.isDraggable
+      ? "_nhanh_canvas_hover_overlay_draggable" + (point ? "_ew" : "")
+      : "_nhanh_canvas_hover_overlay";
+  }
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const isHover = this.isHover;
     const mainCanvas = this.mainCanvas!;
@@ -311,11 +315,16 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     return this.setOverlayStyles().point;
   }
 
-  handlePoints = {
+  /** 控制点 */
+  private handlePoints = {
     start: undefined as Point | undefined,
     end: undefined as Point | undefined,
     radius: undefined as Point | undefined,
   };
+  /** 控制点数组 */
+  private get handlePointsArr() {
+    return Object.values(this.handlePoints).filter(Boolean) as Point[];
+  }
   /** 更新控制点 */
   private updateHandlePoints() {
     let {
@@ -408,9 +417,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     ];
 
     if (!isValue && !isPosition) {
-      return this.internalUpdate({
-        dynamicPosition: undefined,
-      });
+      return this.internalUpdate({ dynamicPosition: undefined });
     } else if (isValue) {
       const loc = this.mainCanvas.getAxisPointByValue(
         value![0],
@@ -429,17 +436,10 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
 
-    this.internalUpdate({
-      value,
-      position,
-      dynamicPosition,
-    });
+    this.internalUpdate({ value, position, dynamicPosition });
 
     this.updateDynamicRadius();
-
     this.updateHandlePoints();
-
-    this.updateValueScope();
   }
 
   /** 绘制从中心点到半径控制点的虚线 */
@@ -495,11 +495,9 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     if (this.isShowHandlePoint) {
       this.drawCenterToRadiusLine(ctx, x, y, style.stroke);
 
-      Object.values(this.handlePoints).forEach((point) => {
-        if (point) {
-          point.internalUpdate({ style: style.point });
-          point.draw(ctx);
-        }
+      this.handlePointsArr.forEach((point) => {
+        point.internalUpdate({ style: style.point });
+        point.getDraw()?.[0].call(point, ctx);
       });
     }
   }
@@ -508,10 +506,23 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       if (this.isRecalculate) {
         const { position, mainCanvas } = this;
         this.updateDynamicRadius();
-        this.internalUpdate({
-          dynamicPosition: mainCanvas!.transformPosition([position!])[0],
-        });
-        this.updateHandlePoints();
+
+        const dynamicPosition = [...this.dynamicPosition!];
+        const newDynamicPosition = mainCanvas!.transformPosition([
+          position!,
+        ])[0];
+        if (mainCanvas?.isScaleUpdated) {
+          this.updateHandlePoints();
+        } else {
+          this.handlePointsArr.forEach((point) => {
+            const offsetx = newDynamicPosition[0] - dynamicPosition[0];
+            const offsety = newDynamicPosition[1] - dynamicPosition[1];
+            const x = point.dynamicPosition![0] + offsetx;
+            const y = point.dynamicPosition![1] + offsety;
+            point.internalUpdate({ dynamicPosition: [x, y] });
+          });
+        }
+        this.internalUpdate({ dynamicPosition: newDynamicPosition });
       }
       return [this.draw, this];
     }
