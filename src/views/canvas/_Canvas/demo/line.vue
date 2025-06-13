@@ -47,5 +47,3 @@ defineExpose({ myCanvas });
   <UpdateData :overlays="line_arr" />
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
-
-<style scoped lang="less"></style>

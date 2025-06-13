@@ -30,5 +30,3 @@ defineExpose({ myCanvas });
   <UpdateData :overlays="point_arr" />
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
-
-<style scoped lang="less"></style>

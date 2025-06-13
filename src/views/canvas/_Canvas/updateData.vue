@@ -63,5 +63,3 @@ function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
     <NButton ghost @click="UpdatePosition(-100)"> position - 100 </NButton>
   </NSpace>
 </template>
-
-<style scoped lang="less"></style>

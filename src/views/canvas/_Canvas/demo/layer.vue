@@ -146,5 +146,3 @@ defineExpose({ myCanvas });
   </NP>
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
-
-<style scoped lang="less"></style>
