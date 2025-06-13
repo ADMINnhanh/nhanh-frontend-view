@@ -324,7 +324,7 @@ export default abstract class Overlay<
     const radius = (() => {
       if (uselastFact) return this.lastPointRadius.radius;
       const style = this.handlePointStyle;
-      if (style) return style.radius + style.width / 2;
+      if (style) return style.radius + Math.max(0, style.width / 2);
     })();
     if (radius === undefined) return;
 

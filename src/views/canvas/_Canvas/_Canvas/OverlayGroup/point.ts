@@ -210,6 +210,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
+    // console.log(this.valueScope);
 
     const { radius, width } = this.setOverlayStyles(ctx);
     const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
