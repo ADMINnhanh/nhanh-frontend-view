@@ -9,11 +9,11 @@ const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 const point_value = new _Canvas.Point({
-  value: [1, 1],
+  value: [0, -0.5],
   isDraggable: true,
 });
 const point_position = new _Canvas.Point({
-  position: [-100, -100],
+  position: [0, 25],
   isDraggable: true,
 });
 const point_arr = [point_value, point_position];

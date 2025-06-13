@@ -10,24 +10,24 @@ const id = _GenerateUUID();
 let myCanvas = shallowRef<_Canvas>();
 const polygon_value = new _Canvas.Polygon({
   value: [
-    [1, 1],
+    [0, 2],
     [2, 2],
-    [3, 1],
+    [2, 0],
   ],
   isDraggable: true,
 });
 const polygon_position = new _Canvas.Polygon({
   position: [
-    [-100, 50],
+    [-100, 0],
     [-100, -100],
-    [50, -100],
+    [0, -100],
   ],
   isDraggable: true,
 });
 const polygon_rect = new _Canvas.Polygon({
   value: [
-    [1, -2],
-    [3, 0],
+    [1, -1],
+    [-1, 1],
   ],
   isRect: true,
   isDraggable: true,

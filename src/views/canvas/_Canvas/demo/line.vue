@@ -10,17 +10,17 @@ const id = _GenerateUUID();
 let myCanvas = shallowRef<_Canvas>();
 const line_value = new _Canvas.Line({
   value: [
-    [1, 1],
+    [0, 2],
     [2, 2],
-    [3, 1],
+    [2, 0],
   ],
   isDraggable: true,
 });
 const line_position = new _Canvas.Line({
   position: [
-    [-100, 50],
+    [-100, 0],
     [-100, -100],
-    [50, -100],
+    [0, -100],
   ],
   isDraggable: true,
 });

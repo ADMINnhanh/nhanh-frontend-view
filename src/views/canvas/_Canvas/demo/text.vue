@@ -9,13 +9,13 @@ const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 const text_value = new _Canvas.Text({
-  value: [0, 0],
+  value: [0, -0.5],
   text: "你好 世界",
   style: { color: "#18a058", size: 20 },
   isDraggable: true,
 });
 const text_position = new _Canvas.Text({
-  position: [100, -100],
+  position: [0, 25],
   text: "Hello World",
   style: { color: "#18a058", size: 20 },
   isDraggable: true,

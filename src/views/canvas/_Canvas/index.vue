@@ -10,18 +10,18 @@ const independent: [string, string][] = [
   // ["China%2Findex.vue", "最佳实现 - 中国地图"],
 ];
 const demoName: [string, string][] = [
-  // ["original.vue", "仅需初始化 _Canvas"],
-  // ["center.vue", "中心点"],
-  // ["shortcutKey.vue", "快捷键"],
-  // ["axis.vue", "坐标轴"],
-  // ["text.vue", "文字"],
-  // ["point.vue", "点"],
-  // ["line.vue", "线"],
+  ["original.vue", "仅需初始化 _Canvas"],
+  ["center.vue", "中心点"],
+  ["shortcutKey.vue", "快捷键"],
+  ["axis.vue", "坐标轴"],
+  ["text.vue", "文字"],
+  ["point.vue", "点"],
+  ["line.vue", "线"],
   ["arc.vue", "圆弧"],
-  // ["polygon.vue", "面"],
-  // ["custom.vue", "自定义绘制"],
-  // ["layer.vue", "图层 & 层级"],
-  // ["show.vue", "显示条件"],
+  ["polygon.vue", "面"],
+  ["custom.vue", "自定义绘制"],
+  ["layer.vue", "图层 & 层级"],
+  ["show.vue", "显示条件"],
 ];
 
 type DemoName = (typeof demoName)[number][0];
@@ -51,7 +51,6 @@ const vueFiles = ref<{
   const componentModules = import.meta.glob("./demo/**/*.vue");
   for (const path in codeModules) {
     const name = path.replace("./demo/", "").replace(/\//g, "%2F");
-    // const name = (path.split("/").pop() as string).replace(".vue", "");
     const code = (await codeModules[path]()) as string;
     const component = (await componentModules[path]()) as any;
     vueFiles.value[name as DemoName] = {
