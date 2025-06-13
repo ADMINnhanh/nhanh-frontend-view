@@ -14,6 +14,10 @@ type ConstructorOption = ConstructorParameters<
 >[0] & {
   /** 是否填充 */
   isFill?: boolean;
+  /** 是否闭合 */
+  isClosed?: boolean;
+  /** 闭合时是否经过中心点 */
+  isClosedThroughCenter?: boolean;
   /** 圆弧的半径类型.  默认为 "position" */
   radiusType?: "position" | "value";
   /** 圆弧的半径。必须为正值。 */
@@ -40,6 +44,30 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       this.notifyReload?.();
     }
   }
+
+  protected _isClosed = false;
+  /** 是否闭合 */
+  get isClosed() {
+    return this._isClosed;
+  }
+  set isClosed(isClosed: boolean) {
+    if (this._isClosed != isClosed) {
+      this._isClosed = isClosed;
+      this.notifyReload?.();
+    }
+  }
+  private _isClosedThroughCenter = false;
+  /** 闭合时是否经过中心点 */
+  get isClosedThroughCenter() {
+    return this._isClosedThroughCenter;
+  }
+  set isClosedThroughCenter(isClosedThroughCenter: boolean) {
+    if (this._isClosedThroughCenter != isClosedThroughCenter) {
+      this._isClosedThroughCenter = isClosedThroughCenter;
+      this.notifyReload?.();
+    }
+  }
+
   private _radiusType = "position" as "position" | "value";
   /** 圆弧的半径类型.  默认为 "position" */
   get radiusType() {
@@ -128,6 +156,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     [
       "isFill",
+      "isClosed",
+      "isClosedThroughCenter",
       "radius",
       "radiusType",
       "startAngle",
@@ -197,7 +227,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         } else if (handlePoint == radius) {
           let v = 0;
           if (this.radiusType == "position") {
-            v = offsetX / 2;
+            v = offsetX / 2 / this.mainCanvas.percentage;
           } else {
             v = this.mainCanvas.getAxisValueByPoint(offsetX, 0).xV / 2;
           }
@@ -437,6 +467,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       endAngle,
       counterclockwise,
       isFill,
+      isClosed,
+      isClosedThroughCenter,
     } = this;
     if (!mainCanvas || dynamicRadius <= 0) return;
     this.setGlobalAlpha(ctx);
@@ -450,6 +482,10 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     this.path = new Path2D();
     this.path.arc(x, y, dynamicRadius, startAngle, endAngle, counterclockwise);
+    if (isClosed) {
+      this.path.lineTo(x, y);
+      isClosedThroughCenter && this.path.closePath();
+    }
     ctx.stroke(this.path);
     isFill && ctx.fill(this.path);
 
