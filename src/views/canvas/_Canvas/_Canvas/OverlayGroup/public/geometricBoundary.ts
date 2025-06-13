@@ -229,7 +229,6 @@ export default abstract class GeometricBoundary<T> extends Overlay<
           dynamicPosition: this.dynamicPosition![index],
         });
       });
-      this.notifyReload?.();
       this.lockedCanCreateOrDeleteHandlePoint = true;
     };
     if (this.isHandlePointsVisible) {
@@ -245,6 +244,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       } else moveTheWhole();
     } else moveTheWhole();
 
+    this.notifyReload?.();
     this.updateValueScope();
   };
 
@@ -254,9 +254,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     if (!dynamicPosition) return;
 
     value?.forEach((_, index) => {
-      const point =
-        this.handlePoints[index] ||
-        new Point({
+      if (!this.handlePoints[index]) {
+        const point = new Point({
           mainCanvas: this.mainCanvas,
           isDraggable: true,
           value: value![index],
@@ -264,7 +263,9 @@ export default abstract class GeometricBoundary<T> extends Overlay<
           dynamicPosition: dynamicPosition![index],
           notifyReload: () => this.notifyReload?.(),
         });
-      if (!this.handlePoints[index]) this.handlePoints.push(point);
+        point.internalUpdate({}, true);
+        this.handlePoints.push(point);
+      }
     });
     this.handlePoints.length = value!.length;
   }

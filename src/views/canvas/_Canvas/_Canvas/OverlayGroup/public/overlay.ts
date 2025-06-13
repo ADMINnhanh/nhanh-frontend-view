@@ -352,12 +352,14 @@ export default abstract class Overlay<
       this.calculatePointRadiusValue(true);
     }
 
-    return !(
-      maxMinValue.maxXV < valueScope!.minX ||
-      maxMinValue.minXV > valueScope!.maxX ||
-      maxMinValue.maxYV < valueScope!.minY ||
-      maxMinValue.minYV > valueScope!.maxY
-    );
+    return valueScope
+      ? !(
+          maxMinValue.maxXV < valueScope.minX ||
+          maxMinValue.minXV > valueScope.maxX ||
+          maxMinValue.maxYV < valueScope.minY ||
+          maxMinValue.minYV > valueScope.maxY
+        )
+      : true;
   }
   /** 判断是否需要渲染 */
   protected get isNeedRender() {

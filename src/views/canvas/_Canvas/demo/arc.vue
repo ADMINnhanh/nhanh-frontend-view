@@ -3,12 +3,13 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
+import UpdateData from "../updateData.vue";
 
 const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 const arc_value = new _Canvas.Arc({
-  value: [-10, 0],
+  value: [-5, 0],
   radius: 2,
   radiusType: "value",
   startAngle: 0.5,
@@ -25,7 +26,7 @@ const arc_value_counterclockwise = new _Canvas.Arc({
   counterclockwise: true,
 });
 const arc_position = new _Canvas.Arc({
-  position: [200, 0],
+  position: [250, 0],
   radius: 100,
   startAngle: -0.5,
   endAngle: Math.PI + 0.5,
@@ -45,6 +46,7 @@ defineExpose({ myCanvas });
 </script>
 
 <template>
+  <UpdateData :overlays="arc_arr" />
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 

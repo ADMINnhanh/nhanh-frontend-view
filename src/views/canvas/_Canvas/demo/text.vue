@@ -3,7 +3,7 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NSpace, NSwitch } from "naive-ui";
+import UpdateData from "../updateData.vue";
 
 const id = _GenerateUUID();
 
@@ -22,22 +22,6 @@ const text_position = new _Canvas.Text({
 });
 const text_arr = [text_value, text_position];
 
-function UpdateValue(delta: number) {
-  text_arr.forEach((text) => {
-    const [x, y] = text.value!;
-    text.value = [x + delta, y + delta];
-  });
-}
-function UpdatePosition(delta: number) {
-  text_arr.forEach((text) => {
-    const [x, y] = text.position!;
-    text.position = [x + delta, y + delta];
-  });
-}
-function UpdateDraggable(draggable: boolean) {
-  myCanvas.value!.isDraggable = draggable;
-}
-
 onMounted(() => {
   myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
@@ -47,17 +31,7 @@ defineExpose({ myCanvas });
 </script>
 
 <template>
-  <NSpace style="margin-bottom: 10px">
-    <NSwitch @update-value="UpdateDraggable" :default-value="true">
-      <template #checked> 拖拽 </template>
-      <template #unchecked> 拖拽 </template>
-    </NSwitch>
-    <NButton type="info" ghost @click="UpdateValue(1)"> value + 1 </NButton>
-    <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>
-    <NButton ghost @click="UpdatePosition(100)"> position + 100 </NButton>
-    <NButton ghost @click="UpdatePosition(-100)"> position - 100 </NButton>
-  </NSpace>
-
+  <UpdateData :overlays="text_arr" />
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
-import { onMounted, shallowRef, watch } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NSpace, NSwitch } from "naive-ui";
+import UpdateData from "../updateData.vue";
 
 const id = _GenerateUUID();
 
@@ -34,28 +34,6 @@ const polygon_rect = new _Canvas.Polygon({
 });
 const polygon_arr = [polygon_value, polygon_position, polygon_rect];
 
-function UpdateValue(delta: number) {
-  polygon_arr.forEach((polygon) => {
-    polygon.value = polygon.value!.map(([x, y]) => [x + delta, y + delta]);
-  });
-}
-function UpdatePosition(delta: number) {
-  polygon_arr.forEach((polygon) => {
-    polygon.position = polygon.position!.map(([x, y]) => [
-      x + delta,
-      y + delta,
-    ]);
-  });
-}
-function UpdateDraggable(draggable: boolean) {
-  myCanvas.value!.isDraggable = draggable;
-}
-function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
-  polygon_arr.forEach(
-    (polygon) => (polygon.isHandlePointsVisible = isShowHandlePoint)
-  );
-}
-
 onMounted(() => {
   myCanvas.value = new _Canvas({ id });
   myCanvas.value.setTheme(Settings.value.theme);
@@ -65,21 +43,7 @@ defineExpose({ myCanvas });
 </script>
 
 <template>
-  <NSpace style="margin-bottom: 10px">
-    <NSwitch @update-value="UpdateDraggable" :default-value="true">
-      <template #checked> 拖拽 </template>
-      <template #unchecked> 拖拽 </template>
-    </NSwitch>
-    <NSwitch @update-value="UpdateIsShowHandlePoint" :default-value="true">
-      <template #checked> 显示控制点 </template>
-      <template #unchecked> 显示控制点 </template>
-    </NSwitch>
-    <NButton type="info" ghost @click="UpdateValue(1)"> value + 1 </NButton>
-    <NButton type="info" ghost @click="UpdateValue(-1)"> value - 1 </NButton>
-    <NButton ghost @click="UpdatePosition(100)"> position + 100 </NButton>
-    <NButton ghost @click="UpdatePosition(-100)"> position - 100 </NButton>
-  </NSpace>
-
+  <UpdateData :overlays="polygon_arr" />
   <canvas :id="id" class="my-canvas"></canvas>
 </template>
 
