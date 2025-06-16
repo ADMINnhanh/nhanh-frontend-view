@@ -1,4 +1,9 @@
-import { _CalculateDistance2D, _GetMidpoint } from "nhanh-pure-function";
+import {
+  _AreAllArraysValid,
+  _CalculateDistance2D,
+  _GetMidpoint,
+  _IsSingleArrayValid,
+} from "nhanh-pure-function";
 import type { OverlayType } from "../OverlayGroup";
 import Draw from "./draw";
 import type { EventHandler } from "../public/eventController";
@@ -136,45 +141,68 @@ export default class Event extends Draw {
   }
   /** 键盘按下事件 */
   private keydown(event: KeyboardEvent) {
-    const { mouseInCanvas, offset, delta } = this;
+    const { mouseInCanvas, offset, delta, axisConfig } = this;
     const key = event.key;
-    if (mouseInCanvas) {
-      if (this.isDraggable && !this.isAuto) {
-        const step = this.getStep(key);
 
-        switch (key) {
-          case "ArrowUp":
-            offset.y -= step;
-            break;
-          case "ArrowDown":
-            offset.y += step;
-            break;
-          case "ArrowLeft":
-            offset.x -= step;
-            break;
-          case "ArrowRight":
-            offset.x += step;
-            break;
-          case "+":
-            this.setScale("center", delta);
-            break;
-          case "-":
-            this.setScale("center", -delta);
-            break;
-        }
+    if (!mouseInCanvas || !this.isDraggable || this.isAuto) return;
 
-        /** 是否需要重绘 */
-        const shouldRedraw = [
-          "ArrowUp",
-          "ArrowDown",
-          "ArrowLeft",
-          "ArrowRight",
-          "+",
-          "-",
-        ].includes(key);
+    const step = this.getStep(key);
+    const overlay = this.lastClickedOverlay;
+    const moveOverlay = overlay && this.currentDrawOverlays.includes(overlay);
+    const valueType =
+      moveOverlay &&
+      (_AreAllArraysValid(overlay.value)
+        ? "Matrix"
+        : _IsSingleArrayValid(overlay.value)
+        ? "Single"
+        : false);
 
-        if (shouldRedraw) this.redrawOnce();
+    // 方向键处理逻辑抽象
+    const handleDirection = (dx: number, dy: number) => {
+      if (!valueType) {
+        offset.x += dx * step;
+        offset.y += dy * step;
+        return true;
       }
+
+      const stepPx = this.getAxisValueByPoint(step, 0).xV;
+      const [xStep, yStep] = [stepPx * axisConfig.x, stepPx * axisConfig.y];
+
+      if (valueType === "Single") {
+        const val = overlay!.value as number[];
+        val[0] += dx * xStep;
+        val[1] += dy * yStep;
+      } else {
+        // Matrix
+        (overlay!.value as number[][]).forEach((point) => {
+          point[0] += dx * xStep;
+          point[1] += dy * yStep;
+        });
+      }
+
+      // 触发响应式更新
+      overlay!.value = [...overlay!.value!];
+      return true;
+    };
+
+    // 缩放操作抽象
+    const handleScale = (direction: number) => {
+      this.setScale("center", direction * delta);
+      return true;
+    };
+
+    const actionMap: Record<string, () => boolean> = {
+      ArrowUp: () => handleDirection(0, -1),
+      ArrowDown: () => handleDirection(0, 1),
+      ArrowLeft: () => handleDirection(-1, 0),
+      ArrowRight: () => handleDirection(1, 0),
+      "+": () => handleScale(1),
+      "-": () => handleScale(-1),
+    };
+
+    const actionHandler = actionMap[key];
+    if (actionHandler?.()) {
+      this.redrawOnce();
     }
   }
   /** 键盘松开事件 */
@@ -214,7 +242,7 @@ export default class Event extends Draw {
 
     this.redrawOnce();
   };
-  /** 上一个被点击的覆盖物 */
+  /** 上一个被按下的覆盖物 */
   private lastDownOverlay?: OverlayType;
   /** 鼠标按下 */
   private mousedown(event: MouseEvent) {

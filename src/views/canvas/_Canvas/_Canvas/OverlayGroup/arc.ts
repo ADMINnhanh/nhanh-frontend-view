@@ -339,7 +339,14 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     if (!mainCanvas || !dynamicPosition) return;
 
     const data = this[radiusType]!;
-    const [start, end] = _GetArcPoints(...data, radius, startAngle, endAngle);
+    const [start, end] = _GetArcPoints(
+      ...data,
+      radius,
+      startAngle,
+      endAngle,
+      mainCanvas.axisConfig.x,
+      mainCanvas.axisConfig.y
+    );
 
     const getPoint = (name: string) =>
       new Point({
@@ -536,12 +543,14 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 }
 
 /**
- * 计算圆弧的起点和终点坐标
+ * 计算圆弧的起点和终点坐标（支持坐标轴方向调整）
  * @param x 圆心X坐标
  * @param y 圆心Y坐标
  * @param radius 圆弧半径
  * @param startAngle 起始角度（弧度制，0表示X轴正方向）
  * @param endAngle 结束角度（弧度制）
+ * @param axisX X轴方向（1=正方向向右，-1=正方向向左）
+ * @param axisY Y轴方向（1=正方向向上，-1=正方向向下）
  * @returns [起点坐标, 终点坐标]
  */
 function _GetArcPoints(
@@ -549,15 +558,17 @@ function _GetArcPoints(
   y: number,
   radius: number,
   startAngle: number,
-  endAngle: number
+  endAngle: number,
+  axisX: number = 1,
+  axisY: number = 1
 ): [[number, number], [number, number]] {
-  // 计算起点坐标并保留两位小数
-  const startX = x + radius * Math.cos(startAngle);
-  const startY = y + radius * Math.sin(startAngle);
+  // 计算起点坐标（考虑坐标轴方向）
+  const startX = x + radius * Math.cos(startAngle) * axisX;
+  const startY = y + radius * Math.sin(startAngle) * axisY;
 
-  // 计算终点坐标并保留两位小数
-  const endX = x + radius * Math.cos(endAngle);
-  const endY = y + radius * Math.sin(endAngle);
+  // 计算终点坐标（考虑坐标轴方向）
+  const endX = x + radius * Math.cos(endAngle) * axisX;
+  const endY = y + radius * Math.sin(endAngle) * axisY;
 
   return [
     [startX, startY],
