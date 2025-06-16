@@ -447,14 +447,20 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
-    stroke: BaseLineStyle
+    style: ArcStyleType
   ) {
-    this.setBaseLineStyle(ctx, { ...stroke, dash: true });
+    this.setBaseLineStyle(ctx, { ...style.stroke, dash: true });
     ctx.beginPath();
     ctx.moveTo(x, y);
     const radiusPoint = this.handlePoints.radius!.dynamicPosition!;
     ctx.lineTo(radiusPoint[0], radiusPoint[1]);
     ctx.stroke();
+
+    if (this.isClosed && this.isClosedThroughCenter) return;
+    ctx.fillStyle = ctx.strokeStyle;
+    ctx.beginPath();
+    ctx.arc(x, y, style.point.radius, 0, Math.PI * 2);
+    ctx.fill();
   }
 
   draw(ctx: CanvasRenderingContext2D) {
@@ -493,7 +499,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     this.isShowHandlePoint = this.isClick && this.isHandlePointsVisible;
 
     if (this.isShowHandlePoint) {
-      this.drawCenterToRadiusLine(ctx, x, y, style.stroke);
+      this.drawCenterToRadiusLine(ctx, x, y, style);
 
       this.handlePointsArr.forEach((point) => {
         point.internalUpdate({ style: style.point });
