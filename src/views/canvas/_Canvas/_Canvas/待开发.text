@@ -1,0 +1,8 @@
+// 绘制曲线
+arcTo() 
+
+// 绘制贝塞尔曲线
+bezierCurveTo() 
+
+// 绘制圆弧
+ellipse()
