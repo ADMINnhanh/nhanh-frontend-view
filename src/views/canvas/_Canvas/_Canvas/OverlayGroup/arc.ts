@@ -187,14 +187,12 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   defaultDragg: EventHandler<"dragg"> = (event, mouseEvent) => {
     if (!this.mainCanvas) return;
 
-    const { start, end, radius } = this.handlePoints;
-
     /** 移动整体 */
     const moveTheWhole = () => {
       const { offsetX, offsetY } = event.data;
       const { x, y } = this.calculateOffset(offsetX, offsetY)!;
 
-      const points = [this, start, end, radius] as (Point | Arc)[];
+      const points = (this.handlePointsArr as (Point | Arc)[]).concat(this);
       points.forEach((item) => {
         item.internalUpdate({
           value: [item.value![0] + x.value, item.value![1] + y.value],
@@ -212,9 +210,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     };
     if (this.isHandlePointsVisible) {
       const { start, end, radius } = this.handlePoints;
-      const handlePoint = (
-        [start, end, radius].filter(Boolean) as Point[]
-      ).find((point) => point.isHover);
+      const handlePoint = this.handlePointsArr.find((point) => point.isHover);
 
       if (handlePoint) {
         const offsetX = event.data.offsetX;
@@ -262,11 +258,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     const isPoint = ((allow) => {
       if (!allow) return false;
       let point_hover = false;
-      const { start, end, radius } = this.handlePoints;
-      const handlePoints = (
-        [start, end, radius].filter(Boolean) as Point[]
-      ).sort((a, b) => (a.isHover ? 0 : 1) - (b.isHover ? 0 : 1));
-      handlePoints.forEach((point) => {
+
+      this.handlePointsArr.forEach((point) => {
         if (point_hover) {
           point.isHover && point.notifyHover(false);
         } else {
@@ -323,7 +316,13 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   };
   /** 控制点数组 */
   private get handlePointsArr() {
-    return Object.values(this.handlePoints).filter(Boolean) as Point[];
+    const radiusPoint = this.handlePoints.radius;
+
+    return (Object.values(this.handlePoints).filter(Boolean) as Point[]).sort(
+      (a, b) =>
+        (a.isHover || a == radiusPoint ? 0 : 1) -
+        (b.isHover || b == radiusPoint ? 0 : 1)
+    );
   }
   /** 更新控制点 */
   private updateHandlePoints() {
@@ -342,15 +341,16 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     const data = this[radiusType]!;
     const [start, end] = _GetArcPoints(...data, radius, startAngle, endAngle);
 
-    const getPoint = () =>
+    const getPoint = (name: string) =>
       new Point({
+        name,
         isDraggable: true,
         mainCanvas: this.mainCanvas,
         notifyReload: () => this.notifyReload?.(),
       });
-    const startPoint = this.handlePoints.start || getPoint();
-    const endPoint = this.handlePoints.end || getPoint();
-    const radiusPoint = this.handlePoints.radius || getPoint();
+    const startPoint = this.handlePoints.start || getPoint("start");
+    const endPoint = this.handlePoints.end || getPoint("end");
+    const radiusPoint = this.handlePoints.radius || getPoint("radius");
     startPoint[radiusType] = start;
     endPoint[radiusType] = end;
 
