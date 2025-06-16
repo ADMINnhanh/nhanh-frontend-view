@@ -173,8 +173,6 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
     ctx.beginPath();
 
-    // ctx.rect( left, top, width, height );
-
     // 创建 Path2D 对象
     this.path = new Path2D();
     this.path.rect(left, top, width, height);
@@ -204,7 +202,6 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.path = new Path2D();
 
     dynamicPosition!.forEach((item, index) => {
-      // ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
       this.path![index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
     this.path.lineTo(dynamicPosition[0][0], dynamicPosition[0][1]);

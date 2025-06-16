@@ -219,7 +219,6 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     ctx.beginPath();
 
-    // ctx.arc(dynamicPosition![0], dynamicPosition![1], radius, 0, this.angle);
     // 创建 Path2D 对象
     this.path = new Path2D();
     this.path.arc(x, y, radius + lineWidthOffset / 2, 0, this.angle);

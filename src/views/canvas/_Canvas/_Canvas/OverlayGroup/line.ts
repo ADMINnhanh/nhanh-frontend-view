@@ -146,7 +146,6 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     this.path = new Path2D();
 
     position!.forEach((item, index) => {
-      // ctx[index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
       this.path![index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
 
