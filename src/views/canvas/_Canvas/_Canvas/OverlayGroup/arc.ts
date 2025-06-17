@@ -448,14 +448,20 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     this.updateHandlePoints();
   }
 
-  /** 绘制从中心点到半径控制点的虚线 */
-  private drawCenterToRadiusLine(
+  /** 绘制辅助虚线 */
+  private drawGuideLine(
     ctx: CanvasRenderingContext2D,
     x: number,
     y: number,
     style: ArcStyleType
   ) {
     this.setBaseLineStyle(ctx, { ...style.stroke, dash: true });
+
+    const { dynamicRadius, startAngle, endAngle, counterclockwise } = this;
+    ctx.beginPath();
+    ctx.arc(x, y, dynamicRadius, endAngle, startAngle, counterclockwise);
+    ctx.stroke();
+
     ctx.beginPath();
     ctx.moveTo(x, y);
     const radiusPoint = this.handlePoints.radius!.dynamicPosition!;
@@ -491,7 +497,6 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     const y = dynamicPosition![1] + extraOffset.y;
 
     ctx.beginPath();
-
     this.path = new Path2D();
     this.path.arc(x, y, dynamicRadius, startAngle, endAngle, counterclockwise);
     if (isClosed) {
@@ -505,7 +510,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     this.isShowHandlePoint = this.isClick && this.isHandlePointsVisible;
 
     if (this.isShowHandlePoint) {
-      this.drawCenterToRadiusLine(ctx, x, y, style);
+      this.drawGuideLine(ctx, x, y, style);
 
       this.handlePointsArr.forEach((point) => {
         point.internalUpdate({ style: style.point });

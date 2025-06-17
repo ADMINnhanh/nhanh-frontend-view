@@ -222,8 +222,8 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     // 创建 Path2D 对象
     this.path = new Path2D();
     this.path.arc(x, y, radius + lineWidthOffset / 2, 0, this.angle);
-    ctx.fill(this.path);
     if (width != lineWidthOffset) ctx.stroke(this.path);
+    ctx.fill(this.path);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     if (this.isNeedRender) {
