@@ -402,7 +402,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   }
 
   /** 更新动态半径 */
-  updateDynamicRadius() {
+  private updateDynamicRadius() {
     const { mainCanvas, radius, radiusType } = this;
     if (!mainCanvas || radius <= 0) {
       this.dynamicRadius = 0;

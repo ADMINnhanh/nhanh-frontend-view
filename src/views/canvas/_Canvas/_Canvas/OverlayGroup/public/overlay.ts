@@ -37,10 +37,8 @@ export default abstract class Overlay<
   set style(style: Overlay<T, V>["_style"] | undefined) {
     this._style = style;
 
-    if (this.mainCanvas) {
-      if (this.dynamicPosition) this.notifyReload?.();
-      this.calculatePointRadiusValue();
-    }
+    this.calculatePointRadiusValue();
+    this.notifyReload?.();
   }
 
   private _position?: V;
@@ -53,9 +51,8 @@ export default abstract class Overlay<
     /** 位置改变时，清除值信息 */
     this._value = undefined;
 
-    const prevDynamicStatus = !!this.dynamicPosition;
     this.updateBaseData();
-    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
+    this.notifyReload?.();
   }
   private _value?: V;
   /** 坐标轴上的值 */
@@ -67,9 +64,8 @@ export default abstract class Overlay<
     /** 值改变时，清除位置信息 */
     this._position = undefined;
 
-    const prevDynamicStatus = !!this.dynamicPosition;
     this.updateBaseData();
-    if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
+    this.notifyReload?.();
   }
   private _zIndex = 0;
   /** 层级 */
@@ -79,7 +75,7 @@ export default abstract class Overlay<
   set zIndex(zIndex: number) {
     if (this._zIndex != zIndex) {
       this._zIndex = zIndex;
-      if (this.dynamicPosition) this.notifyReload?.();
+      this.notifyReload?.();
     }
   }
   private _dynamicPosition?: V;
@@ -325,7 +321,7 @@ export default abstract class Overlay<
   };
   /** 计算点位半径值 */
   protected calculatePointRadiusValue(uselastFact = false) {
-    if (!this.valueScope) return;
+    if (!this.mainCanvas || !this.valueScope) return;
     if (uselastFact && this.lastPointRadius.value == 0) return;
 
     const radius = (() => {
@@ -335,7 +331,7 @@ export default abstract class Overlay<
     })();
     if (radius === undefined) return;
 
-    const radiusValue = this.mainCanvas!.getAxisValueByPoint(radius, 0).xV;
+    const radiusValue = this.mainCanvas.getAxisValueByPoint(radius, 0).xV;
 
     const offset = radiusValue - this.lastPointRadius.value;
 

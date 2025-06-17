@@ -23,10 +23,8 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   set text(text: string | undefined) {
     if (this._text != text) {
       this._text = text;
-      if (this.mainCanvas) {
-        this.updateBaseData();
-        if (this.dynamicPosition) this.notifyReload?.();
-      }
+      this.updateBaseData();
+      this.notifyReload?.();
     }
   }
 

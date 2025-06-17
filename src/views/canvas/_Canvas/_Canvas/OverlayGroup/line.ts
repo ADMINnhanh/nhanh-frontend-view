@@ -21,7 +21,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     if (this._isInfinite != isInfinite) {
       this._isInfinite = isInfinite;
       this.canCreateOrDeleteHandlePoint = !isInfinite;
-      if (this.dynamicPosition) this.notifyReload?.();
+      this.notifyReload?.();
     }
   }
 

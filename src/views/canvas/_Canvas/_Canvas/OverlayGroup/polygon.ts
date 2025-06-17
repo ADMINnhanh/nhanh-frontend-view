@@ -9,6 +9,10 @@ type ConstructorOption = ConstructorParameters<
 >[0] & {
   /** 是否为矩形 */
   isRect?: boolean;
+  /** 矩形圆角半径 */
+  borderRadius?: number | number[];
+  /** 矩形圆角半径类型.  默认为 "position" */
+  borderRadiusType?: "position" | "value";
 };
 
 export default class Polygon extends GeometricBoundary<PolygonStyleType> {
@@ -22,11 +26,35 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       this._isRect = isRect;
       this.canCreateOrDeleteHandlePoint = !isRect;
 
-      if (this.mainCanvas) {
-        const prevDynamicStatus = !!this.dynamicPosition;
-        this.updateBaseData();
-        if (this.dynamicPosition || prevDynamicStatus) this.notifyReload?.();
-      }
+      this.updateBaseData();
+      this.notifyReload?.();
+    }
+  }
+  /** 动态矩形圆角半径 */
+  private dynamicBorderRadius?: number | number[];
+  private _borderRadius?: number | number[];
+  /** 矩形圆角半径 */
+  get borderRadius() {
+    return this._borderRadius;
+  }
+  set borderRadius(borderRadius: number | number[] | undefined) {
+    if (this._borderRadius != borderRadius) {
+      this._borderRadius = borderRadius;
+
+      this.updateDynamicRadius();
+      this.notifyReload?.();
+    }
+  }
+  private _borderRadiusType = "position" as "position" | "value";
+  /** 矩形圆角半径类型.  默认为 "position" */
+  get borderRadiusType() {
+    return this._borderRadiusType;
+  }
+  set borderRadiusType(borderRadiusType: "position" | "value") {
+    if (this._borderRadiusType != borderRadiusType) {
+      this._borderRadiusType = borderRadiusType;
+      this.updateDynamicRadius();
+      this.notifyReload?.();
     }
   }
 
@@ -36,8 +64,10 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   constructor(option: ConstructorOption) {
     super(option);
 
-    const { isRect } = option;
-    Object.assign(this, { isRect });
+    ["isRect", "borderRadius", "borderRadiusType"].forEach((key) => {
+      /** @ts-ignore */
+      if (key in option) this[key] = option[key];
+    });
 
     if (option.isRect) this.canCreateOrDeleteHandlePoint = false;
   }
@@ -82,6 +112,47 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     return isLine || isPoint;
   }
 
+  /** 更新动态圆角半径 */
+  private updateDynamicRadius() {
+    const { mainCanvas, borderRadius } = this;
+
+    // 1. 清理无效情况：无画布或未设置圆角
+    if (!mainCanvas || !borderRadius) {
+      this.dynamicBorderRadius = undefined;
+      return;
+    }
+
+    // 2. 处理数字类型半径
+    if (typeof borderRadius === "number") {
+      this.dynamicBorderRadius = this.handleSingleRadius(borderRadius);
+      return;
+    }
+
+    // 3. 处理数组类型半径
+    this.dynamicBorderRadius = borderRadius.map((v) =>
+      this.handleSingleRadius(v, true)
+    );
+  }
+  private handleSingleRadius(radius: number): number | undefined;
+  private handleSingleRadius(radius: number, allowZero: true): number;
+  /** 处理单个半径值转换 */
+  private handleSingleRadius(
+    radius: number,
+    allowZero?: boolean
+  ): number | undefined {
+    const { mainCanvas, borderRadiusType } = this;
+
+    // 非正数处理逻辑
+    if (radius <= 0) return allowZero ? 0 : undefined;
+
+    // 根据类型转换半径值
+    switch (borderRadiusType) {
+      case "position": // 百分比模式
+        return radius * mainCanvas!.percentage;
+      default: // 坐标值模式
+        return mainCanvas!.getAxisPointByValue(radius, 0).x;
+    }
+  }
   /** 更新基础数据 */
   protected updateBaseData() {
     if (!this.mainCanvas) return;
@@ -128,6 +199,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     this.internalUpdate({ value, position, dynamicPosition });
 
     this.updateHandlePoints();
+    this.updateDynamicRadius();
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
@@ -175,7 +247,10 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
 
     // 创建 Path2D 对象
     this.path = new Path2D();
-    this.path.rect(left, top, width, height);
+
+    if (this.dynamicBorderRadius)
+      this.path.roundRect(left, top, width, height, this.dynamicBorderRadius);
+    else this.path.rect(left, top, width, height);
 
     ctx.stroke(this.path);
     ctx.fill(this.path);
@@ -223,6 +298,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       const { mainCanvas, position } = this;
 
       if (this.isRecalculate) {
+        this.updateDynamicRadius();
         const dynamicPosition = mainCanvas!.transformPosition(position!);
         this.internalUpdate({ dynamicPosition });
         this.handlePoints.forEach((point, index) => {
