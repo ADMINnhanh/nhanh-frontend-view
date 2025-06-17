@@ -191,7 +191,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
         // 计算到达横向边界的参数t
         const tx =
           vx > 0
-            ? (rect!.value.width - px) / vx // 向右延伸至右边界（x=rect!.value.width）
+            ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
             : -px / vx; // 向左延伸至左边界（x=0）
 
         if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
@@ -202,7 +202,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
         // 计算到达横向边界的参数t
         const tx =
           vx > 0
-            ? (rect!.value.width - px) / vx // 向右延伸至右边界（x=rect!.value.width）
+            ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
             : -px / vx; // 向左延伸至左边界（x=0）
 
         if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值

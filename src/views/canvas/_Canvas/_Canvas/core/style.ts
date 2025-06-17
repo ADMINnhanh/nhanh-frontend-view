@@ -193,7 +193,7 @@ export default class Style extends BaseData {
   /** 清除画布 */
   clearScreen(fillBackground = true) {
     const { ctx, theme, rect } = this;
-    const { width, height } = rect!.value;
+    const { width, height } = rect;
 
     ctx.clearRect(0, 0, width, height);
 

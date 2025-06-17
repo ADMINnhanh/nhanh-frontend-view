@@ -1,16 +1,28 @@
 import _Canvas from "..";
+import EventController from "../public/eventController";
 
 import Text from "./text";
 import Point from "./point";
 import Line from "./line";
 import Polygon from "./polygon";
 import Custom from "./custom";
-import EventController from "../public/eventController";
 import type Arc from "./arc";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 
 export type OverlayType = Text | Point | Line | Arc | Polygon | Custom<any>;
+
+// // 绘制曲线
+// arcTo()
+
+// // 绘制三次贝塞尔曲线
+// bezierCurveTo()
+
+// // 绘制二次贝塞尔曲线
+// quadraticCurveTo()
+
+// // 绘制圆弧
+// ellipse()
 
 export default class OverlayGroup extends EventController {
   /** 覆盖物集合 */

@@ -267,7 +267,7 @@ export const heatMapOverlay = new _Canvas.Custom({
   value: heatMapValue,
   scaleRange: [0.8, 100],
   draw: (ctx) => {
-    const { width, height } = heatMapOverlay.mainCanvas!.rect!.value;
+    const { width, height } = heatMapOverlay.mainCanvas!.rect;
     const container = document.createElement("div");
     const heatMap = new HeatMap({ container, width, height });
 

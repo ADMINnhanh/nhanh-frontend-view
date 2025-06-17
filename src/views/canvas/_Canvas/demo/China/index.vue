@@ -51,8 +51,8 @@ onMounted(() => {
     defaultCenter: { bottom: 100 },
   });
   myCanvas.value.setDefaultCenter({
-    left: -(580 - myCanvas.value.rect!.value.width / 2),
-    bottom: Number((myCanvas.value.rect!.value.height / 4.6).toFixed(0)),
+    left: -(580 - myCanvas.value.rect.width / 2),
+    bottom: Number((myCanvas.value.rect.height / 4.6).toFixed(0)),
   });
 
   myCanvas.value.setScale("center", myCanvas.value.delta * 8);

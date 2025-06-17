@@ -35,8 +35,8 @@ export default class Layer extends EventController {
 
   setMainCanvas(mainCanvas?: _Canvas) {
     super.setMainCanvas(mainCanvas);
-    this.canvas.width = mainCanvas?.rect?.value.width || 0;
-    this.canvas.height = mainCanvas?.rect?.value.height || 0;
+    this.canvas.width = mainCanvas?.rect.width || 0;
+    this.canvas.height = mainCanvas?.rect.height || 0;
     this.groups.forEach((group) => {
       group.setMainCanvas(mainCanvas);
       group.parent = this;
@@ -134,8 +134,8 @@ export default class Layer extends EventController {
         this.currentDrawOverlays = [];
         this.isReload = false;
 
-        this.canvas.width = rect?.value.width || 0;
-        this.canvas.height = rect?.value.height || 0;
+        this.canvas.width = rect.width || 0;
+        this.canvas.height = rect.height || 0;
 
         const groupArr: [
           number,

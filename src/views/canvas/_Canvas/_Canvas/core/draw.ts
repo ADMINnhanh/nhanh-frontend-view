@@ -26,8 +26,10 @@ export default class Draw extends Style {
     if (this.canvas) {
       this.resizeObserver = new ResizeObserver(
         _Debounce(() => {
-          const rect = this.rect!.value;
-          [this.canvas.width, this.canvas.height] = [rect.width, rect.height];
+          [this.canvas.width, this.canvas.height] = [
+            this.rect.width,
+            this.rect.height,
+          ];
           this.redrawOnce();
         }, 200)
       );
@@ -46,8 +48,8 @@ export default class Draw extends Style {
       center.y,
       scale,
       JSON.stringify(axisConfig),
-      rect!.value.width,
-      rect!.value.height,
+      rect.width,
+      rect.height,
     ].join();
     this.isRecalculate = this.rely !== newRely;
     this.rely = newRely;
@@ -166,11 +168,11 @@ export default class Draw extends Style {
     if (!this.redrawInNextRenderFrame) {
       this.redrawInNextRenderFrame = true;
       Promise.resolve().then(() => {
-        // this.measureRedrawPerformance();
-        this.isRendering = true;
-        this.redraw();
-        this.redrawInNextRenderFrame = false;
-        this.isRendering = false;
+        this.measureRedrawPerformance();
+        // this.isRendering = true;
+        // this.redraw();
+        // this.redrawInNextRenderFrame = false;
+        // this.isRendering = false;
       });
     }
   }

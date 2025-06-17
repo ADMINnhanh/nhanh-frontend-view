@@ -172,8 +172,8 @@ export default class QuickMethod extends Event {
     maxScale?: number
   ): number {
     // 获取画布尺寸和轴配置
-    const { width, height } = this.rect!.value;
-    const { cycle, delta, axisConfig } = this;
+    const { cycle, delta, axisConfig, rect } = this;
+    const { width, height } = rect;
 
     // 计算实际可用绘制区域（考虑边距后的有效区域）
     const availableWidth =
@@ -277,7 +277,7 @@ export default class QuickMethod extends Event {
     maxY: number,
     avoid: [number, number, number, number]
   ) {
-    const { width, height } = this.rect!.value;
+    const { width, height } = this.rect;
     const { axisConfig, center } = this;
 
     // 计算中心点坐标
@@ -399,13 +399,13 @@ export default class QuickMethod extends Event {
     const defaultCenter = this.getDefaultCenterLocation()!;
 
     // 计算中心点坐标
-    const centerX = (rect!.value.width / 2 - defaultCenter.x) * axisConfig.x;
-    const centerY = (rect!.value.height / 2 - defaultCenter.y) * axisConfig.y;
+    const centerX = (rect.width / 2 - defaultCenter.x) * axisConfig.x;
+    const centerY = (rect.height / 2 - defaultCenter.y) * axisConfig.y;
     const centerValue = this.getAxisValueByPoint(centerX, centerY, true);
 
     const canvasPoint = this.getMousePositionOnAxis({
-      clientX: rect!.value.x + rect!.value.width / 2,
-      clientY: rect!.value.y + rect!.value.height / 2,
+      clientX: rect.x + rect.width / 2,
+      clientY: rect.y + rect.height / 2,
     })!;
     const canvasValue = this.getAxisValueByPoint(canvasPoint.x, canvasPoint.y);
 

@@ -20,9 +20,17 @@ export default class BaseData extends EventController {
   canvas: HTMLCanvasElement;
   /** 画布上下文 */
   ctx: CanvasRenderingContext2D;
+  /** rect值是最新的吗 */
+  private _rectValueIsUpdated = false;
+  private _rect?: DOMRect;
   /** 画布矩形 */
-  // rect: DOMRect;
-  rect?: { value: DOMRect };
+  get rect(): DOMRect {
+    if (this._rectValueIsUpdated && this._rect) return this._rect;
+    this._rectValueIsUpdated = true;
+    Promise.resolve().then(() => (this._rectValueIsUpdated = false));
+    this._rect = this.canvas.getBoundingClientRect();
+    return this._rect;
+  }
 
   /** 画布偏移量 */
   offset = { x: 0, y: 0 };
@@ -108,33 +116,7 @@ export default class BaseData extends EventController {
       if (canvas.getContext) {
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d")!;
-        this.rect = ((canvas: HTMLCanvasElement) => {
-          let isNew = true;
-          Promise.resolve().then(() => (isNew = false));
-          const rect: { value: DOMRect } = {
-            value: canvas.getBoundingClientRect(),
-          };
-          return new Proxy(rect, {
-            get(target, key) {
-              if (key == "value") {
-                if (isNew) return target.value;
-                else {
-                  target.value = canvas.getBoundingClientRect();
-                  isNew = true;
-                  Promise.resolve().then(() => (isNew = false));
-                  return target.value;
-                }
-              }
-              return target[key as never];
-            },
-            set() {
-              return false;
-            },
-          });
-        })(canvas);
-
         const { clientWidth, clientHeight } = canvas;
-
         [canvas.width, canvas.height] = [clientWidth, clientHeight];
       } else throw new Error("canvas-unsupported code here");
     } else throw new Error("canvas is not HTMLCanvasElement");
@@ -156,7 +138,7 @@ export default class BaseData extends EventController {
     const { canvas, rect, defaultCenter } = this;
     if (!canvas) return console.error("canvas is not HTMLCanvasElement");
 
-    const { width, height } = rect!.value;
+    const { width, height } = rect;
     const { top, bottom, left, right } = defaultCenter;
 
     // 值解析策略
@@ -237,10 +219,9 @@ export default class BaseData extends EventController {
     event: "center" | { clientX: number; clientY: number },
     delta: number
   ) {
-    const { canvas, isWheelable, axisConfig } = this;
-    const rect = this.rect!.value;
+    const { canvas, isWheelable, axisConfig, rect } = this;
 
-    if (!isWheelable || !canvas || !rect)
+    if (!isWheelable || !canvas)
       return console.error("canvas is not HTMLCanvasElement");
 
     let clientX, clientY;
@@ -404,7 +385,7 @@ export default class BaseData extends EventController {
     if (!canvas) return console.error("canvas is not HTMLCanvasElement");
 
     const { clientX, clientY } = event;
-    const { left, top } = rect!.value;
+    const { left, top } = rect;
 
     const x = (clientX - left - center.x) * axisConfig.x;
     const y = (clientY - top - center.y) * axisConfig.y;
@@ -461,7 +442,7 @@ export default class BaseData extends EventController {
     right: number;
     bottom: number;
   }) {
-    rect = rect || this.rect!.value;
+    rect = rect || this.rect;
 
     const { left, top, right, bottom } = rect;
     const { axisConfig } = this;
