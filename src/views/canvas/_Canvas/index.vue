@@ -15,7 +15,7 @@ const demoName: [string, string][] = [
   // ["shortcutKey.vue", "快捷键"],
   // ["axis.vue", "坐标轴"],
   // ["text.vue", "文字"],
-  //  ["point.vue", "点"],
+  // ["point.vue", "点"],
   // ["line.vue", "线"],
   ["arc.vue", "圆弧"],
   // ["polygon.vue", "面"],

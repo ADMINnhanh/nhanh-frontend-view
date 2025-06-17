@@ -258,14 +258,19 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         const point = new Point({
           mainCanvas: this.mainCanvas,
           isDraggable: true,
+          notifyReload: () => this.notifyReload?.(),
+        });
+        this.handlePoints.push(point);
+      }
+
+      this.handlePoints[index].internalUpdate(
+        {
           value: value![index],
           position: position![index],
           dynamicPosition: dynamicPosition![index],
-          notifyReload: () => this.notifyReload?.(),
-        });
-        point.internalUpdate({}, true);
-        this.handlePoints.push(point);
-      }
+        },
+        true
+      );
     });
     this.handlePoints.length = value!.length;
   }

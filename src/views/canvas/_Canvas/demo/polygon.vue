@@ -43,6 +43,6 @@ defineExpose({ myCanvas });
 </script>
 
 <template>
-  <UpdateData :overlays="polygon_arr" />
+  <UpdateData :canvas="myCanvas" :overlays="polygon_arr" />
   <canvas :id="id" class="my-canvas"></canvas>
 </template>

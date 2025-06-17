@@ -151,7 +151,7 @@ onBeforeUnmount(() => {
     flex-direction: column;
     .my-canvas {
       width: 100%;
-      height: var(--height, 270px);
+      height: var(--height, 300px);
       flex-grow: 1;
     }
   }
