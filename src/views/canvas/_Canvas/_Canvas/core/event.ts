@@ -148,7 +148,8 @@ export default class Event extends Draw {
 
     const step = this.getStep(key);
     const overlay = this.lastClickedOverlay;
-    const moveOverlay = overlay && this.currentDrawOverlays.includes(overlay);
+    const moveOverlay =
+      overlay?.isDraggable && this.currentDrawOverlays.includes(overlay);
     const valueType =
       moveOverlay &&
       (_AreAllArraysValid(overlay.value)

@@ -1,8 +1,12 @@
 // 绘制曲线
 arcTo() 
 
-// 绘制贝塞尔曲线
+// 绘制三次贝塞尔曲线
 bezierCurveTo() 
+
+// 绘制二次贝塞尔曲线
+quadraticCurveTo()  
 
 // 绘制圆弧
 ellipse()
+

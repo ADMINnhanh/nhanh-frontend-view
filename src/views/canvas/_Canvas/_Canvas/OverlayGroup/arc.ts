@@ -328,7 +328,6 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   private updateHandlePoints() {
     let {
       mainCanvas,
-      value,
       radius,
       radiusType,
       startAngle,
@@ -361,7 +360,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     startPoint[radiusType] = start;
     endPoint[radiusType] = end;
 
-    const x = data![0] + radius * 2;
+    const x = data![0] + radius * 2 * mainCanvas.axisConfig.x;
     radiusPoint[radiusType] = [x, data![1]];
 
     this.handlePoints = {

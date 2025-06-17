@@ -387,12 +387,12 @@ export default abstract class Overlay<
     const x = {
       value: offsetX * base * axisConfig.x,
       position: (offsetX / percentage) * axisConfig.x,
-      dynamicPosition: offsetX * axisConfig.x,
+      dynamicPosition: offsetX,
     };
     const y = {
       value: offsetY * base * axisConfig.y,
       position: (offsetY / percentage) * axisConfig.y,
-      dynamicPosition: offsetY * axisConfig.y,
+      dynamicPosition: offsetY,
     };
     return { x, y };
   }
