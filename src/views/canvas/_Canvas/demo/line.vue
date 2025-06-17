@@ -36,8 +36,7 @@ const line_infinite = new _Canvas.Line({
 const line_arr = [line_value, line_position, line_infinite];
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id });
-  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
   myCanvas.value.addOverlay(line_arr);
 });
 defineExpose({ myCanvas });

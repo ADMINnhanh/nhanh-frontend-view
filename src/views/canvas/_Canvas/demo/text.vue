@@ -23,8 +23,7 @@ const text_position = new _Canvas.Text({
 const text_arr = [text_value, text_position];
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id });
-  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
   myCanvas.value.addOverlay(text_arr);
 });
 defineExpose({ myCanvas });

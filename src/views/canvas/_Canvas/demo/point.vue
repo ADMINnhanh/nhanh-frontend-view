@@ -19,8 +19,7 @@ const point_position = new _Canvas.Point({
 const point_arr = [point_value, point_position];
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id });
-  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
   myCanvas.value.addOverlay(point_arr);
 });
 defineExpose({ myCanvas });

@@ -35,8 +35,7 @@ const polygon_rect = new _Canvas.Polygon({
 const polygon_arr = [polygon_value, polygon_position, polygon_rect];
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id });
-  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
   myCanvas.value.addOverlay(polygon_arr);
 });
 defineExpose({ myCanvas });

@@ -38,8 +38,7 @@ const arc_position = new _Canvas.Arc({
 const arc_arr = [arc_value, arc_value_counterclockwise, arc_position];
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id });
-  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
   myCanvas.value.addOverlay(arc_arr);
 });
 defineExpose({ myCanvas });
