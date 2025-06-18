@@ -14,6 +14,10 @@ type ConstructorOption = ConstructorParameters<
 >[0] & {
   /** 是否可显示控制点 */
   isHandlePointsVisible?: boolean;
+  /** 圆弧的半径。必须为正值。 */
+  radiusValue?: number;
+  /** 圆弧的半径。必须为正值。 */
+  radiusPosition?: number;
 };
 
 export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
@@ -48,29 +52,45 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
     }
   }
 
-  private _radiusType = "position" as "position" | "value";
-  /** 圆弧的半径类型.  默认为 "position" */
-  get radiusType() {
-    return this._radiusType;
+  private _radiusValue = 0;
+  /** 圆弧的半径。必须为正值。 */
+  get radiusValue() {
+    return this._radiusValue;
   }
-  set radiusType(radiusType: "position" | "value") {
-    if (this._radiusType != radiusType) {
-      this._radiusType = radiusType;
-      this.updateRadius();
+  set radiusValue(radius: number) {
+    if (this._radiusValue != radius) {
+      this._radiusValue = radius;
+
+      if (this.mainCanvas) {
+        this._radiusPosition = this.mainCanvas.getAxisPointByValue(
+          radius,
+          0,
+          true
+        ).x;
+
+        this.updateExtraScope();
+        this.updateHandlePoints();
+      }
     }
   }
-
-  /** 动态圆弧半径 */
-  private dynamicRadius = 0;
-  private _radius = 0;
+  private _radiusPosition = 0;
   /** 圆弧的半径。必须为正值。 */
-  get radius() {
-    return this._radius;
+  get radiusPosition() {
+    return this._radiusPosition;
   }
-  set radius(radius: number) {
-    if (this._radius != radius) {
-      this._radius = radius;
-      this.updateRadius();
+  set radiusPosition(radius: number) {
+    if (this._radiusPosition != radius) {
+      this._radiusPosition = radius;
+
+      if (this.mainCanvas) {
+        this._radiusValue = this.mainCanvas.getAxisValueByPoint(
+          radius,
+          0,
+          true
+        ).xV;
+        this.updateExtraScope();
+        this.updateHandlePoints();
+      }
     }
   }
 
@@ -243,48 +263,11 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
     this.handlePoints = { radius, other };
   }
 
-  /** 更新半径 */
-  private updateRadius() {
-    if (this.mainCanvas) {
-      this.updateDynamicRadius();
-      this.updateHandlePoints();
-      this.updateExtraScope();
-    }
-  }
   /** 更新额外范围 */
   private updateExtraScope() {
-    const { mainCanvas, radius, radiusType } = this;
+    const { mainCanvas, radiusValue } = this;
     if (mainCanvas) {
-      if (radius == 0) this.setExtraScopeByValue();
-      else if (radiusType == "position") {
-        // const xV = mainCanvas.getAxisValueByPoint(radius, 0).xV;
-        // this.setExtraScopeByValue({
-        //   topV: xV,
-        //   bottomV: xV,
-        //   leftV: xV,
-        //   rightV: xV * 2,
-        // });
-      } else if (radiusType == "value") {
-        // this.setExtraScopeByValue({
-        //   topV: radius,
-        //   bottomV: radius,
-        //   leftV: radius,
-        //   rightV: radius * 2,
-        // });
-      }
-    }
-  }
-  /** 更新动态半径 */
-  private updateDynamicRadius() {
-    const { mainCanvas, radius, radiusType } = this;
-    if (!mainCanvas || radius <= 0) {
-      this.dynamicRadius = 0;
-    } else {
-      if (radiusType == "position") {
-        this.dynamicRadius = radius * mainCanvas.percentage;
-      } else {
-        this.dynamicRadius = mainCanvas.getAxisPointByValue(radius, 0).x;
-      }
+      if (radiusValue == 0) this.setExtraScopeByValue();
     }
   }
   protected updateBaseData() {
@@ -323,14 +306,13 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    const { dynamicPosition, mainCanvas, extraOffset, dynamicRadius } = this;
+    const { dynamicPosition, mainCanvas, extraOffset, radiusValue } = this;
     if (!mainCanvas) return;
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     if (this.isNeedRender) {
       if (this.isRecalculate) {
         const { position, mainCanvas } = this;
-        this.updateDynamicRadius();
 
         const dynamicPosition = this.dynamicPosition!;
         const newDynamicPosition = mainCanvas!.transformPosition(position!);

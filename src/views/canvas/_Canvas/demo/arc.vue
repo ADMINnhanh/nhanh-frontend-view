@@ -10,16 +10,14 @@ const id = _GenerateUUID();
 let myCanvas = shallowRef<_Canvas>();
 const arc_value = new _Canvas.Arc({
   value: [-5, 0],
-  radius: 2,
-  radiusType: "value",
+  radiusValue: 2,
   startAngle: 0.5,
   endAngle: Math.PI - 0.5,
   isDraggable: true,
 });
 const arc_value_counterclockwise = new _Canvas.Arc({
   value: [0, 0],
-  radius: 2,
-  radiusType: "value",
+  radiusValue: 2,
   startAngle: 0.5,
   endAngle: Math.PI - 0.5,
   isDraggable: true,
@@ -27,7 +25,7 @@ const arc_value_counterclockwise = new _Canvas.Arc({
 });
 const arc_position = new _Canvas.Arc({
   position: [250, 0],
-  radius: 100,
+  radiusPosition: 100,
   startAngle: -0.5,
   endAngle: Math.PI + 0.5,
   isDraggable: true,

@@ -9,6 +9,7 @@ import Point from "../OverlayGroup/point";
 import Line from "../OverlayGroup/line";
 import Polygon from "../OverlayGroup/polygon";
 import Arc from "../OverlayGroup/arc";
+import ArcTo from "../OverlayGroup/arcTo";
 
 type ConstructorOption = ConstructorParameters<typeof Style>[0];
 
@@ -129,7 +130,12 @@ export default class Draw extends Style {
           if (overlay instanceof Custom) return 5;
           if (overlay instanceof Text) return 4;
           if (overlay instanceof Point) return 3;
-          if (overlay instanceof Line || overlay instanceof Arc) return 2;
+          if (
+            overlay instanceof Line ||
+            overlay instanceof Arc ||
+            overlay instanceof ArcTo
+          )
+            return 2;
           if (overlay instanceof Polygon) return 1;
           return 0; // 默认优先级
         };

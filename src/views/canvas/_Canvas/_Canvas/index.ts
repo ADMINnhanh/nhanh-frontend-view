@@ -10,6 +10,9 @@ import Polygon from "./OverlayGroup/polygon";
 import Axis from "./core/axis";
 import Custom from "./OverlayGroup/custom";
 import Arc from "./OverlayGroup/arc";
+import ArcTo from "./OverlayGroup/arcTo";
+// import Ellipse from "./OverlayGroup/ellipse";
+// import BezierCurve from "./OverlayGroup/bezierCurve";
 
 type ConstructorOption = ConstructorParameters<typeof QuickMethod>[0] & {
   /** 轴线显示属性 */
@@ -35,8 +38,10 @@ export default class _Canvas extends QuickMethod {
   static Polygon = Polygon;
   /** 自定义绘制 */
   static Custom = Custom;
-  /** 弧线 */
+  /** 圆弧 */
   static Arc = Arc;
+  /** 圆角 */
+  static ArcTo = ArcTo;
 
   constructor(option: ConstructorOption) {
     super(option);
@@ -127,7 +132,11 @@ export default class _Canvas extends QuickMethod {
     [overlays].flat().forEach((overlay) => {
       if (overlay instanceof Text) overlays_text?.addOverlays(overlay);
       else if (overlay instanceof Point) overlays_point?.addOverlays(overlay);
-      else if (overlay instanceof Line || overlay instanceof Arc)
+      else if (
+        overlay instanceof Line ||
+        overlay instanceof Arc ||
+        overlay instanceof ArcTo
+      )
         overlays_line?.addOverlays(overlay);
       else if (overlay instanceof Polygon)
         overlays_polygon?.addOverlays(overlay);
