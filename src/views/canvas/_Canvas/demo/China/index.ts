@@ -270,6 +270,7 @@ export const heatMapOverlay = new _Canvas.Custom({
   name: "景点热力图",
   value: heatMapValue,
   scaleRange: [0.8, 100],
+  zIndex: 2,
   draw: (ctx) => {
     const { width, height } = heatMapOverlay.mainCanvas!.rect;
     const container = document.createElement("div");
