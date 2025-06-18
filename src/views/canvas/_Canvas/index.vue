@@ -7,7 +7,7 @@ import Media from "@/stores/media";
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
 const independent: [string, string][] = [
-  ["China%2Findex.vue", "最佳实践 - 中国地图"],
+  // ["China%2Findex.vue", "最佳实践 - 中国地图"],
 ];
 const demoName: [string, string][] = [
   // ["original.vue", "仅需初始化 _Canvas"],
@@ -16,7 +16,7 @@ const demoName: [string, string][] = [
   // ["axis.vue", "坐标轴"],
   // ["text.vue", "文字"],
   // ["point.vue", "点"],
-  // ["line.vue", "线"],
+  ["line.vue", "线"],
   // ["arc.vue", "圆弧"],
   // ["polygon.vue", "面"],
   // ["custom.vue", "自定义绘制"],

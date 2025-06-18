@@ -204,6 +204,7 @@ export default class Event extends Draw {
     const actionHandler = actionMap[key];
     if (actionHandler?.()) {
       this.redrawOnce();
+      event.preventDefault();
     }
   }
   /** 键盘松开事件 */

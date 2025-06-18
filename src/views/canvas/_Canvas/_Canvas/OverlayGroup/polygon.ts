@@ -279,8 +279,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     dynamicPosition!.forEach((item, index) => {
       this.path![index == 0 ? "moveTo" : "lineTo"](item[0], item[1]);
     });
-    this.path.lineTo(dynamicPosition[0][0], dynamicPosition[0][1]);
-    ctx.closePath();
+    this.path.closePath();
     ctx.stroke(this.path);
     ctx.fill(this.path);
 

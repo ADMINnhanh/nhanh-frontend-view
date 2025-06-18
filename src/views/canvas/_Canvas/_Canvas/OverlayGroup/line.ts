@@ -198,14 +198,14 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       }
 
       // 纵向边界检测 (top/bottom)
-      if (vx !== 0) {
-        // 计算到达横向边界的参数t
-        const tx =
-          vx > 0
-            ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
-            : -px / vx; // 向左延伸至左边界（x=0）
+      if (vy !== 0) {
+        // 计算到达纵向边界的参数t
+        const ty =
+          vy > 0
+            ? (rect.height - py) / vy // 向下延伸至下边界（y=rect.height）
+            : -py / vy; // 向上延伸至上边界（y=0）
 
-        if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
+        if (ty > 0) t = Math.min(t, ty); // 只保留最小的正t值
       }
 
       // 延长向量至边界
