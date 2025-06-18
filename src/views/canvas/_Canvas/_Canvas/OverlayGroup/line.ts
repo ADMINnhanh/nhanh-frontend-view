@@ -177,47 +177,19 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       return console.error("重合点无法确定方向");
     }
 
-    // 核心算法：计算线段与画布边界的交点
-    const getBoundaryIntersection = (
-      point: [number, number],
-      vector: [number, number]
-    ): [number, number] => {
-      const [px, py] = point; // 当前点的x,y坐标
-      const [vx, vy] = vector; // 方向向量的x,y分量
-      let t = Infinity; // 记录最小正值的参数t
-
-      // 横向边界检测 (left/right)
-      if (vx !== 0) {
-        // 计算到达横向边界的参数t
-        const tx =
-          vx > 0
-            ? (rect.width - px) / vx // 向右延伸至右边界（x=rect.width）
-            : -px / vx; // 向左延伸至左边界（x=0）
-
-        if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
-      }
-
-      // 纵向边界检测 (top/bottom)
-      if (vy !== 0) {
-        // 计算到达纵向边界的参数t
-        const ty =
-          vy > 0
-            ? (rect.height - py) / vy // 向下延伸至下边界（y=rect.height）
-            : -py / vy; // 向上延伸至上边界（y=0）
-
-        if (ty > 0) t = Math.min(t, ty); // 只保留最小的正t值
-      }
-
-      // 延长向量至边界
-      return t === Infinity ? point : [px + vx * t, py + vy * t];
-    };
-
     // 计算延长后的实际坐标
-    const extendedStart = getBoundaryIntersection(start, [
-      -dirVector[0],
-      -dirVector[1],
-    ]);
-    const extendedEnd = getBoundaryIntersection(end, dirVector);
+    const extendedStart = _GetBoundaryIntersection(
+      start,
+      [-dirVector[0], -dirVector[1]],
+      rect.width,
+      rect.height
+    );
+    const extendedEnd = _GetBoundaryIntersection(
+      end,
+      dirVector,
+      rect.width,
+      rect.height
+    );
 
     // 绘制最终线段
     this.drawLine(ctx, [extendedStart, extendedEnd]);
@@ -237,4 +209,41 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       return [this.drawLine, this];
     }
   }
+}
+
+// 核心算法：计算线段与画布边界的交点
+function _GetBoundaryIntersection(
+  point: [number, number],
+  vector: [number, number],
+  width: number,
+  height: number
+): [number, number] {
+  const [px, py] = point; // 当前点的x,y坐标
+  const [vx, vy] = vector; // 方向向量的x,y分量
+  let t = Infinity; // 记录最小正值的参数t
+
+  // 横向边界检测 (left/right)
+  if (vx !== 0) {
+    // 计算到达横向边界的参数t
+    const tx =
+      vx > 0
+        ? (width - px) / vx // 向右延伸至右边界（x=rect.width）
+        : -px / vx; // 向左延伸至左边界（x=0）
+
+    if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
+  }
+
+  // 纵向边界检测 (top/bottom)
+  if (vy !== 0) {
+    // 计算到达纵向边界的参数t
+    const ty =
+      vy > 0
+        ? (height - py) / vy // 向下延伸至下边界（y=rect.height）
+        : -py / vy; // 向上延伸至上边界（y=0）
+
+    if (ty > 0) t = Math.min(t, ty); // 只保留最小的正t值
+  }
+
+  // 延长向量至边界
+  return t === Infinity ? point : [px + vx * t, py + vy * t];
 }
