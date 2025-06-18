@@ -7,13 +7,20 @@ import Line from "./line";
 import Polygon from "./polygon";
 import Custom from "./custom";
 import Arc from "./arc";
+import ArcTo from "./arcTo";
 // import Ellipse from "./ellipse";
 // import BezierCurve from "./bezierCurve";
-// import ArcTo from "./arcTo";
 
 type ConstructorOption = ConstructorParameters<typeof EventController>[0];
 
-export type OverlayType = Text | Point | Line | Arc | Polygon | Custom<any>;
+export type OverlayType =
+  | Text
+  | Point
+  | Line
+  | Arc
+  | ArcTo
+  | Polygon
+  | Custom<any>;
 
 export default class OverlayGroup extends EventController {
   /** 覆盖物集合 */

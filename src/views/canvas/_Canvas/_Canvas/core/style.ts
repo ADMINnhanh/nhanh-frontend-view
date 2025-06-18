@@ -69,6 +69,24 @@ export default class Style extends BaseData {
           fill: "#f0a020",
         },
       },
+      arcTo: {
+        stroke: {
+          color: "#f0a020",
+          color_hover: "#f2c97d",
+          width: 4,
+          dash: false,
+          dashGap: [5, 10],
+          dashOffset: 0,
+          cap: "round",
+          join: "round",
+        },
+        point: {
+          radius: 5,
+          stroke: "#f0a020" + 80,
+          width: 14,
+          fill: "#f0a020",
+        },
+      },
       polygon: {
         fill: "#18a058" + 30,
         fill_hover: "#036933" + 60,
@@ -130,6 +148,24 @@ export default class Style extends BaseData {
       arc: {
         fill: "#f2c97d" + 30,
         fill_hover: "#f0a020" + 60,
+        stroke: {
+          color: "#f2c97d",
+          color_hover: "#f0a020",
+          width: 4,
+          dash: false,
+          dashGap: [5, 10],
+          dashOffset: 0,
+          cap: "round",
+          join: "round",
+        },
+        point: {
+          radius: 5,
+          stroke: "#f2c97d" + "80",
+          width: 14,
+          fill: "#f2c97d",
+        },
+      },
+      arcTo: {
         stroke: {
           color: "#f2c97d",
           color_hover: "#f0a020",

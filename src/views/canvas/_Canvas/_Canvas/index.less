@@ -33,3 +33,11 @@
     cursor: ew-resize !important; /* 现代浏览器优先使用这个更合适的样式 */
   }
 }
+
+._nhanh_canvas_hover_overlay_draggable_ns {
+  cursor: pointer !important;
+  &:active {
+    cursor: n-resize !important; /* 适用于不支持 n-resize 的旧浏览器 */
+    cursor: ns-resize !important; /* 现代浏览器优先使用这个更合适的样式 */
+  }
+}

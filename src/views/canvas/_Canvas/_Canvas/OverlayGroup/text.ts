@@ -114,7 +114,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       value = [val.xV, val.yV];
     }
 
-    const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
+    const dynamicPosition = this.mainCanvas.transformPosition(position!);
 
     const ctx = this.mainCanvas.ctx;
     this.setOverlayStyles(ctx);
@@ -189,7 +189,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       if (this.isRecalculate) {
         const { position, mainCanvas } = this;
         this.internalUpdate({
-          dynamicPosition: mainCanvas!.transformPosition([position!])[0],
+          dynamicPosition: mainCanvas!.transformPosition(position!),
         });
       }
 

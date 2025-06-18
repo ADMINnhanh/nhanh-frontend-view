@@ -437,7 +437,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       value = [val.xV, val.yV];
     }
 
-    const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
+    const dynamicPosition = this.mainCanvas.transformPosition(position!);
 
     this.internalUpdate({ value, position, dynamicPosition });
 
@@ -521,16 +521,14 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         const { position, mainCanvas } = this;
         this.updateDynamicRadius();
 
-        const dynamicPosition = [...this.dynamicPosition!];
-        const newDynamicPosition = mainCanvas!.transformPosition([
-          position!,
-        ])[0];
+        const dynamicPosition = this.dynamicPosition!;
+        const newDynamicPosition = mainCanvas!.transformPosition(position!);
         if (mainCanvas?.isScaleUpdated) {
           this.updateHandlePoints();
         } else {
+          const offsetx = newDynamicPosition[0] - dynamicPosition[0];
+          const offsety = newDynamicPosition[1] - dynamicPosition[1];
           this.handlePointsArr.forEach((point) => {
-            const offsetx = newDynamicPosition[0] - dynamicPosition[0];
-            const offsety = newDynamicPosition[1] - dynamicPosition[1];
             const x = point.dynamicPosition![0] + offsetx;
             const y = point.dynamicPosition![1] + offsety;
             point.internalUpdate({ dynamicPosition: [x, y] });

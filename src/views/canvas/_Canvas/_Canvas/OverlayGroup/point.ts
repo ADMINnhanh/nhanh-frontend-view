@@ -170,7 +170,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
       value = [val.xV, val.yV];
     }
 
-    const dynamicPosition = this.mainCanvas.transformPosition([position!])[0];
+    const dynamicPosition = this.mainCanvas.transformPosition(position!);
 
     this.internalUpdate({ value, position, dynamicPosition });
   }
@@ -229,7 +229,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
       if (this.isRecalculate) {
         this.internalUpdate({
-          dynamicPosition: mainCanvas!.transformPosition([position!])[0],
+          dynamicPosition: mainCanvas!.transformPosition(position!),
         });
       }
       return [this.draw, this];

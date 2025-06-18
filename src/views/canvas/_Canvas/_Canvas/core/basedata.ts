@@ -468,16 +468,24 @@ export default class BaseData extends EventController {
   }
 
   /** 变换坐标 */
-  transformPosition(positions: [number, number][]) {
+  transformPosition(positions: [number, number]): [number, number];
+  transformPosition(positions: [number, number][]): [number, number][];
+  transformPosition(positions: [number, number] | [number, number][]) {
     const { center, percentage, axisConfig } = this;
 
-    const dynamicPositions: [number, number][] = [];
-    for (let i = 0; i < positions.length; i++) {
-      let [x, y] = positions[i];
-      x = center.x + x * percentage * axisConfig.x;
-      y = center.y + y * percentage * axisConfig.y;
-      dynamicPositions.push([x, y]);
+    const xt = percentage * axisConfig.x;
+    const yt = percentage * axisConfig.y;
+    const transform = (position: [number, number]) => [
+      center.x + position[0] * xt,
+      center.y + position[1] * yt,
+    ];
+
+    if (Array.isArray(positions[0])) {
+      return (positions as [number, number][]).map((position) =>
+        transform(position)
+      );
     }
-    return dynamicPositions;
+
+    return transform(positions as [number, number]);
   }
 }

@@ -100,7 +100,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
 
     return values;
   }
-  private updateDataProperties(value: any, position: any) {
+  private updateDataProperties(value: any, position: [number, number][]) {
     this.internalUpdate({
       value,
       position,

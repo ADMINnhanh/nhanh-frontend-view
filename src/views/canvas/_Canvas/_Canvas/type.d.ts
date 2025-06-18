@@ -80,6 +80,13 @@ type ArcStyleType = {
   /** 点位样式 */
   point: PointStyleType;
 };
+/** 圆角样式 */
+type ArcToStyleType = {
+  /** 描边 */
+  stroke: BaseLineStyle;
+  /** 点位样式 */
+  point: PointStyleType;
+};
 
 /** 面样式 */
 type PolygonStyleType = {
@@ -107,6 +114,8 @@ type StyleItemType = {
   line: LineStyleType;
   /** 圆弧样式 */
   arc: ArcStyleType;
+  /** 圆角样式 */
+  arcTo: ArcToStyleType;
   /** 面样式 */
   polygon: PolygonStyleType;
 };
