@@ -29,8 +29,6 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   }
 
   constructor(option: ConstructorOption) {
-    option.redrawOnIsHoverChange = option.redrawOnIsHoverChange ?? true;
-
     super(option);
 
     const { text } = option;

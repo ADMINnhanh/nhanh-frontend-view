@@ -133,6 +133,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
   }
 
+  /** 当前是否渲染了控制点 */
+  private isShowHandlePoint = false;
   /** 是否可显示控制点 */
   private _isHandlePointsVisible = true;
   /** 是否可显示控制点 */
@@ -146,12 +148,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
   }
 
-  /** 当前是否渲染了控制点 */
-  protected isShowHandlePoint = false;
-
   constructor(option: ConstructorOption) {
-    option.redrawOnIsHoverChange = option.redrawOnIsHoverChange ?? true;
-
     super(option);
 
     [

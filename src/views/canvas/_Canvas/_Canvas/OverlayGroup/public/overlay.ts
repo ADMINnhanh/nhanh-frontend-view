@@ -106,12 +106,15 @@ export default abstract class Overlay<
       position,
       dynamicPosition,
       value,
-      redrawOnIsHoverChange,
     } = option;
 
     this.setExtraOffset(extraOffset, false);
     this.setNotifyReload(notifyReload);
-    Object.assign(this, { mainCanvas, redrawOnIsHoverChange });
+    this.mainCanvas = mainCanvas;
+    ["redrawOnIsHoverChange"].forEach((key) => {
+      /** @ts-ignore */
+      if (key in option) this[key] = option[key];
+    });
 
     this.internalUpdate({
       style,
@@ -149,7 +152,7 @@ export default abstract class Overlay<
   }
 
   /** 鼠标移入时是否重新绘制 */
-  redrawOnIsHoverChange = false;
+  redrawOnIsHoverChange = true;
   /** 默认 hover  事件 */
   defaultHover: EventHandler<"hover"> = (event, mouseEvent) => {
     this.redrawOnIsHoverChange && this.notifyReload?.();

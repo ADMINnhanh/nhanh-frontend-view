@@ -27,6 +27,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   /** 控制点 */
   protected handlePoints: Point[] = [];
 
+  /** 当前是否渲染了控制点 */
+  protected isShowHandlePoint = false;
   /** 是否可显示控制点 */
   private _isHandlePointsVisible = true;
   /** 是否可显示控制点 */
@@ -40,9 +42,6 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     }
   }
 
-  /** 当前是否渲染了控制点 */
-  protected isShowHandlePoint = false;
-
   /** 是否闭合 */
   protected abstract isClosed: boolean;
   /** 是否可以创建新的 控制点 */
@@ -53,8 +52,6 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   private lockedCanCreateOrDeleteHandlePoint = false;
 
   constructor(option: ConstructorOption<T>) {
-    option.redrawOnIsHoverChange = option.redrawOnIsHoverChange ?? true;
-
     super(option);
 
     ["isHandlePointsVisible", "canCreateOrDeleteHandlePoint"].forEach((key) => {

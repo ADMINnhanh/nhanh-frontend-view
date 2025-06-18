@@ -12,8 +12,6 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   private angle = 2 * Math.PI;
 
   constructor(option: ConstructorOption) {
-    option.redrawOnIsHoverChange = option.redrawOnIsHoverChange ?? true;
-
     super(option);
 
     this.addEventListener("hover", this.defaultHover);

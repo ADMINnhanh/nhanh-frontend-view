@@ -90,6 +90,7 @@ export const layer = new _Canvas.Layer({
   scaleRange: [0.2, 100],
 });
 const overlayGroups: OverlayGroup[] = [];
+/** 省级行政区 点位 */
 export const provincialAdministrativeRegions: OverlayType[] = [];
 ChinaData().then((chinaData) => {
   chinaData.forEach((item) => {
