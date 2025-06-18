@@ -144,6 +144,7 @@ ChinaData().then((chinaData) => {
         name: "省会城市 " + name,
         value: center,
         scaleRange: [0.9, 100],
+        zIndex: 1,
       });
       const capitalCity_text = new _Canvas.Text({
         name: "省会城市 " + name,
@@ -151,6 +152,7 @@ ChinaData().then((chinaData) => {
         value: center,
         extraOffset: { x: 0, y: 20 },
         scaleRange: [1.1, 100],
+        zIndex: 1,
       });
 
       capitalCity_point.addEventListener("click", clickEvent);
@@ -212,12 +214,14 @@ attractions.forEach((attraction) => {
     value,
     extData: attraction,
     scaleRange: [1, 100],
+    zIndex: 1,
   });
   const text = new _Canvas.Text({
     text: name,
     value,
     extraOffset: { x: 0, y: 20 },
     scaleRange: [1.4, 100],
+    zIndex: 1,
   });
 
   group.addEventListener("click", (event) => {
