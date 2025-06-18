@@ -100,18 +100,13 @@ export default class OverlayGroup extends EventController {
     ][] = [];
 
     if (this.shouldRender() && this.overlays.size) {
-      let index = 1;
-
       Array.from(this.overlays.values())
         .sort((a, b) => a.zIndex - b.zIndex)
         .forEach((overlay) => {
           if (overlay.equalsMainCanvas(this.mainCanvas)) {
             const drawConfig = overlay.getDraw();
             if (drawConfig)
-              groupArr.push([
-                (Number(overlay.zIndex) || 0) + index++,
-                drawConfig,
-              ]);
+              groupArr.push([Number(overlay.zIndex) || 0, drawConfig]);
           } else {
             this.overlays.delete(overlay);
           }

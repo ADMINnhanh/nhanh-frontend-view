@@ -250,6 +250,7 @@ function updateConstruction() {
       state.errorTolCenter
     );
 }
+1;
 
 /* 查找 `arcTo()` 用于绘制路径的几何形状 */
 function findConstruction([P0, P1, P2], r, canvasSize, errorTolCenter) {

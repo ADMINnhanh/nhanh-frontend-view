@@ -8,6 +8,7 @@ import Text from "../OverlayGroup/text";
 import Point from "../OverlayGroup/point";
 import Line from "../OverlayGroup/line";
 import Polygon from "../OverlayGroup/polygon";
+import Arc from "../OverlayGroup/arc";
 
 type ConstructorOption = ConstructorParameters<typeof Style>[0];
 
@@ -94,8 +95,8 @@ export default class Draw extends Style {
     const axis_canvas = this.drawAxis?.drawAxisAndGrid();
     if (axis_canvas) canvasArr.push([0, axis_canvas, []]);
 
-    this.layerGroups.forEach(
-      (layerGroup) => (canvasArr = canvasArr.concat(layerGroup.fetchCanvas()))
+    this.layerGroups.forEach((layerGroup) =>
+      canvasArr.push(...layerGroup.fetchCanvas())
     );
     canvasArr.sort((a, b) => a[0] - b[0]);
 
@@ -125,12 +126,12 @@ export default class Draw extends Style {
 
         // 最后比较覆盖类型优先级
         const getPriority = (overlay: any) => {
-          if (overlay instanceof Custom) return 0;
-          if (overlay instanceof Text) return 1;
-          if (overlay instanceof Point) return 2;
-          if (overlay instanceof Line) return 3;
-          if (overlay instanceof Polygon) return 4;
-          return 5; // 默认优先级
+          if (overlay instanceof Custom) return 5;
+          if (overlay instanceof Text) return 4;
+          if (overlay instanceof Point) return 3;
+          if (overlay instanceof Line || overlay instanceof Arc) return 2;
+          if (overlay instanceof Polygon) return 1;
+          return 0; // 默认优先级
         };
 
         return getPriority(bOverlay) - getPriority(aOverlay);
@@ -181,8 +182,12 @@ export default class Draw extends Style {
   protected findOverlayByPoint(x: number, y: number) {
     return (
       [...this.currentDrawOverlays]
-        /** 优先触发处于  isClick 状态的覆盖物 */
-        .sort((a, b) => (a.isClick ? 0 : 1) - (b.isClick ? 0 : 1))
+        /** 覆盖物可以拖拽的情况下优先触发处于 isClick 状态的覆盖物 */
+        .sort(
+          (a, b) =>
+            (a.isDraggable && a.isClick ? 0 : 1) -
+            (b.isDraggable && b.isClick ? 0 : 1)
+        )
         .find((overlay) => overlay.isPointInAnywhere(x, y))
     );
   }
