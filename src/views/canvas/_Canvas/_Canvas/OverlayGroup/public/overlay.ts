@@ -119,8 +119,6 @@ export default abstract class Overlay<
 
     super(option);
 
-    const { style, zIndex = 0, position, dynamicPosition, value } = option;
-
     this.setNotifyReload(notifyReload);
     this.mainCanvas = mainCanvas;
     ["redrawOnIsHoverChange"].forEach((key) => {
@@ -128,13 +126,19 @@ export default abstract class Overlay<
       if (key in option) this[key] = option[key];
     });
 
-    this.internalUpdate({
-      style,
-      zIndex,
-      position,
-      dynamicPosition,
-      value,
+    const value = {};
+    [
+      "offset",
+      "style",
+      "zIndex",
+      "position",
+      "dynamicPosition",
+      "value",
+    ].forEach((key) => {
+      /** @ts-ignore */
+      if (key in option) value[key] = option[key];
     });
+    this.internalUpdate(value);
 
     this.addEventListener("hover", this.defaultHover);
   }
@@ -142,6 +146,7 @@ export default abstract class Overlay<
   /** 请勿在实体对象中调用此方法，此方法仅用于类内部无副作用更新 （请勿使用！） */
   internalUpdate(
     option: {
+      offset?: { x: number; y: number };
       position?: V;
       value?: V;
       dynamicPosition?: V;

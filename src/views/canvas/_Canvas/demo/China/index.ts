@@ -151,7 +151,7 @@ ChinaData().then((chinaData) => {
         name: "省会城市 " + name,
         text: item.properties.name,
         value: center,
-        extraOffset: { x: 0, y: 20 },
+        offset: { x: 0, y: 20 },
         scaleRange: [1.1, 100],
         zIndex: 1,
       });
@@ -220,7 +220,7 @@ attractions.forEach((attraction) => {
   const text = new _Canvas.Text({
     text: name,
     value,
-    extraOffset: { x: 0, y: 20 },
+    offset: { x: 0, y: 20 },
     scaleRange: [1.4, 100],
     zIndex: 1,
   });
