@@ -95,6 +95,7 @@ export default abstract class Overlay<
   set offset(offset: { x: number; y: number }) {
     this._offset = offset;
 
+    this.calculateOffsetValue();
     this.notifyReload?.();
   }
   /** 带偏移的动态位置 */
@@ -191,12 +192,28 @@ export default abstract class Overlay<
   }
 
   /** 值范围 */
-  valueScope?: {
+  private _valueScope?: {
     minX: number;
     maxX: number;
     minY: number;
     maxY: number;
   };
+  /** 值范围 */
+  get valueScope() {
+    return this._valueScope;
+  }
+  private set valueScope(
+    value:
+      | {
+          minX: number;
+          maxX: number;
+          minY: number;
+          maxY: number;
+        }
+      | undefined
+  ) {
+    this._valueScope = value;
+  }
   /** 更新值范围 */
   protected abstract updateValueScope(): void;
   /** 初始化值范围 */
