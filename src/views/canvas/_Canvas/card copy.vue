@@ -308,7 +308,7 @@ function findConstruction([P0, P1, P2], r, canvasSize, errorTolCenter) {
     /* 夹角接近于 0 或 180 度 */
     return [false];
   }
-  const angle = Math.acos(Math2D.dot(dir1_unit, dir2_unit));
+  const angle = Math.acos(dp);
 
   /* 到切线点 T1 和 T2 的距离 --
    * (T1, P1, C) 构成一个直角三角形 (T2, P1, C) 与上述三角形相同。

@@ -124,17 +124,17 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       style = defaultStyle;
     }
 
-    if (ctx) this.setBaseLineStyle(ctx, style);
+    if (ctx) this.setBaseLineStyle(ctx, style.stroke);
 
     return style;
   }
-  protected get handlePointStyle() {
-    return this.setOverlayStyles().point;
+  protected get computedValueScopeStyles() {
+    return this.setOverlayStyles();
   }
   /** 绘制线段 */
   drawLine(ctx: CanvasRenderingContext2D, position?: [number, number][]) {
     const { mainCanvas, isInfinite, isClick } = this;
-    position = position || this.dynamicPosition;
+    position = position || this.dynamicPositionWithOffset;
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
 
@@ -163,13 +163,15 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   }
   /** 绘制无限延伸线段 */
   drawisInfiniteStraightLine(ctx: CanvasRenderingContext2D) {
-    const { mainCanvas, dynamicPosition } = this;
+    const { mainCanvas, dynamicPositionWithOffset } = this;
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
 
     const { rect } = mainCanvas;
 
-    const [start, end]: [number, number][] = _Clone(dynamicPosition!) as any;
+    const [start, end]: [number, number][] = _Clone(
+      dynamicPositionWithOffset!
+    ) as any;
 
     // 方向向量计算（终点到起点）
     const dirVector: [number, number] = [end[0] - start[0], end[1] - start[1]];

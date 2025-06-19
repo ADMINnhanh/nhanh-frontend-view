@@ -17,8 +17,8 @@ type ConstructorOption<T, V> = ConstructorParameters<
   dynamicPosition?: V;
   /** 坐标轴上的值 */
   value?: V;
-  /** 额外偏移 */
-  extraOffset?: { x: number; y: number };
+  /** 偏移 */
+  offset?: { x: number; y: number };
   /** 鼠标移入时是否重新绘制 */
   redrawOnIsHoverChange?: boolean;
 };
@@ -37,7 +37,7 @@ export default abstract class Overlay<
   set style(style: Overlay<T, V>["_style"] | undefined) {
     this._style = style;
 
-    this.calculatePointRadiusValue();
+    this.updateValueScope();
     this.notifyReload?.();
   }
 
@@ -87,6 +87,25 @@ export default abstract class Overlay<
     this._dynamicPosition = dynamicPosition;
   }
 
+  private _offset = { x: 0, y: 0 };
+  /** 偏移量 */
+  get offset() {
+    return this._offset;
+  }
+  set offset(offset: { x: number; y: number }) {
+    this._offset = offset;
+
+    this.notifyReload?.();
+  }
+  /** 带偏移的动态位置 */
+  get dynamicPositionWithOffset() {
+    const { x, y } = this.offset;
+    return this.dynamicPosition?.map((v, i) => {
+      if (typeof v === "number") return i == 0 ? v + x : v + y;
+      return [v[0] + x, v[1] + y];
+    }) as V;
+  }
+
   /** 绘制路径 */
   protected path?: Path2D;
 
@@ -99,16 +118,8 @@ export default abstract class Overlay<
 
     super(option);
 
-    const {
-      extraOffset,
-      style,
-      zIndex = 0,
-      position,
-      dynamicPosition,
-      value,
-    } = option;
+    const { style, zIndex = 0, position, dynamicPosition, value } = option;
 
-    this.setExtraOffset(extraOffset, false);
     this.setNotifyReload(notifyReload);
     this.mainCanvas = mainCanvas;
     ["redrawOnIsHoverChange"].forEach((key) => {
@@ -179,13 +190,6 @@ export default abstract class Overlay<
       : undefined;
   }
 
-  /** 静态的值范围 不含偏移、点半径 */
-  staticValueScope?: {
-    minX: number;
-    maxX: number;
-    minY: number;
-    maxY: number;
-  };
   /** 值范围 */
   valueScope?: {
     minX: number;
@@ -209,153 +213,221 @@ export default abstract class Overlay<
         minY = Math.min(minY, y);
         maxY = Math.max(maxY, y);
       });
-      this.valueScope = {
-        minX,
-        maxX,
-        minY,
-        maxY,
-      };
+      this.valueScope = { minX, maxX, minY, maxY };
     } else {
       const [x, y] = value as [number, number];
-      this.valueScope = {
-        minX: x,
-        maxX: x,
-        minY: y,
-        maxY: y,
-      };
+      this.valueScope = { minX: x, maxX: x, minY: y, maxY: y };
     }
-    this.staticValueScope = { ...this.valueScope };
-
-    ["extraScope", "extraOffset", "lastPointRadius"].forEach((item) => {
-      /** @ts-ignore */
-      Object.keys(this[item]).forEach((key) => (this[item][key] = 0));
-    });
-
-    this.calculatePointRadiusValue();
-    this.setExtraOffset(this.extraOffset, false);
+    this.calculateStyleRadiusValue(false);
+    this.calculateOffsetValue(false);
+    this.setFixedExtraScope(true);
+    this.setExtraScope(true);
   }
 
-  /** 额外范围 */
-  protected extraScope = {
+  /** 计算 valueScope 所需要的样式 */
+  protected abstract get computedValueScopeStyles(): {
+    stroke?: BaseLineStyle;
+    point?: PointStyleType;
+  };
+  /** 描边半径值 */
+  private styleRadius = {
+    value: 0,
+    radius: 0,
+  };
+  /** 计算样式半径值 */
+  protected calculateStyleRadiusValue(uselastFact = true) {
+    if (!this.mainCanvas || !this.valueScope) return;
+
+    if (uselastFact) {
+      const { radius, value } = this.styleRadius;
+      if (radius == 0) return;
+      const radiusValue = this.mainCanvas.getAxisValueByPoint(radius, 0).xV;
+      const offset = radiusValue - value;
+
+      this.valueScope.minX -= offset;
+      this.valueScope.maxX += offset;
+      this.valueScope.minY -= offset;
+      this.valueScope.maxY += offset;
+
+      this.styleRadius = { radius, value: radiusValue };
+    } else {
+      const { stroke, point } = this.computedValueScopeStyles;
+      const pointRadius = point
+        ? point.radius + Math.max(0, point.width / 2)
+        : 0;
+      const strokeRadius = stroke ? Math.max(0, stroke.width / 2) : 0;
+
+      const radius = Math.max(pointRadius, strokeRadius);
+
+      if (radius == 0) return (this.styleRadius = { radius: 0, value: 0 });
+
+      const radiusValue = this.mainCanvas.getAxisValueByPoint(radius, 0).xV;
+
+      this.valueScope.minX -= radiusValue;
+      this.valueScope.maxX += radiusValue;
+      this.valueScope.minY -= radiusValue;
+      this.valueScope.maxY += radiusValue;
+
+      this.styleRadius = { radius, value: radiusValue };
+    }
+  }
+  /** 额外偏移 */
+  private offsetValue = {
+    xV: 0,
+    yV: 0,
+  };
+  /** 计算偏移 */
+  protected calculateOffsetValue(uselastFact = true) {
+    const { mainCanvas, valueScope, offset, offsetValue } = this;
+    if (!mainCanvas || !valueScope) return;
+
+    if (uselastFact) {
+      const { xV, yV } = mainCanvas.getAxisValueByPoint(offset.x, offset.y);
+
+      const offsetXV = xV - offsetValue.xV;
+      const offsetYV = yV - offsetValue.yV;
+
+      valueScope.minX += offsetXV;
+      valueScope.maxX += offsetXV;
+      valueScope.minY += offsetYV;
+      valueScope.maxY += offsetYV;
+
+      this.offsetValue = { xV, yV };
+    } else {
+      this.offsetValue = { xV: 0, yV: 0 };
+      if (offset.x == 0 && offset.y == 0) return;
+      this.calculateOffsetValue();
+    }
+  }
+  /** 固定的额外范围 */
+  private fixedExtraScope = {
     topV: 0,
     bottomV: 0,
     leftV: 0,
     rightV: 0,
   };
-  /** 设置额外范围 */
-  setExtraScope(extraScope?: {
-    top: number;
-    bottom: number;
-    left: number;
-    right: number;
-  }) {
-    extraScope = extraScope || { top: 0, bottom: 0, left: 0, right: 0 };
-    if (this.valueScope) {
-      const { xV: topV, yV: bottomV } = this.mainCanvas!.getAxisValueByPoint(
-        extraScope.top,
-        extraScope.bottom
-      );
-      const { xV: leftV, yV: rightV } = this.mainCanvas!.getAxisValueByPoint(
-        extraScope.left,
-        extraScope.right
-      );
-
-      this.setExtraScopeByValue({ topV, bottomV, leftV, rightV });
-    }
-  }
-  /** 设置额外范围 */
-  setExtraScopeByValue(extraScope?: {
+  /** 初始化设置固定的额外范围 */
+  protected setFixedExtraScope(init: true): void;
+  /** 设置固定的额外范围 */
+  protected setFixedExtraScope(fixedExtraScope?: {
     topV: number;
     bottomV: number;
     leftV: number;
     rightV: number;
-  }) {
-    extraScope = extraScope || { topV: 0, bottomV: 0, leftV: 0, rightV: 0 };
-    if (this.valueScope) {
-      const { leftV, rightV, topV, bottomV } = extraScope;
+  }): void;
+  /** 设置固定的额外范围 */
+  protected setFixedExtraScope(
+    value?:
+      | {
+          topV: number;
+          bottomV: number;
+          leftV: number;
+          rightV: number;
+        }
+      | true
+  ) {
+    if (value === true) {
+      this.fixedExtraScope = { topV: 0, bottomV: 0, leftV: 0, rightV: 0 };
+    } else {
+      const fixedExtraScope = value || {
+        topV: 0,
+        bottomV: 0,
+        leftV: 0,
+        rightV: 0,
+      };
+      if (this.valueScope) {
+        const { leftV, rightV, topV, bottomV } = fixedExtraScope;
 
-      this.valueScope.minX -= leftV - this.extraScope.leftV;
-      this.valueScope.maxX += rightV - this.extraScope.rightV;
-      this.valueScope.minY -= topV - this.extraScope.topV;
-      this.valueScope.maxY += bottomV - this.extraScope.bottomV;
+        this.valueScope.minX -= leftV - this.fixedExtraScope.leftV;
+        this.valueScope.maxX += rightV - this.fixedExtraScope.rightV;
+        this.valueScope.minY -= topV - this.fixedExtraScope.topV;
+        this.valueScope.maxY += bottomV - this.fixedExtraScope.bottomV;
 
-      Object.assign(this.extraScope, extraScope);
+        this.fixedExtraScope = fixedExtraScope;
+      }
     }
   }
-
-  /** 额外偏移 */
-  protected extraOffset = {
-    x: 0,
-    y: 0,
-    xV: 0,
-    yV: 0,
+  /** 额外范围 */
+  private extraScope = {
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    topV: 0,
+    bottomV: 0,
+    leftV: 0,
+    rightV: 0,
   };
-  /** 设置额外偏移 */
-  setExtraOffset(extraOffset?: { x: number; y: number }, reload = true) {
-    extraOffset = extraOffset || { x: 0, y: 0 };
-    if (!this.valueScope) return Object.assign(this.extraOffset, extraOffset);
+  /** 初始化设置额外范围 */
+  protected setExtraScope(init: true): void;
+  /** 更新额外范围 */
+  protected setExtraScope(): void;
+  /** 设置新的额外范围 */
+  protected setExtraScope(extraScope?: {
+    top: number;
+    bottom: number;
+    left: number;
+    right: number;
+  }): void;
+  /** 设置额外范围 */
+  protected setExtraScope(
+    value?:
+      | {
+          top: number;
+          bottom: number;
+          left: number;
+          right: number;
+        }
+      | true
+  ) {
+    const { valueScope, mainCanvas, extraScope } = this;
+    if (!valueScope || !mainCanvas) return;
 
-    const { xV, yV } = this.mainCanvas!.getAxisValueByPoint(
-      extraOffset.x,
-      extraOffset.y
-    );
+    if (value === true) {
+      this.extraScope = {
+        top: 0,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        topV: 0,
+        bottomV: 0,
+        leftV: 0,
+        rightV: 0,
+      };
+    } else if (value) {
+      const { left, right, top, bottom } = value;
 
-    const offsetXV = xV - this.extraOffset.xV;
-    const offsetYV = yV - this.extraOffset.yV;
+      const { xV: topV, yV: bottomV } = mainCanvas.getAxisValueByPoint(
+        top,
+        bottom
+      );
+      const { xV: leftV, yV: rightV } = mainCanvas.getAxisValueByPoint(
+        left,
+        right
+      );
 
-    this.valueScope.minX -= offsetXV;
-    this.valueScope.maxX += offsetXV;
-    this.valueScope.minY -= offsetYV;
-    this.valueScope.maxY += offsetYV;
+      valueScope.minX -= leftV - extraScope.leftV;
+      valueScope.maxX += rightV - extraScope.rightV;
+      valueScope.minY -= topV - extraScope.topV;
+      valueScope.maxY += bottomV - extraScope.bottomV;
 
-    Object.assign(this.extraOffset, extraOffset, {
-      xV,
-      yV,
-    });
-    reload && this.notifyReload?.();
-  }
-
-  /** 获取控制点样式 */
-  protected abstract get handlePointStyle(): PointStyleType | undefined;
-  /** 点位半径值 */
-  private lastPointRadius = {
-    value: 0,
-    radius: 0,
-  };
-  /** 计算点位半径值 */
-  protected calculatePointRadiusValue(uselastFact = false) {
-    if (!this.mainCanvas || !this.valueScope) return;
-    if (uselastFact && this.lastPointRadius.value == 0) return;
-
-    const radius = (() => {
-      if (uselastFact) return this.lastPointRadius.radius;
-      const style = this.handlePointStyle;
-      if (style) return style.radius + Math.max(0, style.width / 2);
-    })();
-    if (radius === undefined) return;
-
-    const radiusValue = this.mainCanvas.getAxisValueByPoint(radius, 0).xV;
-
-    const offset = radiusValue - this.lastPointRadius.value;
-
-    this.valueScope.minX -= offset;
-    this.valueScope.maxX += offset;
-    this.valueScope.minY -= offset;
-    this.valueScope.maxY += offset;
-
-    this.lastPointRadius = { radius, value: radiusValue };
+      this.extraScope = { ...value, topV, bottomV, leftV, rightV };
+    } else {
+      this.setExtraScope(this.extraScope);
+    }
   }
 
   /** 判断是否在可视范围内 */
   protected get isWithinRange() {
-    const { mainCanvas, valueScope, extraOffset } = this;
+    const { mainCanvas, valueScope } = this;
     if (!mainCanvas) return false;
 
-    const { isScaleUpdated, maxMinValue, axisConfig } = mainCanvas;
+    const { isScaleUpdated, maxMinValue } = mainCanvas;
 
     if (isScaleUpdated) {
-      this.setExtraOffset(extraOffset, false);
-      this.calculatePointRadiusValue(true);
+      this.calculateStyleRadiusValue();
+      this.calculateOffsetValue();
+      this.setExtraScope();
     }
 
     return valueScope

@@ -13,7 +13,7 @@ const demoName: [string, string][] = [
   // ["text.vue", "文字"],
   // ["point.vue", "点"],
   // ["line.vue", "线"],
-  // ["arc.vue", "圆弧"],
+  ["arc.vue", "圆弧"],
   // ["arcTo.vue", "圆角"],
   // ["bezierCurve.vue", "贝塞尔曲线"],
   // ["ellipse.vue", "椭圆弧"],

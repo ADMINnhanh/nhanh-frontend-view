@@ -139,7 +139,7 @@ export default class QuickMethod extends Event {
       maxY = -Infinity;
 
     for (const overlay of overlays) {
-      const scope = overlay.staticValueScope!;
+      const scope = overlay.valueScope!;
       minX = Math.min(minX, scope.minX);
       maxX = Math.max(maxX, scope.maxX);
       minY = Math.min(minY, scope.minY);

@@ -227,15 +227,15 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     }
     return style;
   }
-  protected get handlePointStyle() {
-    return this.setOverlayStyles().point;
+  protected get computedValueScopeStyles() {
+    return this.setOverlayStyles();
   }
 
   /** 绘制矩形 */
   drawRect(ctx: CanvasRenderingContext2D) {
     this.setGlobalAlpha(ctx);
 
-    const [[x1, y1], [x2, y2]] = this.dynamicPosition!;
+    const [[x1, y1], [x2, y2]] = this.dynamicPositionWithOffset;
     const width = Math.abs(x2 - x1);
     const height = Math.abs(y2 - y1);
     const left = Math.min(x1, x2);
@@ -267,7 +267,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   drawPolygon(ctx: CanvasRenderingContext2D) {
     this.setGlobalAlpha(ctx);
 
-    const dynamicPosition = this.dynamicPosition!;
+    const dynamicPosition = this.dynamicPositionWithOffset;
 
     const style = this.setOverlayStyles(ctx);
 

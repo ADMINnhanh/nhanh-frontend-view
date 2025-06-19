@@ -61,16 +61,7 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
     if (this._radiusValue != radius) {
       this._radiusValue = radius;
 
-      if (this.mainCanvas) {
-        this._radiusPosition = this.mainCanvas.getAxisPointByValue(
-          radius,
-          0,
-          true
-        ).x;
-
-        this.updateExtraScope();
-        this.updateHandlePoints();
-      }
+      this.updateBaseData();
     }
   }
   private _radiusPosition = 0;
@@ -82,15 +73,7 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
     if (this._radiusPosition != radius) {
       this._radiusPosition = radius;
 
-      if (this.mainCanvas) {
-        this._radiusValue = this.mainCanvas.getAxisValueByPoint(
-          radius,
-          0,
-          true
-        ).xV;
-        this.updateExtraScope();
-        this.updateHandlePoints();
-      }
+      this.updateBaseData();
     }
   }
 
@@ -227,8 +210,8 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
 
     return style;
   }
-  protected get handlePointStyle() {
-    return this.setOverlayStyles().point;
+  protected get computedValueScopeStyles() {
+    return this.setOverlayStyles();
   }
 
   /** 更新控制点 */

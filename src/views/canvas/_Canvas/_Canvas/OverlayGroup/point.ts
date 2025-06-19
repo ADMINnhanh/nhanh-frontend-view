@@ -200,11 +200,11 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
 
     return { ...style };
   }
-  protected get handlePointStyle() {
-    return this.setOverlayStyles();
+  protected get computedValueScopeStyles() {
+    return { point: this.setOverlayStyles() };
   }
   draw(ctx: CanvasRenderingContext2D) {
-    const { dynamicPosition, mainCanvas, extraOffset } = this;
+    const { dynamicPositionWithOffset, mainCanvas } = this;
 
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
@@ -212,8 +212,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     const { radius, width } = this.setOverlayStyles(ctx);
     const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
 
-    const x = dynamicPosition![0] + extraOffset.x;
-    const y = dynamicPosition![1] + extraOffset.y;
+    const [x, y] = dynamicPositionWithOffset;
 
     ctx.beginPath();
 

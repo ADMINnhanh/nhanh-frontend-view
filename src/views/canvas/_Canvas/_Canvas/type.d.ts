@@ -64,7 +64,9 @@ type BaseLineStyle = {
 };
 
 /** 线样式 */
-type LineStyleType = BaseLineStyle & {
+type LineStyleType = {
+  /** 描边 */
+  stroke: BaseLineStyle;
   /** 点位样式 */
   point: PointStyleType;
 };

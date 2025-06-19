@@ -76,17 +76,9 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   set radiusValue(radius: number) {
     if (this._radiusValue != radius) {
       this._radiusValue = radius;
+      this._radiusPosition = 0;
 
-      if (this.mainCanvas) {
-        this._radiusPosition = this.mainCanvas.getAxisPointByValue(
-          radius,
-          0,
-          true
-        ).x;
-
-        this.updateExtraScope();
-        this.updateHandlePoints();
-      }
+      this.updateBaseData();
     }
   }
   private _radiusPosition = 0;
@@ -97,16 +89,9 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   set radiusPosition(radius: number) {
     if (this._radiusPosition != radius) {
       this._radiusPosition = radius;
+      this._radiusValue = 0;
 
-      if (this.mainCanvas) {
-        this._radiusValue = this.mainCanvas.getAxisValueByPoint(
-          radius,
-          0,
-          true
-        ).xV;
-        this.updateExtraScope();
-        this.updateHandlePoints();
-      }
+      this.updateBaseData();
     }
   }
 
@@ -233,14 +218,23 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         } else if (handlePoint == radius) {
           const v = offsetX / 2 / this.mainCanvas.percentage;
           if (this.radiusPosition + v > 0) this.radiusPosition += v;
+          console.log(this.radiusPosition);
         }
       } else moveTheWhole();
     } else moveTheWhole();
   };
 
   protected updateValueScope() {
-    this.initValueScope();
-    this.updateExtraScope();
+    const { mainCanvas, radiusValue } = this;
+    if (mainCanvas) {
+      this.initValueScope();
+      this.setFixedExtraScope({
+        topV: radiusValue,
+        bottomV: radiusValue,
+        leftV: radiusValue,
+        rightV: radiusValue * 2,
+      });
+    }
   }
 
   isPointInPath(x: number, y: number) {
@@ -309,8 +303,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     }
     return style;
   }
-  protected get handlePointStyle() {
-    return this.setOverlayStyles().point;
+  protected get computedValueScopeStyles() {
+    return this.setOverlayStyles();
   }
 
   /** 控制点 */
@@ -372,20 +366,6 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       end: endPoint,
       radius: radiusPoint,
     };
-  }
-  /** 更新额外范围 */
-  private updateExtraScope() {
-    const { mainCanvas, radiusValue } = this;
-    if (mainCanvas) {
-      if (radiusValue == 0) this.setExtraScopeByValue();
-      else
-        this.setExtraScopeByValue({
-          topV: radiusValue,
-          bottomV: radiusValue,
-          leftV: radiusValue,
-          rightV: radiusValue * 2,
-        });
-    }
   }
 
   protected updateBaseData() {
@@ -463,7 +443,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     ctx.beginPath();
     ctx.moveTo(x, y);
-    const radiusPoint = this.handlePoints.radius!.dynamicPosition!;
+    const radiusPoint = this.handlePoints.radius!.dynamicPositionWithOffset;
     ctx.lineTo(radiusPoint[0], radiusPoint[1]);
     ctx.stroke();
 
@@ -476,9 +456,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
   draw(ctx: CanvasRenderingContext2D) {
     const {
-      dynamicPosition,
+      dynamicPositionWithOffset,
       mainCanvas,
-      extraOffset,
       startAngle,
       endAngle,
       counterclockwise,
@@ -492,8 +471,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     const style = this.setOverlayStyles(ctx);
 
-    const x = dynamicPosition![0] + extraOffset.x;
-    const y = dynamicPosition![1] + extraOffset.y;
+    const [x, y] = dynamicPositionWithOffset;
 
     ctx.beginPath();
     this.path = new Path2D();

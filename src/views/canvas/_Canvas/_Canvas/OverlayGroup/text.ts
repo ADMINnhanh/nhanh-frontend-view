@@ -41,41 +41,33 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     const { offsetX, offsetY } = event.data;
     const { x, y } = this.calculateOffset(offsetX, offsetY);
 
-    this.internalUpdate({
-      value: [this.value![0] + x.value, this.value![1] + y.value],
-      position: [
-        this.position![0] + x.position,
-        this.position![1] + y.position,
-      ],
-      dynamicPosition: [
-        this.dynamicPosition![0] + x.dynamicPosition,
-        this.dynamicPosition![1] + y.dynamicPosition,
-      ],
-    });
+    this.internalUpdate(
+      {
+        value: [this.value![0] + x.value, this.value![1] + y.value],
+        position: [
+          this.position![0] + x.position,
+          this.position![1] + y.position,
+        ],
+        dynamicPosition: [
+          this.dynamicPosition![0] + x.dynamicPosition,
+          this.dynamicPosition![1] + y.dynamicPosition,
+        ],
+      },
+      true
+    );
 
     this.notifyReload?.();
   };
 
   protected updateValueScope() {
-    const { textOffset, value } = this;
-
-    const { xV: width, yV: height } = this.mainCanvas!.getAxisValueByPoint(
-      textOffset.x * 2,
-      textOffset.y * 2
-    );
-    this.valueScope = {
-      minX: value![0] - width / 2,
-      maxX: value![0] + width / 2,
-      minY: value![1] - height / 2,
-      maxY: value![1] + height / 2,
-    };
-    this.staticValueScope = {
-      minX: value![0],
-      maxX: value![0],
-      minY: value![1],
-      maxY: value![1],
-    };
-    this.setExtraOffset(this.extraOffset, false);
+    this.initValueScope();
+    const textOffset = this.textOffset;
+    this.setExtraScope({
+      top: textOffset.y,
+      bottom: textOffset.y,
+      left: textOffset.x,
+      right: textOffset.x,
+    });
   }
 
   isPointInPath(x: number, y: number) {
@@ -124,7 +116,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       y: textMetrics.actualBoundingBoxAscent / 2,
     };
 
-    this.internalUpdate({ value, position, dynamicPosition });
+    this.internalUpdate({ value, position, dynamicPosition }, true);
   }
 
   /** 设置样式 */
@@ -152,23 +144,19 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     return style;
   }
-  protected get handlePointStyle() {
-    return undefined;
+  protected get computedValueScopeStyles() {
+    return {};
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    if (!this.mainCanvas) return;
+    const { text, textOffset, dynamicPositionWithOffset } = this;
+    if (!this.mainCanvas || !text) return;
     this.setGlobalAlpha(ctx);
-
-    const dynamicPosition = this.dynamicPosition!;
-    const textOffset = this.textOffset!;
-    const text = this.text!;
-    const extraOffset = this.extraOffset;
 
     this.setOverlayStyles(ctx);
 
-    const x = dynamicPosition[0] + extraOffset.x - textOffset.x;
-    const y = dynamicPosition[1] + extraOffset.y + textOffset.y;
+    const x = dynamicPositionWithOffset[0] - textOffset.x;
+    const y = dynamicPositionWithOffset[1] + textOffset.y;
 
     // 绘制文本的描边
     ctx.strokeText(text, x, y);
@@ -179,7 +167,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.path = new Path2D();
     this.path.rect(
       x,
-      dynamicPosition[1] + extraOffset.y - textOffset.y,
+      dynamicPositionWithOffset[1] - textOffset.y,
       textOffset.x * 2,
       textOffset.y * 2
     );
