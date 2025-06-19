@@ -1,4 +1,4 @@
-import { _AreAllArraysValid, _Clone } from "nhanh-pure-function";
+import { _AreAllArraysValid } from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
@@ -169,9 +169,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     const { rect } = mainCanvas;
 
-    const [start, end]: [number, number][] = _Clone(
-      dynamicPositionWithOffset!
-    ) as any;
+    const [start, end]: [number, number][] = dynamicPositionWithOffset!;
 
     // 方向向量计算（终点到起点）
     const dirVector: [number, number] = [end[0] - start[0], end[1] - start[1]];

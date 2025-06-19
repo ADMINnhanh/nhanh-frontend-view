@@ -1,8 +1,4 @@
-import {
-  _Clone,
-  _GetMidpoint,
-  _PointToLineDistance,
-} from "nhanh-pure-function";
+import { _GetMidpoint, _PointToLineDistance } from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./overlay";
 import Point from "../point";
