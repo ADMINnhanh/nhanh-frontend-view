@@ -33,9 +33,7 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
   protected updateBaseData() {
     if (!this.mainCanvas) return;
 
-    this.internalUpdate({
-      dynamicPosition: undefined,
-    });
+    this.internalUpdate({ dynamicPosition: undefined });
 
     let value = this.value as any;
     let position = this.position as any;
@@ -109,8 +107,8 @@ export default class Custom<T> extends Overlay<T, [number, number][]> {
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D): any {}
-  protected get handlePointStyle() {
-    return undefined;
+  protected get computedValueScopeStyles() {
+    return {};
   }
 
   private _draw?: (ctx: CanvasRenderingContext2D) => void;

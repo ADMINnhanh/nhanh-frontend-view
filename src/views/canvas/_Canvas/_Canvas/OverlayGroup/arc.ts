@@ -185,17 +185,20 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
       const points = (this.handlePointsArr as (Point | Arc)[]).concat(this);
       points.forEach((item) => {
-        item.internalUpdate({
-          value: [item.value![0] + x.value, item.value![1] + y.value],
-          position: [
-            item.position![0] + x.position,
-            item.position![1] + y.position,
-          ],
-          dynamicPosition: [
-            item.dynamicPosition![0] + x.dynamicPosition,
-            item.dynamicPosition![1] + y.dynamicPosition,
-          ],
-        });
+        item.internalUpdate(
+          {
+            value: [item.value![0] + x.value, item.value![1] + y.value],
+            position: [
+              item.position![0] + x.position,
+              item.position![1] + y.position,
+            ],
+            dynamicPosition: [
+              item.dynamicPosition![0] + x.dynamicPosition,
+              item.dynamicPosition![1] + y.dynamicPosition,
+            ],
+          },
+          true
+        );
       });
       this.notifyReload?.();
     };
@@ -214,7 +217,6 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         } else if (handlePoint == radius) {
           const v = offsetX / 2 / this.mainCanvas.percentage;
           if (this.radiusPosition + v > 0) this.radiusPosition += v;
-          console.log(this.radiusPosition);
         }
       } else moveTheWhole();
     } else moveTheWhole();
@@ -366,33 +368,6 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
   protected updateBaseData() {
     if (!this.mainCanvas) return;
-    let { value, position } = this;
-    const [isValue, isPosition] = [
-      _IsSingleArrayValid(value),
-      _IsSingleArrayValid(position),
-    ];
-
-    if (!isValue && !isPosition) {
-      return this.internalUpdate({ dynamicPosition: undefined });
-    } else if (isValue) {
-      const loc = this.mainCanvas.getAxisPointByValue(
-        value![0],
-        value![1],
-        true
-      );
-      position = [loc.x, loc.y];
-    } else {
-      const val = this.mainCanvas.getAxisValueByPoint(
-        position![0],
-        position![1],
-        true
-      );
-      value = [val.xV, val.yV];
-    }
-
-    const dynamicPosition = this.mainCanvas.transformPosition(position!);
-
-    this.internalUpdate({ value, position, dynamicPosition }, true);
 
     if (this.radiusValue)
       this._radiusPosition = this.mainCanvas.getAxisPointByValue(
@@ -406,6 +381,8 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         0,
         true
       ).xV;
+
+    if (!this.handleValuePosition("array1D")) return;
 
     this.updateHandlePoints();
   }

@@ -26,17 +26,20 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     const { offsetX, offsetY } = event.data;
     const { x, y } = this.calculateOffset(offsetX, offsetY);
 
-    this.internalUpdate({
-      value: [this.value![0] + x.value, this.value![1] + y.value],
-      position: [
-        this.position![0] + x.position,
-        this.position![1] + y.position,
-      ],
-      dynamicPosition: [
-        this.dynamicPosition![0] + x.dynamicPosition,
-        this.dynamicPosition![1] + y.dynamicPosition,
-      ],
-    });
+    this.internalUpdate(
+      {
+        value: [this.value![0] + x.value, this.value![1] + y.value],
+        position: [
+          this.position![0] + x.position,
+          this.position![1] + y.position,
+        ],
+        dynamicPosition: [
+          this.dynamicPosition![0] + x.dynamicPosition,
+          this.dynamicPosition![1] + y.dynamicPosition,
+        ],
+      },
+      true
+    );
 
     this.notifyReload?.();
   };
@@ -145,34 +148,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
   }
 
   protected updateBaseData() {
-    if (!this.mainCanvas) return;
-    let { value, position } = this;
-    const [isValue, isPosition] = [
-      _IsSingleArrayValid(value),
-      _IsSingleArrayValid(position),
-    ];
-
-    if (!isValue && !isPosition) {
-      return this.internalUpdate({ dynamicPosition: undefined });
-    } else if (isValue) {
-      const loc = this.mainCanvas.getAxisPointByValue(
-        value![0],
-        value![1],
-        true
-      );
-      position = [loc.x, loc.y];
-    } else {
-      const val = this.mainCanvas.getAxisValueByPoint(
-        position![0],
-        position![1],
-        true
-      );
-      value = [val.xV, val.yV];
-    }
-
-    const dynamicPosition = this.mainCanvas.transformPosition(position!);
-
-    this.internalUpdate({ value, position, dynamicPosition });
+    this.handleValuePosition("array1D");
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {

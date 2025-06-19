@@ -80,35 +80,11 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
   protected updateBaseData() {
     if (!this.mainCanvas) return;
+
     if (!this.text || this.text.length == 0)
       return this.internalUpdate({ dynamicPosition: undefined });
-    let { value, position } = this;
-    const [isValue, isPosition] = [
-      _IsSingleArrayValid(value),
-      _IsSingleArrayValid(position),
-    ];
 
-    if (!isValue && !isPosition) {
-      return this.internalUpdate({ dynamicPosition: undefined });
-    } else if (isValue) {
-      const loc = this.mainCanvas.getAxisPointByValue(
-        value![0],
-        value![1],
-        true
-      );
-      position = [loc.x, loc.y];
-    } else {
-      const val = this.mainCanvas.getAxisValueByPoint(
-        position![0],
-        position![1],
-        true
-      );
-      value = [val.xV, val.yV];
-    }
-
-    const dynamicPosition = this.mainCanvas.transformPosition(position!);
-
-    const ctx = this.mainCanvas.ctx;
+    const ctx = Overlay.ctx;
     this.setOverlayStyles(ctx);
     const textMetrics = ctx.measureText(this.text);
     this.textOffset = {
@@ -116,7 +92,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
       y: textMetrics.actualBoundingBoxAscent / 2,
     };
 
-    this.internalUpdate({ value, position, dynamicPosition }, true);
+    this.handleValuePosition("array1D");
   }
 
   /** 设置样式 */

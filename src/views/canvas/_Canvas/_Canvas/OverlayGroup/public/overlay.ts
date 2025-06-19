@@ -2,7 +2,11 @@ import _Canvas from "../..";
 import { type OverlayType } from "../index";
 import type { EventHandler } from "../../public/eventController";
 import EventController from "../../public/eventController";
-import { _Clone } from "nhanh-pure-function";
+import {
+  _AreAllArraysValid,
+  _Clone,
+  _IsSingleArrayValid,
+} from "nhanh-pure-function";
 
 type ConstructorOption<T, V> = ConstructorParameters<
   typeof EventController
@@ -37,6 +41,7 @@ export default abstract class Overlay<
   set style(style: Overlay<T, V>["_style"] | undefined) {
     this._style = style;
 
+    if (!this.mainCanvas) return;
     this.updateValueScope();
     this.notifyReload?.();
   }
@@ -159,9 +164,6 @@ export default abstract class Overlay<
     for (const key in option) {
       if (Object.prototype.hasOwnProperty.call(option, key)) {
         this[("_" + key) as never] = option[key as never];
-
-        if (updateValueScope === undefined)
-          updateValueScope = ["value", "position"].includes(key);
       }
     }
 
@@ -488,6 +490,61 @@ export default abstract class Overlay<
       dynamicPosition: offsetY,
     };
     return { x, y };
+  }
+  /** 处理一维数组的坐标数据 */
+  protected handleValuePosition(type: "array1D"): boolean;
+  /** 处理二维数组的坐标数据 */
+  protected handleValuePosition(type: "array2D", minLen: number): boolean;
+  protected handleValuePosition(type: "array1D" | "array2D", minLen?: number) {
+    let { value, position, mainCanvas } = this;
+
+    if (!mainCanvas) return false;
+
+    const valid = type === "array1D" ? _IsSingleArrayValid : _AreAllArraysValid;
+    const [isValue, isPosition] = [
+      valid(value) && (!minLen || value!.length >= minLen),
+      valid(position) && (!minLen || position!.length >= minLen),
+    ];
+
+    let newV: { value: any; position: any; dynamicPosition: any } = {
+      value,
+      position,
+      dynamicPosition: [],
+    };
+
+    if (!isValue && !isPosition) {
+      this.internalUpdate({ dynamicPosition: undefined });
+      return false;
+    } else if (isValue) {
+      const v = value as any;
+      if (type === "array1D") {
+        const loc = mainCanvas.getAxisPointByValue(v[0], v[1], true);
+        newV.position = [loc.x, loc.y];
+      } else {
+        newV.position = [];
+        for (let i = 0; i < v.length; i++) {
+          const item = v![i];
+          const loc = mainCanvas.getAxisPointByValue(item[0], item[1], true);
+          newV.position.push([loc.x, loc.y]);
+        }
+      }
+    } else {
+      const p = position as any;
+      if (type === "array1D") {
+        const loc = mainCanvas.getAxisValueByPoint(p[0], p[1], true);
+        newV.value = [loc.xV, loc.yV];
+      } else {
+        newV.value = [];
+        for (let i = 0; i < p.length; i++) {
+          const item = p![i];
+          const loc = mainCanvas.getAxisValueByPoint(item[0], item[1], true);
+          newV.value.push([loc.xV, loc.yV]);
+        }
+      }
+    }
+    newV.dynamicPosition = mainCanvas.transformPosition(newV.position);
+    this.internalUpdate(newV, true);
+    return true;
   }
 
   /** 更新基础数据 */

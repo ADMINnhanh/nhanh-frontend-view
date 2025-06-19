@@ -76,37 +76,12 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     return isLine || isPoint;
   }
 
+  protected get isWithinRange() {
+    if (this.isInfinite) return true;
+    return super.isWithinRange;
+  }
   protected updateBaseData() {
-    if (!this.mainCanvas) return;
-
-    let { value, position } = this;
-    const [isValue, isPosition] = [
-      _AreAllArraysValid(value) && value!.length > 1,
-      _AreAllArraysValid(position) && position!.length > 1,
-    ];
-
-    if (!isValue && !isPosition) {
-      this.handlePoints = [];
-      return this.internalUpdate({ dynamicPosition: undefined });
-    } else if (isValue) {
-      position = [];
-      for (let i = 0; i < value!.length; i++) {
-        const item = value![i];
-        const loc = this.mainCanvas.getAxisPointByValue(item[0], item[1], true);
-        position.push([loc.x, loc.y]);
-      }
-    } else {
-      value = [];
-      for (let i = 0; i < position!.length; i++) {
-        const item = position![i];
-        const val = this.mainCanvas.getAxisValueByPoint(item[0], item[1], true);
-        value.push([val.xV, val.yV]);
-      }
-    }
-
-    const dynamicPosition = this.mainCanvas.transformPosition(position!);
-
-    this.internalUpdate({ value, position, dynamicPosition });
+    if (!this.handleValuePosition("array2D", 2)) return;
 
     this.updateHandlePoints();
   }

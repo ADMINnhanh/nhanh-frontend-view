@@ -158,45 +158,13 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     if (!this.mainCanvas) return;
     let { value, position, isRect } = this;
 
-    let [isValue, isPosition] = [
-      _AreAllArraysValid(value) && value!.length > (isRect ? 1 : 2),
-      _AreAllArraysValid(position) && position!.length > (isRect ? 1 : 2),
-    ];
-
-    if (!isValue && !isPosition)
-      return this.internalUpdate({ dynamicPosition: undefined });
-
+    const minLen = isRect ? 2 : 3;
     if (isRect) {
-      if (isValue) {
-        value!.length = 2;
-        const [point1, point2] = value!;
-        isValue = !(point1[0] == point2[0] || point1[1] == point2[1]);
-      }
-      if (isPosition) {
-        position!.length = 2;
-        const [point1, point2] = position!;
-        isPosition = !(point1[0] == point2[0] || point1[1] == point2[1]);
-      }
-    }
-    if (isValue) {
-      position = [];
-      for (let i = 0; i < value!.length; i++) {
-        const item = value![i];
-        const loc = this.mainCanvas.getAxisPointByValue(item[0], item[1], true);
-        position.push([loc.x, loc.y]);
-      }
-    } else {
-      value = [];
-      for (let i = 0; i < position!.length; i++) {
-        const item = position![i];
-        const val = this.mainCanvas.getAxisValueByPoint(item[0], item[1], true);
-        value.push([val.xV, val.yV]);
-      }
+      if (Array.isArray(value)) value.length = 2;
+      if (Array.isArray(position)) position.length = 2;
     }
 
-    const dynamicPosition = this.mainCanvas.transformPosition(position!);
-
-    this.internalUpdate({ value, position, dynamicPosition });
+    if (!this.handleValuePosition("array2D", minLen)) return;
 
     this.updateHandlePoints();
     this.updateDynamicRadius();
