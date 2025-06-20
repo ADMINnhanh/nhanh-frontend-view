@@ -75,7 +75,7 @@ onBeforeUnmount(() => {
               </template>
             </NButton>
           </template>
-          复位
+          复位视图
         </NTooltip>
         <NTooltip trigger="hover">
           <template #trigger>

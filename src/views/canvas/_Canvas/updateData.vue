@@ -61,7 +61,7 @@ function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
 </script>
 
 <template>
-  <NSpace vertical style="margin-bottom: 10px">
+  <NSpace v-if="canvas" vertical style="margin-bottom: 10px">
     <NSpace>
       <NSwitch :round="false" @update:value="UpdateAxis">
         <template #checked> 颠倒坐标轴 </template>
@@ -84,6 +84,9 @@ function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
         <template #checked> 控制点 </template>
         <template #unchecked> 控制点 </template>
       </NSwitch>
+      <NButton @click="canvas.setFitView()" size="small" type="primary">
+        调整视图
+      </NButton>
       <NSwitch :round="false" v-model:value="more">
         <template #checked> 更多控制项 </template>
         <template #unchecked> 更多控制项 </template>
@@ -105,3 +108,10 @@ function UpdateIsShowHandlePoint(isShowHandlePoint: boolean) {
     </NCollapseTransition>
   </NSpace>
 </template>
+
+<style lang="less" scoped>
+.n-button--small-type {
+  --n-height: 22px !important;
+  vertical-align: middle;
+}
+</style>

@@ -195,7 +195,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   }
 }
 
-// 核心算法：计算线段与画布边界的交点
+/** 计算线段与画布边界的交点 */
 function _GetBoundaryIntersection(
   point: [number, number],
   vector: [number, number],

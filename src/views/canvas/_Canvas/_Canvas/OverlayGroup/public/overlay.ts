@@ -506,7 +506,7 @@ export default abstract class Overlay<
       valid(position) && (!minLen || position!.length >= minLen),
     ];
 
-    let newV: { value: any; position: any; dynamicPosition: any } = {
+    const newV: { value: any; position: any; dynamicPosition: any } = {
       value,
       position,
       dynamicPosition: [],
