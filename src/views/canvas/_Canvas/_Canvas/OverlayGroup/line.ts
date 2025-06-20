@@ -77,7 +77,16 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   }
 
   protected get isWithinRange() {
-    if (this.isInfinite) return true;
+    if (this.isInfinite) {
+      const { mainCanvas, dynamicPositionWithOffset } = this;
+      const { width, height } = mainCanvas!.rect;
+      return _DoesLineIntersectRectangle(
+        [0, 0],
+        [width, height],
+        dynamicPositionWithOffset[0],
+        dynamicPositionWithOffset[1]
+      );
+    }
     return super.isWithinRange;
   }
   protected updateBaseData() {
@@ -221,4 +230,63 @@ function _GetBoundaryIntersection(
 
   // 延长向量至边界
   return t === Infinity ? point : [px + vx * t, py + vy * t];
+}
+
+/** 判断线段是否与矩形相交 */
+function _DoesLineIntersectRectangle(
+  j1: [number, number],
+  j2: [number, number],
+  y3: [number, number],
+  y4: [number, number]
+): boolean {
+  // 计算矩形边界
+  const xMin = Math.min(j1[0], j2[0]);
+  const xMax = Math.max(j1[0], j2[0]);
+  const yMin = Math.min(j1[1], j2[1]);
+  const yMax = Math.max(j1[1], j2[1]);
+
+  // 矩形四个顶点
+  const vertices: [number, number][] = [
+    [xMin, yMin], // 左上
+    [xMax, yMin], // 右上
+    [xMax, yMax], // 右下
+    [xMin, yMax], // 左下
+  ];
+
+  // 计算直线方程 Ax + By + C = 0
+  const A = y4[1] - y3[1];
+  const B = y3[0] - y4[0];
+  const C = y4[0] * y3[1] - y3[0] * y4[1];
+
+  // 处理两点重合的情况
+  if (A === 0 && B === 0) {
+    const [x, y] = y3;
+    return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
+  }
+
+  // 检查矩形顶点相对于直线的位置
+  let hasPositive = false;
+  let hasNegative = false;
+  const epsilon = 1e-10; // 浮点精度容差
+
+  for (const [x, y] of vertices) {
+    const value = A * x + B * y + C;
+
+    if (Math.abs(value) < epsilon) {
+      // 点在直线上
+      return true;
+    } else if (value > epsilon) {
+      hasPositive = true;
+    } else if (value < -epsilon) {
+      hasNegative = true;
+    }
+
+    // 如果已检测到两侧都有点，提前结束
+    if (hasPositive && hasNegative) {
+      return true;
+    }
+  }
+
+  // 矩形是否与直线相交（点在两侧或点在直线上）
+  return hasPositive && hasNegative;
 }
