@@ -1,4 +1,4 @@
-<!-- <script setup lang="ts">
+<script setup lang="ts">
 import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
 import { onMounted, ref } from "vue";
@@ -132,6 +132,6 @@ defineExpose({ myCanvas });
     }
   }
 }
-</style> -->
+</style>
 
-<template></template>
+<!-- <template></template> -->

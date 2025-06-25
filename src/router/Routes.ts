@@ -100,6 +100,17 @@ const math: CustomRouteRecord = {
       },
       component: () => import("@/views/math/GraphingEquations/index.vue"),
     },
+    {
+      path: "DynamicDiagram",
+      name: "DynamicDiagram",
+      meta: {
+        name: {
+          zhCN: "动态图解",
+          enUS: "Dynamic Diagram",
+        },
+      },
+      component: () => import("@/views/math/DynamicDiagram/index.vue"),
+    },
   ],
 };
 

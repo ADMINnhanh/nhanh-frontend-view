@@ -7,24 +7,24 @@ import Media from "@/stores/media";
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
 const independent: [string, string][] = [
-  // ["China%2Findex.vue", "最佳实践 - 中国地图"],
+  ["China%2Findex.vue", "最佳实践 - 中国地图"],
 ];
 const demoName: [string, string][] = [
-  // ["text.vue", "文字"],
-  // ["point.vue", "点"],
+  ["text.vue", "文字"],
+  ["point.vue", "点"],
   ["line.vue", "线"],
-  // ["arc.vue", "圆弧"],
+  ["arc.vue", "圆弧"],
   // ["arcTo.vue", "圆角"],
   // ["bezierCurve.vue", "贝塞尔曲线"],
   // ["ellipse.vue", "椭圆弧"],
-  // ["polygon.vue", "面"],
-  // ["custom.vue", "自定义绘制"],
-  // ["original.vue", "仅需初始化 _Canvas"],
-  // ["center.vue", "中心点"],
-  // ["shortcutKey.vue", "快捷键"],
-  // ["axis.vue", "坐标轴"],
-  // ["layer.vue", "图层 & 层级"],
-  // ["show.vue", "显示条件"],
+  ["polygon.vue", "面"],
+  ["custom.vue", "自定义绘制"],
+  ["original.vue", "仅需初始化 _Canvas"],
+  ["center.vue", "中心点"],
+  ["shortcutKey.vue", "快捷键"],
+  ["axis.vue", "坐标轴"],
+  ["layer.vue", "图层 & 层级"],
+  ["show.vue", "显示条件"],
 ];
 
 type DemoName = (typeof demoName)[number][0];
@@ -63,6 +63,34 @@ const vueFiles = ref<{
   }
 })();
 
+const initVueFiles = ref<{ [key: string]: true }>({});
+let observer = new IntersectionObserver((entries, observer) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      const skeleton = entry.target;
+      initVueFiles.value[skeleton.id] = true;
+      observer.unobserve(skeleton); // 停止观察，避免重复加载
+
+      if (
+        Object.keys(initVueFiles.value).length ==
+        independent.length + demoName.length
+      ) {
+        observer.disconnect();
+        observer = null as any;
+        console.log("加载完成");
+      }
+    }
+  });
+});
+requestAnimationFrame(() => {
+  const skeletons = document.querySelectorAll(".my-canvas-tools .n-skeleton");
+  skeletons.forEach((skeleton) => observer.observe(skeleton));
+});
+
+const canInitialize = (id: string) => {
+  return initVueFiles.value[id] && vueFiles.value[id];
+};
+
 const doubleRow = ref(window.innerWidth >= 1280);
 const resize = () => {
   doubleRow.value = window.innerWidth >= 1280;
@@ -81,7 +109,7 @@ onUnmounted(() => {
           <NSpace class="independent-space" vertical>
             <template v-for="item in independent" :key="item[0]">
               <MyCard
-                v-if="vueFiles[item[0]]"
+                v-if="canInitialize(item[0])"
                 :id="item[0]"
                 :path="item[0]"
                 :title="item[1]"
@@ -94,7 +122,7 @@ onUnmounted(() => {
           <NSpace vertical>
             <template v-for="item in evenIndexArray" :key="item[0]">
               <MyCard
-                v-if="vueFiles[item[0]]"
+                v-if="canInitialize(item[0])"
                 :id="item[0]"
                 :path="item[0]"
                 :title="item[1]"
@@ -107,7 +135,7 @@ onUnmounted(() => {
           <NSpace vertical>
             <template v-for="item in oddIndexArray" :key="item[0]">
               <MyCard
-                v-if="vueFiles[item[0]]"
+                v-if="canInitialize(item[0])"
                 :id="item[0]"
                 :path="item[0]"
                 :title="item[1]"
@@ -121,7 +149,7 @@ onUnmounted(() => {
         <NSpace v-else style="width: 100%" vertical>
           <template v-for="item in independent.concat(demoName)" :key="item[0]">
             <MyCard
-              v-if="vueFiles[item[0]]"
+              v-if="canInitialize(item[0])"
               :id="item[0]"
               :path="item[0]"
               :title="item[1]"
