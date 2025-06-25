@@ -186,8 +186,6 @@ export default abstract class Overlay<
       ? (needForceExecute?: boolean) => {
           if (needForceExecute) this.isRecalculate = true;
 
-          /** mainCanvas 已确认下一帧重绘则跳过 */
-          if (this.mainCanvas?.redrawInNextRenderFrame) return;
           /** 确认当前覆盖物需要渲染 */
           if (needForceExecute || this.isNeedRender) notifyReload();
           /** 上一帧时当前覆盖物若已渲染，通知原因（清除当前覆盖物） */ else if (

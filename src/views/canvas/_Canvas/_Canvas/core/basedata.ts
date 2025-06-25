@@ -152,8 +152,8 @@ export default class BaseData extends EventController {
         if (["bottom", "right"].includes(value)) return max;
         if (["middle", "center"].includes(value)) return max / 2;
 
-        if (/^(\d+)%$/.test(value)) {
-          value = value.match(/^(\d+)%$/)![1];
+        if (/^(-?\d+)%$/.test(value)) {
+          value = value.match(/^(-?\d+)%$/)![1];
           return (max * Number(value)) / 100;
         }
         return Number(value) || undefined;
