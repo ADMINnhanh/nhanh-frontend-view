@@ -213,13 +213,14 @@ function UpdateX(x: number) {
 UpdateX(x.value);
 
 onMounted(() => {
-  const dom = document.getElementById(id)!;
-  const left = dom.getBoundingClientRect().width / 2 - 250;
+  const { width, height } = document
+    .getElementById(id)!
+    .getBoundingClientRect();
   myCanvas.value = new _Canvas({
     id,
     theme: Settings.value.theme,
     axisConfig: { y: -1, count: 20 },
-    defaultCenter: { left: left, bottom: 50 },
+    defaultCenter: { left: width / 2 - 250, bottom: height / 2 - 250 },
     axisShow: false,
   });
   myCanvas.value.addOverlay([
@@ -256,7 +257,12 @@ defineExpose({ myCanvas });
       >
         <NIcon :component="isPlay ? PauseCircleOutline : PlayCircleOutline" />
       </NButton>
-      <NSlider v-model:value="x" @update:value="UpdateX" :marks="marks" />
+      <NSlider
+        v-model:value="x"
+        @update:value="UpdateX"
+        :marks="marks"
+        vertical
+      />
     </div>
     <canvas :id="id"></canvas>
   </NCard>
@@ -266,20 +272,25 @@ defineExpose({ myCanvas });
 .n-card {
   :deep(.n-card__content) {
     display: flex;
-    flex-direction: column;
+    height: 100%;
   }
 }
 .tools {
   display: flex;
+  flex-direction: column;
+  height: 100%;
+  > :not(:last-child) {
+    margin-bottom: 10px;
+  }
   .n-slider {
-    margin-left: 10px;
-    width: 100px;
+    width: 20px;
+    height: 100px;
     flex-grow: 1;
   }
 }
 canvas {
-  width: 100%;
-  height: 100px;
+  width: 100px;
+  height: 100%;
   flex-grow: 1;
 }
 </style>
