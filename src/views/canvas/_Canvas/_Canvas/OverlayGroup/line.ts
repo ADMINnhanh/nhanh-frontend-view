@@ -78,13 +78,14 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
   protected get isWithinRange() {
     if (this.isInfinite) {
-      const { mainCanvas, dynamicPositionWithOffset } = this;
-      const { width, height } = mainCanvas!.rect;
+      if (this.isRecalculate) this.updateDynamicPosition();
+
+      const { width, height } = this.mainCanvas!.rect;
       return _DoesInfiniteLineIntersectRectangle(
         [0, 0],
         [width, height],
-        dynamicPositionWithOffset[0],
-        dynamicPositionWithOffset[1]
+        this.dynamicPositionWithOffset[0],
+        this.dynamicPositionWithOffset[1]
       );
     }
     return super.isWithinRange;
@@ -93,6 +94,16 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     if (!this.handleValuePosition("array2D", 2)) return;
 
     this.updateHandlePoints();
+  }
+  /** 更新动态点位数据 */
+  protected updateDynamicPosition() {
+    const { mainCanvas, position } = this;
+
+    const dynamicPosition = mainCanvas!.transformPosition(position!);
+    this.internalUpdate({ dynamicPosition });
+    this.handlePoints.forEach((point, index) => {
+      point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
+    });
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
@@ -176,20 +187,13 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     );
 
     // 绘制最终线段
-    if (extendedStart && extendedEnd)
-      this.drawLine(ctx, [extendedStart, extendedEnd]);
+    this.drawLine(ctx, [extendedStart, extendedEnd]);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     if (this.isNeedRender) {
-      const { mainCanvas, position, isInfinite } = this;
+      const { isRecalculate, isInfinite } = this;
 
-      if (this.isRecalculate) {
-        const dynamicPosition = mainCanvas!.transformPosition(position!);
-        this.internalUpdate({ dynamicPosition });
-        this.handlePoints.forEach((point, index) => {
-          point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
-        });
-      }
+      if (isRecalculate) this.updateDynamicPosition();
       if (isInfinite) return [this.drawisInfiniteStraightLine, this];
       return [this.drawLine, this];
     }
@@ -298,14 +302,14 @@ export default class Line extends GeometricBoundary<LineStyleType> {
  * @param direction 方向向量 [dx, dy]
  * @param canvasWidth 画布宽度
  * @param canvasHeight 画布高度
- * @returns 与边界的交点坐标，若无有效交点返回 null
+ * @returns 与边界的交点坐标
  */
 function _GetBoundaryIntersection(
   startPoint: [number, number],
   direction: [number, number],
   canvasWidth: number,
   canvasHeight: number
-): [number, number] | null {
+): [number, number] {
   const [startX, startY] = startPoint;
   const [dirX, dirY] = direction;
   let minT = Infinity; // 存储到达边界的最小正比例系数
@@ -336,7 +340,7 @@ function _GetBoundaryIntersection(
 
   // 当向量指向边界外时返回 null
   return minT === Infinity
-    ? null
+    ? startPoint
     : [startX + dirX * minT, startY + dirY * minT];
 }
 
