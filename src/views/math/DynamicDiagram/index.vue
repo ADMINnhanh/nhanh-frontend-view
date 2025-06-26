@@ -9,7 +9,7 @@ const dynamicDiagramCollection = [
     component: ThreeWalledEnclosure,
   },
 ];
-const dynamicDiagram = ref("三边围墙");
+const dynamicDiagram = ref(dynamicDiagramCollection[0].title);
 
 const dynamicDiagramComponent = computed(() => {
   return dynamicDiagramCollection.find(

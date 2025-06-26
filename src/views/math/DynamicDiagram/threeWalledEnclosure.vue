@@ -72,6 +72,15 @@ const y_text = new _Canvas.Text({
 });
 
 const isPlay = ref(false);
+/**
+ * 创建指定范围的振荡器，在最小值和最大值之间循环变化
+ * @param initialMin - 振荡器初始最小值
+ * @param initialMax - 振荡器初始最大值
+ * @param initialSteps - 从最小值到最大值所需的动画步数
+ * @param callback - 每帧更新时的回调函数，接收当前振荡值
+ * @param precision - 数值精度（保留小数位数，默认2位）
+ * @returns 振荡器控制对象，包含播放/暂停/参数更新等方法
+ */
 function _CreateOscillator(
   initialMin: number,
   initialMax: number,
@@ -92,7 +101,7 @@ function _CreateOscillator(
   // 计算步长
   const calculateStepSize = () => {
     const rawStep = (max - min) / steps;
-    return Number(rawStep.toFixed(precision)) || 0.01;
+    return Number(rawStep.toFixed(precision));
   };
 
   let stepSize = calculateStepSize();
@@ -153,7 +162,7 @@ function _CreateOscillator(
     play(target = current) {
       current = clamp(target);
 
-      if (validateParams(initialMin, initialMax, initialSteps).length) {
+      if (validateParams(min, max, steps).length) {
         return console.warn("配置参数错误", this.getParams());
       }
 
@@ -181,6 +190,53 @@ function _CreateOscillator(
     /** 获取当前参数 */
     getParams: () => ({ min, max, steps, precision, stepSize }),
   };
+}
+/**
+ * 动画过渡数值变化
+ * @param startValue - 起始值
+ * @param targetValue - 目标值
+ * @param stepCount - 动画步数
+ * @param callback - 每帧回调函数
+ * @param precision - 数值精度（默认2位小数）
+ */
+function _AnimateValue(
+  startValue: number,
+  targetValue: number,
+  stepCount: number,
+  callback: (currentValue: number) => void,
+  precision: number = 2
+): void {
+  if (stepCount <= 0) return;
+
+  const toFixedPrecision = (value: number) => Number(value.toFixed(precision));
+  const distance = targetValue - startValue;
+
+  // 计算实际步长（考虑精度）
+  const stepSize = toFixedPrecision(Math.abs(distance) / stepCount);
+  if (stepSize === 0) return;
+
+  const direction = Math.sign(distance);
+  let currentValue = startValue;
+
+  const animate = () => {
+    // 计算新值并应用精度
+    currentValue = toFixedPrecision(currentValue + stepSize * direction);
+
+    // 边界检查防止过冲
+    const shouldContinue =
+      direction > 0 ? currentValue < targetValue : currentValue > targetValue;
+
+    if (shouldContinue) {
+      callback(currentValue);
+      requestAnimationFrame(animate);
+    } else {
+      // 确保最终到达目标值
+      callback(targetValue);
+    }
+  };
+
+  // 启动动画
+  animate();
 }
 const playTool = _CreateOscillator(0, 100, 300, (v) => {
   x.value = v;
@@ -279,6 +335,7 @@ defineExpose({ myCanvas });
   display: flex;
   flex-direction: column;
   height: 100%;
+  margin-right: 10px;
   > :not(:last-child) {
     margin-bottom: 10px;
   }
