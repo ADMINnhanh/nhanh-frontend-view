@@ -7,24 +7,24 @@ import Media from "@/stores/media";
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
 const independent: [string, string][] = [
-  // ["China%2Findex.vue", "最佳实践 - 中国地图"],
+  ["China%2Findex.vue", "最佳实践 - 中国地图"],
 ];
 const demoName: [string, string][] = [
-  // ["text.vue", "文字"],
-  // ["point.vue", "点"],
+  ["text.vue", "文字"],
+  ["point.vue", "点"],
   ["line.vue", "线"],
-  // ["arc.vue", "圆弧"],
+  ["arc.vue", "圆弧"],
   // ["arcTo.vue", "圆角"],
   // ["bezierCurve.vue", "贝塞尔曲线"],
   // ["ellipse.vue", "椭圆弧"],
-  // ["polygon.vue", "面"],
-  // ["custom.vue", "自定义绘制"],
-  // ["original.vue", "仅需初始化 _Canvas"],
-  // ["center.vue", "中心点"],
-  // ["shortcutKey.vue", "快捷键"],
-  // ["axis.vue", "坐标轴"],
-  // ["layer.vue", "图层 & 层级"],
-  // ["show.vue", "显示条件"],
+  ["polygon.vue", "面"],
+  ["custom.vue", "自定义绘制"],
+  ["original.vue", "仅需初始化 _Canvas"],
+  ["center.vue", "中心点"],
+  ["shortcutKey.vue", "快捷键"],
+  ["axis.vue", "坐标轴"],
+  ["layer.vue", "图层 & 层级"],
+  ["show.vue", "显示条件"],
 ];
 
 type DemoName = (typeof demoName)[number][0];
