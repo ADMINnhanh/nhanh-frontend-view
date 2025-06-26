@@ -1,6 +1,6 @@
 import { CreateOutline } from "@vicons/ionicons5";
 import { NColorPicker, NIcon, NInput, NSpace } from "naive-ui";
-import { _GenerateUUID, _Throttle } from "nhanh-pure-function";
+import { _Utility_GenerateUUID, _Utility_Throttle } from "nhanh-pure-function";
 import { h, ref, type Component } from "vue";
 
 interface Point {
@@ -415,11 +415,11 @@ function getBoxPoints(item: BoxItem) {
 
 /** 鼠标滚轮 */
 export const handleWheel = (function () {
-  const isMaxZoom = _Throttle(
+  const isMaxZoom = _Utility_Throttle(
     () => window.$message.warning(`放大到最大值了！ ${maxScale} 倍`),
     200
   );
-  const isMinZoom = _Throttle(
+  const isMinZoom = _Utility_Throttle(
     () => window.$message.warning(`缩小到最小值了！ ${minScale} 倍`),
     200
   );
@@ -499,7 +499,7 @@ export function handleMouseClick(payload: MouseEvent) {
       const h = Math.max(curCreatedBox.value.points[0].y, point.y) - y;
 
       boxList.push({
-        id: _GenerateUUID(),
+        id: _Utility_GenerateUUID(),
         name: curCreatedBox.value.name,
         color: curCreatedBox.value.color,
         points: { x, y, w, h },
@@ -890,7 +890,7 @@ export function initialization(config?: InitializationType) {
         /** @ts-ignore */
         delete points.name;
         return {
-          id: _GenerateUUID(),
+          id: _Utility_GenerateUUID(),
           name: item.name,
           color: typeItem.color,
           points,

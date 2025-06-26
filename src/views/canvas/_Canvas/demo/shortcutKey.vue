@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { _GenerateUUID } from "nhanh-pure-function";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
 import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { NDivider, NFlex, NSpace, NText } from "naive-ui";
 import SvgGather from "@/assets/icon/gather";
 
-const id = _GenerateUUID();
+const id = _Utility_GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 

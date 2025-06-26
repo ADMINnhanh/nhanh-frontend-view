@@ -19,7 +19,7 @@ import {
   scrollbarHover,
 } from ".";
 import { CallOutline } from "@vicons/ionicons5";
-import { _CopyToClipboard, _Tip } from "nhanh-pure-function";
+import { _Browser_CopyToClipboard, _Tip } from "nhanh-pure-function";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
 </script>
 
@@ -32,7 +32,7 @@ import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLa
             _Tip
               .success('已复制 Peer ID')
               .error('复制 Peer ID 失败')
-              .run(_CopyToClipboard(peerID))
+              .run(_Browser_CopyToClipboard(peerID))
           "
         >
           我的 Peer ID (点击复制): {{ peerID }}

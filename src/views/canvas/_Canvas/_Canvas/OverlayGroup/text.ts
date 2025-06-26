@@ -2,7 +2,7 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
 import type { EventHandler } from "../public/eventController";
-import { _IsSingleArrayValid } from "nhanh-pure-function";
+import { _Valid_IsNumberArray } from "nhanh-pure-function";
 
 type ConstructorOption = ConstructorParameters<
   typeof Overlay<TextStyleType, [number, number]>

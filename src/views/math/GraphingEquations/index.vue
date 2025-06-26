@@ -33,7 +33,7 @@ import {
   SettingsOutline,
 } from "@vicons/ionicons5";
 import { Settings } from "@/components/popups/components/Settings";
-import { _GenerateUUID, _ReadFile } from "nhanh-pure-function";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import { useFps } from "@vueuse/core";
 import _Canvas from "../../canvas/_Canvas/_Canvas";
 import InputMath from "./InputMath/index.vue";
@@ -53,7 +53,7 @@ const buttonApi = computed(() => {
 });
 
 const fps = useFps();
-const id = _GenerateUUID("canvas-");
+const id = _Utility_GenerateUUID("canvas-");
 const setActive = ref(false);
 const lock = ref(false);
 let canvas: _Canvas;

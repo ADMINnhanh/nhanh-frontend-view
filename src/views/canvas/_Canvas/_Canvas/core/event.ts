@@ -1,8 +1,8 @@
 import {
-  _AreAllArraysValid,
-  _CalculateDistance2D,
-  _GetMidpoint,
-  _IsSingleArrayValid,
+  _Valid_Is2DNumberArray,
+  _Math_CalculateDistance2D,
+  _Valid_IsNumberArray,
+  _Math_GetMidpoint,
 } from "nhanh-pure-function";
 import type { OverlayType } from "../OverlayGroup";
 import Draw from "./draw";
@@ -152,9 +152,9 @@ export default class Event extends Draw {
       overlay?.isDraggable && this.currentDrawOverlays.includes(overlay);
     const valueType =
       moveOverlay &&
-      (_AreAllArraysValid(overlay.value)
+      (_Valid_Is2DNumberArray(overlay.value)
         ? "Matrix"
-        : _IsSingleArrayValid(overlay.value)
+        : _Valid_IsNumberArray(overlay.value)
         ? "Single"
         : false);
 
@@ -418,20 +418,20 @@ export default class Event extends Draw {
         const { clientX: clientX2, clientY: clientY2 } = touches[1];
 
         if (oldClientX.length == 2) {
-          const oldDistance = _CalculateDistance2D(
+          const oldDistance = _Math_CalculateDistance2D(
             oldClientX[0],
             oldClientY[0],
             oldClientX[1],
             oldClientY[1]
           );
-          const newDistance = _CalculateDistance2D(
+          const newDistance = _Math_CalculateDistance2D(
             clientX1,
             clientY1,
             clientX2,
             clientY2
           );
 
-          const { x: clientX, y: clientY } = _GetMidpoint(
+          const { x: clientX, y: clientY } = _Math_GetMidpoint(
             clientX1,
             clientY1,
             clientX2,

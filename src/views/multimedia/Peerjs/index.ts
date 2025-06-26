@@ -1,5 +1,5 @@
 import type { ScrollbarInst } from "naive-ui";
-import { _WaitForCondition } from "nhanh-pure-function";
+import { _Utility_WaitForCondition } from "nhanh-pure-function";
 import { Peer } from "peerjs";
 import { ref } from "vue";
 
@@ -61,7 +61,7 @@ peer.on("connection", function (conn) {
 });
 peer.on("call", (call) => {
   let finish = false;
-  _WaitForCondition(() => finish, 5000).catch(() => {
+  _Utility_WaitForCondition(() => finish, 5000).catch(() => {
     newLog("获取本地流超时", "error");
   });
   navigator.mediaDevices
@@ -88,7 +88,7 @@ export function ConnectToPeer() {
   });
 
   let finish = false;
-  _WaitForCondition(() => finish, 5000).catch(() => {
+  _Utility_WaitForCondition(() => finish, 5000).catch(() => {
     newLog("获取本地流超时", "error");
   });
 

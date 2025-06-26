@@ -35,7 +35,7 @@ import img1 from "./1.avif";
 import img2 from "./2.avif";
 import { TrashBinOutline } from "@vicons/ionicons5";
 import JSZip from "jszip";
-import { _GenerateUUID } from "nhanh-pure-function";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import { HideGlobalLoading, ShowGlobalLoading } from "@/stores/globalLoading";
 
 type FileList = {
@@ -148,7 +148,7 @@ async function exportFile() {
       const response = await fetch(item.src);
       const blob = await response.blob();
 
-      const filename = _GenerateUUID();
+      const filename = _Utility_GenerateUUID();
       imagesFolder.file(filename + "." + blob.type.split("/")[1], blob);
 
       const txtContent = item.boxList

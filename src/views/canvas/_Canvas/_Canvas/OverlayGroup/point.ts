@@ -1,7 +1,7 @@
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
-import { _IsSingleArrayValid, _Schedule } from "nhanh-pure-function";
+import { _Valid_IsNumberArray, _Animate_Schedule } from "nhanh-pure-function";
 import type { EventHandler } from "../public/eventController";
 
 type ConstructorOption = ConstructorParameters<
@@ -80,7 +80,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.fillProgress!.scheduleCallback(); // 取消当前动画
 
     let lastScheduleTime = 0;
-    this.fillProgress!.scheduleCallback = _Schedule((currentTime) => {
+    this.fillProgress!.scheduleCallback = _Animate_Schedule((currentTime) => {
       if (!this.fillProgress || !currentTime) return;
 
       // 更新进度(正向或反向)
@@ -114,7 +114,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     this.fillProgress = {
       lineWidthOffset: 0,
       progress: 0,
-      scheduleCallback: _Schedule((progress) => {
+      scheduleCallback: _Animate_Schedule((progress) => {
         if (!this.fillProgress) return;
 
         this.fillProgress.progress = progress;

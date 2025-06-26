@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _GenerateUUID } from "nhanh-pure-function";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import {
   NButton,
   NSpace,

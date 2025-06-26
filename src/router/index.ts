@@ -5,7 +5,7 @@ import {
 } from "vue-router";
 import home from "../views/Layout/index.vue";
 import Routes from "./Routes";
-import { _WaitForCondition } from "nhanh-pure-function";
+import { _Utility_WaitForCondition } from "nhanh-pure-function";
 
 const router = createRouter({
   // history: createWebHistory(import.meta.env.BASE_URL),
@@ -67,7 +67,7 @@ const router = createRouter({
         // 如果元素存在且已加载，直接滚动
         highlightAndScroll(targetEl);
       } else {
-        _WaitForCondition(() => {
+        _Utility_WaitForCondition(() => {
           const targetEl = document.getElementById(targetHash);
           return Boolean(
             targetEl && !targetEl.classList.contains("n-skeleton")

@@ -6,7 +6,6 @@ import {
   NStatistic,
   NGrid,
   NGi,
-  NSwitch,
   NModal,
   NImage,
 } from "naive-ui";
@@ -23,8 +22,8 @@ import {
   StatsChartOutline,
 } from "@vicons/ionicons5";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
-import { onMounted, onUnmounted, ref, computed, type Ref } from "vue";
-import { _DownloadFile, _TimeTransition } from "nhanh-pure-function";
+import { onMounted, onUnmounted, ref, computed } from "vue";
+import { _File_Download } from "nhanh-pure-function";
 
 const DisplayMedia = ref<HTMLVideoElement>();
 const UserMedia = ref<HTMLVideoElement>();
@@ -541,7 +540,7 @@ onUnmounted(() => {
         ghost
         type="success"
         @click="
-          _DownloadFile(
+          _File_Download(
             screenshotData,
             `screenshot-${new Date().toISOString()}.png`
           )

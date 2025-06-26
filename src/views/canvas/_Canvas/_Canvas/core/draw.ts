@@ -1,4 +1,7 @@
-import { _Debounce, _TimeConsumption } from "nhanh-pure-function";
+import {
+  _Utility_Debounce,
+  _Utility_TimeConsumption,
+} from "nhanh-pure-function";
 import Style from "./style";
 import _Canvas from "..";
 import type { OverlayType } from "../OverlayGroup";
@@ -27,7 +30,7 @@ export default class Draw extends Style {
     super(option);
     if (this.canvas) {
       this.resizeObserver = new ResizeObserver(
-        _Debounce(() => {
+        _Utility_Debounce(() => {
           [this.canvas.width, this.canvas.height] = [
             this.rect.width,
             this.rect.height,
@@ -159,7 +162,7 @@ export default class Draw extends Style {
   }
 
   /** 测量重绘性能 */
-  private measureRedrawPerformance = _TimeConsumption(() => {
+  private measureRedrawPerformance = _Utility_TimeConsumption(() => {
     this.isRendering = true;
     this.redraw();
     this.redrawInNextRenderFrame = false;
@@ -175,7 +178,7 @@ export default class Draw extends Style {
     if (!this.redrawInNextRenderFrame) {
       this.redrawInNextRenderFrame = true;
       Promise.resolve().then(() => {
-        this.measureRedrawPerformance();
+        this.measureRedrawPerformance?.();
         // this.isRendering = true;
         // this.redraw();
         // this.redrawInNextRenderFrame = false;

@@ -18,9 +18,9 @@ import {
   NTooltip,
 } from "naive-ui";
 import {
-  _CopyToClipboard,
-  _Fullscreen,
-  _IsFullscreen,
+  _Browser_CopyToClipboard,
+  _Element_Fullscreen,
+  _Element_IsFullscreen,
   _Tip,
 } from "nhanh-pure-function";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
@@ -50,11 +50,11 @@ const toggleFullScreen = ref();
 
 /** 全屏切换监测 */
 const resizeObserver = new ResizeObserver(() => {
-  isFullScreen.value = _IsFullscreen(cardRef.value?.$el);
+  isFullScreen.value = _Element_IsFullscreen(cardRef.value?.$el);
 });
 
 onMounted(() => {
-  toggleFullScreen.value = _Fullscreen(cardRef.value.$el);
+  toggleFullScreen.value = _Element_Fullscreen(cardRef.value.$el);
   resizeObserver.observe(cardRef.value.$el);
 });
 onBeforeUnmount(() => {
@@ -112,7 +112,7 @@ onBeforeUnmount(() => {
                 _Tip
                   .success('复制成功')
                   .error('复制失败')
-                  .run(_CopyToClipboard(code))
+                  .run(_Browser_CopyToClipboard(code))
               "
               text
             >

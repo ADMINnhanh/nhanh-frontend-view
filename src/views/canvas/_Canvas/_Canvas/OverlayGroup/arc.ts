@@ -1,4 +1,7 @@
-import { _AreAllArraysValid, _IsSingleArrayValid } from "nhanh-pure-function";
+import {
+  _Valid_Is2DNumberArray,
+  _Valid_IsNumberArray,
+} from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";

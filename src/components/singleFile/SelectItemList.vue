@@ -3,7 +3,7 @@ import { NButton, NIcon } from "naive-ui";
 import { ChevronBack, ChevronForward } from "@vicons/ionicons5";
 import Scroll from "@/components/singleFile/Scroll.vue";
 import { computed, ref } from "vue";
-import { _GenerateUUID, _Schedule } from "nhanh-pure-function";
+import { _Animate_Schedule, _Utility_GenerateUUID } from "nhanh-pure-function";
 
 type PropsType = {
   trigger: "vertical" | "horizontal";
@@ -27,7 +27,7 @@ const canBack = computed(() => {
 /** 是否正在移动滚动条中 */
 const isMoving = ref(false);
 
-const id = _GenerateUUID("id-");
+const id = _Utility_GenerateUUID("id-");
 function MoveSrcoll() {
   const scrollDom = document.querySelector(
     `#` + id + ` .scroll >div`
@@ -49,7 +49,7 @@ function MoveSrcoll() {
       isMoving.value = true;
       /** 已移动距离 */
       let moved = 0;
-      _Schedule((schedule: number) => {
+      _Animate_Schedule((schedule: number) => {
         if (trigger == "vertical") {
           let newSrcollMoved = scrollDom.scrollTop + schedule * offset - moved;
           newSrcollMoved = Math.min(

@@ -1,5 +1,5 @@
 import type { Component } from "vue";
-import { _CloseOnOutsideClick } from "nhanh-pure-function";
+import { _Element_CloseOnOutsideClick } from "nhanh-pure-function";
 
 /** 组件列表 */
 type _AllComponent = { [key: string]: () => Promise<Component> };
@@ -32,5 +32,5 @@ export function EnhancedCloseOnOutsideClick(
     }
   };
   clickableSelector.push(".layout-header-button-group button");
-  _CloseOnOutsideClick(clickableSelector, callback, { isClickAllowed });
+  _Element_CloseOnOutsideClick(clickableSelector, callback, { isClickAllowed });
 }

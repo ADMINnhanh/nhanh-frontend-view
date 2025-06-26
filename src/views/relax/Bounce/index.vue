@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _GenerateUUID, _Schedule } from "nhanh-pure-function";
+import { _Utility_GenerateUUID, _Animate_Schedule } from "nhanh-pure-function";
 import { onUnmounted, ref } from "vue";
 /** 鼠标速度 */
 const speed = ref({ x: 0, y: 0 });
@@ -35,7 +35,7 @@ function ContinueMove(id: string) {
   let _speed = { x: speed.value.x, y: speed.value.y };
   const _moveId = id;
 
-  _Schedule((schedule) => {
+  _Animate_Schedule((schedule) => {
     if (moveId != _moveId) return;
     const x = (1 - schedule) * _speed.x;
     const y = (1 - schedule) * _speed.y;
@@ -75,7 +75,7 @@ function Mouseup(payload: MouseEvent) {
   x.value = payload.clientX;
   y.value = payload.clientY;
 
-  moveId = _GenerateUUID();
+  moveId = _Utility_GenerateUUID();
   ContinueMove(moveId);
 }
 /** 鼠标移动 */

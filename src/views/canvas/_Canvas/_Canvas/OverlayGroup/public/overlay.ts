@@ -3,9 +3,9 @@ import { type OverlayType } from "../index";
 import type { EventHandler } from "../../public/eventController";
 import EventController from "../../public/eventController";
 import {
-  _AreAllArraysValid,
-  _Clone,
-  _IsSingleArrayValid,
+  _Valid_Is2DNumberArray,
+  _Utility_Clone,
+  _Valid_IsNumberArray,
 } from "nhanh-pure-function";
 
 type ConstructorOption<T, V> = ConstructorParameters<
@@ -160,7 +160,7 @@ export default abstract class Overlay<
     },
     updateValueScope?: boolean
   ) {
-    option = _Clone(option) as any;
+    option = _Utility_Clone(option) as any;
     for (const key in option) {
       if (Object.prototype.hasOwnProperty.call(option, key)) {
         this[("_" + key) as never] = option[key as never];
@@ -498,7 +498,8 @@ export default abstract class Overlay<
 
     if (!mainCanvas) return false;
 
-    const valid = type === "array1D" ? _IsSingleArrayValid : _AreAllArraysValid;
+    const valid =
+      type === "array1D" ? _Valid_IsNumberArray : _Valid_Is2DNumberArray;
     const [isValue, isPosition] = [
       valid(value) && (!minLen || value!.length >= minLen),
       valid(position) && (!minLen || position!.length >= minLen),

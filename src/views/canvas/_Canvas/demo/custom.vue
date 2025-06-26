@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { _GenerateUUID } from "nhanh-pure-function";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../_Canvas";
 import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 
-const id = _GenerateUUID();
+const id = _Utility_GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 const overlay = new _Canvas.Custom<any>({

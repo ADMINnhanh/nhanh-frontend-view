@@ -1,4 +1,4 @@
-import { _GenerateUUID } from "nhanh-pure-function";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import type _Canvas from "..";
 
 abstract class Base<T extends Base<T>> {
@@ -122,7 +122,7 @@ interface BaseDataOptions {
 export default abstract class BaseData<T extends BaseData<T>> extends Show<T> {
   constructor(options: BaseDataOptions) {
     super();
-    options.name = options.name || _GenerateUUID("default-name-");
+    options.name = options.name || _Utility_GenerateUUID("default-name-");
     Object.assign(this, { ...options });
   }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _ScrollEndListener } from "nhanh-pure-function";
+import { _Element_ScrollEndListener } from "nhanh-pure-function";
 import { ref } from "vue";
 
 type PropsType = {
@@ -43,7 +43,7 @@ function HasVerticalScrollbar() {
 }
 HasVerticalScrollbar();
 
-const onScroll = _ScrollEndListener((trigger) =>
+const onScroll = _Element_ScrollEndListener((trigger) =>
   emits("bottomReached", trigger)
 );
 </script>

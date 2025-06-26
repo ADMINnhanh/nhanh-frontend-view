@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { _GenerateUUID } from "nhanh-pure-function";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
 import { onMounted, ref } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
@@ -16,7 +16,7 @@ import {
 } from ".";
 import { NSpace, NSwitch, NTabPane, NTabs } from "naive-ui";
 
-const id = _GenerateUUID();
+const id = _Utility_GenerateUUID();
 const tabActive = ref("省级行政区");
 let oldTabActive = "省级行政区";
 function UpdateTabActive(tab: string) {

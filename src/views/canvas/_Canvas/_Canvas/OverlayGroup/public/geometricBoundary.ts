@@ -1,4 +1,7 @@
-import { _GetMidpoint, _PointToLineDistance } from "nhanh-pure-function";
+import {
+  _Math_GetMidpoint,
+  _Math_PointToLineDistance,
+} from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./overlay";
 import Point from "../point";
@@ -287,7 +290,7 @@ function findInsertIndex(
   let insertIndex = -1;
 
   for (let i = 0; i < controlPoints.length - 1; i++) {
-    const distance = _PointToLineDistance(
+    const distance = _Math_PointToLineDistance(
       clickPosition,
       controlPoints[i],
       controlPoints[i + 1]
@@ -320,8 +323,8 @@ function getMidpoint(
   value1: [number, number],
   value2: [number, number]
 ): [number, number] {
-  // 调用 _GetMidpoint 函数计算中点，并将结果解构为 x 和 y
-  const { x, y } = _GetMidpoint(...value1, ...value2);
+  // 调用 _Math_GetMidpoint 函数计算中点，并将结果解构为 x 和 y
+  const { x, y } = _Math_GetMidpoint(...value1, ...value2);
   // 返回中点坐标作为常量元组，确保返回值类型不会被意外修改
   return [x, y];
 }

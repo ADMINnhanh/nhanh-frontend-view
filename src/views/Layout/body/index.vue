@@ -13,7 +13,7 @@ import Media from "@/stores/media";
 import Menu from "./menu.vue";
 import { showMenu, collapsed } from ".";
 import { Close, CopyOutline } from "@vicons/ionicons5";
-import { _CopyToClipboard } from "nhanh-pure-function";
+import { _Browser_CopyToClipboard } from "nhanh-pure-function";
 import { computed, ref, watch } from "vue";
 import router from "@/router";
 import { Settings } from "@/components/popups/components/Settings";
@@ -97,7 +97,7 @@ if (import.meta.env.DEV) {
     </div>
     <div v-if="recordNumber" class="record-number">
       <NButton
-        @click="_CopyToClipboard(recordNumber)"
+        @click="_Browser_CopyToClipboard(recordNumber)"
         tag="a"
         text
         type="primary"
@@ -176,7 +176,7 @@ if (import.meta.env.DEV) {
       </div>
       <div v-if="recordNumber" class="record-number">
         <NButton
-          @click="_CopyToClipboard(recordNumber)"
+          @click="_Browser_CopyToClipboard(recordNumber)"
           tag="a"
           text
           type="primary"

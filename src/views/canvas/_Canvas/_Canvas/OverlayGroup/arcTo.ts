@@ -1,4 +1,7 @@
-import { _AreAllArraysValid, _IsSingleArrayValid } from "nhanh-pure-function";
+import {
+  _Valid_Is2DNumberArray,
+  _Valid_IsNumberArray,
+} from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
@@ -254,8 +257,8 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
 
     let { value, position } = this;
     const [isValue, isPosition] = [
-      _AreAllArraysValid(value) && value!.length > 1,
-      _AreAllArraysValid(position) && position!.length > 1,
+      _Valid_Is2DNumberArray(value) && value!.length > 1,
+      _Valid_Is2DNumberArray(position) && position!.length > 1,
     ];
 
     if (!isValue && !isPosition) {

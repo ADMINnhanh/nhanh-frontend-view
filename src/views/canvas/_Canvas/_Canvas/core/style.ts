@@ -1,4 +1,4 @@
-import { _Clone, _MergeObjects } from "nhanh-pure-function";
+import { _Utility_Clone, _Utility_MergeObjects } from "nhanh-pure-function";
 import BaseData from "./basedata";
 
 type ConstructorOption = ConstructorParameters<typeof BaseData>[0] & {
@@ -249,8 +249,10 @@ export default class Style extends BaseData {
   setStyle(style: DeepPartial<StyleType>) {
     for (const key in style) {
       if (Object.prototype.hasOwnProperty.call(style, key)) {
-        const oldStyle = _Clone(this.style[key] || this.style[this.theme]);
-        _MergeObjects(oldStyle, style[key]);
+        const oldStyle = _Utility_Clone(
+          this.style[key] || this.style[this.theme]
+        );
+        _Utility_MergeObjects(oldStyle, style[key]);
         this.style[key] = oldStyle as StyleItemType;
       }
     }

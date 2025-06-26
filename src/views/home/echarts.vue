@@ -2,7 +2,11 @@
 import { NScrollbar, NSkeleton } from "naive-ui";
 import { markRaw, onUnmounted, ref, watch } from "vue";
 import * as echarts from "echarts";
-import { _Clone, _Debounce, _GenerateUUID } from "nhanh-pure-function";
+import {
+  _Utility_Clone,
+  _Utility_Debounce,
+  _Utility_GenerateUUID,
+} from "nhanh-pure-function";
 import type { ECBasicOption } from "echarts/types/dist/shared";
 import { Settings } from "@/components/popups/components/Settings";
 import {
@@ -298,9 +302,9 @@ PageVisitStats().then((res) => {
 const resizeOpt = {
   animation: { duration: 1500, easing: "cubicInOut" },
 } as const;
-const echartsId = _GenerateUUID("echarts-");
+const echartsId = _Utility_GenerateUUID("echarts-");
 const resize = new ResizeObserver(
-  _Debounce(() => {
+  _Utility_Debounce(() => {
     visitQualityStats.value.chart?.resize(resizeOpt);
     dailyVisitTrend.value.chart?.resize(resizeOpt);
     pageVisitStats.value.chart?.resize(resizeOpt);

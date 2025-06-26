@@ -3,7 +3,7 @@ import { NCard, NA, NDescriptions, NDescriptionsItem } from "naive-ui";
 import type { AttractionsInfo } from "..";
 import { computed, ref, watch } from "vue";
 import Media from "@/stores/media";
-import { _FormatNumberWithUnit } from "nhanh-pure-function";
+import { _Format_NumberWithUnit } from "nhanh-pure-function";
 
 interface Props {
   info: AttractionsInfo;
@@ -56,16 +56,16 @@ const hrefBaidu = "https://www.baidu.com/s?wd=";
     <NDescriptions bordered size="small" :column="2">
       <NDescriptionsItem label="坐标">{{ info.coordinates }}</NDescriptionsItem>
       <NDescriptionsItem label="访问量">
-        {{ _FormatNumberWithUnit(info.visitors, { join: true }) }}人
+        {{ _Format_NumberWithUnit(info.visitors, { join: true }) }}人
       </NDescriptionsItem>
 
       <NDescriptionsItem label="积极评价">
-        {{ _FormatNumberWithUnit(info.positiveReviews, { join: true }) }}人 ({{
+        {{ _Format_NumberWithUnit(info.positiveReviews, { join: true }) }}人 ({{
           info.positiveRate
         }}%)
       </NDescriptionsItem>
       <NDescriptionsItem label="消极评价">
-        {{ _FormatNumberWithUnit(info.negativeReviews, { join: true }) }}人 ({{
+        {{ _Format_NumberWithUnit(info.negativeReviews, { join: true }) }}人 ({{
           info.negativeRate
         }}%)
       </NDescriptionsItem>

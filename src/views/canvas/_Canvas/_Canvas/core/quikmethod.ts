@@ -1,4 +1,4 @@
-import { _Schedule } from "nhanh-pure-function";
+import { _Animate_Schedule } from "nhanh-pure-function";
 import Axis from "./axis";
 import Event from "./event";
 import { type OverlayType } from "../OverlayGroup";
@@ -357,7 +357,7 @@ export default class QuickMethod extends Event {
     const scaleDifference = targetScale - initialScale;
     let oldSchedule = 0;
 
-    _Schedule((schedule) => {
+    _Animate_Schedule((schedule) => {
       if (!this.isAuto || !this.canvas || !this.isInteractive) return;
 
       this.setScale("center", (schedule - oldSchedule) * scaleDifference);
@@ -374,7 +374,7 @@ export default class QuickMethod extends Event {
     duration: number,
     onComplete: () => void
   ) {
-    _Schedule((schedule) => {
+    _Animate_Schedule((schedule) => {
       if (!this.isAuto || !this.canvas || !this.isInteractive) return;
 
       // 插值计算当前偏移量

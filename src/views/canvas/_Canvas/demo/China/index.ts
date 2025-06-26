@@ -1,7 +1,7 @@
 import {
-  _FormatNumberWithUnit,
-  _LngLatToPlane,
-  _ReadFile,
+  _Format_NumberWithUnit,
+  _Math_LngLatToPlane,
+  _File_Read,
 } from "nhanh-pure-function";
 import _Canvas from "../../_Canvas";
 import { markRaw, ref, shallowRef } from "vue";
@@ -50,7 +50,7 @@ type ChinaDataType = {
 
 function ChinaData() {
   const china = new URL("./data/index.json", import.meta.url);
-  return _ReadFile(china.href).then((content) => {
+  return _File_Read(china.href).then((content) => {
     const data = JSON.parse(content) as FeatureCollection;
     const chinaData: ChinaDataType = [];
 
@@ -60,22 +60,22 @@ function ChinaData() {
       chinaData.push(chinaDataItem);
 
       properties.center =
-        properties.center && _LngLatToPlane(...properties.center);
+        properties.center && _Math_LngLatToPlane(...properties.center);
       properties.centroid =
-        properties.centroid && _LngLatToPlane(...properties.centroid);
+        properties.centroid && _Math_LngLatToPlane(...properties.centroid);
 
       if (geometry.type == "MultiPolygon")
         geometry.coordinates.forEach((v) => {
           v.forEach((item) => {
             chinaDataItem.geometry.push(
-              item.map((location) => _LngLatToPlane(...location))
+              item.map((location) => _Math_LngLatToPlane(...location))
             );
           });
         });
       else
         geometry.coordinates.forEach((v) =>
           chinaDataItem.geometry.push(
-            v.map((location) => _LngLatToPlane(...location))
+            v.map((location) => _Math_LngLatToPlane(...location))
           )
         );
     });
@@ -209,7 +209,7 @@ attractions.forEach((attraction) => {
   const name = attraction.name;
   const group = new _Canvas.OverlayGroup({ name });
 
-  const value = _LngLatToPlane(...attraction.coordinates);
+  const value = _Math_LngLatToPlane(...attraction.coordinates);
   heatMapValue.push(value);
   const point = new _Canvas.Point({
     value,
@@ -326,7 +326,7 @@ export const heatMapOverlay = new _Canvas.Custom({
     ctx.fillStyle = "rgb(255,0,0)";
     ctx.font = "bold 16px monospace";
     ctx.fillText(
-      "≥" + _FormatNumberWithUnit(maxValue, { join: true }),
+      "≥" + _Format_NumberWithUnit(maxValue, { join: true }),
       colorBlokX + colorBlokWidth + padding,
       colorBlokY + 16
     );

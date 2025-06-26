@@ -14,7 +14,10 @@ import {
   SunnyOutline,
 } from "@vicons/ionicons5";
 import { NButton, NSpace, NIcon } from "naive-ui";
-import { _Fullscreen, _IsFullscreen } from "nhanh-pure-function";
+import {
+  _Element_Fullscreen,
+  _Element_IsFullscreen,
+} from "nhanh-pure-function";
 import { onBeforeUnmount, ref } from "vue";
 import WeatherInfo from "./weatherInfo/index.vue";
 import Media from "@/stores/media";
@@ -52,10 +55,10 @@ function GotoGitHub() {
 /** 当前状态是否是全屏 */
 const isFullScreen = ref(false);
 /** 全屏切换 */
-const toggleFullScreen = _Fullscreen();
+const toggleFullScreen = _Element_Fullscreen();
 /** 全屏切换监测 */
 const resizeObserver = new ResizeObserver(() => {
-  isFullScreen.value = _IsFullscreen();
+  isFullScreen.value = _Element_IsFullscreen();
 });
 resizeObserver.observe(document.documentElement);
 onBeforeUnmount(() => {
