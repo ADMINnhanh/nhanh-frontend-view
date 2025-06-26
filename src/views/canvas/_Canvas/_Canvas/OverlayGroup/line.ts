@@ -80,7 +80,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     if (this.isInfinite) {
       const { mainCanvas, dynamicPositionWithOffset } = this;
       const { width, height } = mainCanvas!.rect;
-      return _DoesLineIntersectRectangle(
+      return _DoesInfiniteLineIntersectRectangle(
         [0, 0],
         [width, height],
         dynamicPositionWithOffset[0],
@@ -176,7 +176,8 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     );
 
     // 绘制最终线段
-    this.drawLine(ctx, [extendedStart, extendedEnd]);
+    if (extendedStart && extendedEnd)
+      this.drawLine(ctx, [extendedStart, extendedEnd]);
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {
     if (this.isNeedRender) {
@@ -195,98 +196,221 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   }
 }
 
-/** 计算线段与画布边界的交点 */
+// /** 计算线段与画布边界的交点 */
+// function _GetBoundaryIntersection(
+//   point: [number, number],
+//   vector: [number, number],
+//   width: number,
+//   height: number
+// ): [number, number] {
+//   const [px, py] = point; // 当前点的x,y坐标
+//   const [vx, vy] = vector; // 方向向量的x,y分量
+//   let t = Infinity; // 记录最小正值的参数t
+
+//   // 横向边界检测 (left/right)
+//   if (vx !== 0) {
+//     // 计算到达横向边界的参数t
+//     const tx =
+//       vx > 0
+//         ? (width - px) / vx // 向右延伸至右边界（x=rect.width）
+//         : -px / vx; // 向左延伸至左边界（x=0）
+
+//     if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
+//   }
+
+//   // 纵向边界检测 (top/bottom)
+//   if (vy !== 0) {
+//     // 计算到达纵向边界的参数t
+//     const ty =
+//       vy > 0
+//         ? (height - py) / vy // 向下延伸至下边界（y=rect.height）
+//         : -py / vy; // 向上延伸至上边界（y=0）
+
+//     if (ty > 0) t = Math.min(t, ty); // 只保留最小的正t值
+//   }
+
+//   // 延长向量至边界
+//   return t === Infinity ? point : [px + vx * t, py + vy * t];
+// }
+
+// /** 判断线段是否与矩形相交 */
+// function _DoesLineIntersectRectangle(
+//   j1: [number, number],
+//   j2: [number, number],
+//   y3: [number, number],
+//   y4: [number, number]
+// ): boolean {
+//   // 计算矩形边界
+//   const xMin = Math.min(j1[0], j2[0]);
+//   const xMax = Math.max(j1[0], j2[0]);
+//   const yMin = Math.min(j1[1], j2[1]);
+//   const yMax = Math.max(j1[1], j2[1]);
+
+//   // 矩形四个顶点
+//   const vertices: [number, number][] = [
+//     [xMin, yMin], // 左上
+//     [xMax, yMin], // 右上
+//     [xMax, yMax], // 右下
+//     [xMin, yMax], // 左下
+//   ];
+
+//   // 计算直线方程 Ax + By + C = 0
+//   const A = y4[1] - y3[1];
+//   const B = y3[0] - y4[0];
+//   const C = y4[0] * y3[1] - y3[0] * y4[1];
+
+//   // 处理两点重合的情况
+//   if (A === 0 && B === 0) {
+//     const [x, y] = y3;
+//     return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
+//   }
+
+//   // 检查矩形顶点相对于直线的位置
+//   let hasPositive = false;
+//   let hasNegative = false;
+//   const epsilon = 1e-10; // 浮点精度容差
+
+//   for (const [x, y] of vertices) {
+//     const value = A * x + B * y + C;
+
+//     if (Math.abs(value) < epsilon) {
+//       // 点在直线上
+//       return true;
+//     } else if (value > epsilon) {
+//       hasPositive = true;
+//     } else if (value < -epsilon) {
+//       hasNegative = true;
+//     }
+
+//     // 如果已检测到两侧都有点，提前结束
+//     if (hasPositive && hasNegative) {
+//       return true;
+//     }
+//   }
+
+//   // 矩形是否与直线相交（点在两侧或点在直线上）
+//   return hasPositive && hasNegative;
+// }
+
+/**
+ * 计算从起点沿方向向量延伸后与画布边界的交点
+ * @param startPoint 线段起点坐标 [x, y]
+ * @param direction 方向向量 [dx, dy]
+ * @param canvasWidth 画布宽度
+ * @param canvasHeight 画布高度
+ * @returns 与边界的交点坐标，若无有效交点返回 null
+ */
 function _GetBoundaryIntersection(
-  point: [number, number],
-  vector: [number, number],
-  width: number,
-  height: number
-): [number, number] {
-  const [px, py] = point; // 当前点的x,y坐标
-  const [vx, vy] = vector; // 方向向量的x,y分量
-  let t = Infinity; // 记录最小正值的参数t
+  startPoint: [number, number],
+  direction: [number, number],
+  canvasWidth: number,
+  canvasHeight: number
+): [number, number] | null {
+  const [startX, startY] = startPoint;
+  const [dirX, dirY] = direction;
+  let minT = Infinity; // 存储到达边界的最小正比例系数
 
-  // 横向边界检测 (left/right)
-  if (vx !== 0) {
-    // 计算到达横向边界的参数t
-    const tx =
-      vx > 0
-        ? (width - px) / vx // 向右延伸至右边界（x=rect.width）
-        : -px / vx; // 向左延伸至左边界（x=0）
+  // 检测左右边界（垂直边界）
+  if (dirX !== 0) {
+    const tToVerticalBoundary =
+      dirX > 0
+        ? (canvasWidth - startX) / dirX // 到达右边界
+        : -startX / dirX; // 到达左边界
 
-    if (tx > 0) t = Math.min(t, tx); // 只保留最小的正t值
+    if (tToVerticalBoundary > 0) {
+      minT = Math.min(minT, tToVerticalBoundary);
+    }
   }
 
-  // 纵向边界检测 (top/bottom)
-  if (vy !== 0) {
-    // 计算到达纵向边界的参数t
-    const ty =
-      vy > 0
-        ? (height - py) / vy // 向下延伸至下边界（y=rect.height）
-        : -py / vy; // 向上延伸至上边界（y=0）
+  // 检测上下边界（水平边界）
+  if (dirY !== 0) {
+    const tToHorizontalBoundary =
+      dirY > 0
+        ? (canvasHeight - startY) / dirY // 到达下边界
+        : -startY / dirY; // 到达上边界
 
-    if (ty > 0) t = Math.min(t, ty); // 只保留最小的正t值
+    if (tToHorizontalBoundary > 0) {
+      minT = Math.min(minT, tToHorizontalBoundary);
+    }
   }
 
-  // 延长向量至边界
-  return t === Infinity ? point : [px + vx * t, py + vy * t];
+  // 当向量指向边界外时返回 null
+  return minT === Infinity
+    ? null
+    : [startX + dirX * minT, startY + dirY * minT];
 }
 
-/** 判断线段是否与矩形相交 */
-function _DoesLineIntersectRectangle(
-  j1: [number, number],
-  j2: [number, number],
-  y3: [number, number],
-  y4: [number, number]
+/**
+ * 判断无限延伸的直线是否与矩形区域相交
+ * @param rectCorner1 矩形对角顶点1 [x, y]
+ * @param rectCorner2 矩形对角顶点2 [x, y]
+ * @param linePointA 直线上一点A [x, y]
+ * @param linePointB 直线上一点B [x, y]
+ * @returns 直线是否与矩形相交
+ */
+function _DoesInfiniteLineIntersectRectangle(
+  rectCorner1: [number, number],
+  rectCorner2: [number, number],
+  linePointA: [number, number],
+  linePointB: [number, number]
 ): boolean {
-  // 计算矩形边界
-  const xMin = Math.min(j1[0], j2[0]);
-  const xMax = Math.max(j1[0], j2[0]);
-  const yMin = Math.min(j1[1], j2[1]);
-  const yMax = Math.max(j1[1], j2[1]);
+  // 计算矩形边界范围
+  const rectMinX = Math.min(rectCorner1[0], rectCorner2[0]);
+  const rectMaxX = Math.max(rectCorner1[0], rectCorner2[0]);
+  const rectMinY = Math.min(rectCorner1[1], rectCorner2[1]);
+  const rectMaxY = Math.max(rectCorner1[1], rectCorner2[1]);
 
-  // 矩形四个顶点
-  const vertices: [number, number][] = [
-    [xMin, yMin], // 左上
-    [xMax, yMin], // 右上
-    [xMax, yMax], // 右下
-    [xMin, yMax], // 左下
+  // 矩形四个顶点（顺时针顺序）
+  const rectVertices: [number, number][] = [
+    [rectMinX, rectMinY], // 左上
+    [rectMaxX, rectMinY], // 右上
+    [rectMaxX, rectMaxY], // 右下
+    [rectMinX, rectMaxY], // 左下
   ];
 
-  // 计算直线方程 Ax + By + C = 0
-  const A = y4[1] - y3[1];
-  const B = y3[0] - y4[0];
-  const C = y4[0] * y3[1] - y3[0] * y4[1];
+  // 计算直线方程系数: Ax + By + C = 0
+  const coefA = linePointB[1] - linePointA[1];
+  const coefB = linePointA[0] - linePointB[0];
+  const coefC = linePointB[0] * linePointA[1] - linePointA[0] * linePointB[1];
 
-  // 处理两点重合的情况
-  if (A === 0 && B === 0) {
-    const [x, y] = y3;
-    return x >= xMin && x <= xMax && y >= yMin && y <= yMax;
+  // 处理两点重合的退化情况
+  if (coefA === 0 && coefB === 0) {
+    const [pointX, pointY] = linePointA;
+    return (
+      pointX >= rectMinX &&
+      pointX <= rectMaxX &&
+      pointY >= rectMinY &&
+      pointY <= rectMaxY
+    );
   }
 
-  // 检查矩形顶点相对于直线的位置
-  let hasPositive = false;
-  let hasNegative = false;
-  const epsilon = 1e-10; // 浮点精度容差
+  // 检测矩形顶点在直线的分布情况
+  const FLOAT_EPSILON = 1e-10; // 浮点计算容差
+  let hasPositiveSidePoint = false;
+  let hasNegativeSidePoint = false;
 
-  for (const [x, y] of vertices) {
-    const value = A * x + B * y + C;
+  for (const [vertexX, vertexY] of rectVertices) {
+    const positionValue = coefA * vertexX + coefB * vertexY + coefC;
 
-    if (Math.abs(value) < epsilon) {
-      // 点在直线上
+    // 顶点落在直线上（直接判定相交）
+    if (Math.abs(positionValue) < FLOAT_EPSILON) {
       return true;
-    } else if (value > epsilon) {
-      hasPositive = true;
-    } else if (value < -epsilon) {
-      hasNegative = true;
+    }
+    // 顶点在直线正侧
+    else if (positionValue > FLOAT_EPSILON) {
+      hasPositiveSidePoint = true;
+    }
+    // 顶点在直线负侧
+    else {
+      hasNegativeSidePoint = true;
     }
 
-    // 如果已检测到两侧都有点，提前结束
-    if (hasPositive && hasNegative) {
+    // 当检测到直线穿过矩形时提前退出
+    if (hasPositiveSidePoint && hasNegativeSidePoint) {
       return true;
     }
   }
 
-  // 矩形是否与直线相交（点在两侧或点在直线上）
-  return hasPositive && hasNegative;
+  // 当矩形顶点分居直线两侧时判定相交
+  return hasPositiveSidePoint && hasNegativeSidePoint;
 }

@@ -1,25 +1,6 @@
 import Decimal from "decimal.js";
 import type Canvas from "..";
-
-/**
- * 格式化数字，给数字加上千位分隔符。
- * @param {number} number - 要格式化的数字。
- * @returns {string} - 格式化后的字符串。
- */
-function _FormatNumber(number: number): string {
-  // 将数字转换为字符串
-  const numStr = number.toString();
-  // 按小数点分割字符串
-  const parts = numStr.split(".");
-  // 处理整数部分
-  const integerPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  if (parts.length > 1) {
-    // 如果有小数部分，拼接整数部分和小数部分
-    return integerPart + "." + parts[1];
-  }
-  // 如果没有小数部分，直接返回处理后的整数部分
-  return integerPart;
-}
+import { _Format_NumberWithCommas } from "nhanh-pure-function";
 
 export default class Axis {
   /** 画布 */
@@ -293,7 +274,7 @@ export default class Axis {
       let v = canvas.getAxisValueByPoint((x - center.x) * axisConfig.x, 0).xV;
 
       while (x <= width) {
-        const vString = _FormatNumber(v);
+        const vString = _Format_NumberWithCommas(v);
         const textW = textWidth(vString);
         v !== 0 && this.drawText(vString, x - textW / 2, y, isSecondary);
         x += grid_size;
@@ -316,7 +297,7 @@ export default class Axis {
       let v = canvas.getAxisValueByPoint(0, (y - center.y) * axisConfig.y).yV;
 
       while (y <= height) {
-        const vString = _FormatNumber(v);
+        const vString = _Format_NumberWithCommas(v);
         const textW = textWidth(vString);
         let x = center.x - textW - textOffset;
         x = Math.max(Math.min(x, width - textW - textOffset), textOffset);
