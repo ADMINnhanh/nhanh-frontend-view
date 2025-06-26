@@ -20,7 +20,7 @@ const dynamicDiagramComponent = computed(() => {
 
 <template>
   <div class="dynamic-diagram-container">
-    <NScrollbar style="max-height: 40vh; height: auto">
+    <NScrollbar style="width: 20vw; height: auto">
       <NSpace>
         <NRadioGroup v-model:value="dynamicDiagram">
           <NRadio
@@ -43,14 +43,13 @@ const dynamicDiagramComponent = computed(() => {
 }
 .dynamic-diagram-container {
   display: flex;
-  flex-direction: column;
   height: 100%;
   padding: 20px;
   :deep(.n-card) {
-    width: 100%;
-    height: 100px;
+    width: 100px;
+    height: 100%;
     flex-grow: 1;
-    margin-top: 10px;
+    margin-left: 10px;
   }
 }
 </style>

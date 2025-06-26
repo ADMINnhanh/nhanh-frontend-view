@@ -3,22 +3,41 @@ import { _GenerateUUID } from "nhanh-pure-function";
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, ref, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NCard, NIcon, NSlider, NSpace } from "naive-ui";
-import { PauseCircleOutline, PlayCircleOutline } from "@vicons/ionicons5";
+import { NButton, NCard, NIcon, NSlider } from "naive-ui";
+import {
+  PauseCircleOutline,
+  PlayCircleOutline,
+  RefreshCircleOutline,
+} from "@vicons/ionicons5";
 
 const id = _GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 
 const totalLen = 120;
-const x = ref(50);
+const x = ref(60);
 const marks = {
   0: "0m",
-  24: "24m",
-  50: "50m",
-  96: "96m",
+  60: "60m",
   100: "100m",
 };
+
+const curve = new _Canvas.Line({
+  value: Array.from({ length: 101 }, (_, i) => [
+    i,
+    Number(((i * (totalLen - i)) / 2 / 50).toFixed(1)) + 60,
+  ]),
+  isInteractive: false,
+});
+const curve_point = new _Canvas.Point({
+  value: [0, 0],
+});
+const m_text = new _Canvas.Text({
+  text: "面积 : 0㎡",
+  value: [0, 0],
+  style: { color: "#d03050", size: 25 },
+  offset: { x: 120, y: -40 },
+});
 
 const rect = new _Canvas.Polygon({
   value: [
@@ -34,24 +53,22 @@ const line = new _Canvas.Line({
   ],
 });
 const q_text = new _Canvas.Text({
-  text: "用 120m 围栏靠 100m 长的墙围一个长方形",
-  value: [50, -10],
-  style: { color: "#18a058", size: 25 },
+  text: "用 120m 围栏，靠 100m 长的墙围一个长方形",
+  value: [50, 0],
+  style: { size: 25 },
+  offset: { x: 0, y: 20 },
 });
 const x_text = new _Canvas.Text({
   text: "x : 0m",
   value: [0, 0],
   style: { color: "#18a058", size: 25 },
+  offset: { x: 0, y: -20 },
 });
 const y_text = new _Canvas.Text({
   text: "y : 0m",
   value: [0, 0],
   style: { color: "#18a058", size: 25 },
-});
-const m_text = new _Canvas.Text({
-  text: "面积 : 0㎡",
-  value: [0, 0],
-  style: { color: "#18a058", size: 25 },
+  offset: { x: 70, y: 0 },
 });
 
 const isPlay = ref(false);
@@ -178,32 +195,43 @@ function UpdatePlay() {
 
 function UpdateX(x: number) {
   const y = (totalLen - x) / 2;
+  const m = Number((x * y).toFixed(1));
+  const my = m / 50 + 60;
+  curve_point.value = [x, my];
+  m_text.value = [x, my];
+  m_text.text = `面积: ${m.toFixed(1)}㎡`;
+
   rect.value = [
     [0, 0],
     [x, y],
   ];
-  x_text.value = [x / 2, y + 5];
+  x_text.value = [x / 2, y];
   x_text.text = `x: ${x.toFixed(1)}m`;
-  y_text.value = [x + 15, y / 2];
+  y_text.value = [x, y / 2];
   y_text.text = `y: ${y.toFixed(1)}m`;
-
-  m_text.value = [x + 20, y + 10];
-  m_text.text = `面积: ${(x * y).toFixed(1)}㎡`;
 }
 UpdateX(x.value);
 
 onMounted(() => {
+  const dom = document.getElementById(id)!;
+  const left = dom.getBoundingClientRect().width / 2 - 250;
   myCanvas.value = new _Canvas({
     id,
     theme: Settings.value.theme,
     axisConfig: { y: -1, count: 20 },
-    defaultCenter: {
-      left: "20%",
-      bottom: "20%",
-    },
-    isInteractive: false,
+    defaultCenter: { left: left, bottom: 50 },
+    axisShow: false,
   });
-  myCanvas.value.addOverlay([rect, line, q_text, x_text, y_text, m_text]);
+  myCanvas.value.addOverlay([
+    curve,
+    curve_point,
+    rect,
+    line,
+    q_text,
+    x_text,
+    y_text,
+    m_text,
+  ]);
 });
 defineExpose({ myCanvas });
 </script>
@@ -211,6 +239,14 @@ defineExpose({ myCanvas });
 <template>
   <NCard>
     <div class="tools">
+      <NButton
+        quaternary
+        circle
+        style="font-size: 24px"
+        @click="myCanvas?.returnToOrigin()"
+      >
+        <NIcon :component="RefreshCircleOutline" />
+      </NButton>
       <NButton
         quaternary
         circle
