@@ -40,10 +40,10 @@ function ClosePanel(key: string) {
     router.push({ name: oldTab.pop() || panels.value[0].key });
 }
 function CloseOtherPanel() {
-  panels.value.length = 1;
-  oldTab = [];
-  if (tab.value != panels.value[0].key)
-    router.push({ name: panels.value[0].key });
+  oldTab = [tab.value];
+  panels.value = panels.value.filter(
+    (item) => !item.closable || item.key == tab.value
+  );
 }
 watch(
   () => router.currentRoute.value,
