@@ -76,15 +76,15 @@ const y_text = new _Canvas.Text({
 
 const isPlay = ref(false);
 
-const playTool = _Animate_CreateOscillator(0, 100, 300, (v) => {
+const oscillator = _Animate_CreateOscillator(0, 100, 300, (v) => {
   x.value = v;
   UpdateX(v);
 });
 function UpdatePlay() {
   isPlay.value = !isPlay.value;
 
-  if (isPlay.value) playTool.play(x.value);
-  else playTool.pause();
+  if (isPlay.value) oscillator.play(x.value);
+  else oscillator.pause();
 }
 
 function UpdateX(x: number) {
