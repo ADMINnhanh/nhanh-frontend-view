@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NRadio, NRadioGroup, NScrollbar, NSpace } from "naive-ui";
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import { useLocalStorage } from "@vueuse/core";
 import threeWalledEnclosure from "./demo/threeWalledEnclosure.vue";
 import perpendicularBisector from "./demo/perpendicularBisector.vue";
