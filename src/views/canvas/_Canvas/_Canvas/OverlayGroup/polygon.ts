@@ -203,7 +203,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   drawRect(ctx: CanvasRenderingContext2D) {
     this.setGlobalAlpha(ctx);
 
-    const [[x1, y1], [x2, y2]] = this.dynamicPositionWithOffset;
+    const [[x1, y1], [x2, y2]] = this.finalDynamicPosition;
     const width = Math.abs(x2 - x1);
     const height = Math.abs(y2 - y1);
     const left = Math.min(x1, x2);
@@ -235,7 +235,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   drawPolygon(ctx: CanvasRenderingContext2D) {
     this.setGlobalAlpha(ctx);
 
-    const dynamicPosition = this.dynamicPositionWithOffset;
+    const dynamicPosition = this.finalDynamicPosition;
 
     const style = this.setOverlayStyles(ctx);
 

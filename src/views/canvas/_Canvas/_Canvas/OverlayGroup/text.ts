@@ -125,14 +125,14 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    const { text, textOffset, dynamicPositionWithOffset } = this;
+    const { text, textOffset, finalDynamicPosition } = this;
     if (!this.mainCanvas || !text) return;
     this.setGlobalAlpha(ctx);
 
     this.setOverlayStyles(ctx);
 
-    const x = dynamicPositionWithOffset[0] - textOffset.x;
-    const y = dynamicPositionWithOffset[1] + textOffset.y;
+    const x = finalDynamicPosition[0] - textOffset.x;
+    const y = finalDynamicPosition[1] + textOffset.y;
 
     // 绘制文本的描边
     ctx.strokeText(text, x, y);
@@ -143,7 +143,7 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
     this.path = new Path2D();
     this.path.rect(
       x,
-      dynamicPositionWithOffset[1] - textOffset.y,
+      finalDynamicPosition[1] - textOffset.y,
       textOffset.x * 2,
       textOffset.y * 2
     );

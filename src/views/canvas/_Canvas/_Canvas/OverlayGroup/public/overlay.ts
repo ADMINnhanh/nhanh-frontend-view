@@ -103,8 +103,8 @@ export default abstract class Overlay<
     this.calculateOffsetValue();
     this.notifyReload?.();
   }
-  /** 带偏移的动态位置 */
-  get dynamicPositionWithOffset() {
+  /** 最终的动态位置（含：偏移） */
+  get finalDynamicPosition() {
     const { x, y } = this.offset;
     return this.dynamicPosition?.map((v, i) => {
       if (typeof v === "number") return i == 0 ? v + x : v + y;

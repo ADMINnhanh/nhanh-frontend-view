@@ -419,7 +419,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     ctx.beginPath();
     ctx.moveTo(x, y);
-    const radiusPoint = this.handlePoints.radius!.dynamicPositionWithOffset;
+    const radiusPoint = this.handlePoints.radius!.finalDynamicPosition;
     ctx.lineTo(radiusPoint[0], radiusPoint[1]);
     ctx.stroke();
 
@@ -432,7 +432,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
   draw(ctx: CanvasRenderingContext2D) {
     const {
-      dynamicPositionWithOffset,
+      finalDynamicPosition,
       mainCanvas,
       startAngle,
       endAngle,
@@ -447,7 +447,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
     const style = this.setOverlayStyles(ctx);
 
-    const [x, y] = dynamicPositionWithOffset;
+    const [x, y] = finalDynamicPosition;
 
     ctx.beginPath();
     this.path = new Path2D();

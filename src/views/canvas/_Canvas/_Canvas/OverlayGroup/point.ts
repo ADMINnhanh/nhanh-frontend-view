@@ -180,7 +180,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     return { point: this.setOverlayStyles() };
   }
   draw(ctx: CanvasRenderingContext2D) {
-    const { dynamicPositionWithOffset, mainCanvas } = this;
+    const { finalDynamicPosition, mainCanvas } = this;
 
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
@@ -188,7 +188,7 @@ export default class Point extends Overlay<PointStyleType, [number, number]> {
     const { radius, width } = this.setOverlayStyles(ctx);
     const lineWidthOffset = this.fillProgress?.lineWidthOffset || 0;
 
-    const [x, y] = dynamicPositionWithOffset;
+    const [x, y] = finalDynamicPosition;
 
     ctx.beginPath();
 

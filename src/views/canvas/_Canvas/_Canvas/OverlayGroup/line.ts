@@ -84,8 +84,8 @@ export default class Line extends GeometricBoundary<LineStyleType> {
       return _DoesInfiniteLineIntersectRectangle(
         [0, 0],
         [width, height],
-        this.dynamicPositionWithOffset[0],
-        this.dynamicPositionWithOffset[1]
+        this.finalDynamicPosition[0],
+        this.finalDynamicPosition[1]
       );
     }
     return super.isWithinRange;
@@ -129,7 +129,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   /** 绘制线段 */
   drawLine(ctx: CanvasRenderingContext2D, position?: [number, number][]) {
     const { mainCanvas, isInfinite, isClick } = this;
-    position = position || this.dynamicPositionWithOffset;
+    position = position || this.finalDynamicPosition;
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
 
@@ -158,13 +158,13 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   }
   /** 绘制无限延伸线段 */
   drawisInfiniteStraightLine(ctx: CanvasRenderingContext2D) {
-    const { mainCanvas, dynamicPositionWithOffset } = this;
+    const { mainCanvas, finalDynamicPosition } = this;
     if (!mainCanvas) return;
     this.setGlobalAlpha(ctx);
 
     const { rect } = mainCanvas;
 
-    const [start, end]: [number, number][] = dynamicPositionWithOffset!;
+    const [start, end]: [number, number][] = finalDynamicPosition!;
 
     // 方向向量计算（终点到起点）
     const dirVector: [number, number] = [end[0] - start[0], end[1] - start[1]];
