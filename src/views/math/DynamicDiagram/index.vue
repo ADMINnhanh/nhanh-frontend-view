@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import { NRadio, NRadioGroup, NScrollbar, NSpace } from "naive-ui";
 import { computed, ref } from "vue";
-import ThreeWalledEnclosure from "./threeWalledEnclosure.vue";
 import { useLocalStorage } from "@vueuse/core";
+import threeWalledEnclosure from "./demo/threeWalledEnclosure.vue";
+import perpendicularBisector from "./demo/perpendicularBisector.vue";
 
 const dynamicDiagramCollection = [
   {
     title: "三边围墙",
-    component: ThreeWalledEnclosure,
+    component: threeWalledEnclosure,
+  },
+  {
+    title: "垂直平分线",
+    component: perpendicularBisector,
   },
 ];
 const dynamicDiagram = useLocalStorage(
