@@ -1,4 +1,7 @@
-import { _Valid_Is2DNumberArray } from "nhanh-pure-function";
+import {
+  _Utility_MergeObjects,
+  _Valid_Is2DNumberArray,
+} from "nhanh-pure-function";
 import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
@@ -114,7 +117,10 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     if (typeof this.style == "string") {
       style = mainCanvas.style[this.style]?.line || defaultStyle;
     } else if (typeof this.style == "object") {
-      style = Object.assign({}, defaultStyle, this.style as any);
+      style = _Utility_MergeObjects(
+        JSON.parse(JSON.stringify(defaultStyle)),
+        this.style
+      );
     } else {
       style = defaultStyle;
     }

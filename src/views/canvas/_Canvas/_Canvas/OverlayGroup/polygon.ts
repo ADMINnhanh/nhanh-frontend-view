@@ -2,7 +2,10 @@ import _Canvas from "..";
 import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
 import GeometricBoundary from "./public/geometricBoundary";
-import { _Valid_Is2DNumberArray } from "nhanh-pure-function";
+import {
+  _Utility_MergeObjects,
+  _Valid_Is2DNumberArray,
+} from "nhanh-pure-function";
 
 type ConstructorOption = ConstructorParameters<
   typeof GeometricBoundary<PolygonStyleType>
@@ -179,10 +182,10 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     if (typeof this.style == "string") {
       style = mainCanvas.style[this.style]?.polygon || defaultStyle;
     } else if (typeof this.style == "object") {
-      const stroke = this.style.stroke
-        ? Object.assign({}, defaultStyle.stroke, this.style.stroke as any)
-        : defaultStyle.stroke;
-      style = Object.assign({}, defaultStyle, this.style as any, { stroke });
+      style = _Utility_MergeObjects(
+        JSON.parse(JSON.stringify(defaultStyle)),
+        this.style
+      );
     } else {
       style = defaultStyle;
     }

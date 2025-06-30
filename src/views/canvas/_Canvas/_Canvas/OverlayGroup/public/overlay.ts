@@ -586,10 +586,12 @@ export default abstract class Overlay<
   protected abstract setOverlayStyles(ctx?: CanvasRenderingContext2D): T;
 
   /** 光标样式 */
-  get cursorStyle(): string {
-    return this.isDraggable
-      ? "_nhanh_canvas_hover_overlay_draggable"
-      : "_nhanh_canvas_hover_overlay";
+  get cursorStyle(): string | undefined {
+    return this.isInteractive
+      ? this.isDraggable
+        ? "_nhanh_canvas_hover_overlay_draggable"
+        : "_nhanh_canvas_hover_overlay"
+      : undefined;
   }
 
   /** 获取绘制函数 */

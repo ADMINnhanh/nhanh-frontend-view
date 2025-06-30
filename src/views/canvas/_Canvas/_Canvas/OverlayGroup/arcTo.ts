@@ -1,4 +1,5 @@
 import {
+  _Utility_MergeObjects,
   _Valid_Is2DNumberArray,
   _Valid_IsNumberArray,
 } from "nhanh-pure-function";
@@ -197,10 +198,10 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
     if (typeof this.style == "string") {
       style = mainCanvas.style[this.style]?.arcTo || defaultStyle;
     } else if (typeof this.style == "object") {
-      const stroke = this.style.stroke
-        ? Object.assign({}, defaultStyle.stroke, this.style.stroke as any)
-        : defaultStyle.stroke;
-      style = Object.assign({}, defaultStyle, this.style as any, { stroke });
+      style = _Utility_MergeObjects(
+        JSON.parse(JSON.stringify(defaultStyle)),
+        this.style
+      );
     } else {
       style = defaultStyle;
     }

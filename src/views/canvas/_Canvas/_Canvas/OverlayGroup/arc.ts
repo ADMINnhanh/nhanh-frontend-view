@@ -1,4 +1,5 @@
 import {
+  _Utility_MergeObjects,
   _Valid_Is2DNumberArray,
   _Valid_IsNumberArray,
 } from "nhanh-pure-function";
@@ -280,9 +281,11 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
   get cursorStyle() {
     const point = this.handlePointsArr.some((point) => point?.isHover);
-    return this.isDraggable
-      ? "_nhanh_canvas_hover_overlay_draggable" + (point ? "_ew" : "")
-      : "_nhanh_canvas_hover_overlay";
+    return this.isInteractive
+      ? this.isDraggable
+        ? "_nhanh_canvas_hover_overlay_draggable" + (point ? "_ew" : "")
+        : "_nhanh_canvas_hover_overlay"
+      : undefined;
   }
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
     const isHover = this.isHover;
@@ -293,10 +296,10 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     if (typeof this.style == "string") {
       style = mainCanvas.style[this.style]?.arc || defaultStyle;
     } else if (typeof this.style == "object") {
-      const stroke = this.style.stroke
-        ? Object.assign({}, defaultStyle.stroke, this.style.stroke as any)
-        : defaultStyle.stroke;
-      style = Object.assign({}, defaultStyle, this.style as any, { stroke });
+      style = _Utility_MergeObjects(
+        JSON.parse(JSON.stringify(defaultStyle)),
+        this.style
+      );
     } else {
       style = defaultStyle;
     }

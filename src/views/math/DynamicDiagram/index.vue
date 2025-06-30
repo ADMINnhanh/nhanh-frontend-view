@@ -3,7 +3,7 @@ import { NRadio, NRadioGroup, NScrollbar, NSpace } from "naive-ui";
 import { computed } from "vue";
 import { useLocalStorage } from "@vueuse/core";
 import threeWalledEnclosure from "./demo/threeWalledEnclosure.vue";
-import perpendicularBisector from "./demo/perpendicularBisector.vue";
+import perpendicularBisector from "./demo/perpendicularBisector/index.vue";
 
 const dynamicDiagramCollection = [
   {
@@ -73,7 +73,7 @@ const dynamicDiagramComponent = computed(() => {
   height: 100%;
   padding: 20px;
   :deep(> .n-scrollbar) {
-    width: 20vw;
+    width: 400px;
     height: auto;
   }
   :deep(> .n-card) {
