@@ -1,28 +1,7 @@
 <script setup lang="ts">
-import { NRadio, NRadioGroup, NScrollbar } from "naive-ui";
+import { NRadio, NRadioGroup, NScrollbar, NSpace } from "naive-ui";
 import { computed } from "vue";
-import { useLocalStorage } from "@vueuse/core";
-import threeWalledEnclosure from "./demo/threeWalledEnclosure.vue";
-import perpendicularBisector from "./demo/perpendicularBisector/index.vue";
-
-const dynamicDiagramCollection = [
-  {
-    title: "三边围墙",
-    component: threeWalledEnclosure,
-  },
-  {
-    title: "垂直平分线",
-    component: perpendicularBisector,
-  },
-  /**
-   * 待实现：
-   * 角平分线
-   */
-];
-const dynamicDiagram = useLocalStorage(
-  "math-dynamic-diagram",
-  dynamicDiagramCollection[0].title
-);
+import { dynamicDiagram, dynamicDiagramCollection } from ".";
 
 const dynamicDiagramComponent = computed(() => {
   return dynamicDiagramCollection.find(
@@ -34,6 +13,14 @@ const dynamicDiagramComponent = computed(() => {
 <template>
   <div class="dynamic-diagram-container">
     <NScrollbar>
+      <!-- <template v-for="(item, index) in dynamicDiagramCollection"
+       :key="item.title"
+       
+       >
+       <NSpace  vertical></NSpace>
+
+      
+      </template> -->
       <NRadioGroup v-model:value="dynamicDiagram">
         <NRadio
           v-for="diagram in dynamicDiagramCollection"
