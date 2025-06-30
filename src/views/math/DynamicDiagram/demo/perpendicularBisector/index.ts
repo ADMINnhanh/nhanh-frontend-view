@@ -50,16 +50,94 @@ class MP {
   get c() {
     return this.p(2);
   }
-  /** 获取中垂线 */
-  static perpBisector(a: Point, b: Point, xT: number, yT: number) {
-    const x = (a.x + b.x) / 2;
-    const y = (a.y + b.y) / 2;
-    const xy = -1 / ((b.y - a.y) / (b.x - a.x));
+  /** 获取中垂线（在给定范围内裁剪） */
+  static perpBisector(
+    a: Point,
+    b: Point,
+    xScope: { min: number; max: number },
+    yScope: { min: number; max: number }
+  ) {
+    // 处理两点重合的情况
+    if (a.x === b.x && a.y === b.y) return;
 
-    if (a.x === b.x) return { x: xT, y };
-    if (a.y === b.y) return { x, y: yT };
+    // 计算中点
+    const midX = (a.x + b.x) / 2;
+    const midY = (a.y + b.y) / 2;
 
-    return { x: xT, y: (xT - x) * xy + y };
+    // 处理垂直线段（中垂线为水平线）
+    if (a.x === b.x) {
+      return {
+        x: { ...xScope },
+        y: { min: midY, max: midY },
+      };
+    }
+
+    // 处理水平线段（中垂线为垂直线）
+    if (a.y === b.y) {
+      return {
+        x: { min: midX, max: midX },
+        y: { ...yScope },
+      };
+    }
+
+    // 计算原线段斜率和中垂线斜率
+    const slope = (b.y - a.y) / (b.x - a.x);
+    const perpSlope = -1 / slope;
+
+    // 收集有效交点
+    const intersections: Point[] = [];
+
+    // 检查与左右边界的交点
+    const checkXBoundary = (xBoundary: number) => {
+      const y = perpSlope * (xBoundary - midX) + midY;
+      if (y >= yScope.min && y <= yScope.max) {
+        intersections.push({ x: xBoundary, y });
+      }
+    };
+
+    // 检查与上下边界的交点
+    const checkYBoundary = (yBoundary: number) => {
+      const x = (yBoundary - midY) / perpSlope + midX;
+      if (x >= xScope.min && x <= xScope.max) {
+        intersections.push({ x, y: yBoundary });
+      }
+    };
+
+    // 计算四条边界的交点
+    checkXBoundary(xScope.min);
+    checkXBoundary(xScope.max);
+    checkYBoundary(yScope.min);
+    checkYBoundary(yScope.max);
+
+    // 去重（浮点数容差1e-10）
+    const uniquePoints: Point[] = [];
+    for (const p of intersections) {
+      if (
+        !uniquePoints.some(
+          (q) => Math.abs(p.x - q.x) < 1e-10 && Math.abs(p.y - q.y) < 1e-10
+        )
+      ) {
+        uniquePoints.push(p);
+      }
+    }
+
+    // 处理交点不足的情况
+    if (uniquePoints.length < 2) return;
+
+    // 计算线段边界框
+    const min = uniquePoints.reduce((p, p1) => {
+      if (!p || p?.x > p1.x) return p1;
+      return p;
+    });
+    const max = uniquePoints.reduce((p, p1) => {
+      if (!p || p?.x < p1.x) return p1;
+      return p;
+    });
+
+    return {
+      x: { min: min.x, max: max.x },
+      y: { min: min.y, max: max.y },
+    };
   }
 
   static transform(a: Point): PointA;
@@ -88,11 +166,22 @@ export function Update() {
   const min = mainCanvas.getAxisValueByPoint(minP.x, minP.y);
   const max = mainCanvas.getAxisValueByPoint(maxP.x, maxP.y);
 
-  const perpBisector = (a: Point, b: Point) =>
-    MP.transform([
-      MP.perpBisector(a, b, min.xV, min.yV),
-      MP.perpBisector(a, b, max.xV, max.yV),
-    ]);
+  const perpBisector = (a: Point, b: Point): PointA[] | undefined => {
+    const point = MP.perpBisector(
+      a,
+      b,
+      { min: min.xV, max: max.xV },
+      { min: min.yV, max: max.yV }
+    );
+    if (point) {
+      const { x, y } = point;
+      return [
+        [x.min, y.min],
+        [x.max, y.max],
+      ];
+    }
+  };
+
   ablp.value = perpBisector(mp.a, mp.b);
   bclp.value = perpBisector(mp.b, mp.c);
   calp.value = perpBisector(mp.c, mp.a);
