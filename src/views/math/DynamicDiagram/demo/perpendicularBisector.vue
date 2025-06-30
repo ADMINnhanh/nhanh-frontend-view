@@ -16,6 +16,7 @@ const m = new _Canvas.Polygon({
     [2, 2],
   ],
   isDraggable: true,
+  canCreateOrDeleteHandlePoint: false,
 });
 m.addEventListener("dragg", (event) => {
   // console.log(m.value);

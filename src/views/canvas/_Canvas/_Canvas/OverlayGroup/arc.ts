@@ -7,6 +7,7 @@ import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
 import Point from "./point";
 import type { EventHandler } from "../public/eventController";
+import { _Number } from "../public/tools";
 
 type ConstructorOption = ConstructorParameters<
   typeof Overlay<ArcStyleType, [number, number]>
@@ -187,17 +188,21 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       const { x, y } = this.calculateOffset(offsetX, offsetY)!;
 
       const points = (this.handlePointsArr as (Point | Arc)[]).concat(this);
+
       points.forEach((item) => {
         item.internalUpdate(
           {
-            value: [item.value![0] + x.value, item.value![1] + y.value],
+            value: [
+              _Number.add(item.value![0], x.value),
+              _Number.add(item.value![1], y.value),
+            ],
             position: [
-              item.position![0] + x.position,
-              item.position![1] + y.position,
+              _Number.add(item.position![0], x.position),
+              _Number.add(item.position![1], y.position),
             ],
             dynamicPosition: [
-              item.dynamicPosition![0] + x.dynamicPosition,
-              item.dynamicPosition![1] + y.dynamicPosition,
+              _Number.add(item.dynamicPosition![0], x.dynamicPosition),
+              _Number.add(item.dynamicPosition![1], y.dynamicPosition),
             ],
           },
           true

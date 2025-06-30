@@ -6,6 +6,7 @@ import _Canvas from "..";
 import Overlay from "./overlay";
 import Point from "../point";
 import type { EventHandler } from "../../public/eventController";
+import { _Number } from "../../public/tools";
 
 // 定义点的类型
 type PointLocation = [number, number];
@@ -209,14 +210,18 @@ export default abstract class GeometricBoundary<T> extends Overlay<
       const { x, y } = this.calculateOffset(offsetX, offsetY)!;
 
       this.value!.forEach((_, index) => {
-        this.value![index][0] += x.value;
-        this.value![index][1] += y.value;
-
-        this.position![index][0] += x.position;
-        this.position![index][1] += y.position;
-
-        this.dynamicPosition![index][0] += x.dynamicPosition;
-        this.dynamicPosition![index][1] += y.dynamicPosition;
+        this.value![index] = [
+          _Number.add(this.value![index][0], x.value),
+          _Number.add(this.value![index][1], y.value),
+        ];
+        this.position![index] = [
+          _Number.add(this.position![index][0], x.position),
+          _Number.add(this.position![index][1], y.position),
+        ];
+        this.dynamicPosition![index] = [
+          _Number.add(this.dynamicPosition![index][0], x.dynamicPosition),
+          _Number.add(this.dynamicPosition![index][1], y.dynamicPosition),
+        ];
       });
       this.handlePoints.forEach((point, index) => {
         point.internalUpdate({

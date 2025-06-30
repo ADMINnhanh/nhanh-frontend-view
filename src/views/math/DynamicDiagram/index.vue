@@ -14,6 +14,10 @@ const dynamicDiagramCollection = [
     title: "垂直平分线",
     component: perpendicularBisector,
   },
+  /**
+   * 待实现：
+   * 角平分线
+   */
 ];
 const dynamicDiagram = useLocalStorage(
   "math-dynamic-diagram",

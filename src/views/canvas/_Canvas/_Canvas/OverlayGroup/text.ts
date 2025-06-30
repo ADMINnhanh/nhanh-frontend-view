@@ -3,6 +3,7 @@ import Overlay from "./public/overlay";
 import { type OverlayType } from "./index";
 import type { EventHandler } from "../public/eventController";
 import { _Valid_IsNumberArray } from "nhanh-pure-function";
+import { _Number } from "../public/tools";
 
 type ConstructorOption = ConstructorParameters<
   typeof Overlay<TextStyleType, [number, number]>
@@ -43,14 +44,17 @@ export default class Text extends Overlay<TextStyleType, [number, number]> {
 
     this.internalUpdate(
       {
-        value: [this.value![0] + x.value, this.value![1] + y.value],
+        value: [
+          _Number.add(this.value![0], x.value),
+          _Number.add(this.value![1], y.value),
+        ],
         position: [
-          this.position![0] + x.position,
-          this.position![1] + y.position,
+          _Number.add(this.position![0], x.position),
+          _Number.add(this.position![1], y.position),
         ],
         dynamicPosition: [
-          this.dynamicPosition![0] + x.dynamicPosition,
-          this.dynamicPosition![1] + y.dynamicPosition,
+          _Number.add(this.dynamicPosition![0], x.dynamicPosition),
+          _Number.add(this.dynamicPosition![1], y.dynamicPosition),
         ],
       },
       true
