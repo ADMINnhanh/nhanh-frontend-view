@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { NRadio, NRadioGroup, NScrollbar, NSpace } from "naive-ui";
+import { NRadio, NRadioGroup, NScrollbar } from "naive-ui";
 import { computed } from "vue";
 import { useLocalStorage } from "@vueuse/core";
 import threeWalledEnclosure from "./demo/threeWalledEnclosure.vue";
@@ -34,17 +34,15 @@ const dynamicDiagramComponent = computed(() => {
 <template>
   <div class="dynamic-diagram-container">
     <NScrollbar>
-      <NSpace>
-        <NRadioGroup v-model:value="dynamicDiagram">
-          <NRadio
-            v-for="diagram in dynamicDiagramCollection"
-            :key="diagram.title"
-            :value="diagram.title"
-          >
-            {{ diagram.title }}
-          </NRadio>
-        </NRadioGroup>
-      </NSpace>
+      <NRadioGroup v-model:value="dynamicDiagram">
+        <NRadio
+          v-for="diagram in dynamicDiagramCollection"
+          :key="diagram.title"
+          :value="diagram.title"
+        >
+          {{ diagram.title }}
+        </NRadio>
+      </NRadioGroup>
     </NScrollbar>
     <component :is="dynamicDiagramComponent" />
   </div>

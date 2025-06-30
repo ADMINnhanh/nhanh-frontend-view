@@ -2,8 +2,9 @@
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NCard } from "naive-ui";
+import { NAlert } from "naive-ui";
 import { overlays, id, Update } from ".";
+import Card from "../../card.vue";
 
 let myCanvas = shallowRef<_Canvas>();
 
@@ -16,23 +17,15 @@ onMounted(() => {
   myCanvas.value.addOverlay(overlays);
   Update();
 });
-defineExpose({ myCanvas });
 </script>
 
 <template>
-  <NCard>
+  <Card :canvas="myCanvas" vertical>
+    <NAlert title="尝试改变三角形" type="info" :bordered="false" closable>
+      1. 点击三角形 ； 2. 拖拽顶点
+    </NAlert>
     <canvas :id="id"></canvas>
-  </NCard>
+  </Card>
 </template>
 
-<style scoped lang="less">
-.n-card {
-  :deep(.n-card__content) {
-    height: 100%;
-  }
-}
-canvas {
-  width: 100%;
-  height: 100%;
-}
-</style>
+<style scoped lang="less"></style>

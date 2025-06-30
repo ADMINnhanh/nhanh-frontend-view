@@ -6,12 +6,13 @@ import {
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, ref, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NCard, NIcon, NSlider } from "naive-ui";
+import { NButton, NIcon, NSlider } from "naive-ui";
 import {
   PauseCircleOutline,
   PlayCircleOutline,
   RefreshCircleOutline,
 } from "@vicons/ionicons5";
+import Card from "../card.vue";
 
 const id = _Utility_GenerateUUID();
 
@@ -128,11 +129,10 @@ onMounted(() => {
     m_text,
   ]);
 });
-defineExpose({ myCanvas });
 </script>
 
 <template>
-  <NCard>
+  <Card :canvas="myCanvas">
     <div class="tools">
       <NButton
         quaternary
@@ -159,16 +159,10 @@ defineExpose({ myCanvas });
       />
     </div>
     <canvas :id="id"></canvas>
-  </NCard>
+  </Card>
 </template>
 
 <style scoped lang="less">
-.n-card {
-  :deep(.n-card__content) {
-    display: flex;
-    height: 100%;
-  }
-}
 .tools {
   display: flex;
   flex-direction: column;
@@ -182,10 +176,5 @@ defineExpose({ myCanvas });
     height: 100px;
     flex-grow: 1;
   }
-}
-canvas {
-  width: 100px;
-  height: 100%;
-  flex-grow: 1;
 }
 </style>
