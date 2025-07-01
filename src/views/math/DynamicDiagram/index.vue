@@ -1,35 +1,32 @@
 <script setup lang="ts">
-import { NRadio, NRadioGroup, NScrollbar, NSpace } from "naive-ui";
+import { NScrollbar } from "naive-ui";
 import { computed } from "vue";
 import { dynamicDiagram, dynamicDiagramCollection } from ".";
+import DynamicDiagramItem from "./dynamicDiagramItem.vue";
 
-const dynamicDiagramComponent = computed(() => {
-  return dynamicDiagramCollection.find(
-    (item) => item.title === dynamicDiagram.value
-  )!.component;
-});
+function GetComponent(title: string, collection = dynamicDiagramCollection) {
+  for (let i = 0; i < collection.length; i++) {
+    const element = collection[i];
+    if (element.title === title) {
+      return element.component;
+    }
+    if (element.children) {
+      const component = GetComponent(title, element.children) as any;
+      if (component) {
+        return component;
+      }
+    }
+  }
+}
+const dynamicDiagramComponent = computed(() =>
+  GetComponent(dynamicDiagram.value)
+);
 </script>
 
 <template>
   <div class="dynamic-diagram-container">
     <NScrollbar>
-      <!-- <template v-for="(item, index) in dynamicDiagramCollection"
-       :key="item.title"
-       
-       >
-       <NSpace  vertical></NSpace>
-
-      
-      </template> -->
-      <NRadioGroup v-model:value="dynamicDiagram">
-        <NRadio
-          v-for="diagram in dynamicDiagramCollection"
-          :key="diagram.title"
-          :value="diagram.title"
-        >
-          {{ diagram.title }}
-        </NRadio>
-      </NRadioGroup>
+      <DynamicDiagramItem />
     </NScrollbar>
     <component :is="dynamicDiagramComponent" />
   </div>

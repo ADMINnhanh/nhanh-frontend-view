@@ -132,7 +132,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card :canvas="myCanvas">
+  <Card
+    :canvas="myCanvas"
+    alert="这或许就是留白的艺术吧..."
+    has-no-alert-content
+  >
     <div class="tools">
       <NButton
         quaternary

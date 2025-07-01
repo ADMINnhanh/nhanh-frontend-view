@@ -20,10 +20,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <Card :canvas="myCanvas" vertical>
-    <NAlert title="尝试改变三角形" type="info" :bordered="false" closable>
-      1. 点击三角形 ； 2. 拖拽顶点
-    </NAlert>
+  <Card
+    :canvas="myCanvas"
+    vertical
+    alert="尝试改变三角形"
+    alert-content="1. 点击三角形 ； 2. 拖拽顶点"
+  >
     <canvas :id="id"></canvas>
   </Card>
 </template>
