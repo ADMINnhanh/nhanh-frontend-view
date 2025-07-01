@@ -26,7 +26,7 @@ export const dynamicDiagramCollection: Collection = [
         component: perpendicularBisector,
       },
       {
-        title: "角平分线(待完善)",
+        title: "角平分线",
         component: angleBisector,
       },
       {
