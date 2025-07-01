@@ -55,7 +55,7 @@ const dynamicDiagramComponent = computed(() =>
   height: 100%;
   padding: 20px;
   :deep(> .n-scrollbar) {
-    width: 400px;
+    width: 500px;
     height: auto;
   }
   :deep(> .n-card) {

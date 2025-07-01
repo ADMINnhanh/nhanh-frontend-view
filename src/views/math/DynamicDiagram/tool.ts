@@ -114,6 +114,168 @@ export class MyMath {
     };
   }
 
+  /** 获取角平分线（在给定范围内裁剪） */
+  static getAngleBisector(
+    a: Point,
+    b: Point,
+    c: Point,
+    xScope: { min: number; max: number },
+    yScope: { min: number; max: number }
+  ): [Point, Point] | null {
+    // 计算从顶点b出发的两个向量
+    const ba = { x: a.x - b.x, y: a.y - b.y };
+    const bc = { x: c.x - b.x, y: c.y - b.y };
+
+    // 计算向量长度
+    const lenBA = Math.sqrt(ba.x * ba.x + ba.y * ba.y);
+    const lenBC = Math.sqrt(bc.x * bc.x + bc.y * bc.y);
+
+    // 检查零向量（点重合情况）
+    if (lenBA < 1e-10 || lenBC < 1e-10) {
+      return null;
+    }
+
+    // 归一化向量
+    const normBA = { x: ba.x / lenBA, y: ba.y / lenBA };
+    const normBC = { x: bc.x / lenBC, y: bc.y / lenBC };
+
+    // 计算角平分线方向向量
+    const bisectorDir = {
+      x: normBA.x + normBC.x,
+      y: normBA.y + normBC.y,
+    };
+
+    // 检查方向向量是否为零
+    const dirLength = Math.sqrt(
+      bisectorDir.x * bisectorDir.x + bisectorDir.y * bisectorDir.y
+    );
+    if (dirLength < 1e-10) {
+      return null;
+    }
+
+    // 归一化方向向量
+    const dir = {
+      x: bisectorDir.x / dirLength,
+      y: bisectorDir.y / dirLength,
+    };
+
+    // 计算直线与矩形边界的交点
+    const intersections: { point: Point; t: number }[] = [];
+
+    // 辅助函数：添加有效交点（带容差检查）
+    const addIntersection = (t: number) => {
+      const x = b.x + t * dir.x;
+      const y = b.y + t * dir.y;
+
+      // 使用容差检查点是否在矩形边界上
+      const epsilon = 1e-8;
+      const onVerticalEdge =
+        Math.abs(x - xScope.min) < epsilon ||
+        Math.abs(x - xScope.max) < epsilon;
+      const onHorizontalEdge =
+        Math.abs(y - yScope.min) < epsilon ||
+        Math.abs(y - yScope.max) < epsilon;
+
+      // 检查点是否在矩形范围内（包括边界）
+      if (
+        (x >= xScope.min || Math.abs(x - xScope.min) < epsilon) &&
+        (x <= xScope.max || Math.abs(x - xScope.max) < epsilon) &&
+        (y >= yScope.min || Math.abs(y - yScope.min) < epsilon) &&
+        (y <= yScope.max || Math.abs(y - yScope.max) < epsilon) &&
+        (onVerticalEdge || onHorizontalEdge) // 确保点在边界上
+      ) {
+        // 精确对齐到边界
+        const finalX = onVerticalEdge
+          ? Math.abs(x - xScope.min) < epsilon
+            ? xScope.min
+            : xScope.max
+          : x;
+        const finalY = onHorizontalEdge
+          ? Math.abs(y - yScope.min) < epsilon
+            ? yScope.min
+            : yScope.max
+          : y;
+
+        intersections.push({
+          point: { x: finalX, y: finalY },
+          t,
+        });
+      }
+    };
+
+    // 计算与垂直边（x = min/max）的交点
+    if (Math.abs(dir.x) > 1e-10) {
+      const tLeft = (xScope.min - b.x) / dir.x;
+      const tRight = (xScope.max - b.x) / dir.x;
+      addIntersection(tLeft);
+      addIntersection(tRight);
+    }
+
+    // 计算与水平边（y = min/max）的交点
+    if (Math.abs(dir.y) > 1e-10) {
+      const tBottom = (yScope.min - b.y) / dir.y;
+      const tTop = (yScope.max - b.y) / dir.y;
+      addIntersection(tBottom);
+      addIntersection(tTop);
+    }
+
+    // 去重相同的交点（基于坐标）
+    const uniqueIntersections: { point: Point; t: number }[] = [];
+    const epsilon = 1e-8;
+
+    for (const inter of intersections) {
+      const isDuplicate = uniqueIntersections.some(
+        (u) =>
+          Math.abs(u.point.x - inter.point.x) < epsilon &&
+          Math.abs(u.point.y - inter.point.y) < epsilon
+      );
+      if (!isDuplicate) {
+        uniqueIntersections.push(inter);
+      }
+    }
+
+    // 按参数t排序
+    uniqueIntersections.sort((a, b) => a.t - b.t);
+
+    // 处理单点情况：尝试扩展范围寻找第二个交点
+    if (uniqueIntersections.length === 1) {
+      const extendFactor = 1000; // 扩展系数
+      const extendedT = [
+        uniqueIntersections[0].t - extendFactor,
+        uniqueIntersections[0].t + extendFactor,
+      ];
+
+      const extendedPoints: Point[] = [];
+      for (const t of extendedT) {
+        const x = b.x + t * dir.x;
+        const y = b.y + t * dir.y;
+        if (
+          x >= xScope.min &&
+          x <= xScope.max &&
+          y >= yScope.min &&
+          y <= yScope.max
+        ) {
+          extendedPoints.push({ x, y });
+        }
+      }
+
+      if (extendedPoints.length > 0) {
+        return [uniqueIntersections[0].point, extendedPoints[0]];
+      }
+    }
+
+    // 有效交点不足时返回null
+    if (uniqueIntersections.length < 2) {
+      return null;
+    }
+
+    // 返回裁剪后的线段端点
+    return [
+      uniqueIntersections[0].point,
+      uniqueIntersections[uniqueIntersections.length - 1].point,
+    ];
+  }
+
   /** 获取直角符号 */
   static getRightAngleSymbol(a: Point, b: Point, c: Point) {
     if (MyMath.isOverlap(a, b, c)) return;
@@ -121,7 +283,7 @@ export class MyMath {
 
     // 计算向量
     const abVec = { x: b.x - a.x, y: b.y - a.y };
-    const lenAB = Math.sqrt(abVec.x * abVec.x + abVec.y * abVec.y);
+    const lenAB = Math.hypot(abVec.x, abVec.y);
 
     // 处理长度接近0的情况
     if (lenAB < 1e-10) return;
@@ -144,16 +306,16 @@ export class MyMath {
     const perpVec = dot1 >= 0 ? perp1 : perp2;
 
     // 归一化中垂线向量
-    const lenPerp = Math.sqrt(perpVec.x * perpVec.x + perpVec.y * perpVec.y);
+    const lenPerp = Math.hypot(perpVec.x, perpVec.y);
     const unitPerp = {
       x: perpVec.x / lenPerp,
       y: perpVec.y / lenPerp,
     };
 
     // 计算三条边的长度
-    const abLength = Math.sqrt(Math.pow(b.x - a.x, 2) + Math.pow(b.y - a.y, 2));
-    const bcLength = Math.sqrt(Math.pow(c.x - b.x, 2) + Math.pow(c.y - b.y, 2));
-    const caLength = Math.sqrt(Math.pow(a.x - c.x, 2) + Math.pow(a.y - c.y, 2));
+    const abLength = Math.hypot(b.x - a.x, b.y - a.y);
+    const bcLength = Math.hypot(c.x - b.x, c.y - b.y);
+    const caLength = Math.hypot(a.x - c.x, a.y - c.y);
 
     // 获取最短边长度
     const minLength = Math.min(abLength, bcLength, caLength);
