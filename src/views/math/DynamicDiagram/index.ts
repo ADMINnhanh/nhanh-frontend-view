@@ -26,7 +26,7 @@ export const dynamicDiagramCollection: Collection = [
         component: perpendicularBisector,
       },
       {
-        title: "角平分线",
+        title: "角平分线(待完善)",
         component: angleBisector,
       },
       {
@@ -34,11 +34,11 @@ export const dynamicDiagramCollection: Collection = [
         title: "勾股定理",
         children: [
           {
-            title: "欧几里得论证法",
+            title: "欧几里得论证法(待完善)",
             component: angleBisector,
           },
           {
-            title: "月牙定理",
+            title: "月牙定理(待完善)",
             component: angleBisector,
 
             // const canvas = document.getElementById("canvas");
