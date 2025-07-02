@@ -101,7 +101,4 @@ export function Update() {
     MyMath.getRightAngleSymbol(abc.c, abc.a, abc.b) || []
   );
 }
-
-m.addEventListener("dragg", (event) => {
-  Update();
-});
+m.addEventListener("dragg", Update);

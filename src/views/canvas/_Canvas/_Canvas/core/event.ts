@@ -378,7 +378,8 @@ export default class Event extends Draw {
     if (!this.lastHoverOverlay) return;
 
     this.lastHoverOverlay.notifyHover(false, event);
-    this.canvas.classList.remove(this.lastHoverOverlay.cursorStyle);
+    if (this.lastHoverOverlay.cursorStyle)
+      this.canvas.classList.remove(this.lastHoverOverlay.cursorStyle);
   }
   /** 应用新的 hover 状态 */
   private applyHoverState(overlay: OverlayType | undefined, event: MouseEvent) {
@@ -386,7 +387,7 @@ export default class Event extends Draw {
 
     overlay.notifyHover(true, event);
     this.lastCursorStyle = overlay.cursorStyle;
-    this.canvas.classList.add(this.lastCursorStyle);
+    if (this.lastCursorStyle) this.canvas.classList.add(this.lastCursorStyle);
   }
 
   private oldClientX: number[] = [];

@@ -2,7 +2,6 @@
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NAlert } from "naive-ui";
 import { overlays, id, Update } from ".";
 import Card from "../../card.vue";
 
@@ -15,6 +14,7 @@ onMounted(() => {
     axisShow: false,
   });
   myCanvas.value.addOverlay(overlays);
+  myCanvas.value.addEventListener("dragg", Update);
   Update();
 });
 </script>

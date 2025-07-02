@@ -62,6 +62,4 @@ export function Update() {
   );
 }
 
-l.addEventListener("dragg", (event) => {
-  Update();
-});
+l.addEventListener("dragg", Update);

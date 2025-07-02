@@ -3,6 +3,7 @@ import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { NCard, NAlert } from "naive-ui";
+import Media from "@/stores/media";
 
 interface Props {
   vertical?: boolean;
@@ -22,7 +23,10 @@ watch(
 </script>
 
 <template>
-  <NCard :class="[hasNoAlertContent && 'no-alert-content']">
+  <NCard
+    :size="Media.isMobileStyle ? 'small' : 'medium'"
+    :class="[hasNoAlertContent && 'no-alert-content']"
+  >
     <NAlert v-if="alert" :title="alert" type="info" :bordered="false" closable>
       <template v-if="alertContent">{{ alertContent }}</template>
       <slot name="alert-content" />

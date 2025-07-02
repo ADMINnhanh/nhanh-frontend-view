@@ -27,7 +27,9 @@ function isMobileDevice() {
 
 const isMobile = isMobileDevice();
 const Media = ref({
-  deviceType: isMobile ? "phone" : ("desktop" as "phone" | "desktop"),
+  /** 设备类型 */
+  deviceType: (isMobile ? "phone" : "desktop") as "phone" | "desktop",
+  /** 是否使用移动端样式 */
   isMobileStyle: isMobile,
 });
 

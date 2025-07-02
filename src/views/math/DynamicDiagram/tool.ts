@@ -114,7 +114,7 @@ export class MyMath {
     };
   }
 
-  /** 获取角平分线（在给定范围内裁剪） */
+  /** 获取∠abc的平分线（在给定范围内裁剪） */
   static getAngleBisector(
     a: Point,
     b: Point,
@@ -276,7 +276,7 @@ export class MyMath {
     ];
   }
 
-  /** 获取直角符号 */
+  /** 获取 ab中垂线 的直角符号 */
   static getRightAngleSymbol(a: Point, b: Point, c: Point) {
     if (MyMath.isOverlap(a, b, c)) return;
     if (MyMath.isAxisOverlap(a, b, c)) return;

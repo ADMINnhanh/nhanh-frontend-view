@@ -19,7 +19,7 @@ type ConstructorOption = ConstructorParameters<typeof QuickMethod>[0] & {
   axisShow?: Parameters<_Canvas["toggleAxis"]>[0];
 };
 
-/** 画布类 */
+/** 你好啊你好的画布工具 */
 export default class _Canvas extends QuickMethod {
   /** 图层群组 */
   static LayerGroup = LayerGroup;
