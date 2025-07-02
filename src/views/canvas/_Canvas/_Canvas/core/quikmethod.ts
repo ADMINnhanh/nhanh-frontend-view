@@ -1,11 +1,10 @@
 import { _Animate_Schedule } from "nhanh-pure-function";
 import Axis from "./axis";
 import Event from "./event";
-import { type OverlayType } from "../OverlayGroup";
+import OverlayGroup, { type OverlayType } from "../OverlayGroup";
 import Decimal from "decimal.js";
 import LayerGroup from "../LayerGroup";
 import Layer from "../LayerGroup/layer";
-import OverlayGroup from "../OverlayGroup";
 
 // 定义基础节点类型
 type NodeType = LayerGroup | Layer | OverlayGroup | OverlayType;
@@ -511,9 +510,7 @@ class QuickMethod_Ctx extends QuickMethod_Toggle {
    * @param path - 定义清除区域的路径对象
    */
   static clearPathRegion(ctx: CanvasRenderingContext2D, path: Path2D) {
-    const canvas = ctx.canvas;
-    const width = canvas.width;
-    const height = canvas.height;
+    const { width, height } = ctx.canvas;
 
     ctx.save();
     ctx.beginPath();
