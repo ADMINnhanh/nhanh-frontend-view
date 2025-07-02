@@ -13,8 +13,7 @@ type NodeType = LayerGroup | Layer | OverlayGroup | OverlayType;
 // 定义单元素或数组的泛型类型
 type SingleOrArray<T> = T | T[];
 
-/** 快速方法 */
-export default class QuickMethod extends Event {
+class QuickMethod_Get extends Event {
   /** 获取默认覆盖物群组 */
   getDefaultOverlayGroup() {
     const layerGroup = this.layerGroups.get("默认图层群组");
@@ -75,6 +74,47 @@ export default class QuickMethod extends Event {
 
     return overlays;
   }
+}
+class QuickMethod_Set extends QuickMethod_Get {
+  /** 缩放画布 */
+  zoom(delta: number) {
+    const { canvas, rect } = this;
+    if (!canvas || !rect)
+      return console.error("canvas is not HTMLCanvasElement");
+
+    this.setScale("center", delta);
+    this.redrawOnce();
+  }
+  /** 放大 */
+  zoomIn() {
+    this.zoom(this.delta);
+  }
+  /** 缩小 */
+  zoomOut() {
+    this.zoom(-this.delta);
+  }
+  /** 添加样式 */
+  setStyle(style: DeepPartial<StyleType>) {
+    super.setStyle(style);
+    this.redrawOnce();
+  }
+  /** 设置主题 */
+  setTheme(theme: KnownStyleKeys) {
+    super.setTheme(theme);
+    this.redrawOnce();
+  }
+  /** 设置坐标轴 */
+  setAxis(config: Partial<QuickMethod["axisConfig"]>) {
+    super.setAxis(config);
+    this.redrawOnce();
+  }
+  /** 设置默认中心 */
+  setDefaultCenter(center: QuickMethod["defaultCenter"]) {
+    super.setDefaultCenter(center);
+    this.redrawOnce();
+  }
+}
+class QuickMethod_View extends QuickMethod_Set {
   /**
    * 调整视图以适应指定覆盖层
    * @param overlays 目标覆盖层数组，默认使用全部可见覆盖层
@@ -420,44 +460,8 @@ export default class QuickMethod extends Event {
       y: yDifference,
     });
   }
-  /** 缩放画布 */
-  zoom(delta: number) {
-    const { canvas, rect } = this;
-    if (!canvas || !rect)
-      return console.error("canvas is not HTMLCanvasElement");
-
-    this.setScale("center", delta);
-    this.redrawOnce();
-  }
-  /** 放大 */
-  zoomIn() {
-    this.zoom(this.delta);
-  }
-  /** 缩小 */
-  zoomOut() {
-    this.zoom(-this.delta);
-  }
-  /** 添加样式 */
-  setStyle(style: DeepPartial<StyleType>) {
-    super.setStyle(style);
-    this.redrawOnce();
-  }
-  /** 设置主题 */
-  setTheme(theme: KnownStyleKeys) {
-    super.setTheme(theme);
-    this.redrawOnce();
-  }
-  /** 设置坐标轴 */
-  setAxis(config: Partial<QuickMethod["axisConfig"]>) {
-    super.setAxis(config);
-    this.redrawOnce();
-  }
-  /** 设置默认中心 */
-  setDefaultCenter(center: QuickMethod["defaultCenter"]) {
-    super.setDefaultCenter(center);
-    this.redrawOnce();
-  }
-
+}
+class QuickMethod_Toggle extends QuickMethod_View {
   /** 开关坐标轴 */
   toggleAxis(show?: boolean | DeepPartial<Axis["show"]>) {
     this.drawAxis.toggleAxis(show);
@@ -500,3 +504,24 @@ export default class QuickMethod extends Event {
     return this.isInteractive;
   }
 }
+class QuickMethod_Ctx extends QuickMethod_Toggle {
+  /**
+   * 清除指定区域的像素点
+   * @param ctx - Canvas 2D绘图上下文
+   * @param path - 定义清除区域的路径对象
+   */
+  static clearPathRegion(ctx: CanvasRenderingContext2D, path: Path2D) {
+    const canvas = ctx.canvas;
+    const width = canvas.width;
+    const height = canvas.height;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.clip(path);
+    ctx.clearRect(0, 0, width, height);
+    ctx.restore();
+  }
+}
+
+/** 快速方法 */
+export default class QuickMethod extends QuickMethod_Ctx {}
