@@ -44,27 +44,20 @@ export const dynamicDiagramCollection: Collection = [
             // const canvas = document.getElementById("canvas");
             // const ctx = canvas.getContext("2d");
 
-            // ctx.save();
-
-            // // 创建两个裁剪路径
-            // let circlePath = new Path2D();
-            // circlePath.arc(150, 75, 75, 0, 2 * Math.PI);
-            // let squarePath = new Path2D();
-            // squarePath.arc(50, 75, 75, 0, 2 * Math.PI);
-
-            // // 将裁剪区域设置为圆形
-            // ctx.clip(circlePath);
-            // // 将裁剪区域设置为圆形和正方形的交集
-            // ctx.clip(squarePath);
-
-            // // 绘制被裁剪的内容
+            // // 绘制蓝色圆形
+            // ctx.beginPath();
+            // ctx.arc(100, 75, 50, 0, Math.PI * 2);
             // ctx.fillStyle = "blue";
-            // ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ctx.fill();
 
-            // ctx.restore()
-
-            // ctx.fillStyle = "orange";
-            // ctx.fillRect(0, 0, 100, 100);
+            // // 清除指定圆形区域（使用临时路径）
+            // ctx.save();
+            // ctx.beginPath();
+            // ctx.arc(120, 95, 50, 0, Math.PI * 2);
+            // clip 是指定后续可操作的区域
+            // ctx.clip();
+            // ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // ctx.restore();
           },
         ],
       },
