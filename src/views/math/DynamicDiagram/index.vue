@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NScrollbar } from "naive-ui";
-import { computed } from "vue";
+import { computed, defineAsyncComponent } from "vue";
 import { dynamicDiagram, dynamicDiagramCollection } from ".";
 import DynamicDiagramItem from "./dynamicDiagramItem.vue";
 
@@ -19,7 +19,7 @@ function GetComponent(title: string, collection = dynamicDiagramCollection) {
   }
 }
 const dynamicDiagramComponent = computed(() =>
-  GetComponent(dynamicDiagram.value)
+  defineAsyncComponent(GetComponent(dynamicDiagram.value))
 );
 </script>
 

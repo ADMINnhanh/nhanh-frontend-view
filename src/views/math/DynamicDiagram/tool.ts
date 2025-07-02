@@ -114,7 +114,7 @@ export class MyMath {
     };
   }
 
-  /** 获取∠abc的平分线（在给定范围内裁剪） */
+  /** 获取∠abc的角平分线（在给定范围内裁剪） */
   static getAngleBisector(
     a: Point,
     b: Point,
@@ -344,6 +344,122 @@ export class MyMath {
     };
 
     return [point1, apex, point2];
+  }
+
+  /**
+   * 计算∠abc的角平分线上的垂线及直角符号
+   * @param {Point} a - 点a
+   * @param {Point} b - 点b（角的顶点）
+   * @param {Point} c - 点c
+   * @returns {Object} 包含ab和bc边上的垂线及直角符号
+   */
+  static calculatePerpendiculars(a: Point, b: Point, c: Point) {
+    // 计算向量和长度
+    const vecBA = { x: a.x - b.x, y: a.y - b.y };
+    const vecBC = { x: c.x - b.x, y: c.y - b.y };
+    const lenAB = Math.sqrt(vecBA.x * vecBA.x + vecBA.y * vecBA.y);
+    const lenBC = Math.sqrt(vecBC.x * vecBC.x + vecBC.y * vecBC.y);
+
+    // 单位化向量
+    const unitBA = { x: vecBA.x / lenAB, y: vecBA.y / lenAB };
+    const unitBC = { x: vecBC.x / lenBC, y: vecBC.y / lenBC };
+
+    // 计算角平分线方向
+    const bisector = {
+      x: unitBA.x + unitBC.x,
+      y: unitBA.y + unitBC.y,
+    };
+    const lenBisector = Math.sqrt(
+      bisector.x * bisector.x + bisector.y * bisector.y
+    );
+    const unitBisector = {
+      x: bisector.x / lenBisector,
+      y: bisector.y / lenBisector,
+    };
+
+    // 计算角平分线上点D的位置
+    const dLength = Math.min(lenAB, lenBC);
+    const d: Point = {
+      x: b.x + unitBisector.x * dLength,
+      y: b.y + unitBisector.y * dLength,
+    };
+
+    // 计算垂足
+    const calculateFoot = (vec: Point, unit: Point): Point => {
+      const vecBD = { x: d.x - b.x, y: d.y - b.y };
+      const dot = vecBD.x * unit.x + vecBD.y * unit.y;
+      return {
+        x: b.x + unit.x * dot,
+        y: b.y + unit.y * dot,
+      };
+    };
+
+    // 计算垂线方向（指向角内侧）
+    const calculatePerpDirection = (unit: Point, bisector: Point) => {
+      // 初始垂直方向（逆时针旋转90度）
+      let perpDir = { x: -unit.y, y: unit.x };
+
+      // 检查方向是否朝向角内侧
+      const dotProduct = perpDir.x * bisector.x + perpDir.y * bisector.y;
+      if (dotProduct < 0) {
+        // 如果方向朝外，取反方向
+        perpDir = { x: unit.y, y: -unit.x };
+      }
+      return perpDir;
+    };
+
+    // 计算AB边的垂足和方向
+    const footAB = calculateFoot(vecBA, unitBA);
+    const perpDirAB = calculatePerpDirection(unitBA, unitBisector);
+
+    // 计算BC边的垂足和方向
+    const footBC = calculateFoot(vecBC, unitBC);
+    const perpDirBC = calculatePerpDirection(unitBC, unitBisector);
+
+    // 创建垂线段（从D到垂足）
+    const createPerpendicular = (d: Point, foot: Point): [Point, Point] => {
+      return [d, foot];
+    };
+
+    // 创建直角符号
+    const createRightAngleSymbol = (
+      foot: Point,
+      edgeDir: Point, // 边的单位向量（从角顶点b指向边）
+      perpDir: Point // 垂线单位向量（朝向角内侧）
+    ): [Point, Point, Point] => {
+      const symbolLength = Math.min(lenAB, lenBC) * 0.1; // 符号长度为最短边的10%
+
+      // 计算沿边方向的点（从foot向角内侧偏移）
+      const alongEdge: Point = {
+        x: foot.x - edgeDir.x * symbolLength,
+        y: foot.y - edgeDir.y * symbolLength,
+      };
+
+      // 计算沿垂线方向的点（从foot向角内侧偏移）
+      const alongPerp: Point = {
+        x: foot.x + perpDir.x * symbolLength,
+        y: foot.y + perpDir.y * symbolLength,
+      };
+
+      // 关键修正：创建镜像点，形成直角路径 [alongEdge -> (镜像点) -> alongPerp]
+      const mirroredFoot: Point = {
+        x: alongEdge.x + perpDir.x * symbolLength,
+        y: alongEdge.y + perpDir.y * symbolLength,
+      };
+
+      return [alongEdge, mirroredFoot, alongPerp];
+    };
+
+    return {
+      ab: {
+        perpendicular: createPerpendicular(d, footAB),
+        rightAngleSymbol: createRightAngleSymbol(footAB, unitBA, perpDirAB),
+      },
+      bc: {
+        perpendicular: createPerpendicular(d, footBC),
+        rightAngleSymbol: createRightAngleSymbol(footBC, unitBC, perpDirBC),
+      },
+    };
   }
 
   static transform(a: Point): PointA;

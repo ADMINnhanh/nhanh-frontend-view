@@ -12,7 +12,7 @@ import {
   PlayCircleOutline,
   RefreshCircleOutline,
 } from "@vicons/ionicons5";
-import Card from "../card.vue";
+import Card from "@/views/math/DynamicDiagram/card.vue";
 
 const id = _Utility_GenerateUUID();
 

@@ -1,7 +1,4 @@
 import { useLocalStorage } from "@vueuse/core";
-import threeWalledEnclosure from "./demo/threeWalledEnclosure.vue";
-import perpendicularBisector from "./demo/perpendicularBisector/index.vue";
-import angleBisector from "./demo/angleBisector/index.vue";
 
 export type Collection = {
   title: string;
@@ -14,7 +11,7 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "三边围墙",
-        component: threeWalledEnclosure,
+        component: () => import("./demo/unintuitive/threeWalledEnclosure.vue"),
       },
     ],
   },
@@ -23,23 +20,30 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "垂直平分线",
-        component: perpendicularBisector,
+        component: () =>
+          import("./demo/triangle/perpendicularBisector/index.vue"),
       },
       {
         title: "角平分线",
-        component: angleBisector,
+        component: () => import("./demo/triangle/angleBisector/index.vue"),
       },
       {
         // https://basic.smartedu.cn/syncClassroom/classActivity?activityId=314b07ca-a341-11ec-92ef-246e9675e50c&chapterId=1d266936-49d6-37ba-8a82-466e03e69efa&teachingmaterialId=561056b2-29a1-4588-9ed2-a9440667e589&fromPrepare=0&classHourId=lesson_1
         title: "勾股定理",
         children: [
           {
-            title: "欧几里得论证法(待完善)",
-            component: angleBisector,
+            title: "欧几里得论证法",
+            component: () =>
+              import(
+                "./demo/triangle/pythagoreanTheorem/euclideanArgument/index.vue"
+              ),
           },
           {
             title: "月牙定理(待完善)",
-            component: angleBisector,
+            component: () =>
+              import(
+                "./demo/triangle/pythagoreanTheorem/lunesTheorem/index.vue"
+              ),
 
             // const canvas = document.getElementById("canvas");
             // const ctx = canvas.getContext("2d");

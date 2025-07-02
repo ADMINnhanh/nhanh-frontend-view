@@ -1,6 +1,11 @@
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { _Utility_GenerateUUID } from "nhanh-pure-function";
-import { ABC, MyMath, type Point, type PointA } from "../../tool";
+import {
+  ABC,
+  MyMath,
+  type Point,
+  type PointA,
+} from "@/views/math/DynamicDiagram/tool";
 
 export const id = _Utility_GenerateUUID();
 
