@@ -2,9 +2,11 @@
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { overlays, id, Update, J_ABC } from ".";
+import { overlays, id, Update, J_ABC, isPlay, Tips } from ".";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
+import { NButton } from "naive-ui";
+import SvgGather from "@/assets/icon/gather";
 
 let myCanvas = shallowRef<_Canvas>();
 
@@ -15,23 +17,45 @@ onMounted(() => {
     axisShow: false,
   });
   myCanvas.value.addOverlay(overlays);
+  myCanvas.value.style.light.line.stroke.color = "#000";
+  myCanvas.value.style.light.line.stroke.width = 2;
+  myCanvas.value.style.dark.line.stroke.color = "#fff";
+  myCanvas.value.style.dark.line.stroke.width = 2;
   Update();
 });
 </script>
 
 <template>
-  <Card
-    :canvas="myCanvas"
-    alert="巧妙的辅助线，对吗？对的！"
-    has-no-alert-content
-  >
+  <Card :canvas="myCanvas" alert="巧妙的辅助线，对吗？对的！">
+    <template #alert-content>
+      没有头绪？ 点击
+      <NButton
+        text
+        type="success"
+        style="font-size: 20px; vertical-align: middle"
+      >
+        <SvgGather icon="Bulb" />
+      </NButton>
+      看看。
+    </template>
     <Oscillator
       :canvas="myCanvas"
       v-model:value="J_ABC"
       @change="Update"
       :marks="{ 0: '0°', 90: '90°' }"
       :max="90"
-    />
+      :disabled="isPlay"
+    >
+      <NButton
+        quaternary
+        circle
+        type="success"
+        style="font-size: 24px"
+        @click="Tips"
+      >
+        <SvgGather icon="Bulb" />
+      </NButton>
+    </Oscillator>
     <canvas :id="id"></canvas>
   </Card>
 </template>

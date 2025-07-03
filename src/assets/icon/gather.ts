@@ -148,6 +148,9 @@ export const SystemSvg = {
 
   /** 更多 */
   IosMore: `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve"><g><path d="M255.8,218c-21,0-38,17-38,38s17,38,38,38c21,0,38-17,38-38S276.8,218,255.8,218L255.8,218z"></path><path d="M102,218c-21,0-38,17-38,38s17,38,38,38c21,0,38-17,38-38S123,218,102,218L102,218z"></path><path d="M410,218c-21,0-38,17-38,38s17,38,38,38c21,0,38-17,38-38S431,218,410,218L410,218z"></path></g></svg>`,
+
+  /** 灯 */
+  Bulb: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h1m8-9v1m8 8h1M5.6 5.6l.7.7m12.1-.7l-.7.7"></path><path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0-1 3a2 2 0 0 1-4 0a3.5 3.5 0 0 0-1-3"></path><path d="M9.7 17h4.6"></path></g></svg>`,
   /**  */
 };
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { _Animate_CreateOscillator } from "nhanh-pure-function";
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
-import { onBeforeUnmount, ref } from "vue";
+import { onBeforeUnmount, ref, watch } from "vue";
 import { NButton, NIcon, NSlider } from "naive-ui";
 import {
   PauseCircleOutline,
@@ -15,6 +15,7 @@ interface Props {
   marks: Record<string, string>;
   min?: number;
   max?: number;
+  disabled?: boolean;
 }
 const props = withDefaults(defineProps<Props>(), {
   min: 0,
@@ -40,13 +41,21 @@ function UpdatePlay() {
   else oscillator.pause();
 }
 
+watch(
+  () => props.disabled,
+  (disabled) => {
+    if (disabled && isPlay.value) UpdatePlay();
+  }
+);
+
 onBeforeUnmount(() => {
   oscillator.pause();
 });
 </script>
 
 <template>
-  <div class="oscillator">
+  <div :class="['oscillator', disabled && 'disabled']">
+    <slot></slot>
     <NButton
       quaternary
       circle
@@ -91,5 +100,9 @@ onBeforeUnmount(() => {
     height: 100px;
     flex-grow: 1;
   }
+}
+.disabled.oscillator {
+  pointer-events: none;
+  opacity: 0.7;
 }
 </style>

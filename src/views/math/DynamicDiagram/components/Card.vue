@@ -46,6 +46,9 @@ watch(
     height: 100%;
     display: flex;
     flex-direction: column;
+    .n-alert {
+      margin-bottom: 5px;
+    }
     .content {
       width: 100%;
       height: 100px;

@@ -514,11 +514,43 @@ export class MyMath {
     return [D, F, E];
   }
 
+  /** 围绕指定下标点位进行旋转  */
+  static rotatePoints(points: Point[], index: number, angle: number): Point[] {
+    // 获取旋转中心点
+    const center = points[index];
+    const a = center.x;
+    const b = center.y;
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    // 遍历所有点进行旋转计算
+    return points.map((point) => {
+      // 计算相对于旋转中心的偏移量
+      const dx = point.x - a;
+      const dy = point.y - b;
+
+      // 应用旋转公式
+      const rotatedX = a + dx * cos - dy * sin;
+      const rotatedY = b + dx * sin + dy * cos;
+
+      return { x: rotatedX, y: rotatedY };
+    });
+  }
+
   static transform(a: Point): PointA;
   static transform(a: Point[]): PointA[];
   static transform(a: Point | Point[]): PointA | PointA[] {
     if (Array.isArray(a)) return a.map((v) => this.transform(v));
     return [a.x, a.y];
+  }
+
+  // 将PointA转换为Point
+  static inverseTransform(a: PointA): Point;
+  static inverseTransform(a: PointA[]): Point[];
+  static inverseTransform(a: PointA | PointA[]): Point | Point[] {
+    if (Array.isArray(a) && Array.isArray(a[0]))
+      return a.map((v) => this.inverseTransform(v as PointA));
+    return { x: (a as PointA)[0], y: (a as PointA)[1] };
   }
 }
 
