@@ -37,7 +37,40 @@ const tra = new _Canvas.Line({
   isInteractive: false,
   style: { stroke: { color: "#18a058", width: 2 } },
 });
-export const overlays = [t, tra];
+
+// "#3bc0cd"
+const color_m = {
+  ab: {
+    fill: "#8a2be2" + 80,
+    stroke: { color: "#8a2be2" + 80 },
+  },
+  ac: {
+    fill: "#ff69b4" + 80,
+    stroke: { color: "#ff69b4" + 80 },
+  },
+};
+
+const abm = new _Canvas.Polygon({
+  isInteractive: false,
+  style: color_m.ab,
+});
+const acm = new _Canvas.Polygon({
+  isInteractive: false,
+  style: color_m.ac,
+});
+
+const bcm_ab = new _Canvas.Polygon({
+  isInteractive: false,
+  style: color_m.ab,
+  isRect: true,
+});
+const bcm_ac = new _Canvas.Polygon({
+  isInteractive: false,
+  style: color_m.ac,
+  isRect: true,
+});
+
+export const overlays = [t, tra, abm, acm, bcm_ab, bcm_ac];
 
 const abc = new ABC(t as any);
 
@@ -49,11 +82,26 @@ export function Update() {
   const bp = ab * cos_b;
   const h = ab * Math.sin(j);
 
-  t.value![0] = [-BC / 2 + bp, -h];
-  t.value = [...t.value!];
+  /** 直角三角形 */ {
+    t.value![0] = [-BC / 2 + bp, -h];
+    t.value = [...t.value!];
 
-  tra.value =
-    J_ABC.value == 0 || J_ABC.value == 90
-      ? []
-      : MyMath.transform(MyMath.getRightAngleSymbol(abc.a, abc.b, abc.c));
+    tra.value =
+      J_ABC.value == 0 || J_ABC.value == 90
+        ? undefined
+        : MyMath.transform(MyMath.getRightAngleSymbol(abc.a, abc.b, abc.c));
+  }
+
+  /** bcm 面 */ {
+    const x = -BC / 2 + (ab * ab) / BC;
+
+    bcm_ab.value = J_ABC.value == 90 ? undefined : [t.value![1], [x, BC]];
+    bcm_ac.value =
+      J_ABC.value == 0
+        ? undefined
+        : [
+            [x, 0],
+            [t.value![1][0] + BC, t.value![1][1] + BC],
+          ];
+  }
 }

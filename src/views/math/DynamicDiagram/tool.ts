@@ -466,6 +466,7 @@ export class MyMath {
     };
   }
 
+  /** 获取直角三角形的直角符号 */
   static getRightAngleSymbol(
     a: Point,
     b: Point,

@@ -65,7 +65,12 @@ onBeforeUnmount(() => {
       <NIcon :component="isPlay ? PauseCircleOutline : PlayCircleOutline" />
     </NButton>
     <NSlider
-      @update:value="(v) => emit('update:value', v)"
+      @update:value="
+        (v) => {
+          emit('update:value', v);
+          emit('change');
+        }
+      "
       :="{ value, marks, min, max }"
       vertical
     />
