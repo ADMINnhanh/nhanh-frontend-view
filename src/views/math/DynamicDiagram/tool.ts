@@ -277,7 +277,11 @@ export class MyMath {
   }
 
   /** 获取 ab中垂线 的直角符号 */
-  static getRightAngleSymbol(a: Point, b: Point, c: Point) {
+  static getPerpendicularBisectorRightAngleSymbol(
+    a: Point,
+    b: Point,
+    c: Point
+  ) {
     if (MyMath.isOverlap(a, b, c)) return;
     if (MyMath.isAxisOverlap(a, b, c)) return;
 
@@ -460,6 +464,53 @@ export class MyMath {
         rightAngleSymbol: createRightAngleSymbol(footBC, unitBC, perpDirBC),
       },
     };
+  }
+
+  static getRightAngleSymbol(
+    a: Point,
+    b: Point,
+    c: Point
+  ): [Point, Point, Point] {
+    // 计算向量AB和AC
+    const vecAB = { x: b.x - a.x, y: b.y - a.y };
+    const vecAC = { x: c.x - a.x, y: c.y - a.y };
+
+    // 计算向量长度
+    const lenAB = Math.sqrt(vecAB.x * vecAB.x + vecAB.y * vecAB.y);
+    const lenAC = Math.sqrt(vecAC.x * vecAC.x + vecAC.y * vecAC.y);
+
+    // 处理零向量（理论上不会发生，但确保安全）
+    if (lenAB === 0 || lenAC === 0) {
+      // 如果任一向量为零，返回三个相同的点（直角符号无法生成）
+      return [a, a, a];
+    }
+
+    // 计算单位向量
+    const unitAB = { x: vecAB.x / lenAB, y: vecAB.y / lenAB };
+    const unitAC = { x: vecAC.x / lenAC, y: vecAC.y / lenAC };
+
+    // 计算直角符号的大小（取两向量长度中较小值的20%）
+    const d = Math.min(lenAB, lenAC) * 0.2;
+
+    // 计算点D：a + d * unitAB
+    const D = {
+      x: a.x + d * unitAB.x,
+      y: a.y + d * unitAB.y,
+    };
+
+    // 计算点E：a + d * unitAC
+    const E = {
+      x: a.x + d * unitAC.x,
+      y: a.y + d * unitAC.y,
+    };
+
+    // 计算点F：D + d * unitAC（或等价于 E + d * unitAB）
+    const F = {
+      x: D.x + d * unitAC.x,
+      y: D.y + d * unitAC.y,
+    };
+
+    return [D, F, E];
   }
 
   static transform(a: Point): PointA;

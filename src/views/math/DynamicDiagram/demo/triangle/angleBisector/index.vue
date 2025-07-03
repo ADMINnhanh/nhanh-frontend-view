@@ -3,7 +3,7 @@ import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, Update } from ".";
-import Card from "@/views/math/DynamicDiagram/card.vue";
+import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 
 let myCanvas = shallowRef<_Canvas>();
 

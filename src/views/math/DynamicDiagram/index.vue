@@ -2,7 +2,7 @@
 import { NScrollbar } from "naive-ui";
 import { computed, defineAsyncComponent } from "vue";
 import { dynamicDiagram, dynamicDiagramCollection } from ".";
-import DynamicDiagramItem from "./dynamicDiagramItem.vue";
+import DynamicDiagramItem from "./components/DynamicDiagramItem.vue";
 
 function GetComponent(title: string, collection = dynamicDiagramCollection) {
   for (let i = 0; i < collection.length; i++) {

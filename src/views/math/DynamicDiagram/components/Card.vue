@@ -6,10 +6,15 @@ import { NCard, NAlert } from "naive-ui";
 import Media from "@/stores/media";
 
 interface Props {
+  /** 是否垂直 */
   vertical?: boolean;
+  /** 画布实例 */
   canvas?: _Canvas;
+  /** 提示信息 */
   alert?: string;
+  /** 提示内容 */
   alertContent?: string;
+  /** 无提示内容 */
   hasNoAlertContent?: boolean;
 }
 const props = defineProps<Props>();

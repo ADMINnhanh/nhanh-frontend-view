@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { NCard, NRadio, NRadioGroup } from "naive-ui";
-import { dynamicDiagram, dynamicDiagramCollection, type Collection } from ".";
+import { dynamicDiagram, dynamicDiagramCollection, type Collection } from "..";
 
 interface Props {
   collection?: Collection;

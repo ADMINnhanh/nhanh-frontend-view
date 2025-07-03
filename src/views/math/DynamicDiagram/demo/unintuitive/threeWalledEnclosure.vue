@@ -4,15 +4,11 @@ import {
   _Utility_GenerateUUID,
 } from "nhanh-pure-function";
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
-import { onBeforeUnmount, onMounted, ref, shallowRef } from "vue";
+import { onMounted, ref, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NButton, NIcon, NSlider } from "naive-ui";
-import {
-  PauseCircleOutline,
-  PlayCircleOutline,
-  RefreshCircleOutline,
-} from "@vicons/ionicons5";
-import Card from "@/views/math/DynamicDiagram/card.vue";
+
+import Card from "@/views/math/DynamicDiagram/components/Card.vue";
+import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
 
 const id = _Utility_GenerateUUID();
 
@@ -75,19 +71,6 @@ const y_text = new _Canvas.Text({
   offset: { x: 70, y: 0 },
 });
 
-const isPlay = ref(false);
-
-const oscillator = _Animate_CreateOscillator(0, 100, 300, (v) => {
-  x.value = v;
-  UpdateX(v);
-});
-function UpdatePlay() {
-  isPlay.value = !isPlay.value;
-
-  if (isPlay.value) oscillator.play(x.value);
-  else oscillator.pause();
-}
-
 function UpdateX(x: number) {
   const y = (totalLen - x) / 2;
   const m = Number((x * y).toFixed(1));
@@ -129,9 +112,6 @@ onMounted(() => {
     m_text,
   ]);
 });
-onBeforeUnmount(() => {
-  oscillator.pause();
-});
 </script>
 
 <template>
@@ -140,31 +120,12 @@ onBeforeUnmount(() => {
     alert="这或许就是留白的艺术吧..."
     has-no-alert-content
   >
-    <div class="tools">
-      <NButton
-        quaternary
-        circle
-        style="font-size: 24px"
-        @click="myCanvas?.returnToOrigin()"
-      >
-        <NIcon :component="RefreshCircleOutline" />
-      </NButton>
-      <NButton
-        quaternary
-        circle
-        :type="isPlay ? 'primary' : 'default'"
-        style="font-size: 24px"
-        @click="UpdatePlay()"
-      >
-        <NIcon :component="isPlay ? PauseCircleOutline : PlayCircleOutline" />
-      </NButton>
-      <NSlider
-        v-model:value="x"
-        @update:value="UpdateX"
-        :marks="marks"
-        vertical
-      />
-    </div>
+    <Oscillator
+      :canvas="myCanvas"
+      v-model:value="x"
+      @change="UpdateX(x)"
+      :marks="marks"
+    />
     <canvas :id="id"></canvas>
   </Card>
 </template>

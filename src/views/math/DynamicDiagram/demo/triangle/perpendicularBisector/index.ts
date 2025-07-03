@@ -97,13 +97,13 @@ export function Update() {
   cal.value = MyMath.transform([abc.c, abc.a]);
 
   ablra.value = MyMath.transform(
-    MyMath.getRightAngleSymbol(abc.a, abc.b, abc.c) || []
+    MyMath.getPerpendicularBisectorRightAngleSymbol(abc.a, abc.b, abc.c) || []
   );
   bclra.value = MyMath.transform(
-    MyMath.getRightAngleSymbol(abc.b, abc.c, abc.a) || []
+    MyMath.getPerpendicularBisectorRightAngleSymbol(abc.b, abc.c, abc.a) || []
   );
   calra.value = MyMath.transform(
-    MyMath.getRightAngleSymbol(abc.c, abc.a, abc.b) || []
+    MyMath.getPerpendicularBisectorRightAngleSymbol(abc.c, abc.a, abc.b) || []
   );
 }
 m.addEventListener("dragg", Update);
