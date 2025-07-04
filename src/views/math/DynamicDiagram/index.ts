@@ -48,6 +48,10 @@ export const dynamicDiagramCollection: Collection = [
       },
     ],
   },
+  {
+    title: "多边形",
+    children: [],
+  },
 ] as const;
 export const dynamicDiagram = useLocalStorage(
   "math-dynamic-diagram",
