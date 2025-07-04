@@ -9,8 +9,7 @@
 *::after {
   box-sizing: border-box;
   margin: 0;
-  font-weight: normal;
-  font-family: monospace !important;
+  font-family: monospace;
 }
 
 body {
@@ -26,4 +25,10 @@ body {
 
   color: var(--text-color);
   background-color: var(--background-color);
+}
+
+.katex * {
+  font-size: 18px;
+  font-family: cursive !important;
+  font-weight: bold;
 }

@@ -14,5 +14,9 @@ declare global {
     $loadingBar: LoadingBarProviderInst;
     $modal: ModalApiInjection;
     $CustomizeError: (message: string, error?: any) => void;
+
+    katex: {
+      render(tex: string, element: HTMLElement, options?: KatexOptions): void;
+    };
   }
 }

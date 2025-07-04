@@ -9,20 +9,6 @@ import { ref } from "vue";
 
 export const id = _Utility_GenerateUUID();
 
-/**
- * ∠BAC为直角（90°）
- * 
-          A
-         /|\
-        / | \
-       /  |  \
-      /   |   \
-     /    |h   \
-    /     |     \
-   B------P------C
-   
-*/
-
 export const J_ABC = ref(45);
 const BC = 5;
 
