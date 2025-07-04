@@ -48,6 +48,7 @@ const bc_arc = new _Canvas.Arc({
   radiusValue: BC / 2,
   startAngle: Math.PI,
   endAngle: 0,
+  zIndex: 1,
   style: { stroke: { width: 2 } },
 });
 
@@ -75,8 +76,8 @@ const ab_ac_arc = new _Canvas.Custom({
       _ctx.fillStyle = "#8a2be280";
       _ctx.beginPath();
       _ctx.arc(ab_mid[0], ab_mid[1], r, Math.PI - angle, -angle);
-      _ctx.stroke();
       _ctx.fill();
+      _ctx.stroke();
     }
 
     /** AC 半圆 */ {
@@ -88,8 +89,8 @@ const ab_ac_arc = new _Canvas.Custom({
       _ctx.fillStyle = "#ff69b480";
       _ctx.beginPath();
       _ctx.arc(ac_mid[0], ac_mid[1], r, angle + Math.PI, angle);
-      _ctx.stroke();
       _ctx.fill();
+      _ctx.stroke();
     }
 
     _Canvas.clearPathRegion(_ctx, bc_arc.path!);
@@ -98,7 +99,10 @@ const ab_ac_arc = new _Canvas.Custom({
   },
 });
 
-export const overlays = [t, tra, ...text, bc_arc, ab_ac_arc];
+export const layer = new _Canvas.Layer({ name: "希波克拉底月牙定理" });
+const group = new _Canvas.OverlayGroup({});
+group.addOverlays([t, tra, ...text, bc_arc, ab_ac_arc]);
+layer.addGroup(group);
 
 export function Update() {
   const j = (J_ABC.value * Math.PI) / 180;

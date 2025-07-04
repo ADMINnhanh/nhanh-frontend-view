@@ -2,7 +2,7 @@
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, ref, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { overlays, id, Update, J_ABC } from ".";
+import { layer, id, Update, J_ABC } from ".";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import Media from "@/stores/media";
@@ -32,7 +32,7 @@ S_{\\text{月牙}} &= S_{\\text{整}} - S_{\\text{半圆}BC} \\\\
       defaultScale: Media.value.isMobileStyle ? 0.9 : 1.1,
     });
 
-    myCanvas.value.addOverlay(overlays);
+    myCanvas.value.addLayer(layer);
   });
 
   Update();
