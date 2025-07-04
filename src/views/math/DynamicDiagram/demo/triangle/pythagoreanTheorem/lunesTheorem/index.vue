@@ -5,20 +5,13 @@ import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, Update, J_ABC } from ".";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
+import Media from "@/stores/media";
 
 let myCanvas = shallowRef<_Canvas>();
 
 const math = ref();
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({
-    id,
-    theme: Settings.value.theme,
-    axisShow: false,
-    defaultCenter: { bottom: 100 },
-  });
-  myCanvas.value.addOverlay(overlays);
-
   window.katex.render(
     `\\begin{aligned}
 S_{\\text{月牙}} &= S_{\\text{整}} - S_{\\text{半圆}BC} \\\\ 
@@ -29,6 +22,19 @@ S_{\\text{月牙}} &= S_{\\text{整}} - S_{\\text{半圆}BC} \\\\
 \\end{aligned}`,
     math.value
   );
+
+  requestAnimationFrame(() => {
+    myCanvas.value = new _Canvas({
+      id,
+      theme: Settings.value.theme,
+      axisShow: false,
+      defaultCenter: { bottom: "30%" },
+      defaultScale: Media.value.isMobileStyle ? 0.9 : 1.1,
+    });
+
+    myCanvas.value.addOverlay(overlays);
+  });
+
   Update();
 });
 </script>
@@ -42,7 +48,7 @@ S_{\\text{月牙}} &= S_{\\text{整}} - S_{\\text{半圆}BC} \\\\
       :canvas="myCanvas"
       v-model:value="J_ABC"
       @change="Update"
-      :marks="{ 0: '0°', 90: '90°' }"
+      :marks="{ 0: '∠ABC 0°', 90: '∠ABC 90°' }"
       :max="90"
     />
     <canvas :id="id"></canvas>

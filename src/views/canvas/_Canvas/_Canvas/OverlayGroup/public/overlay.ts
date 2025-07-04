@@ -113,7 +113,7 @@ export default abstract class Overlay<
   }
 
   /** 绘制路径 */
-  protected path?: Path2D;
+  path?: Path2D;
 
   constructor(option: ConstructorOption<T, V>) {
     option = { ...option };

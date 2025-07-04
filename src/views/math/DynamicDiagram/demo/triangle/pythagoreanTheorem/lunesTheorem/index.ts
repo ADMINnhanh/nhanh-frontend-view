@@ -5,26 +5,10 @@ import {
 } from "nhanh-pure-function";
 import { ABC, MyMath } from "@/views/math/DynamicDiagram/tool";
 import { ref } from "vue";
+import { Settings } from "@/components/popups/components/Settings";
 
 export const id = _Utility_GenerateUUID();
-// https://basic.smartedu.cn/syncClassroom/classActivity?activityId=314b07ca-a341-11ec-92ef-246e9675e50c&chapterId=1d266936-49d6-37ba-8a82-466e03e69efa&teachingmaterialId=561056b2-29a1-4588-9ed2-a9440667e589&fromPrepare=0&classHourId=lesson_1
-// const canvas = document.getElementById("canvas");
-// const ctx = canvas.getContext("2d");
 
-// // 绘制蓝色圆形
-// ctx.beginPath();
-// ctx.arc(100, 75, 50, 0, Math.PI * 2);
-// ctx.fillStyle = "blue";
-// ctx.fill();
-
-// // 清除指定圆形区域（使用临时路径）
-// ctx.save();
-// ctx.beginPath();
-// ctx.arc(120, 95, 50, 0, Math.PI * 2);
-// clip 是指定后续可操作的区域
-// ctx.clip();
-// ctx.clearRect(0, 0, canvas.width, canvas.height);
-// ctx.restore();
 export const J_ABC = ref(45);
 const BC = 5;
 const t = new _Canvas.Polygon({
@@ -40,13 +24,15 @@ const tra = new _Canvas.Line({
   style: { stroke: { color: "#18a058", width: 2 } },
 });
 
+const abc = new ABC(t as any);
+
 const text_config = (text: string, x = 0, y = 0) => ({
   text,
   offset: { x, y },
-  style: { size: 20 },
+  style: { size: 25 },
   isInteractive: false,
 });
-const a_text = new _Canvas.Text(text_config("A", 0, -15));
+const a_text = new _Canvas.Text(text_config("A", 0, -25));
 const b_text = new _Canvas.Text({
   value: [-BC / 2, 0],
   ...text_config("B", -10, 15),
@@ -57,9 +43,62 @@ const c_text = new _Canvas.Text({
 });
 const text = [a_text, b_text, c_text];
 
-export const overlays = [t, tra, ...text];
+const bc_arc = new _Canvas.Arc({
+  value: [0, 0],
+  radiusValue: BC / 2,
+  startAngle: Math.PI,
+  endAngle: 0,
+  style: { stroke: { width: 2 } },
+});
 
-const abc = new ABC(t as any);
+const _canvas = document.createElement("canvas");
+const _ctx = _canvas.getContext("2d")!;
+const ab_ac_arc = new _Canvas.Custom({
+  value: [[0, 0]],
+  draw(ctx) {
+    const mainCanvas = ab_ac_arc.mainCanvas!;
+    _canvas.width = mainCanvas.rect.width;
+    _canvas.height = mainCanvas.rect.height;
+
+    const theme = Settings.value.theme;
+    const line_style = mainCanvas.style[theme].line.stroke;
+
+    _ctx.strokeStyle = line_style.color;
+    _ctx.lineWidth = 2;
+
+    /** AB 半圆 */ {
+      const angle = (J_ABC.value * Math.PI) / 180;
+      const ab_mid = [(abc.ap.x + abc.bp.x) / 2, (abc.ap.y + abc.bp.y) / 2];
+      const r =
+        _Math_CalculateDistance2D(abc.ap.x, abc.ap.y, abc.bp.x, abc.bp.y) / 2;
+
+      _ctx.fillStyle = "#8a2be280";
+      _ctx.beginPath();
+      _ctx.arc(ab_mid[0], ab_mid[1], r, Math.PI - angle, -angle);
+      _ctx.stroke();
+      _ctx.fill();
+    }
+
+    /** AC 半圆 */ {
+      const angle = ((90 - J_ABC.value) * Math.PI) / 180;
+      const ac_mid = [(abc.ap.x + abc.cp.x) / 2, (abc.ap.y + abc.cp.y) / 2];
+      const r =
+        _Math_CalculateDistance2D(abc.ap.x, abc.ap.y, abc.cp.x, abc.cp.y) / 2;
+
+      _ctx.fillStyle = "#ff69b480";
+      _ctx.beginPath();
+      _ctx.arc(ac_mid[0], ac_mid[1], r, angle + Math.PI, angle);
+      _ctx.stroke();
+      _ctx.fill();
+    }
+
+    _Canvas.clearPathRegion(_ctx, bc_arc.path!);
+
+    ctx.drawImage(_canvas, 0, 0);
+  },
+});
+
+export const overlays = [t, tra, ...text, bc_arc, ab_ac_arc];
 
 export function Update() {
   const j = (J_ABC.value * Math.PI) / 180;
@@ -71,8 +110,6 @@ export function Update() {
 
   a_text.value = [-BC / 2 + bp, -h];
 
-  const x = -BC / 2 + (ab * ab) / BC;
-
   /** 直角三角形 */ {
     t.value![0] = a_text.value;
     t.value = [...t.value!];
@@ -81,4 +118,6 @@ export function Update() {
         ? undefined
         : MyMath.transform(MyMath.getRightAngleSymbol(abc.a, abc.b, abc.c));
   }
+
+  ab_ac_arc.notifyReload?.();
 }

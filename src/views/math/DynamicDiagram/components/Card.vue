@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
-import { watch } from "vue";
+import { computed, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { NCard, NAlert } from "naive-ui";
 import Media from "@/stores/media";
@@ -18,6 +18,8 @@ interface Props {
   hasNoAlertContent?: boolean;
 }
 const props = defineProps<Props>();
+
+const vertical = computed(() => props.vertical || Media.value.isMobileStyle);
 
 watch(
   () => Settings.value.theme,

@@ -556,23 +556,37 @@ export class MyMath {
 
 type ABCA = {
   value: PointA[];
+  finalDynamicPosition: PointA[];
 };
 /** 快捷方法 */
 export class ABC {
   constructor(private abc: ABCA) {
     this.abc = abc;
   }
-  private p(i: number) {
-    const p = this.abc.value[i];
-    return { x: p[0], y: p[1] };
+  private v(i: number) {
+    const v = this.abc.value[i];
+    return { x: v[0], y: v[1] };
   }
   get a() {
-    return this.p(0);
+    return this.v(0);
   }
   get b() {
-    return this.p(1);
+    return this.v(1);
   }
   get c() {
+    return this.v(2);
+  }
+  private p(i: number) {
+    const p = this.abc.finalDynamicPosition[i];
+    return { x: p[0], y: p[1] };
+  }
+  get ap() {
+    return this.p(0);
+  }
+  get bp() {
+    return this.p(1);
+  }
+  get cp() {
     return this.p(2);
   }
 }

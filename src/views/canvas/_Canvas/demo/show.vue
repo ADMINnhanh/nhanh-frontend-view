@@ -18,11 +18,10 @@ const show = ref(true);
 watch(show, (show) => (point_value.isVisible = show), { immediate: true });
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id });
+  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
   myCanvas.value.setNotifyReload(() => {
     scale.value = myCanvas.value!.scale;
   });
-  myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addOverlay(point_value);
 });
 defineExpose({ myCanvas });

@@ -49,14 +49,14 @@ onMounted(() => {
     id,
     axisConfig: { y: -1, count: 2000000 },
     defaultCenter: { bottom: 100 },
+    defaultScale: 1.16,
+    theme: Settings.value.theme,
   });
   myCanvas.value.setDefaultCenter({
     left: -(580 - myCanvas.value.rect.width / 2),
     bottom: Number((myCanvas.value.rect.height / 4.6).toFixed(0)),
   });
 
-  myCanvas.value.setScale("center", myCanvas.value.delta * 8);
-  myCanvas.value.setTheme(Settings.value.theme);
   myCanvas.value.addLayer([layer, attractionLayer]);
 
   myCanvas.value.setNotifyReload(() => {

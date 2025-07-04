@@ -9,17 +9,31 @@ import { Settings } from "@/components/popups/components/Settings";
 
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
+import Media from "@/stores/media";
 
 const id = _Utility_GenerateUUID();
 
 let myCanvas = shallowRef<_Canvas>();
 
+const isMobileStyle = Media.value.isMobileStyle;
 const totalLen = 120;
 const x = ref(60);
 const marks = {
   0: "0m",
   60: "60m",
   100: "100m",
+};
+
+const text_config = (x: number, y: number, color?: string) => {
+  const size = isMobileStyle ? 14 : 25;
+  x /= isMobileStyle ? 1.7 : 1;
+  y /= isMobileStyle ? 1.7 : 1;
+  const config: any = {
+    style: { size },
+    offset: { x, y },
+  };
+  if (color) config.style.color = color;
+  return config;
 };
 
 const curve = new _Canvas.Line({
@@ -34,9 +48,7 @@ const curve_point = new _Canvas.Point({
 });
 const m_text = new _Canvas.Text({
   text: "面积 : 0㎡",
-  value: [0, 0],
-  style: { color: "#d03050", size: 25 },
-  offset: { x: 120, y: -40 },
+  ...text_config(120, -40, "#d03050"),
 });
 
 const rect = new _Canvas.Polygon({
@@ -55,20 +67,15 @@ const line = new _Canvas.Line({
 const q_text = new _Canvas.Text({
   text: "用 120m 围栏，靠 100m 长的墙围一个长方形",
   value: [50, 0],
-  style: { size: 25 },
-  offset: { x: 0, y: 20 },
+  ...text_config(0, 20),
 });
 const x_text = new _Canvas.Text({
   text: "x : 0m",
-  value: [0, 0],
-  style: { color: "#18a058", size: 25 },
-  offset: { x: 0, y: -20 },
+  ...text_config(0, -20, "#18a058"),
 });
 const y_text = new _Canvas.Text({
   text: "y : 0m",
-  value: [0, 0],
-  style: { color: "#18a058", size: 25 },
-  offset: { x: 70, y: 0 },
+  ...text_config(70, 0, "#18a058"),
 });
 
 function UpdateX(x: number) {
@@ -100,7 +107,9 @@ onMounted(() => {
     axisConfig: { y: -1, count: 20 },
     defaultCenter: { left: width / 2 - 250, bottom: height / 2 - 250 },
     axisShow: false,
+    defaultScale: isMobileStyle ? 0.8 : 1,
   });
+
   myCanvas.value.addOverlay([
     curve,
     curve_point,

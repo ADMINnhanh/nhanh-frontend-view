@@ -8,6 +8,7 @@ import {
   PlayCircleOutline,
   RefreshCircleOutline,
 } from "@vicons/ionicons5";
+import Media from "@/stores/media";
 
 interface Props {
   canvas?: _Canvas;
@@ -81,7 +82,7 @@ onBeforeUnmount(() => {
         }
       "
       :="{ value, marks, min, max }"
-      vertical
+      :vertical="!Media.isMobileStyle"
     />
   </div>
 </template>
@@ -104,5 +105,13 @@ onBeforeUnmount(() => {
 .disabled.oscillator {
   pointer-events: none;
   opacity: 0.7;
+}
+.is-mobile .oscillator {
+  flex-direction: row;
+  height: auto;
+  .n-slider {
+    height: auto;
+    width: auto;
+  }
 }
 </style>

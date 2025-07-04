@@ -172,8 +172,7 @@ export function Tips() {
     Update();
   }
 
-  if (ahb_polygon.isVisible)
-    ahb_polygon.value = [a_text.value!, h_text.value!, b_text.value!];
+  ahb_polygon.value = [a_text.value!, h_text.value!, b_text.value!];
 
   isPlay.value = true;
   ahb_polygon.isVisible = true;
@@ -184,42 +183,49 @@ export function Tips() {
 
   const timeout = 500;
   setTimeout(() => {
-    _Animate_NumericTransition(startValue, targetValue, 150, (x) => {
-      const y =
-        ((x - startValue) / (targetValue - startValue)) * yValue +
-        a_text.value![1];
-      ahb_polygon.value![0] = [x, y];
-      ahb_polygon.value = [...ahb_polygon.value!];
-      if (x == targetValue) {
-        const oldV = [...ahb_polygon.value!];
-        setTimeout(() => {
-          _Animate_NumericTransition(0, 90, 90, (r) => {
-            ahb_polygon.value = MyMath.transform(
-              MyMath.rotatePoints(
-                MyMath.inverseTransform(oldV),
-                2,
-                (r * Math.PI) / 180
-              )
-            );
-            if (r == 90) {
-              const startValue = ahb_polygon.value![1][1];
-              const targetValue = g_text.value![1];
-              setTimeout(() => {
-                _Animate_NumericTransition(
-                  startValue,
-                  targetValue,
-                  150,
-                  (y) => {
-                    ahb_polygon.value![1][1] = y;
-                    ahb_polygon.value = [...ahb_polygon.value!];
-                    if (y == targetValue) isPlay.value = false;
-                  }
-                );
-              }, timeout);
-            }
-          });
-        }, timeout);
-      }
-    });
+    _Animate_NumericTransition(
+      startValue,
+      targetValue,
+      150,
+      (x) => {
+        const y =
+          ((x - startValue) / (targetValue - startValue)) * yValue +
+          a_text.value![1];
+        ahb_polygon.value![0] = [x, y];
+        ahb_polygon.value = [...ahb_polygon.value!];
+        if (x == targetValue) {
+          const oldV = [...ahb_polygon.value!];
+          setTimeout(() => {
+            _Animate_NumericTransition(0, 90, 90, (r) => {
+              ahb_polygon.value = MyMath.transform(
+                MyMath.rotatePoints(
+                  MyMath.inverseTransform(oldV),
+                  2,
+                  (r * Math.PI) / 180
+                )
+              );
+              if (r == 90) {
+                const startValue = ahb_polygon.value![1][1];
+                const targetValue = g_text.value![1];
+                setTimeout(() => {
+                  _Animate_NumericTransition(
+                    startValue,
+                    targetValue,
+                    150,
+                    (y) => {
+                      ahb_polygon.value![1][1] = y;
+                      ahb_polygon.value = [...ahb_polygon.value!];
+                      if (y == targetValue) isPlay.value = false;
+                    },
+                    6
+                  );
+                }, timeout);
+              }
+            });
+          }, timeout);
+        }
+      },
+      6
+    );
   }, timeout * 2);
 }

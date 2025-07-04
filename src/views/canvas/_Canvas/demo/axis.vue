@@ -71,8 +71,7 @@ watch(
   { deep: true }
 );
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id });
-  myCanvas.value!.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
 });
 defineExpose({ myCanvas });
 </script>

@@ -32,3 +32,6 @@ body {
   font-family: cursive !important;
   font-weight: bold;
 }
+.math {
+  overflow: auto;
+}

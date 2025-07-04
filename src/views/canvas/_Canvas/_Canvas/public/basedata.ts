@@ -35,7 +35,7 @@ abstract class Base<T extends Base<T>> {
   }
 
   /** 通知重新加载 */
-  protected notifyReload?: (needForceExecute?: boolean) => void;
+  notifyReload?: (needForceExecute?: boolean) => void;
   /** 设置通知重新加载 */
   abstract setNotifyReload(notifyReload?: () => void): void;
 }

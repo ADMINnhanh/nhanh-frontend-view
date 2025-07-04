@@ -72,7 +72,7 @@ const line_value1 = new _Canvas.Line({
     [-2, 0],
     [2, 0],
   ],
-  style: { color: "#8a2be2", width: 10 },
+  style: { stroke: { color: "#8a2be2", width: 10 } },
   zIndex: 6,
 });
 const line_value2 = new _Canvas.Line({
@@ -80,7 +80,7 @@ const line_value2 = new _Canvas.Line({
     [1, 1],
     [1, -1],
   ],
-  style: { color: "#ff69b4", width: 10 },
+  style: { stroke: { color: "#ff69b4", width: 10 } },
   zIndex: 7,
 });
 const polygon_rect1 = new _Canvas.Polygon({
@@ -116,8 +116,11 @@ const overlay_arr = [
 ];
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id, isInteractive: false });
-  myCanvas.value.setTheme(Settings.value.theme);
+  myCanvas.value = new _Canvas({
+    id,
+    isInteractive: false,
+    theme: Settings.value.theme,
+  });
   myCanvas.value.addOverlay(overlay_arr);
 });
 defineExpose({ myCanvas });

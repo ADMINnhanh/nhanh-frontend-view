@@ -431,7 +431,12 @@ class QuickMethod_View extends QuickMethod_Set {
   returnToOrigin() {
     if (!this.isInteractive) return;
 
-    if (this.scale == 1 && this.offset.x == 0 && this.offset.y == 0) return;
+    if (
+      this.scale == this.defaultScale &&
+      this.offset.x == 0 &&
+      this.offset.y == 0
+    )
+      return;
 
     const { rect, axisConfig } = this;
 
@@ -449,12 +454,17 @@ class QuickMethod_View extends QuickMethod_Set {
     const canvasValue = this.getAxisValueByPoint(canvasPoint.x, canvasPoint.y);
 
     const valuePx = axisConfig.size / this.getNowGridCount;
-    const xDifference =
-      (canvasValue.xV - centerValue.xV) * axisConfig.x * valuePx;
-    const yDifference =
-      (canvasValue.yV - centerValue.yV) * axisConfig.y * valuePx;
 
-    this.animateTransform(1, {
+    const xDifference = Math.round(
+      (canvasValue.xV - centerValue.xV) * axisConfig.x * valuePx
+    );
+    const yDifference = Math.round(
+      (canvasValue.yV - centerValue.yV) * axisConfig.y * valuePx
+    );
+
+    if (xDifference == 0 && yDifference == 0) return;
+
+    this.animateTransform(this.defaultScale, {
       x: xDifference,
       y: yDifference,
     });

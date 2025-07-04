@@ -7,6 +7,7 @@ import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
 import { NButton } from "naive-ui";
 import SvgGather from "@/assets/icon/gather";
+import Media from "@/stores/media";
 
 let myCanvas = shallowRef<_Canvas>();
 
@@ -15,7 +16,9 @@ onMounted(() => {
     id,
     theme: Settings.value.theme,
     axisShow: false,
+    defaultScale: Media.value.isMobileStyle ? 0.8 : 1,
   });
+
   myCanvas.value.addOverlay(overlays);
   myCanvas.value.style.light.line.stroke.color = "#000";
   myCanvas.value.style.light.line.stroke.width = 2;
@@ -42,7 +45,7 @@ onMounted(() => {
       :canvas="myCanvas"
       v-model:value="J_ABC"
       @change="Update"
-      :marks="{ 0: '0°', 90: '90°' }"
+      :marks="{ 0: '∠ABC 0°', 90: '∠ABC 90°' }"
       :max="90"
       :disabled="isPlay"
     >

@@ -12,6 +12,18 @@ type ConstructorOption = ConstructorParameters<typeof EventController>[0] & {
   defaultCenter?: Parameters<BaseData["setDefaultCenter"]>[0];
   /** 偏移量 */
   offset?: BaseData["offset"];
+  /**
+   * 缩放比例，用于动态控制坐标轴上数字所对应的实际显示长度，以实现坐标轴显示效果的缩放调整。
+   *
+   * 默认情况下，scale 的初始值设定为 1，此时坐标轴上数值为 1 的刻度在界面上的实际显示长度为 50px。
+   *
+   * scale 的值依据特定的计算逻辑动态变化，其计算公式为：scale = 默认值 1 + 滚动周期 * 滚动值，其中滚动周期和滚动值均为可变参数。
+   * 例如，当滚动周期为 10，滚动值为 0.02 时，scale 的计算结果为 1 + 10 * 0.02 = 1.2 。在此状态下，坐标轴上数值为 1 的刻度在界面上的实际显示长度会变为 100px。
+   *
+   * 一般而言，scale 的值越大，相同数值在坐标轴上显示的长度就越长，在视觉上呈现出放大效果；scale 的值越小，相同数值在坐标轴上显示的长度就越短，视觉上呈现出缩小效果。
+   * 可通过调整滚动周期和滚动值来灵活改变 scale 的大小，进而满足不同的显示需求。
+   */
+  defaultScale?: number;
 };
 
 /** 基础数据 */
@@ -59,6 +71,9 @@ export default class BaseData extends EventController {
    * 可通过调整滚动周期和滚动值来灵活改变 scale 的大小，进而满足不同的显示需求。
    */
   scale = 1;
+  /** 缩放比例 */
+  defaultScale = 1;
+
   /** 百分比 */
   percentage = 1;
   /**
@@ -109,7 +124,7 @@ export default class BaseData extends EventController {
   constructor(option: ConstructorOption) {
     super(option);
 
-    const { id, axisConfig, defaultCenter, offset } = option;
+    const { id, axisConfig, defaultCenter, offset, defaultScale } = option;
 
     const canvas = document.getElementById(id);
     if (canvas instanceof HTMLCanvasElement) {
@@ -122,10 +137,15 @@ export default class BaseData extends EventController {
     } else throw new Error("canvas is not HTMLCanvasElement");
 
     if (axisConfig) this.setAxis(axisConfig);
-    if (defaultCenter) this.setDefaultCenter(defaultCenter);
     if (offset) {
       this.offset.x = offset.x || 0;
       this.offset.y = offset.y || 0;
+    }
+    if (defaultCenter) this.setDefaultCenter(defaultCenter);
+    if (defaultScale) {
+      this.updateCenter();
+      this.setScale("center", defaultScale - 1);
+      this.defaultScale = defaultScale;
     }
   }
 
@@ -197,6 +217,7 @@ export default class BaseData extends EventController {
     const data = this.getDefaultCenterLocation();
     if (!data) return;
     const { x, y } = data;
+
     this.center = {
       x: Math.floor(x + this.offset.x),
       y: Math.floor(y + this.offset.y),

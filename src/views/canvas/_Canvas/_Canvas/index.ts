@@ -47,6 +47,7 @@ export default class _Canvas extends QuickMethod {
     super(option);
 
     this.drawAxis = new Axis(this);
+
     if ("axisShow" in option) this.toggleAxis(option.axisShow);
 
     this.initLayerGroups();
