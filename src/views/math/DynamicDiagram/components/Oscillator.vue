@@ -1,5 +1,8 @@
 <script setup lang="ts">
-import { _Animate_CreateOscillator } from "nhanh-pure-function";
+import {
+  _Animate_CreateOscillator,
+  _Browser_GetFrameRate,
+} from "nhanh-pure-function";
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onBeforeUnmount, ref, watch } from "vue";
 import { NButton, NIcon, NSlider } from "naive-ui";
@@ -35,6 +38,11 @@ const oscillator = _Animate_CreateOscillator(props.min, props.max, 300, (v) => {
   emit("update:value", v);
   emit("change");
 });
+
+_Browser_GetFrameRate((fps) => {
+  oscillator.updateParams(props.min, props.max, (fps / 60) * 300);
+}, 30);
+
 function UpdatePlay() {
   isPlay.value = !isPlay.value;
 
