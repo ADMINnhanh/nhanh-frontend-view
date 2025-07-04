@@ -43,21 +43,12 @@ const c_text = new _Canvas.Text({
 });
 const text = [a_text, b_text, c_text];
 
-const bc_arc = new _Canvas.Arc({
-  value: [0, 0],
-  radiusValue: BC / 2,
-  startAngle: Math.PI,
-  endAngle: 0,
-  zIndex: 1,
-  style: { stroke: { width: 2 } },
-});
-
 const _canvas = document.createElement("canvas");
 const _ctx = _canvas.getContext("2d")!;
-const ab_ac_arc = new _Canvas.Custom({
+const arc = new _Canvas.Custom({
   value: [[0, 0]],
   draw(ctx) {
-    const mainCanvas = ab_ac_arc.mainCanvas!;
+    const mainCanvas = arc.mainCanvas!;
     _canvas.width = mainCanvas.rect.width;
     _canvas.height = mainCanvas.rect.height;
 
@@ -93,16 +84,24 @@ const ab_ac_arc = new _Canvas.Custom({
       _ctx.stroke();
     }
 
-    _Canvas.clearPathRegion(_ctx, bc_arc.path!);
+    /** BC 半圆 */ {
+      const bc_mid = arc.finalDynamicPosition[0];
+      const r =
+        _Math_CalculateDistance2D(abc.bp.x, abc.bp.y, abc.cp.x, abc.cp.y) / 2;
+
+      const path = new Path2D();
+      path.arc(bc_mid[0], bc_mid[1], r, Math.PI, 0);
+      _Canvas.clearPathRegion(_ctx, path);
+
+      _ctx.beginPath();
+      _ctx.stroke(path);
+    }
 
     ctx.drawImage(_canvas, 0, 0);
   },
 });
 
-export const layer = new _Canvas.Layer({ name: "希波克拉底月牙定理" });
-const group = new _Canvas.OverlayGroup({});
-group.addOverlays([t, tra, ...text, bc_arc, ab_ac_arc]);
-layer.addGroup(group);
+export const overlays = [t, tra, ...text, arc];
 
 export function Update() {
   const j = (J_ABC.value * Math.PI) / 180;
@@ -123,5 +122,5 @@ export function Update() {
         : MyMath.transform(MyMath.getRightAngleSymbol(abc.a, abc.b, abc.c));
   }
 
-  ab_ac_arc.notifyReload?.();
+  arc.notifyReload?.();
 }
