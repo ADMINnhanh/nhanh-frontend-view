@@ -13,6 +13,8 @@ onMounted(() => {
     theme: Settings.value.theme,
     axisShow: false,
   });
+  myCanvas.value.style.dark.line.stroke.width = 2;
+  myCanvas.value.style.light.line.stroke.width = 2;
   myCanvas.value.addOverlay(overlays);
   Update();
 });
@@ -23,7 +25,7 @@ onMounted(() => {
     :canvas="myCanvas"
     vertical
     alert="三角形中位线平行于第三边，且等于第三边的一半"
-    alert-content="AD = DB , AE = EC ; "
+    alert-content="AD = DB , AE = EC ;"
   >
     <canvas :id="id"></canvas>
   </Card>

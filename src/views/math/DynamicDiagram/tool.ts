@@ -595,7 +595,7 @@ export class ABC {
     if (!a.value || !b.value) return [0, 0];
     return [(a.value[0] + b.value[0]) / 2, (a.value[1] + b.value[1]) / 2];
   }
-  static transform(...arr: { value?: PointA }[]) {
+  static join(...arr: { value?: PointA }[]) {
     return arr
       .map((v) => v.value && [v.value[0], v.value[1]])
       .filter(Boolean) as PointA[];

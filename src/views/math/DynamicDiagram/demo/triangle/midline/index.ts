@@ -11,6 +11,7 @@ const text_config = (text: string, x: number, y: number) => ({
   text,
   offset: { x, y },
   style: { size: 20 },
+  isInteractive: false,
 });
 const a_text = new _Canvas.Text({
   value: [1, -2],
@@ -40,15 +41,39 @@ const f_text = new _Canvas.Text({
 export const texts = [a_text, b_text, c_text, d_text, e_text, f_text];
 
 const t = new _Canvas.Polygon({
-  value: ABC.transform(d_text, b_text, c_text, e_text),
+  value: ABC.join(d_text, b_text, c_text, e_text),
   isInteractive: false,
+});
+const t_d = new _Canvas.Polygon({
+  value: ABC.join(d_text, a_text, e_text),
+  isInteractive: false,
+  style: { fill: "#B5B3A6" + 80, stroke: { color: "transparent" } },
+});
+const polygons = [t, t_d];
+
+const line_config = (color: string) => ({
+  isInteractive: false,
+  style: { stroke: { color } },
 });
 const l = new _Canvas.Line({
-  value: ABC.transform(d_text, a_text, e_text, f_text, c_text),
+  value: ABC.join(d_text, a_text, e_text, f_text, c_text),
   isInteractive: false,
-  style: { stroke: { width: 2, dash: true } },
+  style: { stroke: { dash: true } },
 });
+const l_ab_s = new _Canvas.Line({
+  value: ABC.join(a_text, d_text),
+  ...line_config("#C73A64"),
+});
+const l_ae_s = new _Canvas.Line({
+  value: ABC.join(a_text, e_text),
+  ...line_config("#ff69b4"),
+});
+const l_de_s = new _Canvas.Line({
+  value: ABC.join(d_text, e_text),
+  ...line_config("#8a2be2"),
+});
+const lines = [l, l_ab_s, l_ae_s, l_de_s];
 
-export const overlays = [t, l, ...texts];
+export const overlays = [...polygons, ...lines, ...texts];
 
 export function Update() {}
