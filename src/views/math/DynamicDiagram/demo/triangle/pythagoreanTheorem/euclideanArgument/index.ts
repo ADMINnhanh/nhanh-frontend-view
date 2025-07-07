@@ -114,7 +114,7 @@ const line = [ah_line, ad_line, ag_line, bg_line, hc_line];
 
 export const overlays = [...text, ...line, ...polygon];
 
-const abc = new ABC(t as any);
+const abc = new ABC(t);
 
 export function Update() {
   const j = (J_ABC.value * Math.PI) / 180;

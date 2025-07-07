@@ -24,7 +24,7 @@ const tra = new _Canvas.Line({
   style: { stroke: { color: "#18a058", width: 2 } },
 });
 
-const abc = new ABC(t as any);
+const abc = new ABC(t);
 
 const text_config = (text: string, x = 0, y = 0) => ({
   text,

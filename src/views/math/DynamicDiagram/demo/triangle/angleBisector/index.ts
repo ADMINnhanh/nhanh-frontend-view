@@ -32,7 +32,7 @@ const bclra = new _Canvas.Line(config(false));
 
 export const overlays = [l, abcl, abl, bcl, ablra, bclra];
 
-const abc = new ABC(l as any);
+const abc = new ABC(l);
 
 export function Update() {
   const dom = document.getElementById(id)!;

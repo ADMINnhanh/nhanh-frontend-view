@@ -53,7 +53,7 @@ export const overlays = [
   calra,
 ];
 
-const abc = new ABC(m as any);
+const abc = new ABC(m);
 
 export function Update() {
   const dom = document.getElementById(id)!;

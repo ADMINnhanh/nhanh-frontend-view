@@ -405,7 +405,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     y: number,
     style: ArcStyleType
   ) {
-    this.setBaseLineStyle(ctx, { ...style.stroke, dash: true });
+    this.setBaseLineStyle(ctx, { ...style.stroke, dash: !style.stroke.dash });
 
     const {
       radiusPosition,

@@ -555,8 +555,8 @@ export class MyMath {
 }
 
 type ABCA = {
-  value: PointA[];
-  finalDynamicPosition: PointA[];
+  value?: PointA[];
+  finalDynamicPosition?: PointA[];
 };
 /** 快捷方法 */
 export class ABC {
@@ -564,6 +564,7 @@ export class ABC {
     this.abc = abc;
   }
   private v(i: number) {
+    if (!this.abc.value) return { x: 0, y: 0 };
     const v = this.abc.value[i];
     return { x: v[0], y: v[1] };
   }
@@ -577,6 +578,7 @@ export class ABC {
     return this.v(2);
   }
   private p(i: number) {
+    if (!this.abc.finalDynamicPosition) return { x: 0, y: 0 };
     const p = this.abc.finalDynamicPosition[i];
     return { x: p[0], y: p[1] };
   }
@@ -588,5 +590,14 @@ export class ABC {
   }
   get cp() {
     return this.p(2);
+  }
+  static getMid(a: { value?: PointA }, b: { value?: PointA }): PointA {
+    if (!a.value || !b.value) return [0, 0];
+    return [(a.value[0] + b.value[0]) / 2, (a.value[1] + b.value[1]) / 2];
+  }
+  static transform(...arr: { value?: PointA }[]) {
+    return arr
+      .map((v) => v.value && [v.value[0], v.value[1]])
+      .filter(Boolean) as PointA[];
   }
 }
