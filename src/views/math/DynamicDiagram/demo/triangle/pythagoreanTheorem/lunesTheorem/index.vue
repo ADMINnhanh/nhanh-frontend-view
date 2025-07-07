@@ -23,17 +23,15 @@ S_{\\text{月牙}} &= S_{\\text{整}} - S_{\\text{半圆}BC} \\\\
     math.value
   );
 
-  requestAnimationFrame(() => {
-    myCanvas.value = new _Canvas({
-      id,
-      theme: Settings.value.theme,
-      axisShow: false,
-      defaultCenter: { bottom: "30%" },
-      defaultScale: Media.value.isMobileStyle ? 0.9 : 1.1,
-    });
-
-    myCanvas.value.addOverlay(overlays);
+  myCanvas.value = new _Canvas({
+    id,
+    theme: Settings.value.theme,
+    axisShow: false,
+    defaultCenter: { bottom: "30%" },
+    defaultScale: Media.value.isMobileStyle ? 0.9 : 1.1,
   });
+
+  myCanvas.value.addOverlay(overlays);
 
   Update();
 });
