@@ -1,3 +1,4 @@
+import { _Browser_GetFrameRate } from "nhanh-pure-function";
 import { ref } from "vue";
 
 function isMobileDevice() {
@@ -31,7 +32,11 @@ const Media = ref({
   deviceType: (isMobile ? "phone" : "desktop") as "phone" | "desktop",
   /** 是否使用移动端样式 */
   isMobileStyle: isMobile,
+  /** 帧率 */
+  fps: 60,
 });
+
+_Browser_GetFrameRate((fps) => (Media.value.fps = fps), 60);
 
 const resize = () => {
   // 屏幕尺寸检测（包含方向自适应）
