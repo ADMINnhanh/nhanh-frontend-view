@@ -3,6 +3,14 @@ import { NScrollbar } from "naive-ui";
 import { computed, defineAsyncComponent } from "vue";
 import { dynamicDiagram, dynamicDiagramCollection } from ".";
 import DynamicDiagramItem from "./components/DynamicDiagramItem.vue";
+import router from "@/router";
+
+interface Props {
+  target?: string;
+}
+const props = defineProps<Props>();
+
+if (props.target) dynamicDiagram.value = props.target;
 
 function GetComponent(title: string, collection = dynamicDiagramCollection) {
   for (let i = 0; i < collection.length; i++) {
@@ -18,9 +26,13 @@ function GetComponent(title: string, collection = dynamicDiagramCollection) {
     }
   }
 }
-const dynamicDiagramComponent = computed(() =>
-  defineAsyncComponent(GetComponent(dynamicDiagram.value))
-);
+
+const dynamicDiagramComponent = computed(() => {
+  if (!router.currentRoute.value.path.includes("DynamicDiagram")) return;
+
+  router.replace({ params: { target: dynamicDiagram.value } });
+  return defineAsyncComponent(GetComponent(dynamicDiagram.value));
+});
 </script>
 
 <template>

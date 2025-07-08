@@ -27,11 +27,12 @@ onMounted(() => {
     theme: Settings.value.theme,
     axisShow: false,
   });
-  myCanvas.value.style.dark.polygon.stroke.width = 4;
   myCanvas.value.style.dark.polygon.fill = "#aaaaaa" + 80;
+  myCanvas.value.style.dark.polygon.stroke.width = 4;
   myCanvas.value.style.dark.polygon.stroke.color = "#aaaaaa";
-  myCanvas.value.style.light.polygon.stroke.width = 4;
+
   myCanvas.value.style.light.polygon.fill = "#000000" + 80;
+  myCanvas.value.style.light.polygon.stroke.width = 4;
   myCanvas.value.style.light.polygon.stroke.color = "#000000";
   myCanvas.value.addOverlay(overlays);
   Update();

@@ -101,7 +101,7 @@ const math: CustomRouteRecord = {
       component: () => import("@/views/math/GraphingEquations/index.vue"),
     },
     {
-      path: "DynamicDiagram",
+      path: "DynamicDiagram/:target?",
       name: "DynamicDiagram",
       meta: {
         name: {
@@ -109,6 +109,7 @@ const math: CustomRouteRecord = {
           enUS: "Dynamic Diagram",
         },
       },
+      props: true,
       component: () => import("@/views/math/DynamicDiagram/index.vue"),
     },
   ],
