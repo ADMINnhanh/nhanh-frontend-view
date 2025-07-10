@@ -3,10 +3,11 @@ import vue from "@vitejs/plugin-vue";
 import vueJsx from "@vitejs/plugin-vue-jsx";
 import path from "path";
 import mkcert from "vite-plugin-mkcert";
+import vueDevTools from "vite-plugin-vue-devtools";
 
 export default defineConfig({
   base: "./",
-  plugins: [vue(), vueJsx(), mkcert()],
+  plugins: [vue(), vueJsx(), mkcert(), vueDevTools()],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "src"),
