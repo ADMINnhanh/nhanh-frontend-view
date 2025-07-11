@@ -50,6 +50,9 @@ watch(
     flex-direction: column;
     .n-alert {
       margin-bottom: 5px;
+      .math {
+        max-height: 30vh;
+      }
     }
     .content {
       width: 100%;
