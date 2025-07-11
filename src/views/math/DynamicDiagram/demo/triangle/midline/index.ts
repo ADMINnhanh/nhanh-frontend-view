@@ -11,6 +11,7 @@ import Media from "@/stores/media";
 
 export const id = _Utility_GenerateUUID();
 
+//#region 定理1
 const text_config = (text: string, x: number, y: number) => ({
   text,
   offset: { x, y },
@@ -18,15 +19,15 @@ const text_config = (text: string, x: number, y: number) => ({
   isInteractive: false,
 });
 const a_text = new _Canvas.Text({
-  value: [1, -2],
+  value: [-4, -2],
   ...text_config("A", 0, -20),
 });
 const b_text = new _Canvas.Text({
-  value: [-2, 2],
+  value: [-7, 2],
   ...text_config("B", -15, 15),
 });
 const c_text = new _Canvas.Text({
-  value: [3, 2],
+  value: [-2, 2],
   ...text_config("C", 15, 15),
 });
 const d_text = new _Canvas.Text({
@@ -44,7 +45,7 @@ const f_text = new _Canvas.Text({
 
 export const texts = [a_text, b_text, c_text, d_text, e_text, f_text];
 
-const t = new _Canvas.Polygon({
+export const t = new _Canvas.Polygon({
   value: ABC.join(d_text, b_text, c_text, e_text),
   isInteractive: false,
 });
@@ -55,9 +56,9 @@ const t_d = new _Canvas.Polygon({
 });
 const polygons = [t, t_d];
 
-const line_config = (color: string, dash?: boolean) => ({
+const line_config = (color: string, dash = false, width = 4) => ({
   isInteractive: false,
-  style: { stroke: { color, dash } },
+  style: { stroke: { color, dash, width } },
 });
 const l_ab_s = new _Canvas.Line({
   value: ABC.join(a_text, b_text),
@@ -108,7 +109,61 @@ const lines = [
   l_de,
 ];
 
-export const overlays = [...polygons, ...lines, ...texts];
+const overlays1 = [...polygons, ...lines, ...texts];
+//#endregion
+
+//#region 定理2
+const a1_text = new _Canvas.Text({
+  value: [4, -2],
+  ...text_config("A`", 0, -20),
+});
+const b1_text = new _Canvas.Text({
+  value: [1, 2],
+  ...text_config("B`", -15, 15),
+});
+const c1_text = new _Canvas.Text({
+  value: [6, 2],
+  ...text_config("C`", 15, 15),
+});
+const d1_text = new _Canvas.Text({
+  value: ABC.getMid(a1_text, b1_text),
+  ...text_config("D`", -15, -15),
+});
+const e1_text = new _Canvas.Text({
+  value: ABC.getMid(a1_text, c1_text),
+  ...text_config("E`", 15, -15),
+});
+const f1_text = new _Canvas.Text({
+  value: b1_text.value,
+  ...text_config("F`", 7, 15),
+});
+const texts1 = [a1_text, b1_text, c1_text, d1_text, e1_text, f1_text];
+
+const t1 = new _Canvas.Polygon({
+  value: ABC.join(a1_text, b1_text, c1_text),
+  isInteractive: false,
+});
+const t1_d = new _Canvas.Polygon({
+  value: ABC.join(d1_text, e1_text, f1_text),
+  isInteractive: false,
+  style: { fill: "#C73A64" + 80 },
+});
+const polygons1 = [t1, t1_d];
+
+const l_eb = new _Canvas.Line({
+  value: ABC.join(e1_text, b1_text),
+  ...line_config("#C73A64", true, 2),
+});
+const l_dc = new _Canvas.Line({
+  value: ABC.join(d1_text, c1_text),
+  ...line_config("#C73A64", true, 2),
+});
+const lines1 = [l_eb, l_dc];
+
+const overlays2 = [...polygons1, ...lines1, ...texts1];
+//#endregion
+
+export const overlays = [...overlays1, ...overlays2];
 
 let angle = 0;
 
@@ -122,6 +177,13 @@ export function Update() {
   l_ad.value = [val[1], val[0]];
   l_ae.value = [val[1], val[2]];
   l_de.value = [val[0], val[2]];
+
+  const percentage = angle / 180;
+  const x =
+    percentage * c1_text.value![0] + (1 - percentage) * b1_text.value![0];
+  f1_text.value![0] = x;
+  f1_text.value = [...f1_text.value!];
+  t1_d.value = ABC.join(d1_text, e1_text, f1_text);
 }
 
 const oscillator = _Animate_CreateOscillator(0, 180, 180, (v) => {
