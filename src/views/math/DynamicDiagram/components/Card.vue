@@ -2,8 +2,9 @@
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { computed, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { NCard, NAlert } from "naive-ui";
+import { NCard, NAlert, NButton, NSpace } from "naive-ui";
 import Media from "@/stores/media";
+import SvgGather from "@/assets/icon/gather";
 
 interface Props {
   /** 是否垂直 */
@@ -16,6 +17,8 @@ interface Props {
   alertContent?: string;
   /** 无提示内容 */
   hasNoAlertContent?: boolean;
+  /** 提示动画 */
+  tipsAnimation?: () => void;
 }
 const props = defineProps<Props>();
 
@@ -38,7 +41,26 @@ watch(
       <template v-if="alertContent">{{ alertContent }}</template>
       <slot name="alert-content" />
     </NAlert>
-    <div :class="['content', vertical ? 'vertical' : '']"><slot /></div>
+    <div :class="['content', vertical ? 'vertical' : '']">
+      <div class="float-button">
+        <NSpace vertical>
+          <NButton
+            v-if="tipsAnimation"
+            strong
+            secondary
+            circle
+            type="success"
+            @click="tipsAnimation"
+          >
+            <template #icon>
+              <SvgGather icon="Bulb" />
+            </template>
+          </NButton>
+        </NSpace>
+      </div>
+
+      <slot />
+    </div>
   </NCard>
 </template>
 
@@ -59,6 +81,12 @@ watch(
       height: 100px;
       flex: 1;
       display: flex;
+      position: relative;
+      .float-button {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
       > canvas {
         width: 100px;
         height: 100%;
