@@ -26,7 +26,7 @@ const b_text = new _Canvas.Text({
   ...text_config("B", -15, 15),
 });
 const c_text = new _Canvas.Text({
-  value: [1, 2],
+  value: [2, 2],
   ...text_config("C", 15, 15),
 });
 const d_text = new _Canvas.Text({
@@ -38,20 +38,19 @@ const e_text = new _Canvas.Text({
   ...text_config("E", 15, -15),
 });
 const f_text = new _Canvas.Text({
-  value: [2 * e_text.value![0] - d_text.value![0], e_text.value![1]],
-  ...text_config("F", 15, -15),
+  value: b_text.value,
+  ...text_config("F", 0, 15),
 });
+const texts = [a_text, b_text, c_text, d_text, e_text, f_text];
 
-export const texts = [a_text, b_text, c_text, d_text, e_text, f_text];
-
-export const t = new _Canvas.Polygon({
-  value: ABC.join(d_text, b_text, c_text, e_text),
+const t = new _Canvas.Polygon({
+  value: ABC.join(a_text, b_text, c_text),
   isInteractive: false,
 });
 const t_d = new _Canvas.Polygon({
-  value: ABC.join(d_text, a_text, e_text),
+  value: ABC.join(d_text, e_text, f_text),
   isInteractive: false,
-  style: { fill: "#73c09a" + 80 },
+  style: { fill: "#C73A64" + 80 },
 });
 const polygons = [t, t_d];
 
@@ -59,69 +58,26 @@ const line_config = (color: string, dash = false, width = 4) => ({
   isInteractive: false,
   style: { stroke: { color, dash, width } },
 });
-const l_ab_s = new _Canvas.Line({
-  value: ABC.join(a_text, b_text),
-  ...line_config("#ff0000", true),
+const l_eb = new _Canvas.Line({
+  value: ABC.join(e_text, b_text),
+  ...line_config("#C73A64", true, 2),
 });
-const l_fc_s = new _Canvas.Line({
-  value: ABC.join(f_text, c_text),
-  ...line_config("#ff0000", true),
+const l_dc = new _Canvas.Line({
+  value: ABC.join(d_text, c_text),
+  ...line_config("#C73A64", true, 2),
 });
-const l_ae_s = new _Canvas.Line({
-  value: ABC.join(a_text, e_text),
-  ...line_config("#0ed6ea", true),
-});
-const l_ec_s = new _Canvas.Line({
-  value: ABC.join(e_text, c_text),
-  ...line_config("#0ed6ea", true),
-});
-const l_de_s = new _Canvas.Line({
-  value: ABC.join(d_text, e_text),
-  ...line_config("#8a2be2", true),
-});
-const l_ef_s = new _Canvas.Line({
-  value: ABC.join(e_text, f_text),
-  ...line_config("#8a2be2", true),
-});
-
-const l_ad = new _Canvas.Line({
-  value: ABC.join(a_text, d_text),
-  ...line_config("#ff0000"),
-});
-const l_ae = new _Canvas.Line({
-  value: ABC.join(a_text, e_text),
-  ...line_config("#0ed6ea"),
-});
-const l_de = new _Canvas.Line({
-  value: ABC.join(d_text, e_text),
-  ...line_config("#8a2be2"),
-});
-const lines = [
-  l_ab_s,
-  l_fc_s,
-  l_ae_s,
-  l_ec_s,
-  l_de_s,
-  l_ef_s,
-  l_ad,
-  l_ae,
-  l_de,
-];
+const lines = [l_eb, l_dc];
 
 export const overlays = [...polygons, ...lines, ...texts];
 
 let angle = 0;
 
 export function Update() {
-  const _val = MyMath.inverseTransform(ABC.join(d_text, a_text, e_text));
-  const val = MyMath.transform(
-    MyMath.rotatePoints(_val, 2, (angle * Math.PI) / 180)
-  );
-
-  t_d.value = val;
-  l_ad.value = [val[1], val[0]];
-  l_ae.value = [val[1], val[2]];
-  l_de.value = [val[0], val[2]];
+  const percentage = angle / 180;
+  const x = percentage * c_text.value![0] + (1 - percentage) * b_text.value![0];
+  f_text.value![0] = x;
+  f_text.value = [...f_text.value!];
+  t_d.value = ABC.join(d_text, e_text, f_text);
 }
 
 const oscillator = _Animate_CreateOscillator(0, 180, 180, (v) => {

@@ -32,6 +32,11 @@ export const dynamicDiagramCollection: Collection = [
         component: () => import("./demo/triangle/midline/index.vue"),
       },
       {
+        title: "平行于第三边的线",
+        component: () =>
+          import("./demo/triangle/lineParallelToThirdSide/index.vue"),
+      },
+      {
         title: "勾股定理",
         children: [
           {
