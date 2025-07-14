@@ -35,7 +35,7 @@ onMounted(() => {
         <NText strong> 三角形 ADE 与三角形 ABC 对应边比例相等 </NText>
       </NP>
       <NP>
-        <NText strong> 注：做辅助线 DF 平行于 AC </NText>
+        <NText strong depth="3"> 注：做辅助线 DF 平行于 AC </NText>
       </NP>
     </template>
 
