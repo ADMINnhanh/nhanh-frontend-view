@@ -27,6 +27,8 @@ function isMobileDevice() {
 }
 
 const isMobile = isMobileDevice();
+
+let initFpsFinish: ((fps: number) => void)[] | null = [];
 const Media = ref({
   /** 设备类型 */
   deviceType: (isMobile ? "phone" : "desktop") as "phone" | "desktop",
@@ -34,9 +36,18 @@ const Media = ref({
   isMobileStyle: isMobile,
   /** 帧率 */
   fps: 60,
+
+  fpsCallback(fun: (fps: number) => void) {
+    if (initFpsFinish) initFpsFinish.push(fun);
+    else fun(Media.value.fps);
+  },
 });
 
-_Browser_GetFrameRate((fps) => (Media.value.fps = fps), 60);
+_Browser_GetFrameRate((fps) => {
+  Media.value.fps = fps;
+  initFpsFinish!.forEach((fun) => fun(fps));
+  initFpsFinish = null;
+}, 60);
 
 const resize = () => {
   // 屏幕尺寸检测（包含方向自适应）

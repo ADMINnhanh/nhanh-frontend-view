@@ -217,11 +217,12 @@ const oscillator = _Animate_CreateOscillator(
   },
   4
 );
-setTimeout(() => {
-  const step = (Media.value.fps / 60) * steps;
+
+Media.value.fpsCallback((fps) => {
+  const step = (fps / 60) * steps;
   steps = step;
   oscillator.updateParams(0, 1, step);
-}, 1200);
+});
 
 export function Transform() {
   if (oscillator.isPlaying()) oscillator.pause();

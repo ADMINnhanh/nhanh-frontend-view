@@ -43,9 +43,9 @@ const oscillator = _Animate_CreateOscillator(props.min, props.max, 300, (v) => {
   emit("change");
 });
 
-setTimeout(() => {
-  oscillator.updateParams(props.min, props.max, (Media.value.fps / 60) * 300);
-}, 1200);
+Media.value.fpsCallback((fps) => {
+  oscillator.updateParams(props.min, props.max, (fps / 60) * 300);
+});
 
 function UpdatePlay() {
   isPlay.value = !isPlay.value;
