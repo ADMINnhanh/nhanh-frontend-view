@@ -24,6 +24,65 @@ export class MyMath {
     return x.length == 1 || y.length == 1;
   }
 
+  /**
+   * 计算两点确定的直线参数
+   * @param p1 第一个点
+   * @param p2 第二个点
+   * @returns 包含斜率和截距的对象，若两点垂直则返回null
+   */
+  static calculateLineParameters(
+    p1: Point,
+    p2: Point
+  ): { slope: number; intercept: number } | null {
+    // 检查两点是否相同
+    if (p1.x === p2.x && p1.y === p2.y) {
+      throw new Error("两点重合，无法确定直线");
+    }
+
+    // 检查是否为垂直线（斜率无穷大）
+    if (p1.x === p2.x) {
+      return null; // 垂直线没有斜率和截距
+    }
+
+    // 计算斜率 (m)
+    const slope = (p2.y - p1.y) / (p2.x - p1.x);
+
+    // 计算截距 (b)，使用 y = mx + b => b = y - mx
+    const intercept = p1.y - slope * p1.x;
+
+    return { slope, intercept };
+  }
+
+  /**
+   * 计算给定y坐标在两点确定直线上对应的x坐标
+   * @param p1 第一个点
+   * @param p2 第二个点
+   * @param y 目标y坐标
+   * @returns 对应的x坐标，若为垂直线则返回直线上的x坐标（p1.x）
+   */
+  static calculateXFromY(p1: Point, p2: Point, y: number) {
+    const slopeIntercept = MyMath.calculateLineParameters(p1, p2);
+    if (slopeIntercept) {
+      const { slope, intercept } = slopeIntercept;
+      return (y - intercept) / slope;
+    } else return p1.x;
+  }
+
+  /**
+   * 计算给定x坐标在两点确定直线上对应的y坐标
+   * @param p1 第一个点
+   * @param p2 第二个点
+   * @param x 目标x坐标
+   * @returns 对应的y坐标，若为垂直线则返回null
+   */
+  static calculateYFromX(p1: Point, p2: Point, x: number) {
+    const slopeIntercept = MyMath.calculateLineParameters(p1, p2);
+    if (slopeIntercept) {
+      const { slope, intercept } = slopeIntercept;
+      return slope * x + intercept;
+    } else return null;
+  }
+
   /** 获取中垂线（在给定范围内裁剪） */
   static perpBisectorByScope(
     a: Point,

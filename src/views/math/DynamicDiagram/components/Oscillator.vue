@@ -12,6 +12,7 @@ import {
   RefreshCircleOutline,
 } from "@vicons/ionicons5";
 import Media from "@/stores/media";
+import SvgGather from "@/assets/icon/gather";
 
 interface Props {
   canvas?: _Canvas;
@@ -19,7 +20,10 @@ interface Props {
   marks: Record<string, string>;
   min?: number;
   max?: number;
+  step?: number;
   disabled?: boolean;
+  reverse?: boolean;
+  Tips?: () => void;
 }
 const props = withDefaults(defineProps<Props>(), {
   min: 0,
@@ -66,6 +70,16 @@ onBeforeUnmount(() => {
   <div :class="['oscillator', disabled && 'disabled']">
     <slot></slot>
     <NButton
+      v-if="Tips"
+      quaternary
+      circle
+      type="success"
+      style="font-size: 24px"
+      @click="Tips"
+    >
+      <SvgGather icon="Bulb" />
+    </NButton>
+    <NButton
       quaternary
       circle
       style="font-size: 24px"
@@ -89,7 +103,7 @@ onBeforeUnmount(() => {
           emit('change');
         }
       "
-      :="{ value, marks, min, max }"
+      :="{ value, marks, min, max, step, reverse }"
       :vertical="!Media.isMobileStyle"
     />
   </div>

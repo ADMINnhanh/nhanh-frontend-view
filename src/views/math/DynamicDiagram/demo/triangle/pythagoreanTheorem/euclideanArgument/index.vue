@@ -48,17 +48,8 @@ onMounted(() => {
       :marks="{ 0: '∠ABC 0°', 90: '∠ABC 90°' }"
       :max="90"
       :disabled="isPlay"
-    >
-      <NButton
-        quaternary
-        circle
-        type="success"
-        style="font-size: 24px"
-        @click="Tips"
-      >
-        <SvgGather icon="Bulb" />
-      </NButton>
-    </Oscillator>
+      :Tips="Tips"
+    />
     <canvas :id="id"></canvas>
   </Card>
 </template>
