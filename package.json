@@ -26,7 +26,7 @@
     "pinia": "^2.1.7",
     "vite-plugin-mkcert": "^1.17.8",
     "vue": "^3.4.29",
-    "vue-router": "^4.3.3"
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
