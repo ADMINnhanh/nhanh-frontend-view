@@ -38,17 +38,24 @@ const e_text = new _Canvas.Text({
   ...text_config("E", 15, -15),
 });
 const f_text = new _Canvas.Text({
-  value: b_text.value,
+  value: [
+    c_text.value![0] - e_text.value![0] + d_text.value![0],
+    b_text.value![1],
+  ],
   ...text_config("F", 0, 15),
 });
-const texts = [a_text, b_text, c_text, d_text, e_text, f_text];
+const g_text = new _Canvas.Text({
+  value: b_text.value,
+  ...text_config("G", 0, 15),
+});
+const texts = [a_text, b_text, c_text, d_text, e_text, f_text, g_text];
 
 const t = new _Canvas.Polygon({
   value: ABC.join(a_text, b_text, c_text),
   isInteractive: false,
 });
 const t_d = new _Canvas.Polygon({
-  value: ABC.join(d_text, e_text, f_text),
+  value: ABC.join(d_text, e_text, g_text),
   isInteractive: false,
   style: { fill: "#C73A64" + 80 },
 });
@@ -66,7 +73,11 @@ const l_dc = new _Canvas.Line({
   value: ABC.join(d_text, c_text),
   ...line_config("#C73A64", true, 2),
 });
-const lines = [l_eb, l_dc];
+const l_df = new _Canvas.Line({
+  value: ABC.join(d_text, f_text),
+  ...line_config("#C73A64", true, 2),
+});
+const lines = [l_eb, l_dc, l_df];
 
 export const overlays = [...polygons, ...lines, ...texts];
 
@@ -75,9 +86,9 @@ let angle = 0;
 export function Update() {
   const percentage = angle / 180;
   const x = percentage * c_text.value![0] + (1 - percentage) * b_text.value![0];
-  f_text.value![0] = x;
-  f_text.value = [...f_text.value!];
-  t_d.value = ABC.join(d_text, e_text, f_text);
+  g_text.value![0] = x;
+  g_text.value = [...g_text.value!];
+  t_d.value = ABC.join(d_text, e_text, g_text);
 }
 
 const oscillator = _Animate_CreateOscillator(0, 180, 180, (v) => {

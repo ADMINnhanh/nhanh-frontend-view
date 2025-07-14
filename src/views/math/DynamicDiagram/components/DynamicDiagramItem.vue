@@ -16,11 +16,7 @@ const collection = props.collection || dynamicDiagramCollection;
       <NRadioGroup v-model:value="dynamicDiagram">
         <template v-for="child in item.children" :key="child.title">
           <DynamicDiagramItem v-if="child.children" :collection="[child]" />
-          <NRadio
-            v-else
-            :value="child.title"
-            :disabled="child.title.includes('待完善')"
-          >
+          <NRadio v-else :value="child.title">
             {{ child.title }}
           </NRadio>
         </template>
