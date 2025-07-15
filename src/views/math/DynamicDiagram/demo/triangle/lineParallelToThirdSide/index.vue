@@ -4,7 +4,7 @@ import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, Update, Transform, Y } from ".";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
-import { NText, NP } from "naive-ui";
+import { NText, NP, NBlockquote } from "naive-ui";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
 
 let myCanvas = shallowRef<_Canvas>();
@@ -34,9 +34,9 @@ onMounted(() => {
       <NP>
         <NText strong> 三角形 ADE 与三角形 ABC 对应边比例相等 </NText>
       </NP>
-      <NP>
+      <NBlockquote>
         <NText strong depth="3"> 注：做辅助线 DF 平行于 AC </NText>
-      </NP>
+      </NBlockquote>
     </template>
 
     <Oscillator
