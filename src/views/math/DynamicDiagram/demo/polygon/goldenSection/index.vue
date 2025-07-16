@@ -12,7 +12,7 @@ const math = ref();
 onMounted(() => {
   window.katex.render(
     `\\begin{aligned}
-   &\\frac{AP}{AC} = \\frac{PC}{AP} \\approx 0.61803;
+   &\\frac{AP}{AB} = \\frac{PB}{AP} \\approx 0.61803;
   \\end{aligned}`,
     math.value
   );
