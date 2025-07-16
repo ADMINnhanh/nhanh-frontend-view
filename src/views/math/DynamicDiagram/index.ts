@@ -59,7 +59,12 @@ export const dynamicDiagramCollection: Collection = [
   },
   {
     title: "多边形",
-    children: [],
+    children: [
+      {
+        title: "黄金分割",
+        component: () => import("./demo/polygon/goldenSection/index.vue"),
+      },
+    ],
   },
 ] as const;
 export const dynamicDiagram = useLocalStorage(
