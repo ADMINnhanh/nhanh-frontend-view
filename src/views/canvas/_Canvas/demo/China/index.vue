@@ -45,16 +45,21 @@ function UpdateHeatMapPoint(value: boolean) {
 }
 
 onMounted(() => {
+  const dom = document.getElementById(id);
+  const rect = dom!.getBoundingClientRect();
+
+  const scale1 = Math.min((rect.width - 200) / 350, (rect.height - 200) / 350);
+  const scale = 1 + Math.floor(((scale1 - 1) * 0.2) / 0.02) * 0.02;
+
+  const left = rect.width / 2 - 600;
+  const bottom = rect.height / 2 - 175;
+
   myCanvas.value = new _Canvas({
     id,
     axisConfig: { y: -1, count: 2000000 },
-    defaultCenter: { bottom: 100 },
-    defaultScale: 1.16,
+    defaultCenter: { left, bottom },
+    defaultScale: scale,
     theme: Settings.value.theme,
-  });
-  myCanvas.value.setDefaultCenter({
-    left: -(580 - myCanvas.value.rect.width / 2),
-    bottom: Number((myCanvas.value.rect.height / 4.6).toFixed(0)),
   });
 
   myCanvas.value.addLayer([layer, attractionLayer]);
@@ -133,5 +138,3 @@ defineExpose({ myCanvas });
   }
 }
 </style>
-
-<!-- <template></template> -->
