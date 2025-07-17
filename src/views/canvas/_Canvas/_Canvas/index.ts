@@ -19,6 +19,10 @@ type ConstructorOption = ConstructorParameters<typeof QuickMethod>[0] & {
   axisShow?: Parameters<_Canvas["toggleAxis"]>[0];
 };
 
+function FlattenAll<T>(arr: any): T[] {
+  return [arr].flat(Infinity) as T[];
+}
+
 /** 你好啊你好的画布工具 */
 export default class _Canvas extends QuickMethod {
   /** 图层群组 */
@@ -84,14 +88,14 @@ export default class _Canvas extends QuickMethod {
       layer_custom,
     ]);
 
-    this.setLayerGroups(layerGroup);
+    this.setLayerGroup(layerGroup);
   }
   /** 获取图层群组 集合 */
   gteLayerGroups(key = "默认图层群组") {
     return this.layerGroups.get(key);
   }
   /** 设置图层群组 */
-  setLayerGroups(layerGroup: LayerGroup) {
+  setLayerGroup(layerGroup: LayerGroup) {
     if (layerGroup instanceof LayerGroup) {
       this.layerGroups.set(layerGroup.name, layerGroup);
       layerGroup.setNotifyReload(() => this.redrawOnce());
@@ -100,7 +104,7 @@ export default class _Canvas extends QuickMethod {
     }
   }
   /** 移除图层群组 */
-  removeLayerGroups(layerGroup: LayerGroup | LayerGroup[]) {
+  removeLayerGroup(layerGroup: LayerGroup) {
     if (layerGroup instanceof LayerGroup) {
       this.layerGroups.delete(layerGroup.name);
       layerGroup.setNotifyReload();
@@ -110,16 +114,16 @@ export default class _Canvas extends QuickMethod {
     }
   }
   /** 添加图层 */
-  addLayer(layers: Layer | Layer[]) {
+  addLayer(layers: DeepArray<Layer>) {
     const layerGroup = this.layerGroups.get("默认图层群组");
     if (!layerGroup) return;
-    layerGroup.addLayer([layers].flat());
+    layerGroup.addLayer(FlattenAll(layers));
   }
   /** 移除图层 */
-  removeLayer(layers: Layer | Layer[]) {
+  removeLayer(layers: DeepArray<Layer>) {
     const layerGroup = this.layerGroups.get("默认图层群组");
     if (!layerGroup) return;
-    layerGroup.removeLayer([layers].flat());
+    layerGroup.removeLayer(FlattenAll(layers));
   }
   /** 添加覆盖物 */
   addOverlay(overlays: DeepArray<OverlayType>) {
@@ -131,11 +135,7 @@ export default class _Canvas extends QuickMethod {
       overlays_custom,
     } = this.getDefaultOverlayGroup() || {};
 
-    function flattenAll<T>(arr: T[]): OverlayType[] {
-      return arr.flat(Infinity) as OverlayType[];
-    }
-
-    flattenAll([overlays]).forEach((overlay) => {
+    FlattenAll<OverlayType>(overlays).forEach((overlay) => {
       if (overlay instanceof Text) overlays_text?.addOverlays(overlay);
       else if (overlay instanceof Point) overlays_point?.addOverlays(overlay);
       else if (
@@ -150,7 +150,7 @@ export default class _Canvas extends QuickMethod {
     });
   }
   /** 移除覆盖物 */
-  removeOverlay(overlays: OverlayType | OverlayType[]) {
+  removeOverlay(overlays: DeepArray<OverlayType>) {
     const {
       overlays_text,
       overlays_point,
@@ -158,7 +158,7 @@ export default class _Canvas extends QuickMethod {
       overlays_polygon,
       overlays_custom,
     } = this.getDefaultOverlayGroup() || {};
-    [overlays].flat().forEach((overlay) => {
+    FlattenAll<OverlayType>(overlays).forEach((overlay) => {
       if (overlay instanceof Text) overlays_text?.removeOverlays(overlay);
       else if (overlay instanceof Point)
         overlays_point?.removeOverlays(overlay);
