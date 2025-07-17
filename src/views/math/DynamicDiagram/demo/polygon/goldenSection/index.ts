@@ -6,12 +6,9 @@ import {
   _Math_CalculateDistance2D,
   _Utility_GenerateUUID,
 } from "nhanh-pure-function";
-import { ABC, MyMath } from "@/views/math/DynamicDiagram/tool";
-import Media from "@/stores/media";
 
 export const id = _Utility_GenerateUUID();
-
-const GOLDEN_RATIO = 0.61803;
+export const GOLDEN_RATIO = 0.61803;
 
 function GetGoldenRatioX(a: [number, number], b: [number, number]) {
   return a[0] + (b[0] - a[0]) * GOLDEN_RATIO;
