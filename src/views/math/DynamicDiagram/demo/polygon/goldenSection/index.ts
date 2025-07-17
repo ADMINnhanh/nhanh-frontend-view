@@ -36,6 +36,7 @@ const t_b = new _Canvas.Text(text_config("B", [4, -5]));
 const t_p = new _Canvas.Text(
   text_config("P", GetGoldenRatio(t_a.value!, t_b.value!))
 );
+
 const texts = [t_a, t_b, t_p];
 
 const l = new _Canvas.Line({
@@ -128,4 +129,16 @@ for (let i = 0; i < 16; i++) {
   arcs.push(arc);
 }
 
-export const overlays = [l, m, ...texts, ...points, ...ms, ...arcs];
+const names: (typeof t_a)[] = [];
+"斐波那契螺旋线/黄金螺旋线".split("").forEach((v, i) => {
+  const name = new _Canvas.Text({
+    ...text_config(v, [m.value![1][0], m.value![0][1]]),
+    offset: {
+      x: 40,
+      y: 10 + i * 25,
+    },
+  });
+  names.push(name);
+});
+
+export const overlays = [l, m, texts, points, ms, arcs, names];

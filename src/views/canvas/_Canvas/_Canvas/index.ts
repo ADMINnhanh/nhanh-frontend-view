@@ -122,7 +122,7 @@ export default class _Canvas extends QuickMethod {
     layerGroup.removeLayer([layers].flat());
   }
   /** 添加覆盖物 */
-  addOverlay(overlays: OverlayType | OverlayType[]) {
+  addOverlay(overlays: DeepArray<OverlayType>) {
     const {
       overlays_text,
       overlays_point,
@@ -130,7 +130,12 @@ export default class _Canvas extends QuickMethod {
       overlays_polygon,
       overlays_custom,
     } = this.getDefaultOverlayGroup() || {};
-    [overlays].flat().forEach((overlay) => {
+
+    function flattenAll<T>(arr: T[]): OverlayType[] {
+      return arr.flat(Infinity) as OverlayType[];
+    }
+
+    flattenAll([overlays]).forEach((overlay) => {
       if (overlay instanceof Text) overlays_text?.addOverlays(overlay);
       else if (overlay instanceof Point) overlays_point?.addOverlays(overlay);
       else if (

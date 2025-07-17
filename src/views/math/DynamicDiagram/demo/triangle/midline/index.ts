@@ -108,7 +108,7 @@ const lines = [
   l_de,
 ];
 
-export const overlays = [...polygons, ...lines, ...texts];
+export const overlays = [polygons, lines, texts];
 
 let angle = 0;
 

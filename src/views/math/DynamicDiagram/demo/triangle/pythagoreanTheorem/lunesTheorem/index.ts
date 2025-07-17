@@ -101,7 +101,7 @@ const arc = new _Canvas.Custom({
   },
 });
 
-export const overlays = [t, tra, ...text, arc];
+export const overlays = [t, tra, text, arc];
 
 export function Update() {
   const j = (J_ABC.value * Math.PI) / 180;

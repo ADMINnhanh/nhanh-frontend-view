@@ -89,7 +89,7 @@ const l_ce = new _Canvas.Line({
 });
 const lines = [l_de, l_eb, l_dc, l_df, l_bd, l_ce];
 
-export const overlays = [...polygons, ...lines, ...texts];
+export const overlays = [polygons, lines, texts];
 
 export const Y = ref(0);
 let percentage = 0,

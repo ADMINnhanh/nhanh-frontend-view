@@ -112,7 +112,7 @@ const bg_line = new _Canvas.Line(line_config());
 const hc_line = new _Canvas.Line(line_config());
 const line = [ah_line, ad_line, ag_line, bg_line, hc_line];
 
-export const overlays = [...text, ...line, ...polygon];
+export const overlays = [text, line, polygon];
 
 const abc = new ABC(t);
 

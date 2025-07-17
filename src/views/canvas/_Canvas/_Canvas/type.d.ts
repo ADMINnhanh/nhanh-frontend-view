@@ -129,3 +129,5 @@ type StyleType = Record<KnownStyleKeys, StyleItemType> &
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends object ? DeepPartial<T[P]> : T[P];
 };
+// 递归定义任意层级的OverlayType嵌套数组
+type DeepArray<T> = T | T[] | DeepArray<T>[];
