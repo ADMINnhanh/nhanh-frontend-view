@@ -148,6 +148,16 @@ export default abstract class Overlay<
     this.addEventListener("hover", this.defaultHover);
   }
 
+  /** 内部使用的属性映射表，请勿修改 */
+  private readonly publicToPrivateKeyMap = {
+    offset: "_offset",
+    position: "_position",
+    value: "_value",
+    dynamicPosition: "_dynamicPosition",
+    zIndex: "_zIndex",
+    style: "_style",
+  };
+
   /** 请勿在实体对象中调用此方法，此方法仅用于类内部无副作用更新 （请勿使用！） */
   internalUpdate(
     option: {
@@ -160,12 +170,10 @@ export default abstract class Overlay<
     },
     updateValueScope?: boolean
   ) {
-    option = _Utility_Clone(option) as any;
-    for (const key in option) {
-      if (Object.prototype.hasOwnProperty.call(option, key)) {
-        this[("_" + key) as never] = option[key as never];
-      }
-    }
+    Object.keys(option).forEach((key) => {
+      const privateKey = this.publicToPrivateKeyMap[key as never];
+      if (privateKey) this[privateKey] = option[key as never];
+    });
 
     updateValueScope && this.updateValueScope();
   }

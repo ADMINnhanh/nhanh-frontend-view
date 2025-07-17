@@ -95,7 +95,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
 
-    const isPoint = ((allow) => {
+    const isPoint = (allow: boolean) => {
       if (!allow) return false;
       let point_hover = false;
       const handlePoints = [...this.handlePoints].sort(
@@ -110,9 +110,9 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
         }
       });
       return point_hover;
-    })(this.isClick && this.isHandlePointsVisible);
+    };
 
-    return isLine || isPoint;
+    return isLine || isPoint(this.isClick && this.isShowHandlePoint);
   }
 
   /** 更新动态圆角半径 */
@@ -271,9 +271,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
         this.updateDynamicRadius();
         const dynamicPosition = mainCanvas!.transformPosition(position!);
         this.internalUpdate({ dynamicPosition });
-        this.handlePoints.forEach((point, index) => {
-          point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
-        });
+        this.updateHandlePointsPosition();
       }
 
       if (this.isRect) return [this.drawRect, this];

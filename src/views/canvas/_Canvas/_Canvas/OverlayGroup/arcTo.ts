@@ -167,7 +167,7 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
 
-    const isPoint = ((allow) => {
+    const isPoint = (allow: boolean) => {
       if (!allow) return false;
       let point_hover = false;
       this.handlePointsArr.forEach((point) => {
@@ -179,9 +179,9 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
         }
       });
       return point_hover;
-    })(this.isClick && this.isHandlePointsVisible);
+    };
 
-    return isLine || isPoint;
+    return isLine || isPoint(this.isClick && this.isShowHandlePoint);
   }
 
   get cursorStyle() {
@@ -246,13 +246,6 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
     this.handlePoints = { radius, other };
   }
 
-  /** 更新额外范围 */
-  private updateExtraScope() {
-    const { mainCanvas, radiusValue } = this;
-    if (mainCanvas) {
-      if (radiusValue == 0) this.setExtraScopeByValue();
-    }
-  }
   protected updateBaseData() {
     if (!this.mainCanvas) return;
 
@@ -289,7 +282,7 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    const { dynamicPosition, mainCanvas, extraOffset, radiusValue } = this;
+    const { dynamicPosition, mainCanvas, radiusValue } = this;
     if (!mainCanvas) return;
   }
   getDraw(): [(ctx: CanvasRenderingContext2D) => void, OverlayType] | void {

@@ -39,6 +39,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
     if (this._isHandlePointsVisible !== value) {
       this._isHandlePointsVisible = value;
       if (this.isShowHandlePoint != value) this.notifyReload?.();
+      this.updateHandlePoints();
     }
   }
 
@@ -250,9 +251,10 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   };
 
   /** 更新控制点 */
-  updateHandlePoints() {
-    let { value, position, dynamicPosition } = this;
-    if (!dynamicPosition) return;
+  protected updateHandlePoints() {
+    if (!this.isHandlePointsVisible) return;
+    let { value, position, finalDynamicPosition } = this;
+    if (!finalDynamicPosition) return;
 
     value?.forEach((_, index) => {
       if (!this.handlePoints[index]) {
@@ -268,12 +270,21 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         {
           value: value![index],
           position: position![index],
-          dynamicPosition: dynamicPosition![index],
+          dynamicPosition: finalDynamicPosition![index],
         },
         true
       );
     });
     this.handlePoints.length = value!.length;
+  }
+  /** 更新控制点位置 */
+  protected updateHandlePointsPosition() {
+    if (this.isHandlePointsVisible) {
+      const dynamicPosition = this.finalDynamicPosition;
+      this.handlePoints.forEach((point, index) => {
+        point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
+      });
+    }
   }
 }
 

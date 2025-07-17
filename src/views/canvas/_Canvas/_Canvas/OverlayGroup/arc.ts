@@ -261,7 +261,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
 
-    const isPoint = ((allow) => {
+    const isPoint = (allow: boolean) => {
       if (!allow) return false;
       let point_hover = false;
 
@@ -274,9 +274,9 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
         }
       });
       return point_hover;
-    })(this.isClick && this.isHandlePointsVisible);
+    };
 
-    return isLine || isPoint;
+    return isLine || isPoint(this.isClick && this.isShowHandlePoint);
   }
 
   get cursorStyle() {

@@ -59,7 +59,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
   isPointInAnywhere(x: number, y: number): boolean {
     const isLine = super.isPointInAnywhere(x, y);
 
-    const isPoint = ((allow) => {
+    const isPoint = (allow: boolean) => {
       if (!allow) return false;
       let point_hover = false;
       const handlePoints = [...this.handlePoints].sort(
@@ -74,9 +74,12 @@ export default class Line extends GeometricBoundary<LineStyleType> {
         }
       });
       return point_hover;
-    })((this.isClick || !!this.isInfinite) && this.isHandlePointsVisible);
+    };
 
-    return isLine || isPoint;
+    return (
+      isLine ||
+      isPoint((this.isClick || !!this.isInfinite) && this.isShowHandlePoint)
+    );
   }
 
   protected get isWithinRange() {
@@ -104,9 +107,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     const dynamicPosition = mainCanvas!.transformPosition(position!);
     this.internalUpdate({ dynamicPosition });
-    this.handlePoints.forEach((point, index) => {
-      point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
-    });
+    this.updateHandlePointsPosition();
   }
 
   protected setOverlayStyles(ctx?: CanvasRenderingContext2D) {
