@@ -9,9 +9,11 @@ import {
   DirectionalLight,
   MeshPhongMaterial,
 } from "three";
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 
 const id = _Utility_GenerateUUID();
+
+// https://github.com/puxiao/threejs-tutorial/blob/main/05%20Three.js%E5%9F%BA%E7%A1%80%E4%B9%8B%E5%9B%BE%E5%85%83.md
 
 function Init() {
   const canvas = document.getElementById(id)!;
@@ -36,12 +38,30 @@ function Init() {
   //创建材质
   //我们需要让立方体能够反射光，所以不使用MeshBasicMaterial，而是改用MeshPhongMaterial
   //const material = new MeshBasicMaterial({ color: 0x44aa88 })
-  const material = new MeshPhongMaterial({ color: 0x44aa88 });
+  // const material = new MeshPhongMaterial({ color: 0x44aa88 });
 
-  //创建网格
-  const cube = new Mesh(geometry, material);
-  //将网格添加到场景中
-  scene.add(cube);
+  // //创建网格
+  // const cube = new Mesh(geometry, material);
+  // //将网格添加到场景中
+  // scene.add(cube);
+
+  //创建 3 个纹理
+  const material1 = new MeshPhongMaterial({ color: 0x44aa88 });
+  const material2 = new MeshPhongMaterial({ color: 0xc50d0d });
+  const material3 = new MeshPhongMaterial({ color: 0x39b20a });
+
+  //创建 3 个网格
+  const cube1 = new Mesh(geometry, material1);
+  cube1.position.x = -2;
+
+  const cube2 = new Mesh(geometry, material2);
+  cube2.position.x = 0;
+
+  const cube3 = new Mesh(geometry, material3);
+  cube3.position.x = 2;
+
+  const cubes = [cube1, cube2, cube3];
+  scene.add(...cubes); //将网格添加到场景中
 
   //创建光源
   const light = new DirectionalLight(0xffffff, 1);
@@ -57,15 +77,36 @@ function Init() {
   //渲染器根据场景、透视镜头来渲染画面，并将该画面内容填充到 DOM 的 canvas 元素中
   //renderer.render(scene, camera)//由于后面我们添加了自动渲染渲染动画，所以此处的渲染可以注释掉
 
+  let stop = false;
   //添加自动旋转渲染动画
   const render = (time: number) => {
     time = time * 0.001; //原本 time 为毫秒，我们这里对 time 进行转化，修改成 秒，以便于我们动画旋转角度的递增
-    cube.rotation.x = time;
-    cube.rotation.y = time;
+
+    cubes.forEach((cube) => {
+      cube.rotation.x = time;
+      cube.rotation.y = time;
+    });
     renderer.render(scene, camera);
-    window.requestAnimationFrame(render);
+
+    if (!stop) window.requestAnimationFrame(render);
   };
   window.requestAnimationFrame(render);
+
+  const handleResize = () => {
+    const canvas = renderer.domElement;
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+  };
+
+  //改为使用 ResizeObserver 来监控(观察)尺寸变化
+  const resizeObserver = new ResizeObserver(handleResize);
+  resizeObserver.observe(canvas);
+  onUnmounted(() => {
+    stop = true;
+    resizeObserver.disconnect();
+  });
 }
 
 onMounted(() => {
