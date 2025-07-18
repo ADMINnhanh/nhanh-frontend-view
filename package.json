@@ -12,6 +12,7 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
+    "@types/three": "^0.178.1",
     "@vueuse/components": "^13.3.0",
     "@vueuse/core": "^11.1.0",
     "axios": "^1.7.2",
@@ -24,6 +25,7 @@
     "nhanh-pure-function": "^3.0.0",
     "peerjs": "^1.5.4",
     "pinia": "^2.1.7",
+    "three": "^0.178.0",
     "vite-plugin-mkcert": "^1.17.8",
     "vue": "^3.4.29",
     "vue-router": "^4.5.1"

@@ -64,15 +64,15 @@ const canvas: CustomRouteRecord = {
       component: () => import("@/views/canvas/YOLOFormatAnnotator/index.vue"),
     },
     {
-      path: "BasicWebGL",
-      name: "BasicWebGL",
+      path: "Threejs",
+      name: "Threejs",
       meta: {
         name: {
-          zhCN: "初识 WebGL",
-          enUS: "Basic WebGL",
+          zhCN: "Threejs",
+          enUS: "Threejs",
         },
       },
-      component: () => import("@/views/canvas/BasicWebGL/index.vue"),
+      component: () => import("@/views/canvas/Threejs/index.vue"),
     },
   ],
 };
