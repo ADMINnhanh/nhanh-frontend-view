@@ -312,8 +312,10 @@ export default abstract class Overlay<
     if (!mainCanvas || !valueScope) return;
 
     if (uselastFact) {
-      const { xV, yV } = mainCanvas.getAxisValueByPoint(offset.x, offset.y);
-
+      const { x, y } = mainCanvas.axisConfig;
+      let { xV, yV } = mainCanvas.getAxisValueByPoint(offset.x, offset.y);
+      xV *= x;
+      yV *= y;
       const offsetXV = xV - offsetValue.xV;
       const offsetYV = yV - offsetValue.yV;
 

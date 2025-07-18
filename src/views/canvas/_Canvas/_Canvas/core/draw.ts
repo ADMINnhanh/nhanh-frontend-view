@@ -188,23 +188,47 @@ export default class Draw extends Style {
   }
 
   /** 根据坐标查找覆盖物 */
-  protected findOverlayByPoint(x: number, y: number) {
-    const oldx = x,
-      oldy = y;
+  protected findOverlayByPoint(event: MouseEvent) {
+    const { offsetX, offsetY, clientX, clientY } = event;
 
-    x += this.rect.left;
-    y += this.rect.top;
-
+    const { x, y } = this.axisConfig;
     const mouseMin = this.getMousePositionOnAxis({
-      clientX: x - 10,
-      clientY: y - 10,
+      clientX: clientX - 10 * x,
+      clientY: clientY - 10 * y,
     })!;
     const mouseMax = this.getMousePositionOnAxis({
-      clientX: x + 10,
-      clientY: y + 10,
+      clientX: clientX + 10 * x,
+      clientY: clientY + 10 * y,
     })!;
     const mouseVMin = this.getAxisValueByPoint(mouseMin.x, mouseMin.y);
     const mouseVMax = this.getAxisValueByPoint(mouseMax.x, mouseMax.y);
+
+    // if (window.yyp) {
+    //   const arr = [...this.currentDrawOverlays]
+    //     /** 覆盖物可以拖拽的情况下优先触发处于 isClick 状态的覆盖物 */
+    //     .sort((a, b) => {
+    //       if (a.isDraggable && a.isClick) console.log(a);
+    //       if (b.isDraggable && b.isClick) console.log(b);
+
+    //       return (
+    //         (a.isDraggable && a.isClick ? 0 : 1) -
+    //         (b.isDraggable && b.isClick ? 0 : 1)
+    //       );
+    //     });
+    //   arr.forEach((overlay) => {
+    //     const valueScope = overlay.valueScope;
+    //     if (valueScope && overlay instanceof Text) {
+    //       console.log(overlay, valueScope, mouseVMax, mouseVMin);
+    //       console.log(
+    //         valueScope.maxX < mouseVMin.xV,
+    //         valueScope.minX > mouseVMax.xV,
+    //         valueScope.maxY < mouseVMin.yV,
+    //         valueScope.minY > mouseVMax.yV
+    //       );
+    //     }
+    //   });
+    //   console.log(arr);
+    // }
 
     return (
       [...this.currentDrawOverlays]
@@ -226,7 +250,7 @@ export default class Draw extends Style {
               return false;
           }
 
-          return overlay.isPointInAnywhere(oldx, oldy);
+          return overlay.isPointInAnywhere(offsetX, offsetY);
         })
     );
   }

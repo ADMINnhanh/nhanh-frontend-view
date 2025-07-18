@@ -57,8 +57,6 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     return false;
   }
   isPointInAnywhere(x: number, y: number): boolean {
-    const isLine = super.isPointInAnywhere(x, y);
-
     const isPoint = (allow: boolean) => {
       if (!allow) return false;
       let point_hover = false;
@@ -78,7 +76,7 @@ export default class Line extends GeometricBoundary<LineStyleType> {
 
     return (
       isPoint((this.isClick || !!this.isInfinite) && this.isShowHandlePoint) ||
-      isLine
+      super.isPointInAnywhere(x, y)
     );
   }
 

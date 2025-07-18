@@ -33,6 +33,7 @@ const polygon_rect = new _Canvas.Polygon({
   isDraggable: true,
   borderRadius: 15,
 });
+
 const polygon_arr = [polygon_value, polygon_position, polygon_rect];
 
 onMounted(() => {

@@ -93,8 +93,6 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
     return false;
   }
   isPointInAnywhere(x: number, y: number): boolean {
-    const isLine = super.isPointInAnywhere(x, y);
-
     const isPoint = (allow: boolean) => {
       if (!allow) return false;
       let point_hover = false;
@@ -112,7 +110,10 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       return point_hover;
     };
 
-    return isPoint(this.isClick && this.isShowHandlePoint) || isLine;
+    return (
+      isPoint(this.isClick && this.isShowHandlePoint) ||
+      super.isPointInAnywhere(x, y)
+    );
   }
 
   /** 更新动态圆角半径 */

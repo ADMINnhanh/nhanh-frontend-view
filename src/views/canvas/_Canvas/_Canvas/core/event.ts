@@ -71,7 +71,7 @@ export default class Event extends Draw {
 
     if (this.lockNotifyClick) return (this.lockNotifyClick = false);
 
-    const clickOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    const clickOverlay = this.findOverlayByPoint(event);
 
     if (this.lastClickedOverlay != clickOverlay)
       this.lastClickedOverlay?.notifyClick(false, event);
@@ -88,10 +88,7 @@ export default class Event extends Draw {
     if (!this.isContextmenuable) return;
 
     event.preventDefault();
-    const contextmenuOverlay = this.findOverlayByPoint(
-      event.offsetX,
-      event.offsetY
-    );
+    const contextmenuOverlay = this.findOverlayByPoint(event);
 
     if (this.lastContextmenuOverlay != contextmenuOverlay)
       this.lastContextmenuOverlay?.notifyContextmenu(false, event);
@@ -228,7 +225,7 @@ export default class Event extends Draw {
 
     const step = event.deltaY < 0 ? delta : -delta;
 
-    const overlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    const overlay = this.findOverlayByPoint(event);
     overlay?.notifyWheel(step, event);
 
     this.notifyWheel(step, event);
@@ -253,7 +250,7 @@ export default class Event extends Draw {
     const { clientX, clientY } = event;
     this.mouseLastPosition = { x: clientX, y: clientY };
 
-    const downOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    const downOverlay = this.findOverlayByPoint(event);
 
     if (this.lastDownOverlay != downOverlay) {
       this.lastDownOverlay?.notifyDown(false, event);
@@ -337,7 +334,7 @@ export default class Event extends Draw {
 
     if (event.target != this.canvas) return;
 
-    const hoverOverlay = this.findOverlayByPoint(event.offsetX, event.offsetY);
+    const hoverOverlay = this.findOverlayByPoint(event);
 
     this.updateHoverState(hoverOverlay, event);
 
