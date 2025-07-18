@@ -117,7 +117,6 @@ defineExpose({ myCanvas });
 
 <style scoped lang="less">
 .my-canvas {
-  --height: calc(var(--router-view-height) - 2px - 28px - 68px - 20px);
   display: flex;
   flex-direction: column;
   .canvas-container {

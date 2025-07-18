@@ -206,6 +206,10 @@ onUnmounted(() => {
     .independent-space {
       width: 100%;
       margin-bottom: 8px;
+      --height: calc(var(--router-view-height) - 2px - 28px - 68px - 20px);
+      .n-skeleton {
+        height: calc(var(--router-view-height) - 28px);
+      }
     }
     :deep(> div) {
       width: calc(50% - 7px);
