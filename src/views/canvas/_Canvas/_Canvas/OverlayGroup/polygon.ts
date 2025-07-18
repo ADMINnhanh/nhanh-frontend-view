@@ -112,7 +112,7 @@ export default class Polygon extends GeometricBoundary<PolygonStyleType> {
       return point_hover;
     };
 
-    return isLine || isPoint(this.isClick && this.isShowHandlePoint);
+    return isPoint(this.isClick && this.isShowHandlePoint) || isLine;
   }
 
   /** 更新动态圆角半径 */

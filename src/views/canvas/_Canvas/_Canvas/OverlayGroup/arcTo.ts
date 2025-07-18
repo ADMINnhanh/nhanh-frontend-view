@@ -181,7 +181,7 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
       return point_hover;
     };
 
-    return isLine || isPoint(this.isClick && this.isShowHandlePoint);
+    return isPoint(this.isClick && this.isShowHandlePoint) || isLine;
   }
 
   get cursorStyle() {
@@ -216,8 +216,8 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
 
   /** 更新控制点 */
   private updateHandlePoints() {
-    let { value, position, dynamicPosition } = this;
-    if (!dynamicPosition) return;
+    let { value, position, dynamicPosition, isHandlePointsVisible } = this;
+    if (!dynamicPosition || !isHandlePointsVisible) return;
 
     const getPoint = () =>
       new Point({
@@ -292,18 +292,21 @@ export default class ArcTo extends Overlay<ArcToStyleType, [number, number][]> {
 
         const dynamicPosition = this.dynamicPosition!;
         const newDynamicPosition = mainCanvas!.transformPosition(position!);
-        if (mainCanvas?.isScaleUpdated) {
-          this.updateHandlePoints();
-        } else {
-          const offsetx = newDynamicPosition[0][0] - dynamicPosition[0][0];
-          const offsety = newDynamicPosition[0][1] - dynamicPosition[0][1];
-          this.handlePointsArr.forEach((point) => {
-            const x = point.dynamicPosition![0] + offsetx;
-            const y = point.dynamicPosition![1] + offsety;
-            point.internalUpdate({ dynamicPosition: [x, y] });
-          });
-        }
         this.internalUpdate({ dynamicPosition: newDynamicPosition });
+
+        if (this.isHandlePointsVisible) {
+          if (mainCanvas?.isScaleUpdated) {
+            this.updateHandlePoints();
+          } else {
+            const offsetx = newDynamicPosition[0][0] - dynamicPosition[0][0];
+            const offsety = newDynamicPosition[0][1] - dynamicPosition[0][1];
+            this.handlePointsArr.forEach((point) => {
+              const x = point.dynamicPosition![0] + offsetx;
+              const y = point.dynamicPosition![1] + offsety;
+              point.internalUpdate({ dynamicPosition: [x, y] });
+            });
+          }
+        }
       }
       return [this.draw, this];
     }

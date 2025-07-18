@@ -144,6 +144,20 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     if (this._isHandlePointsVisible !== value) {
       this._isHandlePointsVisible = value;
       if (this.isShowHandlePoint != value) this.notifyReload?.();
+      this.updateHandlePoints();
+    }
+  }
+
+  /** 偏移量 */
+  get offset() {
+    return super.offset;
+  }
+  set offset(offset: { x: number; y: number }) {
+    super.offset = offset;
+
+    let { isHandlePointsVisible, handlePointsArr } = this;
+    if (isHandlePointsVisible) {
+      handlePointsArr.forEach((p) => p.internalUpdate({ offset }));
     }
   }
 
@@ -276,7 +290,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       return point_hover;
     };
 
-    return isLine || isPoint(this.isClick && this.isShowHandlePoint);
+    return isPoint(this.isClick && this.isShowHandlePoint) || isLine;
   }
 
   get cursorStyle() {
@@ -341,9 +355,11 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
       startAngle,
       endAngle,
       dynamicPosition,
+      isHandlePointsVisible,
+      offset,
     } = this;
 
-    if (!mainCanvas || !dynamicPosition) return;
+    if (!mainCanvas || !dynamicPosition || !isHandlePointsVisible) return;
 
     const [start, end] = _GetArcPoints(
       ...value!,
@@ -357,6 +373,7 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
     const getPoint = (name: string) =>
       new Point({
         name,
+        offset,
         isDraggable: true,
         mainCanvas: this.mainCanvas,
         notifyReload: () => this.notifyReload?.(),
@@ -493,18 +510,20 @@ export default class Arc extends Overlay<ArcStyleType, [number, number]> {
 
         const dynamicPosition = this.dynamicPosition!;
         const newDynamicPosition = mainCanvas!.transformPosition(position!);
-        if (mainCanvas?.isScaleUpdated) {
-          this.updateHandlePoints();
-        } else {
-          const offsetx = newDynamicPosition[0] - dynamicPosition[0];
-          const offsety = newDynamicPosition[1] - dynamicPosition[1];
-          this.handlePointsArr.forEach((point) => {
-            const x = point.dynamicPosition![0] + offsetx;
-            const y = point.dynamicPosition![1] + offsety;
-            point.internalUpdate({ dynamicPosition: [x, y] });
-          });
-        }
         this.internalUpdate({ dynamicPosition: newDynamicPosition });
+        if (this.isHandlePointsVisible) {
+          if (mainCanvas?.isScaleUpdated) {
+            this.updateHandlePoints();
+          } else {
+            const offsetx = newDynamicPosition[0] - dynamicPosition[0];
+            const offsety = newDynamicPosition[1] - dynamicPosition[1];
+            this.handlePointsArr.forEach((point) => {
+              const x = point.dynamicPosition![0] + offsetx;
+              const y = point.dynamicPosition![1] + offsety;
+              point.internalUpdate({ dynamicPosition: [x, y] });
+            });
+          }
+        }
       }
       return [this.draw, this];
     }

@@ -77,8 +77,8 @@ export default class Line extends GeometricBoundary<LineStyleType> {
     };
 
     return (
-      isLine ||
-      isPoint((this.isClick || !!this.isInfinite) && this.isShowHandlePoint)
+      isPoint((this.isClick || !!this.isInfinite) && this.isShowHandlePoint) ||
+      isLine
     );
   }
 

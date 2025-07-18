@@ -52,6 +52,19 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   /** 锁定是否可创建句柄点 */
   private lockedCanCreateOrDeleteHandlePoint = false;
 
+  /** 偏移量 */
+  get offset() {
+    return super.offset;
+  }
+  set offset(offset: { x: number; y: number }) {
+    super.offset = offset;
+
+    let { isHandlePointsVisible, handlePoints } = this;
+    if (isHandlePointsVisible) {
+      handlePoints.forEach((p) => p.internalUpdate({ offset }));
+    }
+  }
+
   constructor(option: ConstructorOption<T>) {
     super(option);
 
@@ -252,15 +265,16 @@ export default abstract class GeometricBoundary<T> extends Overlay<
 
   /** 更新控制点 */
   protected updateHandlePoints() {
-    if (!this.isHandlePointsVisible) return;
-    let { value, position, finalDynamicPosition } = this;
-    if (!finalDynamicPosition) return;
+    let { value, position, dynamicPosition, offset, isHandlePointsVisible } =
+      this;
+    if (!dynamicPosition || !isHandlePointsVisible) return;
 
     value?.forEach((_, index) => {
       if (!this.handlePoints[index]) {
         const point = new Point({
           mainCanvas: this.mainCanvas,
           isDraggable: true,
+          offset,
           notifyReload: () => this.notifyReload?.(),
         });
         this.handlePoints.push(point);
@@ -270,7 +284,7 @@ export default abstract class GeometricBoundary<T> extends Overlay<
         {
           value: value![index],
           position: position![index],
-          dynamicPosition: finalDynamicPosition![index],
+          dynamicPosition: dynamicPosition![index],
         },
         true
       );
@@ -280,9 +294,8 @@ export default abstract class GeometricBoundary<T> extends Overlay<
   /** 更新控制点位置 */
   protected updateHandlePointsPosition() {
     if (this.isHandlePointsVisible) {
-      const dynamicPosition = this.finalDynamicPosition;
       this.handlePoints.forEach((point, index) => {
-        point.internalUpdate({ dynamicPosition: dynamicPosition![index] });
+        point.internalUpdate({ dynamicPosition: this.dynamicPosition![index] });
       });
     }
   }
