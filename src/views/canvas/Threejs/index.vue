@@ -1,5 +1,14 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import MiniCity from "./demo/MiniCity/index.vue";
+</script>
 
-<template></template>
+<template>
+  <MiniCity />
+</template>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+canvas {
+  width: 100%;
+  height: 100%;
+}
+</style>
