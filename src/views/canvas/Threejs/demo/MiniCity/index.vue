@@ -3,10 +3,11 @@ import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { onMounted } from "vue";
+import { onMounted, onUnmounted } from "vue";
 
 const id = _Utility_GenerateUUID();
 
+let play = true;
 function main() {
   const canvas = document.getElementById(id) as HTMLCanvasElement;
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
@@ -132,7 +133,7 @@ function main() {
 
     renderer.render(scene, camera);
 
-    requestAnimationFrame(render);
+    play && requestAnimationFrame(render);
   }
 
   requestAnimationFrame(render);
@@ -140,6 +141,9 @@ function main() {
 
 onMounted(() => {
   main();
+});
+onUnmounted(() => {
+  play = false;
 });
 </script>
 

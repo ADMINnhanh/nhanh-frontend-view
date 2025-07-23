@@ -31,7 +31,7 @@ const dynamicDiagramComponent = computed(() => {
   if (!router.currentRoute.value.path.includes("DynamicDiagram")) return;
 
   router.replace({ params: { target: dynamicDiagram.value } });
-  return defineAsyncComponent(GetComponent(dynamicDiagram.value));
+  return defineAsyncComponent(() => import(GetComponent(dynamicDiagram.value)));
 });
 </script>
 

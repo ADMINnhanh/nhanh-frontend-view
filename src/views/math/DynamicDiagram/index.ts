@@ -3,7 +3,7 @@ import { useLocalStorage } from "@vueuse/core";
 export type Collection = {
   title: string;
   children?: Collection;
-  component?: any;
+  component?: string;
 }[];
 export const dynamicDiagramCollection: Collection = [
   {
@@ -11,7 +11,7 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "三边围墙",
-        component: () => import("./demo/unintuitive/threeWalledEnclosure.vue"),
+        component: "./demo/unintuitive/threeWalledEnclosure.vue",
       },
     ],
   },
@@ -20,38 +20,32 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "垂直平分线",
-        component: () =>
-          import("./demo/triangle/perpendicularBisector/index.vue"),
+        component: "./demo/triangle/perpendicularBisector/index.vue",
       },
       {
         title: "角平分线",
-        component: () => import("./demo/triangle/angleBisector/index.vue"),
+        component: "./demo/triangle/angleBisector/index.vue",
       },
       {
         title: "中位线",
-        component: () => import("./demo/triangle/midline/index.vue"),
+        component: "./demo/triangle/midline/index.vue",
       },
       {
         title: "平行于第三边的线",
-        component: () =>
-          import("./demo/triangle/lineParallelToThirdSide/index.vue"),
+        component: "./demo/triangle/lineParallelToThirdSide/index.vue",
       },
       {
         title: "勾股定理",
         children: [
           {
             title: "欧几里得论证法",
-            component: () =>
-              import(
-                "./demo/triangle/pythagoreanTheorem/euclideanArgument/index.vue"
-              ),
+            component:
+              "./demo/triangle/pythagoreanTheorem/euclideanArgument/index.vue",
           },
           {
             title: "月牙定理",
-            component: () =>
-              import(
-                "./demo/triangle/pythagoreanTheorem/lunesTheorem/index.vue"
-              ),
+            component:
+              "./demo/triangle/pythagoreanTheorem/lunesTheorem/index.vue",
           },
         ],
       },
@@ -62,7 +56,7 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "黄金分割",
-        component: () => import("./demo/polygon/goldenSection/index.vue"),
+        component: "./demo/polygon/goldenSection/index.vue",
       },
     ],
   },
