@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useLocalStorage } from "@vueuse/core";
 import { NTabPane, NTabs } from "naive-ui";
 import { defineAsyncComponent } from "vue";
 
@@ -15,10 +16,12 @@ const demos = [
   ...v,
   component: defineAsyncComponent(() => import(`./demo/${v.path}/index.vue`)),
 }));
+
+const threejs = useLocalStorage("three.js-demo", "迷你城市");
 </script>
 
 <template>
-  <NTabs>
+  <NTabs v-model:value="threejs">
     <NTabPane v-for="item in demos" :name="item.name">
       <component :is="item.component" />
     </NTabPane>

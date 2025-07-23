@@ -3,6 +3,7 @@ import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
 import { onMounted, onUnmounted } from "vue";
 
 const id = _Utility_GenerateUUID();
@@ -30,14 +31,16 @@ function main() {
 
   {
     const loader = new THREE.TextureLoader();
-    const texture = loader.load(
-      "https://threejs.org/manual/examples/resources/images/world.jpg",
-      render
-    );
+    const texture = loader.load("three/world.jpg", render);
     texture.colorSpace = THREE.SRGBColorSpace;
     const geometry = new THREE.SphereGeometry(1, 64, 32);
-    const material = new THREE.MeshBasicMaterial({ map: texture });
+    const material = new THREE.MeshPhongMaterial({ map: texture });
     scene.add(new THREE.Mesh(geometry, material));
+  }
+
+  {
+    const light = new THREE.AmbientLight("#ffffff", 10); // 柔和的白光
+    scene.add(light);
   }
 
   async function loadFile(url: string | URL | Request) {
@@ -85,14 +88,6 @@ function main() {
     const { min, max, data } = file;
     const range = max - min;
 
-    // make one box geometry
-    const boxWidth = 1;
-    const boxHeight = 1;
-    const boxDepth = 1;
-    const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
-    // make it so it scales away from the positive Z axis
-    geometry.applyMatrix4(new THREE.Matrix4().makeTranslation(0, 0, 0.5));
-
     // these helpers will make it easy to position the boxes
     // We can rotate the lon helper on its Y axis to the longitude
     const lonHelper = new THREE.Object3D();
@@ -104,9 +99,16 @@ function main() {
     const positionHelper = new THREE.Object3D();
     positionHelper.position.z = 1;
     latHelper.add(positionHelper);
+    // Used to move the center of the cube so it scales from the position Z axis
+    const originHelper = new THREE.Object3D();
+    originHelper.position.z = 0.5;
+    positionHelper.add(originHelper);
 
-    const lonFudge = Math.PI * 0.5;
-    const latFudge = Math.PI * -0.135;
+    const color = new THREE.Color();
+    const lonFudge = Math.PI * 1.5;
+    const latFudge = Math.PI * -(85 / 90 / 2);
+
+    const geometries = [];
     data.forEach((row, latNdx) => {
       row.forEach((value, lonNdx) => {
         if (value === undefined) {
@@ -114,32 +116,69 @@ function main() {
         }
 
         const amount = (value - min) / range;
-        const material = new THREE.MeshBasicMaterial();
+
+        const boxWidth = 1;
+        const boxHeight = 1;
+        const boxDepth = 1;
+        const geometry = new THREE.BoxGeometry(boxWidth, boxHeight, boxDepth);
+
+        // adjust the helpers to point to the latitude and longitude
+        lonHelper.rotation.y = THREE.MathUtils.degToRad(lonNdx) + lonFudge;
+        latHelper.rotation.x = THREE.MathUtils.degToRad(latNdx) + latFudge;
+
+        // use the world matrix of the origin helper to
+        // position this geometry
+        positionHelper.scale.set(
+          0.005,
+          0.005,
+          THREE.MathUtils.lerp(0.01, 0.5, amount)
+        );
+        originHelper.updateWorldMatrix(true, false);
+        geometry.applyMatrix4(originHelper.matrixWorld);
+
+        // 计算颜色
         const hue = THREE.MathUtils.lerp(0.7, 0.3, amount);
         const saturation = 1;
         const lightness = THREE.MathUtils.lerp(0.4, 1.0, amount);
-        material.color.setHSL(hue, saturation, lightness);
-        const mesh = new THREE.Mesh(geometry, material);
-        scene.add(mesh);
+        color.setHSL(hue, saturation, lightness);
+        // 以0到255之间的值数组形式获取颜色
+        const rgb = color.toArray().map((v) => v * 255);
 
-        // adjust the helpers to point to the latitude and longitude
-        lonHelper.rotation.y =
-          THREE.MathUtils.degToRad(lonNdx + file.xllcorner) + lonFudge;
-        latHelper.rotation.x =
-          THREE.MathUtils.degToRad(latNdx + file.yllcorner) + latFudge;
+        // 创建一个数组来存储每个顶点的颜色
+        const numVerts = geometry.getAttribute("position").count;
+        const itemSize = 3; // r, g, b
+        const colors = new Uint8Array(itemSize * numVerts);
 
-        // use the world matrix of the position helper to
-        // position this mesh.
-        positionHelper.updateWorldMatrix(true, false);
-        mesh.applyMatrix4(positionHelper.matrixWorld);
+        // 将颜色复制到每个顶点的颜色数组中
+        colors.forEach((v, ndx) => {
+          colors[ndx] = rgb[ndx % 3];
+        });
 
-        mesh.scale.set(0.005, 0.005, THREE.MathUtils.lerp(0.01, 0.5, amount));
+        const normalized = true;
+        const colorAttrib = new THREE.BufferAttribute(
+          colors,
+          itemSize,
+          normalized
+        );
+        geometry.setAttribute("color", colorAttrib);
+
+        geometries.push(geometry);
       });
     });
+
+    const mergedGeometry = BufferGeometryUtils.mergeGeometries(
+      geometries,
+      false
+    );
+    const material = new THREE.MeshBasicMaterial({
+      vertexColors: true,
+    });
+    const mesh = new THREE.Mesh(mergedGeometry, material);
+    scene.add(mesh);
   }
 
   loadFile(
-    "https://threejs.org/manual/examples/resources/data/gpw/gpw_v4_basic_demographic_characteristics_rev10_a000_014mt_2010_cntm_1_deg.asc"
+    "three/gpw_v4_basic_demographic_characteristics_rev10_a000_014mt_2010_cntm_1_deg.asc"
   )
     .then(parseData)
     .then(addBoxes)
