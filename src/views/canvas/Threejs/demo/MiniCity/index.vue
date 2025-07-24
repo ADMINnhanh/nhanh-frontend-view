@@ -18,10 +18,10 @@ function main() {
   const near = 0.1;
   const far = 100;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-  camera.position.set(0, 5, 20);
+  camera.position.set(-5.4, 4.2, -5.4);
 
   const controls = new OrbitControls(camera, canvas);
-  controls.target.set(0, 5, 0);
+  controls.target.set(0, -2.5, 0);
   controls.update();
 
   const scene = new THREE.Scene();
@@ -43,7 +43,7 @@ function main() {
     light.position.set(-5, 1.4, 0.6);
     light.target.position.set(0, 0, 0);
 
-    light.shadow.bias = -0.001;
+    light.shadow.bias = -0.01;
     light.shadow.mapSize.width = 2048;
     light.shadow.mapSize.height = 2048;
 
@@ -78,41 +78,6 @@ function main() {
     }
 
     updateCamera();
-  }
-
-  function frameArea(
-    sizeToFitOnScreen: number,
-    boxSize: number,
-    boxCenter: THREE.Vector3Like,
-    camera: THREE.PerspectiveCamera
-  ) {
-    const halfSizeToFitOnScreen = sizeToFitOnScreen * 0.5;
-    const halfFovY = THREE.MathUtils.degToRad(camera.fov * 0.5);
-    const distance = halfSizeToFitOnScreen / Math.tan(halfFovY);
-    // compute a unit vector that points in the direction the camera is now
-    // in the xz plane from the center of the box
-    const direction = new THREE.Vector3()
-      .subVectors(camera.position, boxCenter)
-      .multiply(new THREE.Vector3(1, 0, 1))
-      .normalize();
-
-    // move the camera to a position distance units way from the center
-    // in whatever direction the camera was from the center already
-    const vector3 = direction.multiplyScalar(distance).add(boxCenter);
-    vector3.y += sizeToFitOnScreen * 0.3;
-    vector3.z -= sizeToFitOnScreen * 2;
-    vector3.x -= sizeToFitOnScreen * 1.5;
-    camera.position.copy(vector3);
-
-    // pick some near and far values for the frustum that
-    // will contain the box.
-    camera.near = boxSize / 100;
-    camera.far = boxSize * 100;
-
-    camera.updateProjectionMatrix();
-
-    // point the camera to look at the center of the box
-    camera.lookAt(boxCenter.x, boxCenter.y, boxCenter.z);
   }
 
   let curve: THREE.CatmullRomCurve3;
@@ -209,14 +174,9 @@ function main() {
       const box = new THREE.Box3().setFromObject(root);
 
       const boxSize = box.getSize(new THREE.Vector3()).length();
-      const boxCenter = box.getCenter(new THREE.Vector3());
-
-      // set the camera to frame the box
-      frameArea(boxSize * 0.5, boxSize, boxCenter, camera);
 
       // update the Trackball controls to handle the new size
       controls.maxDistance = boxSize * 10;
-      controls.target.copy(boxCenter);
       controls.update();
     });
   }
