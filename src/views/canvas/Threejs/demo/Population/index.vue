@@ -2,11 +2,15 @@
 import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
 import { onMounted, onUnmounted } from "vue";
 
 const id = _Utility_GenerateUUID();
+
+// 日地距离与地球直径的比例（约11730:1）
+const earthSunDistanceToDiameterRatio = 11730 / 1000;
+// 太阳直径与地球直径的比例（约109:1）
+const sunToEarthDiameterRatio = 109 / 1000;
 
 function main() {
   const canvas = document.getElementById(id) as HTMLCanvasElement;
@@ -15,7 +19,7 @@ function main() {
   const fov = 60;
   const aspect = 2; // the canvas default
   const near = 0.1;
-  const far = 10;
+  const far = 100;
   const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
   camera.position.z = 2.5;
 
@@ -34,13 +38,22 @@ function main() {
     const texture = loader.load("three/world.jpg", render);
     texture.colorSpace = THREE.SRGBColorSpace;
     const geometry = new THREE.SphereGeometry(1, 64, 32);
-    const material = new THREE.MeshPhongMaterial({ map: texture });
+    const material = new THREE.MeshStandardMaterial({ map: texture });
     scene.add(new THREE.Mesh(geometry, material));
   }
 
   {
-    const light = new THREE.AmbientLight("#ffffff", 10); // 柔和的白光
+    const color = 0xffffff;
+    const intensity = 500;
+    const light = new THREE.PointLight(color, intensity);
+    light.position.set(-earthSunDistanceToDiameterRatio, 0, 0);
     scene.add(light);
+
+    const geometry = new THREE.SphereGeometry(sunToEarthDiameterRatio, 64, 32);
+    const material = new THREE.MeshPhongMaterial({ emissive: "#F0AE20" });
+    const mesh = new THREE.Mesh(geometry, material);
+    mesh.position.set(-earthSunDistanceToDiameterRatio, 0, 0);
+    scene.add(mesh);
   }
 
   async function loadFile(url: string | URL | Request) {

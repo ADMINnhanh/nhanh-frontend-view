@@ -3,13 +3,3 @@
 
 @import "@/assets/style/moduls.less";
 @import "@/assets/style/naive-ui.less";
-
-input {
-  height: 0 !important;
-  padding: calc(var(--n-height) / 2) 0 !important;
-  background-clip: content-box !important;
-}
-
-input::first-line {
-  color: var(--n-text-color);
-}

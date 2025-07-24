@@ -4,14 +4,8 @@ import { NTabPane, NTabs } from "naive-ui";
 import { defineAsyncComponent } from "vue";
 
 const demos = [
-  {
-    name: "迷你城市",
-    path: "MiniCity",
-  },
-  {
-    name: "人口分布",
-    path: "Population",
-  },
+  { name: "迷你城市", path: "MiniCity" },
+  { name: "人口分布", path: "Population" },
 ].map((v) => ({
   ...v,
   component: defineAsyncComponent(() => import(`./demo/${v.path}/index.vue`)),
