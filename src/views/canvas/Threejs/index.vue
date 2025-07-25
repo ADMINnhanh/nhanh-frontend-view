@@ -6,9 +6,12 @@ import { defineAsyncComponent } from "vue";
 const demos = [
   { name: "迷你城市", path: "MiniCity" },
   { name: "人口分布", path: "Population" },
+  { name: "离屏渲染", path: "Offscreen" },
 ].map((v) => ({
   ...v,
-  component: defineAsyncComponent(() => import(`./demo/${v.path}/index.vue`)),
+  component: defineAsyncComponent(
+    () => import(new URL(`./demo/${v.path}/index.vue`, import.meta.url).href)
+  ),
 }));
 
 const threejs = useLocalStorage("three.js-demo", "迷你城市");
