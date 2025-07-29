@@ -1,0 +1,172 @@
+<script setup lang="ts">
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
+import * as THREE from "three";
+import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { onMounted, onUnmounted, ref } from "vue";
+import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
+import { NProgress } from "naive-ui";
+
+const id = _Utility_GenerateUUID();
+let play = true;
+
+const percentage = ref(0);
+function main() {
+  const canvas = document.getElementById(id) as HTMLCanvasElement;
+  const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+
+  const fov = 45;
+  const aspect = 2; // the canvas default
+  const near = 0.1;
+  const far = 100;
+  const camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+  camera.position.set(0, 20, 40);
+
+  const controls = new OrbitControls(camera, canvas);
+  controls.target.set(0, 5, 0);
+  controls.update();
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color("white");
+
+  function addLight(...pos) {
+    const color = 0xffffff;
+    const intensity = 2.5;
+    const light = new THREE.DirectionalLight(color, intensity);
+    light.position.set(...pos);
+    scene.add(light);
+    scene.add(light.target);
+  }
+
+  addLight(5, 5, 2);
+  addLight(-5, 5, 5);
+
+  const manager = new THREE.LoadingManager();
+  manager.onLoad = init;
+
+  manager.onProgress = (url, itemsLoaded, itemsTotal) => {
+    percentage.value = Number((itemsLoaded / itemsTotal).toFixed(2)) * 100;
+    if (percentage.value == 100) {
+      const progress = document.getElementById(id + "progress")!;
+      progress.style.opacity = "0";
+    }
+  };
+
+  const models = {
+    pig: { url: "gltf/Pig.gltf" },
+    cow: { url: "gltf/Cow.gltf" },
+    llama: { url: "gltf/Llama.gltf" },
+    pug: { url: "gltf/Pug.gltf" },
+    sheep: { url: "gltf/Sheep.gltf" },
+    zebra: { url: "gltf/Zebra.gltf" },
+    horse: { url: "gltf/Horse.gltf" },
+    knight: { url: "gltf/KnightCharacter.gltf" },
+  };
+
+  {
+    const gltfLoader = new GLTFLoader(manager);
+    for (const model of Object.values(models)) {
+      gltfLoader.load(model.url, (gltf) => {
+        model.gltf = gltf;
+      });
+    }
+  }
+
+  function prepModelsAndAnimations() {
+    Object.values(models).forEach((model) => {
+      const animsByName = {};
+      model.gltf.animations.forEach((clip) => {
+        animsByName[clip.name] = clip;
+      });
+      model.animations = animsByName;
+    });
+  }
+
+  const mixers = [];
+
+  function init() {
+    prepModelsAndAnimations();
+
+    Object.values(models).forEach((model, ndx) => {
+      const clonedScene = SkeletonUtils.clone(model.gltf.scene);
+      const root = new THREE.Object3D();
+      root.add(clonedScene);
+      scene.add(root);
+      root.position.x = (ndx - 3) * 3;
+
+      const mixer = new THREE.AnimationMixer(clonedScene);
+      const firstClip = Object.values(model.animations)[0];
+      const action = mixer.clipAction(firstClip);
+      action.play();
+      mixers.push(mixer);
+    });
+  }
+
+  function resizeRendererToDisplaySize(renderer) {
+    const canvas = renderer.domElement;
+    const width = canvas.clientWidth;
+    const height = canvas.clientHeight;
+    const needResize = canvas.width !== width || canvas.height !== height;
+    if (needResize) {
+      renderer.setSize(width, height, false);
+    }
+
+    return needResize;
+  }
+
+  let then = 0;
+  function render(now) {
+    now *= 0.001; // convert to seconds
+    const deltaTime = now - then;
+    then = now;
+
+    if (resizeRendererToDisplaySize(renderer)) {
+      const canvas = renderer.domElement;
+      camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      camera.updateProjectionMatrix();
+    }
+
+    for (const mixer of mixers) {
+      mixer.update(deltaTime);
+    }
+
+    renderer.render(scene, camera);
+
+    play && requestAnimationFrame(render);
+  }
+
+  requestAnimationFrame(render);
+}
+
+onMounted(() => {
+  main();
+});
+onUnmounted(() => {
+  play = false;
+});
+</script>
+
+<template>
+  <canvas :id="id" />
+  <NProgress
+    :id="id + 'progress'"
+    type="line"
+    status="success"
+    :percentage="percentage"
+    indicator-placement="inside"
+    processing
+  />
+</template>
+
+<style lang="less" scoped>
+.n-progress {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  opacity: 1;
+  width: 300px;
+  height: 20px;
+  transition: opacity 0.5s ease-out;
+}
+</style>

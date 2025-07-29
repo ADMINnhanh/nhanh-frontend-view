@@ -7,6 +7,7 @@ const demos = [
   { name: "迷你城市", path: "MiniCity" },
   { name: "人口分布", path: "Population" },
   { name: "离屏渲染", path: "Offscreen" },
+  { name: "追逐", path: "Chase" },
 ].map((v) => ({
   ...v,
   component: defineAsyncComponent(
@@ -33,6 +34,7 @@ const threejs = useLocalStorage("three.js-demo", "迷你城市");
     flex-grow: 1;
     height: 100px;
     margin-top: 10px;
+    position: relative;
     canvas {
       width: 100%;
       height: 100%;
