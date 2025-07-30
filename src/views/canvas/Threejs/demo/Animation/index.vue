@@ -2,15 +2,42 @@
 import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { onMounted, onUnmounted, ref } from "vue";
+import { markRaw, onMounted, onUnmounted, ref, watch } from "vue";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
 import Progress from "../../Progress.vue";
+import { NRadio, NRadioGroup, NSpace } from "naive-ui";
 
 const id = _Utility_GenerateUUID();
 let play = true;
 
 const percentage = ref(0);
+
+const animations = ref<{ [key: string]: Map<string, THREE.AnimationAction> }>(
+  {}
+);
+const activeAnimations = ref<string>();
+watch(activeAnimations, (name, oldName) => {
+  if (oldName) {
+    for (const [url, animation] of animations.value[oldName]) {
+      if (name) {
+        const newAnimation = animations.value[name].get(url);
+        if (newAnimation) {
+          // 重置新动画状态并设置淡入
+          newAnimation.reset().setEffectiveTimeScale(1).setEffectiveWeight(1);
+          animation.crossFadeTo(newAnimation, 0.5, true);
+        } else animation.stop();
+      } else animation.stop();
+    }
+  }
+
+  if (name) {
+    for (const [url, animation] of animations.value[name]) {
+      animation.reset().play();
+    }
+  }
+});
+
 function main() {
   const canvas = document.getElementById(id) as HTMLCanvasElement;
   const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
@@ -83,7 +110,7 @@ function main() {
   function init() {
     prepModelsAndAnimations();
 
-    Object.values(models).forEach((model, ndx) => {
+    Object.values(models).forEach((model: any, ndx) => {
       const clonedScene = SkeletonUtils.clone(model.gltf.scene);
       const root = new THREE.Object3D();
       root.add(clonedScene);
@@ -91,9 +118,20 @@ function main() {
       root.position.x = (ndx - 3) * 3;
 
       const mixer = new THREE.AnimationMixer(clonedScene);
-      const firstClip = Object.values(model.animations)[0];
-      const action = mixer.clipAction(firstClip);
-      action.play();
+
+      for (const key in model.animations) {
+        if (Object.prototype.hasOwnProperty.call(model.animations, key)) {
+          const firstClip = model.animations[key];
+          if (!animations.value[key as string])
+            animations.value[key as string] = new Map();
+
+          animations.value[key as string].set(
+            model.url,
+            markRaw(mixer.clipAction(firstClip))
+          );
+        }
+      }
+
       mixers.push(mixer);
     });
   }
@@ -145,7 +183,20 @@ onUnmounted(() => {
 <template>
   <Progress :percentage="percentage">
     <canvas :id="id" />
+    <NRadioGroup v-model:value="activeAnimations">
+      <NSpace vertical>
+        <NRadio v-for="(_, key) in animations" :key="key" :value="key">{{
+          key
+        }}</NRadio>
+      </NSpace>
+    </NRadioGroup>
   </Progress>
 </template>
 
-<style lang="less" scoped></style>
+<style lang="less" scoped>
+.n-radio-group {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+</style>
