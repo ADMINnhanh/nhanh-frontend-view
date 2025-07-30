@@ -30,7 +30,7 @@ const watchRes = watch(
       type="line"
       status="success"
       :percentage="percentage"
-      indicator-placement="inside"
+      :show-indicator="false"
       processing
     />
   </div>
