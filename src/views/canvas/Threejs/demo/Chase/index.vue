@@ -5,7 +5,7 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { onMounted, onUnmounted, ref } from "vue";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
-import { NProgress } from "naive-ui";
+import Progress from "../../Progress.vue";
 
 const id = _Utility_GenerateUUID();
 let play = true;
@@ -46,10 +46,6 @@ function main() {
 
   manager.onProgress = (url, itemsLoaded, itemsTotal) => {
     percentage.value = Number((itemsLoaded / itemsTotal).toFixed(2)) * 100;
-    if (percentage.value == 100) {
-      const progress = document.getElementById(id + "progress")!;
-      progress.style.opacity = "0";
-    }
   };
 
   const models = {
@@ -147,26 +143,9 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <canvas :id="id" />
-  <NProgress
-    :id="id + 'progress'"
-    type="line"
-    status="success"
-    :percentage="percentage"
-    indicator-placement="inside"
-    processing
-  />
+  <Progress :percentage="percentage">
+    <canvas :id="id" />
+  </Progress>
 </template>
 
-<style lang="less" scoped>
-.n-progress {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  opacity: 1;
-  width: 300px;
-  height: 20px;
-  transition: opacity 0.5s ease-out;
-}
-</style>
+<style lang="less" scoped></style>
