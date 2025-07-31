@@ -90,17 +90,6 @@ const math: CustomRouteRecord = {
   },
   children: [
     {
-      path: "GraphingEquations",
-      name: "GraphingEquations",
-      meta: {
-        name: {
-          zhCN: "图形方程",
-          enUS: "GraphingEquations",
-        },
-      },
-      component: () => import("@/views/math/GraphingEquations/index.vue"),
-    },
-    {
       path: "DynamicDiagram/:target?",
       name: "DynamicDiagram",
       meta: {
