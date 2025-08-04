@@ -12,11 +12,12 @@ const props = defineProps<Props>();
 
 if (props.target) dynamicDiagram.value = props.target;
 
+const Modules = import.meta.glob(`./demo/**/index.vue`);
 function GetComponent(title: string, collection = dynamicDiagramCollection) {
   for (let i = 0; i < collection.length; i++) {
     const element = collection[i];
     if (element.title === title) {
-      return element.component;
+      return Modules[`./demo/${element.component!}/index.vue`];
     }
     if (element.children) {
       const component = GetComponent(title, element.children) as any;
@@ -31,7 +32,8 @@ const dynamicDiagramComponent = computed(() => {
   if (!router.currentRoute.value.path.includes("DynamicDiagram")) return;
 
   router.replace({ params: { target: dynamicDiagram.value } });
-  return defineAsyncComponent(() => import(GetComponent(dynamicDiagram.value)));
+
+  return defineAsyncComponent(GetComponent(dynamicDiagram.value));
 });
 </script>
 

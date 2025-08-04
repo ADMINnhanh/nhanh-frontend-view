@@ -11,7 +11,7 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "三边围墙",
-        component: "./demo/unintuitive/threeWalledEnclosure.vue",
+        component: "unintuitive/threeWalledEnclosure",
       },
     ],
   },
@@ -20,32 +20,30 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "垂直平分线",
-        component: "./demo/triangle/perpendicularBisector/index.vue",
+        component: "triangle/perpendicularBisector",
       },
       {
         title: "角平分线",
-        component: "./demo/triangle/angleBisector/index.vue",
+        component: "triangle/angleBisector",
       },
       {
         title: "中位线",
-        component: "./demo/triangle/midline/index.vue",
+        component: "triangle/midline",
       },
       {
         title: "平行于第三边的线",
-        component: "./demo/triangle/lineParallelToThirdSide/index.vue",
+        component: "triangle/lineParallelToThirdSide",
       },
       {
         title: "勾股定理",
         children: [
           {
             title: "欧几里得论证法",
-            component:
-              "./demo/triangle/pythagoreanTheorem/euclideanArgument/index.vue",
+            component: "triangle/pythagoreanTheorem/euclideanArgument",
           },
           {
             title: "月牙定理",
-            component:
-              "./demo/triangle/pythagoreanTheorem/lunesTheorem/index.vue",
+            component: "triangle/pythagoreanTheorem/lunesTheorem",
           },
         ],
       },
@@ -56,7 +54,7 @@ export const dynamicDiagramCollection: Collection = [
     children: [
       {
         title: "黄金分割",
-        component: "./demo/polygon/goldenSection/index.vue",
+        component: "polygon/goldenSection",
       },
     ],
   },
