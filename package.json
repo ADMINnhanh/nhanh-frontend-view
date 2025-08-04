@@ -12,7 +12,6 @@
     "type-check": "vue-tsc --build --force"
   },
   "dependencies": {
-    "@types/three": "^0.178.1",
     "@vueuse/components": "^13.3.0",
     "@vueuse/core": "^11.1.0",
     "axios": "^1.7.2",
@@ -26,13 +25,13 @@
     "peerjs": "^1.5.4",
     "pinia": "^2.1.7",
     "three": "^0.178.0",
-    "vite-plugin-mkcert": "^1.17.8",
     "vue": "^3.4.29",
     "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@tsconfig/node20": "^20.1.4",
     "@types/node": "^20.14.5",
+    "@types/three": "^0.178.1",
     "@vicons/ionicons5": "^0.12.0",
     "@vitejs/plugin-vue": "^5.0.5",
     "@vitejs/plugin-vue-jsx": "^4.0.0",
@@ -42,6 +41,7 @@
     "npm-run-all2": "^6.2.0",
     "typescript": "~5.4.0",
     "vite": "^5.3.1",
+    "vite-plugin-mkcert": "^1.17.8",
     "vite-plugin-vue-devtools": "^7.7.7",
     "vue-tsc": "^2.0.21"
   }
