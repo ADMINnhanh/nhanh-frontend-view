@@ -596,6 +596,9 @@ export class MyMath {
     });
   }
 
+  /** 三角形外接圆 */
+  static circumcircle(a: Point, b: Point, c: Point) {}
+
   static transform(a: Point): PointA;
   static transform(a: Point[]): PointA[];
   static transform(a: Point | Point[]): PointA | PointA[] {

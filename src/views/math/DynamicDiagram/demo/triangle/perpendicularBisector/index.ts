@@ -40,6 +40,12 @@ const cal = new _Canvas.Line(config("#3bc0cd"));
 const calp = new _Canvas.Line(config("#3bc0cd", true));
 const calra = new _Canvas.Line(config("#3bc0cd"));
 
+const y = new _Canvas.Arc({
+  startAngle: 0,
+  endAngle: 360,
+  isInteractive: false,
+});
+
 export const overlays = [
   m,
   abl,
@@ -51,6 +57,7 @@ export const overlays = [
   ablra,
   bclra,
   calra,
+  y,
 ];
 
 const abc = new ABC(m);
