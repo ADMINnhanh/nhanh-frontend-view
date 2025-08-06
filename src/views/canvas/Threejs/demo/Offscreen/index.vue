@@ -28,7 +28,7 @@ const keydownEventHandler = makeSendPropertiesHandler([
 
 function wheelEventHandler(event: { preventDefault: () => void }, sendFn: any) {
   event.preventDefault();
-  wheelEventHandlerImpl(event, sendFn);
+  wheelEventHandlerImpl(event as any, sendFn);
 }
 
 function preventDefaultHandler(event: { preventDefault: () => void }) {
@@ -91,9 +91,9 @@ function filteredKeydownEventHandler(
   sendFn: any
 ) {
   const { keyCode } = event;
-  if (orbitKeys[keyCode]) {
+  if (orbitKeys[keyCode as keyof typeof orbitKeys]) {
     event.preventDefault();
-    keydownEventHandler(event, sendFn);
+    keydownEventHandler(event as any, sendFn);
   }
 }
 
@@ -109,8 +109,9 @@ class ElementProxy {
     worker: Worker,
     eventHandlers: { [s: string]: unknown } | ArrayLike<unknown>
   ) {
-    this.id = nextProxyId++;
-    this.worker = worker;
+    const self = this as any;
+    self.id = nextProxyId++;
+    self.worker = worker;
     const sendEvent = (data: {
       type: string;
       left: any;
@@ -118,9 +119,9 @@ class ElementProxy {
       width: any;
       height: any;
     }) => {
-      this.worker.postMessage({
+      self.worker.postMessage({
         type: "event",
-        id: this.id,
+        id: self.id,
         data,
       });
     };
@@ -128,12 +129,12 @@ class ElementProxy {
     // register an id
     worker.postMessage({
       type: "makeProxy",
-      id: this.id,
+      id: self.id,
     });
     sendSize();
     for (const [eventName, handler] of Object.entries(eventHandlers)) {
       element.addEventListener(eventName, function (event: any) {
-        handler(event, sendEvent);
+        (handler as any)(event, sendEvent);
       });
     }
 
@@ -176,7 +177,7 @@ function startWorker(canvas: HTMLCanvasElement) {
     wheel: wheelEventHandler,
     keydown: filteredKeydownEventHandler,
   };
-  const proxy = new ElementProxy(canvas, worker, eventHandlers);
+  const proxy = new ElementProxy(canvas, worker, eventHandlers) as any;
   worker.postMessage(
     {
       type: "start",
@@ -200,6 +201,7 @@ function main() {
   /* eslint consistent-return: 0 */
 
   const canvas = document.getElementById(id) as HTMLCanvasElement;
+  /** @ts-ignore */
   if (canvas.transferControlToOffscreen) {
     startWorker(canvas);
   } else {

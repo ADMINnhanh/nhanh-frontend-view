@@ -63,7 +63,7 @@ function main() {
 
   function parseData(text: string) {
     const data: (number | undefined)[][] = [];
-    const settings = { data };
+    const settings = { data } as any;
     let max: number | undefined;
     let min: number | undefined;
     // split into lines
@@ -121,8 +121,11 @@ function main() {
     const lonFudge = Math.PI * 1.5;
     const latFudge = Math.PI * -(85 / 90 / 2);
 
-    const geometries = [];
-    data.forEach((row, latNdx) => {
+    const geometries: THREE.BufferGeometry<
+      THREE.NormalBufferAttributes,
+      THREE.BufferGeometryEventMap
+    >[] = [];
+    data.forEach((row: any[], latNdx: number) => {
       row.forEach((value, lonNdx) => {
         if (value === undefined) {
           return;

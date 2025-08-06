@@ -56,7 +56,7 @@ function main() {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color("white");
 
-  function addLight(...pos) {
+  function addLight(...pos: [number, number, number]) {
     const color = 0xffffff;
     const intensity = 2.5;
     const light = new THREE.DirectionalLight(color, intensity);
@@ -75,7 +75,7 @@ function main() {
     percentage.value = Number((itemsLoaded / itemsTotal).toFixed(2)) * 100;
   };
 
-  const models = {
+  const models: Record<string, any> = {
     pig: { url: "gltf/Pig.gltf" },
     cow: { url: "gltf/Cow.gltf" },
     llama: { url: "gltf/Llama.gltf" },
@@ -97,15 +97,15 @@ function main() {
 
   function prepModelsAndAnimations() {
     Object.values(models).forEach((model) => {
-      const animsByName = {};
-      model.gltf.animations.forEach((clip) => {
+      const animsByName: any = {};
+      model.gltf.animations.forEach((clip: any) => {
         animsByName[clip.name] = clip;
       });
       model.animations = animsByName;
     });
   }
 
-  const mixers = [];
+  const mixers: THREE.AnimationMixer[] = [];
 
   function init() {
     prepModelsAndAnimations();
@@ -136,7 +136,7 @@ function main() {
     });
   }
 
-  function resizeRendererToDisplaySize(renderer) {
+  function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
     const canvas = renderer.domElement;
     const width = canvas.clientWidth;
     const height = canvas.clientHeight;
@@ -149,7 +149,7 @@ function main() {
   }
 
   let then = 0;
-  function render(now) {
+  function render(now: number) {
     now *= 0.001; // convert to seconds
     const deltaTime = now - then;
     then = now;

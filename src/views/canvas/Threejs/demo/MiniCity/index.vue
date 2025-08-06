@@ -105,7 +105,7 @@ function main() {
       [-5.42372, 5.115846, -14.761919],
       [-5.373599, 5.115846, -3.704133],
       [1.004861, 5.115846, -3.641834],
-    ];
+    ] as [number, number, number][];
     const p0 = new THREE.Vector3();
     const p1 = new THREE.Vector3();
     curve = new THREE.CatmullRomCurve3(
@@ -158,12 +158,12 @@ function main() {
       ];
 
       root.updateMatrixWorld();
-      for (const car of loadedCars.children.slice()) {
+      for (const car of loadedCars!.children.slice()) {
         const fix = fixes.find((fix) => car.name.startsWith(fix.prefix));
         const obj = new THREE.Object3D();
         car.getWorldPosition(obj.position);
-        car.position.set(0, fix.y, 0);
-        car.rotation.set(...fix.rot);
+        car.position.set(0, fix!.y, 0);
+        car.rotation.set(...(fix!.rot as [number, number, number]));
         obj.add(car);
         scene.add(obj);
         cars.push(obj);
@@ -221,12 +221,12 @@ function main() {
         carTarget.applyMatrix4(curveObject.matrixWorld);
 
         // 把汽车放置在第一个点 （暂时的）
-        car.position.copy(carPosition);
+        car!.position.copy(carPosition);
         // 汽车的第二个点
-        car.lookAt(carTarget);
+        car!.lookAt(carTarget);
 
         // 放置小车在两个点中间
-        car.position.lerpVectors(carPosition, carTarget, 0.5);
+        car!.position.lerpVectors(carPosition, carTarget, 0.5);
       });
     }
 
