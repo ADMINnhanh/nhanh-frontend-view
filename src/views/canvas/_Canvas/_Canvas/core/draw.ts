@@ -26,11 +26,17 @@ export default class Draw extends Style {
   /** 计算坐标所需依赖 */
   private rely = "";
 
+  // 创建标志位，标记是否是第一次执行
+  private isResizeObserverFirstRun = true;
+
   constructor(option: ConstructorOption) {
     super(option);
     if (this.canvas) {
       this.resizeObserver = new ResizeObserver(
         _Utility_Debounce(() => {
+          if (this.isResizeObserverFirstRun)
+            return (this.isResizeObserverFirstRun = false);
+
           [this.canvas.width, this.canvas.height] = [
             this.rect.width,
             this.rect.height,
