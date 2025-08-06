@@ -596,8 +596,52 @@ export class MyMath {
     });
   }
 
+  /** 获取两点中垂线方程 */
+  static getPerpendicularLines(
+    a: Point,
+    b: Point
+  ): { slope: number; intercept: number } | { x: number } {
+    // 计算两点中点
+    const midX = (a.x + b.x) / 2;
+    const midY = (a.y + b.y) / 2;
+
+    const ab = MyMath.calculateLineParameters(a, b);
+    if (ab) {
+      if (ab.slope == 0) return { x: midX };
+      const slope = -1 / ab.slope;
+      const intercept = midY - slope * midX;
+      return { slope, intercept };
+    }
+    return { slope: 0, intercept: midY };
+  }
   /** 三角形外接圆 */
-  static circumcircle(a: Point, b: Point, c: Point) {}
+  static circumcircle(a: Point, b: Point, c: Point) {
+    if (MyMath.isOverlap(a, b, c)) return;
+
+    const ab = MyMath.getPerpendicularLines(a, b);
+    const bc = MyMath.getPerpendicularLines(b, c);
+
+    if ("x" in ab && "x" in bc) return;
+
+    let x: number, y: number, r: number;
+    if ("x" in ab || "x" in bc) {
+      if ("x" in ab) {
+        x = ab.x;
+        /** @ts-ignore */
+        y = bc.slope * x + bc.intercept;
+      } else {
+        /** @ts-ignore */
+        x = bc.x;
+        y = ab.slope * x + ab.intercept;
+      }
+    } else {
+      x = (ab.intercept! - bc.intercept!) / (bc.slope! - ab.slope!);
+      y = ab.slope! * x + ab.intercept!;
+    }
+    r = _Math_CalculateDistance2D(a.x, a.y, x!, y!);
+
+    return { x, y, r };
+  }
 
   static transform(a: Point): PointA;
   static transform(a: Point[]): PointA[];

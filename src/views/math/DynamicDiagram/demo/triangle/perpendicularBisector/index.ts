@@ -6,6 +6,7 @@ import {
   type Point,
   type PointA,
 } from "@/views/math/DynamicDiagram/tool";
+import { ref } from "vue";
 
 export const id = _Utility_GenerateUUID();
 
@@ -45,6 +46,8 @@ const y = new _Canvas.Arc({
   endAngle: 360,
   isInteractive: false,
 });
+const yd = new _Canvas.Point({});
+export const showCircumcircle = ref(true);
 
 export const overlays = [
   m,
@@ -58,6 +61,7 @@ export const overlays = [
   bclra,
   calra,
   y,
+  yd,
 ];
 
 const abc = new ABC(m);
@@ -112,5 +116,16 @@ export function Update() {
   calra.value = MyMath.transform(
     MyMath.getPerpendicularBisectorRightAngleSymbol(abc.c, abc.a, abc.b) || []
   );
+
+  if (y.isVisible !== showCircumcircle.value) {
+    y.isVisible = showCircumcircle.value;
+    yd.isVisible = showCircumcircle.value;
+  }
+  const _y = MyMath.circumcircle(abc.a, abc.b, abc.c);
+  if (_y) {
+    y.value = [_y.x, _y.y];
+    y.radiusValue = _y.r;
+    yd.value = [_y.x, _y.y];
+  }
 }
 m.addEventListener("dragg", Update);

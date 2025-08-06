@@ -2,8 +2,9 @@
 import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-import { overlays, id, Update } from ".";
+import { overlays, id, Update, showCircumcircle } from ".";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
+import { NSwitch } from "naive-ui";
 
 let myCanvas = shallowRef<_Canvas>();
 
@@ -26,6 +27,10 @@ onMounted(() => {
     alert="尝试改变三角形"
     alert-content="1. 点击三角形 ； 2. 拖拽顶点"
   >
+    <NSwitch v-model:value="showCircumcircle" @update:value="Update">
+      <template #checked>外接圆</template>
+      <template #unchecked>外接圆</template>
+    </NSwitch>
     <canvas :id="id"></canvas>
   </Card>
 </template>
