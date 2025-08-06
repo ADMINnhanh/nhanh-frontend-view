@@ -62,7 +62,7 @@ const transitionAnimations = [
 ];
 const activeTransition = useLocalStorage(
   "math-dynamic-diagram-transition",
-  "scale-rotate"
+  "slide-fade"
 );
 </script>
 
