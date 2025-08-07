@@ -3,9 +3,10 @@ import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { BufferGeometryUtils } from "three/examples/jsm/Addons.js";
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 const id = _Utility_GenerateUUID();
+const percentage = ref(0);
 
 // 日地距离与地球直径的比例（约11730:1）
 const earthSunDistanceToDiameterRatio = 11730 / 1000;
@@ -35,7 +36,7 @@ function main() {
 
   {
     const loader = new THREE.TextureLoader();
-    const texture = loader.load("three/world.jpg", render);
+    const texture = loader.load("three/world.jpg", () => render(true));
     texture.colorSpace = THREE.SRGBColorSpace;
     const geometry = new THREE.SphereGeometry(1, 64, 32);
     const material = new THREE.MeshStandardMaterial({ map: texture });
@@ -198,7 +199,7 @@ function main() {
   )
     .then(parseData)
     .then(addBoxes)
-    .then(render);
+    .then(() => render(true));
 
   function resizeRendererToDisplaySize(renderer: THREE.WebGLRenderer) {
     const canvas = renderer.domElement;
@@ -214,7 +215,7 @@ function main() {
 
   let renderRequested = false;
 
-  function render() {
+  function render(loadFinish?: boolean) {
     renderRequested = false;
 
     if (resizeRendererToDisplaySize(renderer)) {
@@ -225,6 +226,7 @@ function main() {
 
     controls.update();
     renderer.render(scene, camera);
+    if (loadFinish) percentage.value += 50;
   }
 
   render();
@@ -232,7 +234,7 @@ function main() {
   function requestRenderIfNotRequested() {
     if (!renderRequested) {
       renderRequested = true;
-      requestAnimationFrame(render);
+      requestAnimationFrame(() => render());
     }
   }
 
@@ -245,6 +247,10 @@ function main() {
 
 onMounted(() => {
   main();
+});
+
+defineExpose({
+  percentage,
 });
 </script>
 

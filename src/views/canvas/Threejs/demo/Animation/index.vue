@@ -5,7 +5,6 @@ import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { markRaw, onMounted, onUnmounted, ref, watch } from "vue";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
-import Progress from "../../Progress.vue";
 import { NRadio, NRadioGroup, NSpace } from "naive-ui";
 
 const id = _Utility_GenerateUUID();
@@ -178,19 +177,21 @@ onMounted(() => {
 onUnmounted(() => {
   play = false;
 });
+
+defineExpose({
+  percentage,
+});
 </script>
 
 <template>
-  <Progress :percentage="percentage">
-    <canvas :id="id" />
-    <NRadioGroup v-model:value="activeAnimations">
-      <NSpace vertical>
-        <NRadio v-for="(_, key) in animations" :key="key" :value="key">{{
-          key
-        }}</NRadio>
-      </NSpace>
-    </NRadioGroup>
-  </Progress>
+  <canvas :id="id" />
+  <NRadioGroup v-model:value="activeAnimations">
+    <NSpace vertical>
+      <NRadio v-for="(_, key) in animations" :key="key" :value="key">{{
+        key
+      }}</NRadio>
+    </NSpace>
+  </NRadioGroup>
 </template>
 
 <style lang="less" scoped>

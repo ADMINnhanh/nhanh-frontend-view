@@ -3,9 +3,10 @@ import { _Utility_GenerateUUID } from "nhanh-pure-function";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
-import { onMounted, onUnmounted } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 
 const id = _Utility_GenerateUUID();
+const percentage = ref(false);
 
 let play = true;
 function main() {
@@ -143,6 +144,8 @@ function main() {
       const root = gltf.scene;
       scene.add(root);
 
+      percentage.value = true;
+
       root.traverse((obj) => {
         if (obj.castShadow !== undefined) {
           obj.castShadow = true;
@@ -243,6 +246,10 @@ onMounted(() => {
 });
 onUnmounted(() => {
   play = false;
+});
+
+defineExpose({
+  percentage,
 });
 </script>
 
