@@ -16,9 +16,10 @@ import {
 import { NButton, NSpace, NIcon } from "naive-ui";
 import {
   _Element_Fullscreen,
+  _Element_FullscreenObserver,
   _Element_IsFullscreen,
 } from "nhanh-pure-function";
-import { onBeforeUnmount, ref } from "vue";
+import { ref } from "vue";
 import WeatherInfo from "./weatherInfo/index.vue";
 import Media from "@/stores/media";
 
@@ -56,14 +57,7 @@ function GotoGitHub() {
 const isFullScreen = ref(false);
 /** 全屏切换 */
 const toggleFullScreen = _Element_Fullscreen();
-/** 全屏切换监测 */
-const resizeObserver = new ResizeObserver(() => {
-  isFullScreen.value = _Element_IsFullscreen();
-});
-resizeObserver.observe(document.documentElement);
-onBeforeUnmount(() => {
-  resizeObserver?.disconnect();
-});
+_Element_FullscreenObserver((isFull) => (isFullScreen.value = isFull));
 </script>
 
 <template>

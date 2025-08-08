@@ -20,6 +20,7 @@ import {
 import {
   _Browser_CopyToClipboard,
   _Element_Fullscreen,
+  _Element_FullscreenObserver,
   _Element_IsFullscreen,
   _Tip,
 } from "nhanh-pure-function";
@@ -48,18 +49,15 @@ watch(
 const isFullScreen = ref(false);
 const toggleFullScreen = ref();
 
-/** 全屏切换监测 */
-const resizeObserver = new ResizeObserver(() => {
-  isFullScreen.value = _Element_IsFullscreen(cardRef.value?.$el);
-});
-
 onMounted(() => {
   toggleFullScreen.value = _Element_Fullscreen(cardRef.value.$el);
-  resizeObserver.observe(cardRef.value.$el);
+  _Element_FullscreenObserver(
+    (isFull) => (isFullScreen.value = isFull),
+    cardRef.value.$el
+  );
 });
 onBeforeUnmount(() => {
   componentRef.value?.myCanvas.destroy();
-  resizeObserver?.disconnect();
 });
 </script>
 
