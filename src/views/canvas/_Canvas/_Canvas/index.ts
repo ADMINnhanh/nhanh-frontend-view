@@ -23,6 +23,17 @@ function FlattenAll<T>(arr: any): T[] {
   return [arr].flat(Infinity) as T[];
 }
 
+// class b {
+//   b = 2;
+// }
+// class c {
+//   static B = b;
+//   c = 3;
+// }
+// const arr: InstanceType<(typeof c)["B"]>[] = [];
+// const b1 = new c.B();
+// arr.push(b1);
+
 /** 你好啊你好的画布工具 */
 export default class _Canvas extends QuickMethod {
   /** 图层群组 */
