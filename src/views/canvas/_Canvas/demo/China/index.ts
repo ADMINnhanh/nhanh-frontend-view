@@ -2,16 +2,18 @@ import {
   _Format_NumberWithUnit,
   _Math_LngLatToPlane,
   _File_Read,
+  _Canvas,
 } from "nhanh-pure-function";
-import _Canvas from "../../_Canvas";
+import type {
+  OverlayType,
+  Point,
+  EventHandler,
+  OverlayGroup,
+} from "nhanh-pure-function";
 import { markRaw, ref, shallowRef } from "vue";
-import type OverlayGroup from "../../_Canvas/OverlayGroup";
-import type { EventHandler } from "../../_Canvas/public/eventController";
-import type Point from "../../_Canvas/OverlayGroup/point";
 import provinceInfoMap from "./data/provinceInfoMap";
 import attractions from "./data/attractions";
 import HeatMap from "heatmap-ts";
-import type { OverlayType } from "../../_Canvas/OverlayGroup";
 
 //#region 中国地图数据
 type FeatureCollection = {

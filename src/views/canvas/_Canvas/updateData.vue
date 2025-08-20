@@ -1,5 +1,9 @@
 <script setup lang="ts">
-import { _Utility_GenerateUUID } from "nhanh-pure-function";
+import {
+  _Utility_GenerateUUID,
+  _Canvas,
+  type Overlay,
+} from "nhanh-pure-function";
 import {
   NButton,
   NSpace,
@@ -7,8 +11,6 @@ import {
   NButtonGroup,
   NCollapseTransition,
 } from "naive-ui";
-import type Overlay from "./_Canvas/OverlayGroup/public/overlay";
-import type _Canvas from "./_Canvas";
 import { ref } from "vue";
 
 type Value = [number, number] | [number, number][];

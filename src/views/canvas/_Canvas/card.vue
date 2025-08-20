@@ -23,9 +23,9 @@ import {
   _Element_FullscreenObserver,
   _Element_IsFullscreen,
   _Tip,
+  _Canvas,
 } from "nhanh-pure-function";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
-import type _Canvas from "./_Canvas";
 import { Settings } from "@/components/popups/components/Settings";
 
 interface Props {

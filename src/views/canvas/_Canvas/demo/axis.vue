@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { _Utility_GenerateUUID } from "nhanh-pure-function";
-import _Canvas from "../_Canvas";
+import { _Utility_GenerateUUID, _Canvas } from "nhanh-pure-function";
 import { onMounted, ref, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import {
