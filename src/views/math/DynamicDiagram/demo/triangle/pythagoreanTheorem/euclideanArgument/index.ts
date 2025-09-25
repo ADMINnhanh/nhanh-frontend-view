@@ -1,4 +1,4 @@
-import _Canvas from "@/views/canvas/_Canvas/_Canvas";
+import { _Canvas } from "nhanh-pure-function";
 import {
   _Animate_NumericTransition,
   _Math_CalculateDistance2D,

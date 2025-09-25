@@ -2,8 +2,8 @@
 import {
   _Animate_CreateOscillator,
   _Browser_GetFrameRate,
+  _Canvas,
 } from "nhanh-pure-function";
-import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onBeforeUnmount, ref, watch } from "vue";
 import { NButton, NIcon, NSlider } from "naive-ui";
 import {

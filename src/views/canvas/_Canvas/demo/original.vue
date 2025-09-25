@@ -7,7 +7,10 @@ const id = _Utility_GenerateUUID();
 let myCanvas = shallowRef<_Canvas>();
 
 onMounted(() => {
-  myCanvas.value = new _Canvas({ id, theme: Settings.value.theme });
+  myCanvas.value = new _Canvas({
+    id,
+    theme: Settings.value.theme,
+  });
 });
 defineExpose({ myCanvas });
 </script>

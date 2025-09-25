@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, ref, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, GOLDEN_RATIO } from ".";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
+import { _Canvas } from "nhanh-pure-function";
 
 let myCanvas = shallowRef<_Canvas>();
 

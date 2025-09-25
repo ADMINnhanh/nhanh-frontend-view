@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import {
   _Animate_CreateOscillator,
+  _Canvas,
   _Utility_GenerateUUID,
 } from "nhanh-pure-function";
-import _Canvas from "@/views/canvas/_Canvas/_Canvas";
 import { onMounted, ref, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
-
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
 import Media from "@/stores/media";

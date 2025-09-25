@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import _Canvas from "@/views/canvas/_Canvas/_Canvas";
+import { _Canvas } from "nhanh-pure-function";
 import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, Update, J_ABC, isPlay, Tips } from ".";
