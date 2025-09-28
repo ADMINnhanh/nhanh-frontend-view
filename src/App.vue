@@ -10,6 +10,8 @@ import { NSpinValue } from "@/stores/globalLoading";
 import UseGlobal from "@/views/UseGlobal.vue";
 import { configProviderPropsRef } from "./utils/windows";
 import { computed } from "vue";
+import katex from "katex";
+import "katex/dist/katex.css";
 
 const NSpinApi = computed(() => {
   return {
@@ -32,7 +34,7 @@ window.addEventListener("resize", UpdateVh);
 
 <template>
   <!-- config 全局配置 -->
-  <n-config-provider :="configProviderPropsRef">
+  <n-config-provider :="configProviderPropsRef" :katex="katex">
     <!-- dialog 全局弹窗 -->
     <n-dialog-provider>
       <!-- message 全局消息提示 -->

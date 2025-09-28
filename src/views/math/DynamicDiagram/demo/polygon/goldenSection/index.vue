@@ -1,22 +1,17 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, GOLDEN_RATIO } from ".";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import { _Canvas } from "nhanh-pure-function";
+import { NEquation } from "naive-ui";
 
 let myCanvas = shallowRef<_Canvas>();
 
-const math = ref();
-
-onMounted(() => {
-  window.katex.render(
-    `\\begin{aligned}
+const equation = `\\begin{aligned}
    &\\frac{AP}{AB} = \\frac{PB}{AP} \\approx ${GOLDEN_RATIO};
-  \\end{aligned}`,
-    math.value
-  );
-
+  \\end{aligned}`;
+onMounted(() => {
   myCanvas.value = new _Canvas({
     id,
     theme: Settings.value.theme,
@@ -30,7 +25,7 @@ onMounted(() => {
 <template>
   <Card :canvas="myCanvas" vertical alert="黄金分割">
     <template #alert-content>
-      <div ref="math" class="math"></div>
+      <NEquation :value="equation" />
     </template>
     <canvas :id="id"></canvas>
   </Card>

@@ -1,28 +1,24 @@
 <script setup lang="ts">
 import { _Canvas } from "nhanh-pure-function";
-import { onMounted, ref, shallowRef } from "vue";
+import { onMounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, Update, J_ABC } from ".";
 import Oscillator from "@/views/math/DynamicDiagram/components/Oscillator.vue";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import Media from "@/stores/media";
+import { NEquation } from "naive-ui";
 
 let myCanvas = shallowRef<_Canvas>();
 
-const math = ref();
-
-onMounted(() => {
-  window.katex.render(
-    `\\begin{aligned}
+const equation = `\\begin{aligned}
 S_{\\text{月牙}} &= S_{\\text{整}} - S_{\\text{半圆}BC} \\\\ 
 &= S_{\\text{半圆}BA} + S_{\\text{半圆}CA} + S_{\\triangle BCA} - S_{\\text{半圆}BC} \\\\
 &= \\frac{\\pi}{8}BA^2 + \\frac{\\pi}{8}CA^2 + S_{\\triangle BCA} - \\frac{\\pi}{8}BC^2 \\\\
 &= \\frac{\\pi}{8}\\left(BA^2 + CA^2 - BC^2\\right) + S_{\\triangle BCA} \\\\
 &= S_{\\triangle BCA}
-\\end{aligned}`,
-    math.value
-  );
+\\end{aligned}`;
 
+onMounted(() => {
   myCanvas.value = new _Canvas({
     id,
     theme: Settings.value.theme,
@@ -40,7 +36,7 @@ S_{\\text{月牙}} &= S_{\\text{整}} - S_{\\text{半圆}BC} \\\\
 <template>
   <Card :canvas="myCanvas" alert="希波克拉底月牙定理">
     <template #alert-content>
-      <div ref="math" class="math"></div>
+      <NEquation :value="equation" />
     </template>
     <Oscillator
       :canvas="myCanvas"

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted, ref, shallowRef, watch } from "vue";
+import { onMounted, shallowRef, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, Update, Transform, t } from ".";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import { _Canvas } from "nhanh-pure-function";
+import { NEquation } from "naive-ui";
 
 let myCanvas = shallowRef<_Canvas>();
 
@@ -24,10 +25,7 @@ watch(
   }
 );
 
-const math = ref();
-onMounted(() => {
-  window.katex.render(
-    `\\begin{aligned}
+const equation = `\\begin{aligned}
   &\\text{已知}:\\ AD = DB,\\ AE = EC; \\\\
   &\\text{作DE的延长线至F，使} EF = DE, \\text{并连接CF}; \\\\
   &\\therefore \\triangle ADE \\cong \\triangle EFC; \\\\
@@ -35,10 +33,8 @@ onMounted(() => {
   &\\because DB = CF;  \\\\
   &\\therefore \\square DFCB \\text{ 是平行四边形}; \\\\
   &\\therefore DE = \\frac{BC}{2};
-  \\end{aligned}`,
-    math.value
-  );
-
+  \\end{aligned}`;
+onMounted(() => {
   myCanvas.value = new _Canvas({
     id,
     theme: Settings.value.theme,
@@ -58,7 +54,7 @@ onMounted(() => {
     :tips-animation="Transform"
   >
     <template #alert-content>
-      <div ref="math" class="math"></div>
+      <NEquation :value="equation" />
     </template>
     <canvas :id="id"></canvas>
   </Card>
