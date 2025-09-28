@@ -119,7 +119,6 @@ onBeforeUnmount(() => {
     margin-bottom: 10px;
   }
   .n-slider {
-    width: 20px;
     height: 100px;
     flex-grow: 1;
   }

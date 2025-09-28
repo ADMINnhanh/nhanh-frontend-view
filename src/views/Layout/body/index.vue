@@ -156,7 +156,7 @@ if (import.meta.env.DEV) {
         />
         <template #suffix>
           <NButton
-            :disabled="panels.length == 1"
+            v-if="panels.length > 2"
             size="small"
             quaternary
             @click="CloseOtherPanel"
