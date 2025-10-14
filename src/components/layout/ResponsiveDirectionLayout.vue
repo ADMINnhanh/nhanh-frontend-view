@@ -3,7 +3,14 @@ import Media from "@/stores/media";
 import { NSplit } from "naive-ui";
 import { ref, shallowRef } from "vue";
 
-const size = ref(0.25);
+interface Props {
+  defaultSize?: number;
+}
+const props = withDefaults(defineProps<Props>(), {
+  defaultSize: 0.25,
+});
+
+const size = ref(props.defaultSize);
 
 const split = shallowRef();
 requestAnimationFrame(() => {

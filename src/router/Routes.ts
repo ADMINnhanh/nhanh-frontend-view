@@ -175,6 +175,17 @@ const relaxRouting: CustomRouteRecord = {
       },
       component: () => import("@/views/relax/Knowledge/index.vue"),
     },
+    {
+      path: "Novel",
+      name: "Novel",
+      meta: {
+        name: {
+          zhCN: "小说节点搜索",
+          enUS: "Novel",
+        },
+      },
+      component: () => import("@/views/relax/Novel/index.vue"),
+    },
   ],
 };
 
