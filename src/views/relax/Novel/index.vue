@@ -11,6 +11,7 @@ import {
   NEllipsis,
   NRadio,
   NRadioGroup,
+  NPopconfirm,
 } from "naive-ui";
 import { CreateOutline, TrashBinOutline } from "@vicons/ionicons5";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
@@ -94,16 +95,16 @@ function addNovelCallback(promie: Promise<void>) {
                           <NIcon :component="CreateOutline" />
                         </template>
                       </NButton>
-                      <NButton
-                        type="error"
-                        quaternary
-                        size="small"
-                        @click="deleteNovel(novel.id!)"
-                      >
-                        <template #icon>
-                          <NIcon :component="TrashBinOutline" />
+                      <NPopconfirm @positive-click="deleteNovel(novel.id!)">
+                        <template #trigger>
+                          <NButton type="error" quaternary size="small">
+                            <template #icon>
+                              <NIcon :component="TrashBinOutline" />
+                            </template>
+                          </NButton>
                         </template>
-                      </NButton>
+                        确认删除该小说吗？
+                      </NPopconfirm>
                     </NSpace>
                   </template>
                 </NCard>
