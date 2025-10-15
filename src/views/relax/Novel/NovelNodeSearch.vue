@@ -16,6 +16,7 @@ import {
   NDrawerContent,
   NText,
   NButtonGroup,
+  NInputGroupLabel,
 } from "naive-ui";
 import {
   ArrowBackOutline,
@@ -36,7 +37,6 @@ interface Props {
 }
 const props = defineProps<Props>();
 
-// 见阳环
 const loading = ref(false);
 const keyword = ref("");
 type Chapters = {
@@ -98,7 +98,7 @@ function goToNextChapter() {
 
 <template>
   <NSpin v-if="novelId" :show="loading">
-    <NAlert v-if="novel" type="info" :title="novel.name" closable>
+    <NAlert v-if="novel" type="info" :title="novel.name">
       <NFlex>
         <NTag round type="info">
           章节总数: {{ _Format_NumberWithCommas(novel.chapterCount) }}
@@ -110,6 +110,9 @@ function goToNextChapter() {
       </NFlex>
     </NAlert>
     <NInputGroup>
+      <NInputGroupLabel>
+        共匹配到 {{ chaptersByKeyword ? chaptersByKeyword.length : "*" }} 章
+      </NInputGroupLabel>
       <NInput
         v-model:value="keyword"
         :disabled="loading"
@@ -180,14 +183,15 @@ function goToNextChapter() {
   </NSpin>
   <NEmpty v-else description="还未选择小说" />
 
-  <NDrawer v-model:show="active" :width="1000" :auto-focus="false">
+  <NDrawer
+    v-model:show="active"
+    style="width: 1000px; max-width: 100vw"
+    :auto-focus="false"
+  >
     <NDrawerContent closable>
       <template #header>
         <NSpace align="center">
-          <NText>
-            {{ chapterDetails?.title }}
-            还未选择小说
-          </NText>
+          <NText>{{ chapterDetails?.title }}</NText>
           <NButtonGroup>
             <NButton @click="goToPrevChapter">
               <template #icon>
