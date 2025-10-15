@@ -1,0 +1,1 @@
+import{d as n,aP as t,cq as o,av as c,dm as l,aN as r,o as m,c as i,u}from"./index-EfoIWUQ8.js";const _=["id"],h=n({__name:"original",setup(d,{expose:s}){const e=t();let a=o();return c(()=>{a.value=new l({id:e,theme:r.value.theme})}),s({myCanvas:a}),(p,f)=>(m(),i("canvas",{id:u(e),class:"my-canvas"},null,8,_))}});export{h as default};
