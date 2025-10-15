@@ -1,0 +1,1 @@
+import{d as n,aP as t,cp as o,av as c,dl as l,aN as r,o as i,c as m,u}from"./index-DRU1KIa-.js";const _=["id"],h=n({__name:"original",setup(d,{expose:s}){const e=t();let a=o();return c(()=>{a.value=new l({id:e,theme:r.value.theme})}),s({myCanvas:a}),(p,f)=>(i(),m("canvas",{id:u(e),class:"my-canvas"},null,8,_))}});export{h as default};
