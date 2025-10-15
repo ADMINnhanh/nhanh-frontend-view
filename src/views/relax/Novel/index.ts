@@ -81,6 +81,8 @@ export class NovelService {
     const content = await this.readFileAsText(file);
     const chapters = this.parseChapters(content, regular);
 
+    if (chapters.length == 0) return Promise.reject("未匹配到任何章节");
+
     return this.db.transaction(
       "rw",
       this.db.novels,
@@ -341,7 +343,7 @@ export class NovelService {
     regular: string
   ): Array<{ title: string; content: string }> {
     // 正则表达式匹配"第X章 标题"格式
-    // const chapterRegex = /第[^\n]+章[^\n]*\n/g;
+    // const chapterRegex = /第(?:[零一二三四五六七八九十百千万亿]+|\\d+)章[^\\n]*/g;
     const chapterRegex = new RegExp(regular, "g");
     const chapters: Array<{ title: string; content: string }> = [];
 
@@ -395,6 +397,9 @@ export class NovelService {
 /** 初始化服务 */
 export const novelService = new NovelService();
 
+const errorMsg = (msg: string) =>
+  window.$message.error(msg, { duration: 5000 });
+
 /** 导入新小说 */
 export async function importNewNovel(file: File, regular: string) {
   try {
@@ -403,7 +408,9 @@ export async function importNewNovel(file: File, regular: string) {
     window.$message.success("导入成功: " + file.name);
   } catch (error) {
     console.error("导入失败:", error);
-    window.$message.error("导入失败: " + file.name);
+    errorMsg(
+      "导入失败: " + file.name + (typeof error == "string" ? " " + error : "")
+    );
   }
 }
 
@@ -414,7 +421,7 @@ export async function searchNovels(keyword: string) {
     console.log("搜索结果:", results);
   } catch (error) {
     console.error("搜索失败:", error);
-    window.$message.error("搜索失败");
+    errorMsg("搜索失败");
   }
 }
 
@@ -444,7 +451,7 @@ export function renameNovel(novel: Novel, callback: () => void) {
       window.$message.success("重命名成功");
     } catch (error) {
       console.error("重命名失败:", error);
-      window.$message.error("重命名失败");
+      errorMsg("重命名失败");
     }
   }
 }

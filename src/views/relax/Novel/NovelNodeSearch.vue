@@ -14,8 +14,15 @@ import {
   NTag,
   NDrawer,
   NDrawerContent,
+  NText,
+  NButtonGroup,
 } from "naive-ui";
-import { DocumentTextOutline, SearchOutline } from "@vicons/ionicons5";
+import {
+  ArrowBackOutline,
+  ArrowForwardOutline,
+  DocumentTextOutline,
+  SearchOutline,
+} from "@vicons/ionicons5";
 import { ref, watch } from "vue";
 import { NovelService, novelService, type Chapter, type Novel } from ".";
 import {
@@ -74,6 +81,18 @@ function openChapter(item: Chapter) {
     chapterDetails.value = { ...item, content: v };
     active.value = true;
   });
+}
+function goToPrevChapter() {
+  const order = chapterDetails.value!.order - 2;
+  const item = chapters.value![order];
+  if (item) openChapter(item);
+  else window.$message.warning("没有上一章了");
+}
+function goToNextChapter() {
+  const order = chapterDetails.value!.order;
+  const item = chapters.value![order];
+  if (item) openChapter(item);
+  else window.$message.warning("没有下一章了");
 }
 </script>
 
@@ -161,8 +180,30 @@ function openChapter(item: Chapter) {
   </NSpin>
   <NEmpty v-else description="还未选择小说" />
 
-  <NDrawer v-model:show="active" :width="1000">
-    <NDrawerContent :title="chapterDetails?.title" closable>
+  <NDrawer v-model:show="active" :width="1000" :auto-focus="false">
+    <NDrawerContent closable>
+      <template #header>
+        <NSpace align="center">
+          <NText>
+            {{ chapterDetails?.title }}
+            还未选择小说
+          </NText>
+          <NButtonGroup>
+            <NButton @click="goToPrevChapter">
+              <template #icon>
+                <NIcon :component="ArrowBackOutline" />
+              </template>
+              上一章
+            </NButton>
+            <NButton @click="goToNextChapter" icon-placement="right">
+              <template #icon>
+                <NIcon :component="ArrowForwardOutline" />
+              </template>
+              下一章
+            </NButton>
+          </NButtonGroup>
+        </NSpace>
+      </template>
       <ChapterContent v-html="chapterDetails?.content" />
     </NDrawerContent>
   </NDrawer>

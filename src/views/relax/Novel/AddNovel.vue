@@ -14,11 +14,14 @@ import {
   NInput,
   NA,
   NSpace,
-  NSwitch,
 } from "naive-ui";
-import { ArchiveOutline } from "@vicons/ionicons5";
+import { ArchiveOutline, CopyOutline } from "@vicons/ionicons5";
 import { importNewNovel } from ".";
-import { _Format_NumberWithUnit } from "nhanh-pure-function";
+import {
+  _Browser_CopyToClipboard,
+  _Format_NumberWithUnit,
+  _Tip,
+} from "nhanh-pure-function";
 import { ref } from "vue";
 
 interface Props {
@@ -30,7 +33,6 @@ let file: File | null | undefined;
 const showModal = ref(false);
 const formRef = ref<FormInst | null>(null);
 const formValue = ref({
-  join: true,
   title: "",
   regular: "",
 });
@@ -44,10 +46,11 @@ const rules: FormRules = {
     validator(rule, value) {
       if (!value) return new Error("请输入 正则");
 
-      const join = formValue.value.join ? "\\n" : "";
-      const title = formValue.value.title + join;
+      const title = formValue.value.title;
       const regular = new RegExp(value);
       const matchResult = title.match(regular);
+
+      if (value && !title) return true;
 
       if (matchResult) {
         const result = matchResult[0];
@@ -91,7 +94,7 @@ function analysis(fileList: UploadFileInfo[]) {
   file = fileList[0].file;
   if (!file) return window.$message.error("文件异常");
 
-  // props.callback(importNewNovel(file));
+  showModal.value = true;
 }
 </script>
 
@@ -107,8 +110,9 @@ function analysis(fileList: UploadFileInfo[]) {
   <NModal
     v-model:show="showModal"
     preset="card"
-    style="width: 500px"
+    style="width: 600px"
     title="章节标题正则配置"
+    :auto-focus="false"
   >
     <NForm
       ref="formRef"
@@ -128,23 +132,48 @@ function analysis(fileList: UploadFileInfo[]) {
           <NSpace>
             <NText depth="3">示例 - 标题</NText>
             <NText code>第1章 初入</NText>
+            <NButton
+              text
+              type="success"
+              @click="
+                _Tip
+                  .success('复制成功')
+                  .error('复制失败')
+                  .run(_Browser_CopyToClipboard('第1章 初入'))
+              "
+            >
+              <template #icon>
+                <NIcon :component="CopyOutline" />
+              </template>
+            </NButton>
           </NSpace>
-          <NSpace>
+          <NSpace align="center">
             <NText depth="3">示例 - 正则</NText>
-            <NText code>第[^\\n]+章[^\\n]*\\n</NText>
+            <NText code>
+              第 *(?:[零一二三四五六七八九十百千万亿]+|\d+) *章[^\n]*
+            </NText>
+            <NButton
+              text
+              type="success"
+              @click="
+                _Tip
+                  .success('复制成功')
+                  .error('复制失败')
+                  .run(
+                    _Browser_CopyToClipboard(
+                      '第 *(?:[零一二三四五六七八九十百千万亿]+|\\d+) *章[^\\n]*'
+                    )
+                  )
+              "
+            >
+              <template #icon>
+                <NIcon :component="CopyOutline" />
+              </template>
+            </NButton>
           </NSpace>
         </NSpace>
       </NFormItem>
 
-      <NFormItem path="join">
-        <template #label>
-          <NSpace>
-            <NText> 验证时在标题末尾拼接 </NText>
-            <NText code>\\n</NText>
-          </NSpace>
-        </template>
-        <NSwitch v-model:value="formValue.join" />
-      </NFormItem>
       <NFormItem label="标题" path="title">
         <n-input
           v-model:value="formValue.title"
@@ -171,4 +200,13 @@ function analysis(fileList: UploadFileInfo[]) {
   </NModal>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+:deep(.n-upload-dragger) {
+  padding: 10px;
+}
+.n-space {
+  :deep(> div) {
+    display: flex;
+  }
+}
+</style>
