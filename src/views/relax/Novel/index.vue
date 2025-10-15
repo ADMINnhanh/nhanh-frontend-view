@@ -3,11 +3,7 @@ import {
   NCard,
   NSpace,
   NScrollbar,
-  NUpload,
-  NUploadDragger,
   NIcon,
-  NText,
-  type UploadFileInfo,
   NButton,
   NSpin,
   NInput,
@@ -16,17 +12,13 @@ import {
   NRadio,
   NRadioGroup,
 } from "naive-ui";
-import {
-  ArchiveOutline,
-  CreateOutline,
-  Prism,
-  TrashBinOutline,
-} from "@vicons/ionicons5";
+import { CreateOutline, TrashBinOutline } from "@vicons/ionicons5";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
 import { computed, ref } from "vue";
-import { importNewNovel, novelService, renameNovel, type Novel } from ".";
+import { novelService, renameNovel, type Novel } from ".";
 import { _Format_NumberWithUnit } from "nhanh-pure-function";
 import NovelNodeSearch from "./NovelNodeSearch.vue";
+import AddNovel from "./AddNovel.vue";
 
 const loading = ref(false);
 const keyword = ref("");
@@ -53,18 +45,9 @@ function deleteNovel(id: number) {
   loading.value = true;
   novelService.deleteNovel(id).finally(updateNovelList);
 }
-
-const fileList = ref<UploadFileInfo[]>([]);
-function analysis() {
+function addNovelCallback(promie: Promise<void>) {
   loading.value = true;
-  const promies = fileList.value
-    .map((file) => {
-      if (!file.file) return;
-      return importNewNovel(file.file);
-    })
-    .filter(Boolean);
-  Promise.allSettled(promies).finally(updateNovelList);
-  fileList.value = [];
+  promie.finally(updateNovelList);
 }
 </script>
 
@@ -74,31 +57,7 @@ function analysis() {
       <NScrollbar style="max-height: 100%">
         <NSpin :show="loading">
           <NSpace class="left-space" vertical>
-            <NUpload
-              v-model:file-list="fileList"
-              multiple
-              directory-dnd
-              accept="text/*"
-            >
-              <NUploadDragger>
-                <div style="margin-bottom: 6px">
-                  <NIcon size="35" :depth="3" :component="ArchiveOutline" />
-                </div>
-                <NText> 点击或者拖动文件到该区域来上传 </NText>
-              </NUploadDragger>
-            </NUpload>
-            <NSpace justify="end">
-              <NButton
-                type="primary"
-                :disabled="fileList.length == 0"
-                @click="analysis"
-              >
-                <template #icon>
-                  <NIcon :component="Prism" />
-                </template>
-                解析
-              </NButton>
-            </NSpace>
+            <AddNovel :callback="addNovelCallback" />
             <NCard v-if="novelList.length > 0" title="书架" size="small">
               <template #header-extra>
                 <NInput

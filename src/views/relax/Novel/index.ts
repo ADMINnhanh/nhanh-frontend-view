@@ -75,14 +75,11 @@ export class NovelService {
   /**
    * 解析并导入小说文件
    * @param file 小说文件
-   * @param existingNovelId 如果提供，表示覆盖现有小说
+   * @param regular 章节标题正则表达式
    */
-  async importNovel(
-    file: File,
-    existingNovelId?: number
-  ): Promise<Novel | undefined> {
+  async importNovel(file: File, regular: string): Promise<Novel | undefined> {
     const content = await this.readFileAsText(file);
-    const chapters = this.parseChapters(content);
+    const chapters = this.parseChapters(content, regular);
 
     return this.db.transaction(
       "rw",
@@ -90,23 +87,6 @@ export class NovelService {
       this.db.chapters,
       this.db.chapterContents,
       async () => {
-        let novelId = existingNovelId;
-
-        // 如果是覆盖模式，先删除原有数据
-        if (novelId) {
-          const chaptersToDelete = await this.db.chapters
-            .where("novelId")
-            .equals(novelId)
-            .toArray();
-          const chapterIds = chaptersToDelete.map((ch) => ch.id!);
-
-          await this.db.chapterContents
-            .where("chapterId")
-            .anyOf(chapterIds)
-            .delete();
-          await this.db.chapters.where("novelId").equals(novelId).delete();
-        }
-
         // 计算总内容长度
         const contentLength = chapters.reduce(
           (sum, ch) => sum + ch.content.length,
@@ -114,22 +94,13 @@ export class NovelService {
         );
         const now = new Date().toISOString();
 
-        // 创建或更新小说记录
-        if (novelId) {
-          await this.db.novels.update(novelId, {
-            chapterCount: chapters.length,
-            contentLength,
-            updatedTime: now,
-          });
-        } else {
-          novelId = await this.db.novels.add({
-            name: file.name.replace(/\.[^/.]+$/, ""), // 从文件名提取小说名
-            chapterCount: chapters.length,
-            contentLength,
-            createdTime: now,
-            updatedTime: now,
-          });
-        }
+        const novelId = await this.db.novels.add({
+          name: file.name.replace(/\.[^/.]+$/, ""), // 从文件名提取小说名
+          chapterCount: chapters.length,
+          contentLength,
+          createdTime: now,
+          updatedTime: now,
+        });
 
         // 批量添加章节和内容
         for (let i = 0; i < chapters.length; i++) {
@@ -238,15 +209,12 @@ export class NovelService {
     }));
   }
 
-  static keywordSpan(src: string, keyword: string) {
-    const span = ` <span
-                      style="
-                        color: var(--n-color-target);
-                        font-weight: bold;
-                        text-decoration: underline;
-                      "
-                    >${keyword}</span> `;
-    return src.replace(new RegExp(keyword, "g"), span);
+  static formatString(str: string, keyword?: string) {
+    if (keyword) {
+      const span = ` <span class="keyword">${keyword}</span> `;
+      str = str.replace(new RegExp(keyword, "g"), span);
+    }
+    return str.replace(/\n/g, `<div class="gap"></div>`);
   }
 
   /**
@@ -320,12 +288,20 @@ export class NovelService {
 
       results.push({
         chapter,
-        contentSnippet: NovelService.keywordSpan(snippet, keyword),
+        contentSnippet: NovelService.formatString(snippet, keyword),
       });
     }
 
     // 按章节顺序排序
     return results.sort((a, b) => a.chapter.order - b.chapter.order);
+  }
+
+  /**
+   * 获取小说
+   * @param novelId 小说ID
+   */
+  async getNovel(novelId: number): Promise<Novel> {
+    return (await this.db.novels.toArray()).find((n) => n.id === novelId)!;
   }
 
   /**
@@ -358,12 +334,15 @@ export class NovelService {
   /**
    * 按章节标题分割小说内容
    * @param content 完整小说文本
+   * @param regular 章节标题正则表达式
    */
   private parseChapters(
-    content: string
+    content: string,
+    regular: string
   ): Array<{ title: string; content: string }> {
     // 正则表达式匹配"第X章 标题"格式
-    const chapterRegex = /第[^\n]+章[^\n]*\n/g;
+    // const chapterRegex = /第[^\n]+章[^\n]*\n/g;
+    const chapterRegex = new RegExp(regular, "g");
     const chapters: Array<{ title: string; content: string }> = [];
 
     let match;
@@ -417,26 +396,14 @@ export class NovelService {
 export const novelService = new NovelService();
 
 /** 导入新小说 */
-export async function importNewNovel(file: File) {
+export async function importNewNovel(file: File, regular: string) {
   try {
-    const novel = await novelService.importNovel(file);
+    const novel = await novelService.importNovel(file, regular);
     console.log("导入成功:", novel);
     window.$message.success("导入成功: " + file.name);
   } catch (error) {
     console.error("导入失败:", error);
     window.$message.error("导入失败: " + file.name);
-  }
-}
-
-/** 覆盖现有小说 */
-export async function overwriteNovel(file: File, novelId: number) {
-  try {
-    const novel = await novelService.importNovel(file, novelId);
-    console.log("覆盖成功:", novel);
-    window.$message.success("覆盖成功: " + file.name);
-  } catch (error) {
-    console.error("覆盖失败:", error);
-    window.$message.error("覆盖失败: " + file.name);
   }
 }
 

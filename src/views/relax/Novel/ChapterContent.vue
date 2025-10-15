@@ -1,0 +1,41 @@
+<script setup lang="ts">
+import { useThemeVars } from "naive-ui";
+
+interface Props {
+  min?: boolean;
+}
+const props = defineProps<Props>();
+
+const themeVars = useThemeVars();
+</script>
+
+<template>
+  <div
+    :class="['chapter-content', min && 'min']"
+    :style="{ '--keyword-color': themeVars.primaryColor }"
+  ></div>
+</template>
+
+<style scoped lang="less">
+.min.chapter-content {
+  line-height: 2;
+  font-size: 18px;
+  :deep(.gap) {
+    height: 10px;
+  }
+}
+.chapter-content {
+  line-height: 2.5;
+  font-size: 20px;
+  font-weight: bold;
+  font-family: cursive;
+  :deep(.gap) {
+    height: 30px;
+  }
+  :deep(.keyword) {
+    color: var(--keyword-color);
+    font-weight: bold;
+    text-decoration: underline;
+  }
+}
+</style>

@@ -9,10 +9,20 @@ import {
   NInput,
   NEmpty,
   NInputGroup,
+  NAlert,
+  NFlex,
+  NTag,
+  NDrawer,
+  NDrawerContent,
 } from "naive-ui";
 import { DocumentTextOutline, SearchOutline } from "@vicons/ionicons5";
-import { computed, ref, watch } from "vue";
-import { novelService, type Chapter } from ".";
+import { ref, watch } from "vue";
+import { NovelService, novelService, type Chapter, type Novel } from ".";
+import {
+  _Format_NumberWithCommas,
+  _Format_NumberWithUnit,
+} from "nhanh-pure-function";
+import ChapterContent from "./ChapterContent.vue";
 
 interface Props {
   novelId?: number;
@@ -20,22 +30,29 @@ interface Props {
 const props = defineProps<Props>();
 
 // 见阳环
-
 const loading = ref(false);
 const keyword = ref("");
-const chapters = ref<
-  {
-    chapter: Chapter;
-    contentSnippet: string;
-  }[]
->();
+type Chapters = {
+  chapter: Chapter;
+  contentSnippet: string;
+}[];
+const novel = ref<Novel>();
+const chapters = ref<Chapter[]>();
+const chaptersByKeyword = ref<Chapters>();
 watch(
   () => props.novelId,
   (id) => {
-    if (!id) {
-      chapters.value = undefined;
-      keyword.value = "";
-      loading.value = false;
+    chapters.value = undefined;
+    chaptersByKeyword.value = undefined;
+    keyword.value = "";
+    loading.value = false;
+    if (id) {
+      loading.value = true;
+      const promises = [
+        novelService.getNovel(id).then((v) => (novel.value = v)),
+        novelService.getChapters(id).then((v) => (chapters.value = v)),
+      ];
+      Promise.allSettled(promises).finally(() => (loading.value = false));
     }
   }
 );
@@ -45,71 +62,131 @@ function search() {
 
   novelService
     .searchChapters(props.novelId!, keyword.value)
-    .then((v) => (chapters.value = v))
+    .then((v) => (chaptersByKeyword.value = v))
     .finally(() => (loading.value = false));
+}
+
+const active = ref(false);
+const chapterDetails = ref<Chapter & { content: string }>();
+function openChapter(item: Chapter) {
+  novelService.getChapterContent(item.id!).then((v) => {
+    v = NovelService.formatString(v || "", keyword.value);
+    chapterDetails.value = { ...item, content: v };
+    active.value = true;
+  });
 }
 </script>
 
 <template>
-  <div class="right-box">
+  <NSpin v-if="novelId" :show="loading">
+    <NAlert v-if="novel" type="info" :title="novel.name" closable>
+      <NFlex>
+        <NTag round type="info">
+          章节总数: {{ _Format_NumberWithCommas(novel.chapterCount) }}
+        </NTag>
+        <n-tag round type="info">
+          字符数: {{ _Format_NumberWithUnit(novel.contentLength) }}
+        </n-tag>
+        <n-tag round type="primary"> 更新时间: {{ novel.updatedTime }} </n-tag>
+      </NFlex>
+    </NAlert>
     <NInputGroup>
       <NInput
         v-model:value="keyword"
-        :disabled="loading || !novelId"
+        :disabled="loading"
         placeholder="请输入关键字"
         clearable
+        @keydown.enter="search"
       />
-      <NButton
-        :disabled="loading || !novelId || !keyword"
-        type="primary"
-        @click="search"
-      >
+      <NButton :disabled="loading || !keyword" type="primary" @click="search">
         <template #icon>
           <NIcon :component="SearchOutline" />
         </template>
         搜索
       </NButton>
     </NInputGroup>
-    <NScrollbar>
-      <NSpin :show="loading">
-        <NSpace vertical>
-          <NCard
-            v-if="chapters && chapters.length > 0"
-            v-for="novel in chapters"
-            :key="novel.chapter.id"
-            :title="novel.chapter.title"
+
+    <NScrollbar v-if="chaptersByKeyword && chaptersByKeyword.length > 0">
+      <NCard
+        v-for="novel in chaptersByKeyword"
+        :key="novel.chapter.id"
+        :title="novel.chapter.title"
+        size="small"
+        class="novel-card"
+        embedded
+      >
+        <template #header-extra>
+          <NButton
+            @click="openChapter(novel.chapter)"
+            type="info"
+            quaternary
             size="small"
-            class="novel-card"
-            embedded
           >
-            <template #header-extra>
-              <NSpace>
-                <NButton type="info" quaternary size="small">
-                  <template #icon>
-                    <NIcon :component="DocumentTextOutline" />
-                  </template>
-                  查看完整章节
-                </NButton>
-              </NSpace>
+            <template #icon>
+              <NIcon :component="DocumentTextOutline" />
             </template>
-            <div v-html="novel.contentSnippet"></div>
-          </NCard>
-          <NEmpty v-else-if="chapters" description="没有相关文字" />
-        </NSpace>
-      </NSpin>
+            查看完整章节
+          </NButton>
+        </template>
+        <ChapterContent v-html="novel.contentSnippet" min />
+      </NCard>
     </NScrollbar>
-  </div>
+    <NEmpty v-else-if="chaptersByKeyword" description="没有相关文字" />
+    <NScrollbar v-else-if="chapters">
+      <NCard
+        v-for="novel in chapters"
+        :key="novel.id"
+        :title="novel.title"
+        size="small"
+        class="novel-card"
+        embedded
+      >
+        <template #header-extra>
+          <NSpace>
+            <NButton
+              @click="openChapter(novel)"
+              type="info"
+              quaternary
+              size="small"
+            >
+              <template #icon>
+                <NIcon :component="DocumentTextOutline" />
+              </template>
+              查看章节
+            </NButton>
+          </NSpace>
+        </template>
+      </NCard>
+    </NScrollbar>
+  </NSpin>
+  <NEmpty v-else description="还未选择小说" />
+
+  <NDrawer v-model:show="active" :width="1000">
+    <NDrawerContent :title="chapterDetails?.title" closable>
+      <ChapterContent v-html="chapterDetails?.content" />
+    </NDrawerContent>
+  </NDrawer>
 </template>
 
 <style scoped lang="less">
-.right-box {
+.n-spin-container {
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  :deep(.n-scrollbar) {
-    margin-top: 10px;
-    height: 0;
-    flex-grow: 1;
+  :deep(.n-spin-content) {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    .n-input-group {
+      margin: 10px 0;
+    }
+    .n-scrollbar {
+      height: 0;
+      flex-grow: 1;
+      .n-card {
+        margin-bottom: 10px;
+        line-height: 2;
+        font-family: cursive;
+      }
+    }
   }
 }
 </style>
