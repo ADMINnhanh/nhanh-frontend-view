@@ -540,10 +540,10 @@ onUnmounted(() => {
         ghost
         type="success"
         @click="
-          _File_Download(
-            screenshotData,
-            `screenshot-${new Date().toISOString()}.png`
-          )
+          _File_Download({
+            href: screenshotData,
+            fileName: `screenshot-${new Date().toISOString()}.png`,
+          })
         "
       >
         下载
