@@ -231,7 +231,7 @@ export class NovelService {
   ): Promise<
     Array<{
       chapter: Chapter;
-      contentSnippet: string; // 包含关键字的内容片段
+      contentSnippet: string;
     }>
   > {
     if (!keyword.trim()) return [];
@@ -262,36 +262,63 @@ export class NovelService {
       let currentIndex = content.content.indexOf(keyword);
       while (currentIndex !== -1) {
         keywordPositions.push(currentIndex);
-        // 从下一个位置继续查找，避免重复匹配同一位置
         currentIndex = content.content.indexOf(
           keyword,
           currentIndex + keyword.length
         );
       }
 
-      if (keywordPositions.length === 0) continue; // 理论上不会触发，因为已过滤
+      if (keywordPositions.length === 0) continue;
 
-      // 第一个关键字位置和最后一个关键字结束位置
-      const firstPos = keywordPositions[0];
-      const lastPos =
-        keywordPositions[keywordPositions.length - 1] + keyword.length;
-
-      // 计算片段起止位置（包含前后上下文）
-      const start = Math.max(0, firstPos - 100);
-      const end = Math.min(content.content.length, lastPos + 100);
-
-      // 添加省略号表示截断
-      const prefix = start > 0 ? "..." : "";
-      const suffix = end < content.content.length ? "..." : "";
-      const snippet = `${prefix}${content.content.substring(
-        start,
-        end
-      )}${suffix}`;
-
-      results.push({
-        chapter,
-        contentSnippet: NovelService.formatString(snippet, keyword),
+      // 为每个关键字计算片段范围，并合并重叠或邻近的片段
+      const segments: [number, number][] = [];
+      keywordPositions.forEach((pos) => {
+        const start = Math.max(0, pos - 100);
+        const end = Math.min(
+          content.content.length,
+          pos + keyword.length + 100
+        );
+        segments.push([start, end]);
       });
+
+      // 合并重叠或距离过近的片段（间隔小于50字则合并）
+      if (segments.length > 0) {
+        // 按起始位置排序
+        segments.sort((a, b) => a[0] - b[0]);
+        const mergedSegments: [number, number][] = [segments[0]];
+
+        for (let i = 1; i < segments.length; i++) {
+          const last = mergedSegments[mergedSegments.length - 1];
+          const current = segments[i];
+
+          // 如果当前片段与上一个片段重叠或距离小于150，则合并
+          if (current[0] - last[1] < 150) {
+            mergedSegments[mergedSegments.length - 1] = [
+              last[0],
+              Math.max(last[1], current[1]),
+            ];
+          } else {
+            mergedSegments.push(current);
+          }
+        }
+
+        // 提取并拼接所有合并后的片段
+        let snippet = "";
+        mergedSegments.forEach(([start, end], index) => {
+          const prefix = start > 0 ? "\t..." : "";
+          const suffix = end < content.content.length ? "..." : "";
+          const segmentText = content.content.substring(start, end);
+
+          // 不同片段之间用省略号分隔
+          const separator = index > 0 ? "<br/><br/>" : "";
+          snippet += `${separator}${prefix}${segmentText}${suffix}`;
+        });
+
+        results.push({
+          chapter,
+          contentSnippet: NovelService.formatString(snippet, keyword),
+        });
+      }
     }
 
     // 按章节顺序排序
@@ -330,7 +357,7 @@ export class NovelService {
       .where("chapterId")
       .equals(chapterId)
       .first();
-    return content ? content.content : null;
+    return content ? "\t" + content.content : null;
   }
 
   /**

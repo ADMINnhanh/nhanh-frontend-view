@@ -37,6 +37,7 @@ interface Props {
 }
 const props = defineProps<Props>();
 
+
 const loading = ref(false);
 const keyword = ref("");
 type Chapters = {
@@ -65,6 +66,12 @@ watch(
 );
 
 function search() {
+  if (!keyword.value.trim()) {
+    loading.value = true;
+    setTimeout(() => (loading.value = false), 500);
+    return setTimeout(() => (chaptersByKeyword.value = undefined), 50);
+  }
+
   loading.value = true;
 
   novelService
@@ -75,13 +82,22 @@ function search() {
 
 const active = ref(false);
 const chapterDetails = ref<Chapter & { content: string }>();
+/** 滚动条回归顶部 */
+function scrollToTop() {
+  const el = document.querySelector(
+    "#chapter-details .n-drawer-body-content-wrapper"
+  );
+  if (el) el.scrollTo(0, 0);
+}
 function openChapter(item: Chapter) {
   novelService.getChapterContent(item.id!).then((v) => {
     v = NovelService.formatString(v || "", keyword.value);
     chapterDetails.value = { ...item, content: v };
+    scrollToTop();
     active.value = true;
   });
 }
+
 function goToPrevChapter() {
   const order = chapterDetails.value!.order - 2;
   const item = chapters.value![order];
@@ -120,7 +136,7 @@ function goToNextChapter() {
         clearable
         @keydown.enter="search"
       />
-      <NButton :disabled="loading || !keyword" type="primary" @click="search">
+      <NButton :disabled="loading" type="primary" @click="search">
         <template #icon>
           <NIcon :component="SearchOutline" />
         </template>
@@ -128,43 +144,37 @@ function goToNextChapter() {
       </NButton>
     </NInputGroup>
 
-    <NScrollbar v-if="chaptersByKeyword && chaptersByKeyword.length > 0">
-      <NCard
-        v-for="novel in chaptersByKeyword"
-        :key="novel.chapter.id"
-        :title="novel.chapter.title"
-        size="small"
-        class="novel-card"
-        embedded
-      >
-        <template #header-extra>
-          <NButton
-            @click="openChapter(novel.chapter)"
-            type="info"
-            quaternary
-            size="small"
-          >
-            <template #icon>
-              <NIcon :component="DocumentTextOutline" />
-            </template>
-            查看完整章节
-          </NButton>
-        </template>
-        <ChapterContent v-html="novel.contentSnippet" min />
-      </NCard>
-    </NScrollbar>
-    <NEmpty v-else-if="chaptersByKeyword" description="没有相关文字" />
-    <NScrollbar v-else-if="chapters">
-      <NCard
-        v-for="novel in chapters"
-        :key="novel.id"
-        :title="novel.title"
-        size="small"
-        class="novel-card"
-        embedded
-      >
-        <template #header-extra>
-          <NSpace>
+    <NCard class="n-card-class" size="small" :bordered="false">
+      <NScrollbar v-if="chaptersByKeyword && chaptersByKeyword.length > 0">
+        <div
+          v-for="novel in chaptersByKeyword"
+          :key="novel.chapter.id"
+          class="my-n-card"
+        >
+          <div class="header">
+            <span>{{ novel.chapter.title }}</span>
+            <NButton
+              @click="openChapter(novel.chapter)"
+              type="info"
+              quaternary
+              size="small"
+            >
+              <template #icon>
+                <NIcon :component="DocumentTextOutline" />
+              </template>
+              查看完整章节
+            </NButton>
+          </div>
+          <div class="content">
+            <ChapterContent v-html="novel.contentSnippet" min />
+          </div>
+        </div>
+      </NScrollbar>
+      <NEmpty v-else-if="chaptersByKeyword" description="没有相关文字" />
+      <NScrollbar v-else-if="chapters">
+        <div v-for="novel in chapters" :key="novel.id" class="my-n-card">
+          <div class="header">
+            <span>{{ novel.title }}</span>
             <NButton
               @click="openChapter(novel)"
               type="info"
@@ -176,10 +186,10 @@ function goToNextChapter() {
               </template>
               查看章节
             </NButton>
-          </NSpace>
-        </template>
-      </NCard>
-    </NScrollbar>
+          </div>
+        </div>
+      </NScrollbar>
+    </NCard>
   </NSpin>
   <NEmpty v-else description="还未选择小说" />
 
@@ -187,6 +197,7 @@ function goToNextChapter() {
     v-model:show="active"
     style="width: 1000px; max-width: 100vw"
     :auto-focus="false"
+    id="chapter-details"
   >
     <NDrawerContent closable>
       <template #header>
@@ -223,13 +234,35 @@ function goToNextChapter() {
     .n-input-group {
       margin: 10px 0;
     }
-    .n-scrollbar {
-      height: 0;
-      flex-grow: 1;
-      .n-card {
-        margin-bottom: 10px;
-        line-height: 2;
-        font-family: cursive;
+    .n-card-class > .n-card__content {
+      padding: 0;
+
+      display: flex;
+      flex-direction: column;
+      > .n-scrollbar {
+        height: 0;
+        flex-grow: 1;
+        .my-n-card {
+          margin-bottom: 10px;
+          line-height: 2;
+          font-family: cursive;
+
+          background-color: var(--n-color-embedded);
+          border: 1px solid var(--n-border-color);
+          border-radius: var(--n-border-radius);
+
+          .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--n-padding-top) var(--n-padding-left)
+              var(--n-padding-bottom) var(--n-padding-left);
+          }
+          .content {
+            padding: 0 var(--n-padding-left) var(--n-padding-bottom)
+              var(--n-padding-left);
+          }
+        }
       }
     }
   }

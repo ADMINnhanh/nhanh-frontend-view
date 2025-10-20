@@ -29,6 +29,9 @@ const themeVars = useThemeVars();
   font-size: 20px;
   font-weight: bold;
   font-family: cursive;
+  /* 保留空白和换行，且内容会自动换行 */
+  white-space: pre-wrap;
+  tab-size: 4;
   :deep(.gap) {
     height: 30px;
   }
