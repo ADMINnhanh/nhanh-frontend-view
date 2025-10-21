@@ -1,10 +1,18 @@
 <script setup lang="ts">
-import { NCard, NRadio, NRadioGroup, NScrollbar, NSpace } from "naive-ui";
-import { computed, defineAsyncComponent, onMounted, ref } from "vue";
-import { dynamicDiagram, dynamicDiagramCollection } from ".";
+import {
+  NCard,
+  NRadio,
+  NRadioGroup,
+  NResult,
+  NScrollbar,
+  NSpace,
+} from "naive-ui";
+import { computed, defineAsyncComponent, h } from "vue";
+import { dynamicDiagram, GetComponent } from ".";
 import DynamicDiagramItem from "./components/DynamicDiagramItem.vue";
 import router from "@/router";
 import { useLocalStorage } from "@vueuse/core";
+import { _Utility_WaitForCondition } from "nhanh-pure-function";
 
 interface Props {
   target?: string;
@@ -13,28 +21,35 @@ const props = defineProps<Props>();
 
 if (props.target) dynamicDiagram.value = props.target;
 
-const Modules = import.meta.glob(`./demo/**/index.vue`);
-function GetComponent(title: string, collection = dynamicDiagramCollection) {
-  for (let i = 0; i < collection.length; i++) {
-    const element = collection[i];
-    if (element.title === title) {
-      return Modules[`./demo/${element.component!}/index.vue`];
-    }
-    if (element.children) {
-      const component = GetComponent(title, element.children) as any;
-      if (component) {
-        return component;
-      }
-    }
-  }
-}
-
 const dynamicDiagramComponent = computed(() => {
   if (!router.currentRoute.value.path.includes("DynamicDiagram")) return;
 
   router.replace({ params: { target: dynamicDiagram.value } });
+  const component = GetComponent(dynamicDiagram.value);
 
-  return defineAsyncComponent(GetComponent(dynamicDiagram.value));
+  const error = () =>
+    h(NResult, {
+      status: "500",
+      title: "初始化失败了",
+      description: "这是为什么啊？可恶！",
+    });
+
+  if (component) {
+    const waitComponent = () =>
+      _Utility_WaitForCondition(
+        () => !!document.querySelector(".dynamic-diagram-container"),
+        1000
+      )
+        .then(component)
+        .catch(() => {
+          window.$message.error("初始化失败");
+          return error;
+        });
+
+    return defineAsyncComponent(waitComponent as any);
+  }
+
+  return error;
 });
 
 /** 过渡动画 */
@@ -123,6 +138,10 @@ const activeTransition = useLocalStorage(
     height: 100%;
     flex-grow: 1;
     margin-left: 10px;
+  }
+  .n-result {
+    width: 0;
+    flex-grow: 1;
   }
 }
 </style>

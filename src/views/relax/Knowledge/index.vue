@@ -26,73 +26,75 @@ CompanyPhrases();
 </script>
 
 <template>
-  <NScrollbar>
-    <NGrid
-      x-gap="15"
-      y-gap="15"
-      style="padding: 10px"
-      :cols="Media.isMobileStyle ? 1 : 2"
-    >
-      <NGi>
-        <NSpace vertical :size="15">
-          <NCard title="今天无用的事实" hoverable>
-            <template #header-extra>
-              <Header_extra not-click href="https://uselessfacts.jsph.pl/" />
-            </template>
-            <En_zh :list="uselessFact.today" />
-          </NCard>
-          <NCard title="chuck 笑话" hoverable>
-            <template #header-extra>
-              <Header_extra
-                @click="RandomJoke"
-                href="https://api.chucknorris.io/"
-              />
-            </template>
+  <div style="height: 100%">
+    <NScrollbar style="height: 100%">
+      <NGrid
+        x-gap="15"
+        y-gap="15"
+        style="padding: 10px"
+        :cols="Media.isMobileStyle ? 1 : 2"
+      >
+        <NGi>
+          <NSpace vertical :size="15">
+            <NCard title="今天无用的事实" hoverable>
+              <template #header-extra>
+                <Header_extra not-click href="https://uselessfacts.jsph.pl/" />
+              </template>
+              <En_zh :list="uselessFact.today" />
+            </NCard>
+            <NCard title="chuck 笑话" hoverable>
+              <template #header-extra>
+                <Header_extra
+                  @click="RandomJoke"
+                  href="https://api.chucknorris.io/"
+                />
+              </template>
 
-            <NSpace vertical>
-              <En_zh :list="jokeList" />
-            </NSpace>
-          </NCard>
-          <NCard title="企业流行语" hoverable>
-            <template #header-extra>
-              <Header_extra
-                @click="CompanyPhrases"
-                href="https://github.com/sameerkumar18/corporate-bs-generator-api"
-              />
-            </template>
-            <NSpace vertical>
-              <En_zh :list="companyPhraseList" />
-            </NSpace>
-          </NCard>
-        </NSpace>
-      </NGi>
+              <NSpace vertical>
+                <En_zh :list="jokeList" />
+              </NSpace>
+            </NCard>
+            <NCard title="企业流行语" hoverable>
+              <template #header-extra>
+                <Header_extra
+                  @click="CompanyPhrases"
+                  href="https://github.com/sameerkumar18/corporate-bs-generator-api"
+                />
+              </template>
+              <NSpace vertical>
+                <En_zh :list="companyPhraseList" />
+              </NSpace>
+            </NCard>
+          </NSpace>
+        </NGi>
 
-      <NGi>
-        <NSpace vertical :size="15">
-          <NCard title="随机无用的事实" hoverable>
-            <template #header-extra>
-              <Header_extra
-                @click="UselessFact('random')"
-                href="https://uselessfacts.jsph.pl/"
-              />
-            </template>
-            <En_zh :list="uselessFact.random" />
-          </NCard>
-          <NCard title="技术感十足的短语" hoverable>
-            <template #header-extra>
-              <Header_extra
-                @click="TechyPhrases"
-                href="https://techy-api.vercel.app/"
-              />
-            </template>
-            <NSpace vertical>
-              <En_zh :list="techPhraseList" />
-            </NSpace>
-          </NCard>
-        </NSpace>
-      </NGi>
-    </NGrid>
-  </NScrollbar>
+        <NGi>
+          <NSpace vertical :size="15">
+            <NCard title="随机无用的事实" hoverable>
+              <template #header-extra>
+                <Header_extra
+                  @click="UselessFact('random')"
+                  href="https://uselessfacts.jsph.pl/"
+                />
+              </template>
+              <En_zh :list="uselessFact.random" />
+            </NCard>
+            <NCard title="技术感十足的短语" hoverable>
+              <template #header-extra>
+                <Header_extra
+                  @click="TechyPhrases"
+                  href="https://techy-api.vercel.app/"
+                />
+              </template>
+              <NSpace vertical>
+                <En_zh :list="techPhraseList" />
+              </NSpace>
+            </NCard>
+          </NSpace>
+        </NGi>
+      </NGrid>
+    </NScrollbar>
+  </div>
 </template>
 
 <style scoped lang="less">

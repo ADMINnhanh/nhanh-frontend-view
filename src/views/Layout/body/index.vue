@@ -89,10 +89,12 @@ if (import.meta.env.DEV) {
 <template>
   <div v-if="Media.isMobileStyle" class="mobile-layout" :style="baseStyle">
     <div class="router-view">
-      <router-view v-slot="{ Component }">
-        <KeepAlive :max="5">
-          <component :is="Component" />
-        </KeepAlive>
+      <router-view v-slot="{ Component, route }">
+        <transition name="slide-fade" mode="out-in">
+          <KeepAlive :max="5">
+            <component :is="Component" :key="route.name" />
+          </KeepAlive>
+        </transition>
       </router-view>
     </div>
     <div v-if="recordNumber" class="record-number">
@@ -168,10 +170,12 @@ if (import.meta.env.DEV) {
         </template>
       </NTabs>
       <div class="router-view-box">
-        <router-view v-slot="{ Component }">
-          <KeepAlive :max="10" :include="panels.map((item) => item.key)">
-            <component :is="Component" :key="tab" />
-          </KeepAlive>
+        <router-view v-slot="{ Component, route }">
+          <transition name="slide-fade" mode="out-in">
+            <KeepAlive :max="10">
+              <component :is="Component" :key="route.name" />
+            </KeepAlive>
+          </transition>
         </router-view>
       </div>
       <div v-if="recordNumber" class="record-number">

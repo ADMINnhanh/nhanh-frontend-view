@@ -23,7 +23,7 @@
     "highlight.js": "^11.10.0",
     "jszip": "^3.10.1",
     "katex": "^0.16.11",
-    "nhanh-pure-function": "^3.0.6-beta.10",
+    "nhanh-pure-function": "^3.0.6-beta.11",
     "peerjs": "^1.5.4",
     "pinia": "^2.1.7",
     "three": "^0.178.0",

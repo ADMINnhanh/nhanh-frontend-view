@@ -64,6 +64,30 @@ export const dynamicDiagram = useLocalStorage(
   "三边围墙"
 );
 
+const Modules = import.meta.glob(`./demo/**/index.vue`);
+export function GetComponent(
+  title: string,
+  collection = dynamicDiagramCollection
+) {
+  for (let i = 0; i < collection.length; i++) {
+    const element = collection[i];
+    if (element.title === title) {
+      return Modules[
+        `./demo/${element.component!}/index.vue`
+      ] as () => Promise<Comment>;
+    }
+    if (element.children) {
+      const component = GetComponent(
+        title,
+        element.children
+      ) as () => Promise<Comment>;
+      if (component) {
+        return component;
+      }
+    }
+  }
+}
+
 const otherColor = ["#8a2be2", "#ff69b4"];
 const moneyColor = {
   "0.1": ["#604041", "#66484A", "#A68784", "#CDA8A2", "#CBB9B7", "#D1C1A7"],

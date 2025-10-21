@@ -13,6 +13,9 @@ import { computed } from "vue";
 import katex from "katex";
 import "katex/dist/katex.css";
 
+// import { _Utility_WaitForCondition, _Test, _Test22 } from "nhanh-pure-function";
+// console.log("_Test", _Test, _Test22);
+
 const NSpinApi = computed(() => {
   return {
     show: NSpinValue.value.show,
@@ -48,7 +51,7 @@ window.addEventListener("resize", UpdateVh);
             </template>
 
             <!-- 视图 -->
-            <router-view></router-view>
+            <router-view />
 
             <UseGlobal />
           </n-spin>

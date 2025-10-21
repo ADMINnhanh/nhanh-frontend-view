@@ -35,14 +35,14 @@ const equation = `\\begin{aligned}
   &\\therefore DE = \\frac{BC}{2};
   \\end{aligned}`;
 onMounted(() => {
-  myCanvas.value = new _Canvas({
-    id,
-    theme: Settings.value.theme,
-    axisShow: false,
-  });
+    myCanvas.value = new _Canvas({
+      id,
+      theme: Settings.value.theme,
+      axisShow: false,
+    });
 
-  myCanvas.value.addOverlay(overlays);
-  Update();
+    myCanvas.value.addOverlay(overlays);
+    Update();
 });
 </script>
 

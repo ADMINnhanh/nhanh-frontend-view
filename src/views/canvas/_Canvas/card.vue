@@ -16,6 +16,7 @@ import {
   NScrollbar,
   NSpace,
   NTooltip,
+  NResult,
 } from "naive-ui";
 import {
   _Browser_CopyToClipboard,
@@ -24,6 +25,7 @@ import {
   _Element_IsFullscreen,
   _Tip,
   _Canvas,
+  _Utility_WaitForCondition,
 } from "nhanh-pure-function";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
@@ -48,15 +50,17 @@ watch(
 /** 当前状态是否是全屏 */
 const isFullScreen = ref(false);
 const toggleFullScreen = ref();
+let cleanup: () => void;
 
 onMounted(() => {
   toggleFullScreen.value = _Element_Fullscreen(cardRef.value.$el);
-  _Element_FullscreenObserver(
+  cleanup = _Element_FullscreenObserver(
     (isFull) => (isFullScreen.value = isFull),
     cardRef.value.$el
   );
 });
 onBeforeUnmount(() => {
+  cleanup?.();
   componentRef.value?.myCanvas.destroy();
 });
 </script>
@@ -134,6 +138,7 @@ onBeforeUnmount(() => {
       </NSpace>
     </template>
     <component :is="component" ref="componentRef" />
+
     <NCollapseTransition :show="showCode">
       <NScrollbar x-scrollable style="max-height: 50vh; margin-top: 10px">
         <NCode :code="code" language="javascript" show-line-numbers />

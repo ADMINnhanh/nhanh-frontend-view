@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, shallowRef } from "vue";
+import { onMounted, onUnmounted, shallowRef } from "vue";
 import { Settings } from "@/components/popups/components/Settings";
 import { overlays, id, Update } from ".";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";

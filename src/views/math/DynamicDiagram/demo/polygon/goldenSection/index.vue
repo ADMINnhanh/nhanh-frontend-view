@@ -11,6 +11,7 @@ let myCanvas = shallowRef<_Canvas>();
 const equation = `\\begin{aligned}
    &\\frac{AP}{AB} = \\frac{PB}{AP} \\approx ${GOLDEN_RATIO};
   \\end{aligned}`;
+
 onMounted(() => {
   myCanvas.value = new _Canvas({
     id,

@@ -7,21 +7,29 @@ const prod = import.meta.env.PROD;
 </script>
 
 <template>
-  <NScrollbar>
-    <NH1>
-      <NText type="primary">站点访问统计</NText>
-    </NH1>
-    <NH6>
-      <NText depth="3">基于用户会话的 PV/UV、停留时长、跳出率分析</NText>
-    </NH6>
-    <template v-if="prod">
-      <Echart />
-      <SessionList />
-    </template>
-  </NScrollbar>
+  <div class="home">
+    <NScrollbar>
+      <NH1>
+        <NText type="primary">站点访问统计</NText>
+      </NH1>
+      <NH6>
+        <NText depth="3">基于用户会话的 PV/UV、停留时长、跳出率分析</NText>
+      </NH6>
+      <template v-if="prod">
+        <Echart />
+        <SessionList />
+      </template>
+    </NScrollbar>
+  </div>
 </template>
 
 <style scoped lang="less">
+.home {
+  height: 100%;
+  :deep(.n-scrollbar) {
+    height: 100%;
+  }
+}
 .n-h1 {
   text-align: center;
   margin: 10px 0 0 !important;

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { NAnchor, NAnchorLink, NScrollbar, NSkeleton, NSpace } from "naive-ui";
 import MyCard from "./card.vue";
-import { markRaw, onUnmounted, ref } from "vue";
+import { markRaw, onActivated, onUnmounted, ref } from "vue";
 import Media from "@/stores/media";
+import { _Utility_WaitForCondition } from "nhanh-pure-function";
 
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
@@ -10,23 +11,23 @@ const independent: [string, string][] = [
   // ["China%2Findex.vue", "最佳实践 - 中国地图"],
 ];
 const demoName: [string, string][] = [
-  // ["text.vue", "文字"],
-  // ["point.vue", "点"],
-  // ["line.vue", "线"],
-  // ["arc.vue", "圆弧"],
+  ["text.vue", "文字"],
+  ["point.vue", "点"],
+  ["line.vue", "线"],
+  ["arc.vue", "圆弧"],
 
   // ["arcTo.vue", "圆角"],
   // ["bezierCurve.vue", "贝塞尔曲线"],
   // ["ellipse.vue", "椭圆弧"],
 
-  // ["polygon.vue", "面"],
-  // ["custom.vue", "自定义绘制"],
+  ["polygon.vue", "面"],
+  ["custom.vue", "自定义绘制"],
   ["original.vue", "仅需初始化 _Canvas"],
-  // ["center.vue", "中心点"],
-  // ["shortcutKey.vue", "快捷键"],
-  // ["axis.vue", "坐标轴"],
-  // ["layer.vue", "图层 & 层级"],
-  // ["show.vue", "显示条件"],
+  ["center.vue", "中心点"],
+  ["shortcutKey.vue", "快捷键"],
+  ["axis.vue", "坐标轴"],
+  ["layer.vue", "图层 & 层级"],
+  ["show.vue", "显示条件"],
 ];
 
 type DemoName = (typeof demoName)[number][0];
@@ -79,7 +80,6 @@ let observer = new IntersectionObserver((entries, observer) => {
       ) {
         observer.disconnect();
         observer = null as any;
-        console.log("加载完成");
       }
     }
   });
@@ -95,16 +95,22 @@ const canInitialize = (id: string) => {
 
 const doubleRow = ref(window.innerWidth >= 1280);
 const resize = () => {
-  doubleRow.value = window.innerWidth >= 1280;
+  const hasDom = document.querySelector(".my-canvas-tools");
+  if (hasDom) doubleRow.value = window.innerWidth >= 1280;
 };
 window.addEventListener("resize", resize);
+
+onActivated(() => {
+  resize();
+});
+
 onUnmounted(() => {
   window.removeEventListener("resize", resize);
 });
 </script>
 
 <template>
-  <div id="/canvas/_Canvas" class="my-canvas-tools">
+  <div class="my-canvas-tools">
     <NScrollbar>
       <div class="list-box">
         <template v-if="doubleRow">

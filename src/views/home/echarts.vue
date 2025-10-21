@@ -319,17 +319,15 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <NScrollbar>
-    <div class="echarts" :id="echartsId">
-      <template
-        v-for="item in [visitQualityStats, dailyVisitTrend, pageVisitStats]"
-        :key="item.id"
-      >
-        <div v-if="item.option" :id="item.id"></div>
-        <NSkeleton v-else :sharp="false" />
-      </template>
-    </div>
-  </NScrollbar>
+  <div class="echarts" :id="echartsId">
+    <template
+      v-for="item in [visitQualityStats, dailyVisitTrend, pageVisitStats]"
+      :key="item.id"
+    >
+      <div v-if="item.option" :id="item.id"></div>
+      <NSkeleton v-else :sharp="false" />
+    </template>
+  </div>
 </template>
 
 <style scoped lang="less">

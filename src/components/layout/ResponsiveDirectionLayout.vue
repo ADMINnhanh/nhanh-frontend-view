@@ -36,7 +36,6 @@ requestAnimationFrame(() => {
     });
     triggerDom.addEventListener("touchend", () => {
       oldClientX = oldClientY = undefined;
-      console.log(123);
     });
   }
 });
