@@ -19,6 +19,7 @@
     "dexie": "^4.2.1",
     "echarts": "^5.6.0",
     "gl-matrix": "^4.0.0-beta.2",
+    "glsl-canvas-js": "^0.2.9",
     "heatmap-ts": "^0.0.5",
     "highlight.js": "^11.10.0",
     "jszip": "^3.10.1",

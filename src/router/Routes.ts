@@ -74,6 +74,17 @@ const canvas: CustomRouteRecord = {
       },
       component: () => import("@/views/canvas/Threejs/index.vue"),
     },
+    {
+      path: "GLSL",
+      name: "GLSL",
+      meta: {
+        name: {
+          zhCN: "GLSL",
+          enUS: "GLSL",
+        },
+      },
+      component: () => import("@/views/canvas/GLSL/index.vue"),
+    },
   ],
 };
 
