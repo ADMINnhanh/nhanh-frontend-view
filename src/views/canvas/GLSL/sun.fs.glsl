@@ -26,11 +26,9 @@ void main() {
     color = mix(skyBottom, skyTop, skyBlend);
   }else {
     // 地面渐变：从地平线向下颜色变深
-    float groundBlend = y /0.4; // 映射到 0~1
+    float groundBlend = y / 0.4; // 映射到 0~1
     color = mix(groundBottom, groundTop, groundBlend);
   }
-  
-  // 彩虹
   
   // 太阳轨迹半径
   float sunRadius = 0.3;
