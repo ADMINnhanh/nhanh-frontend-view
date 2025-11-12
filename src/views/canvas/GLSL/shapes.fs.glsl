@@ -7,7 +7,7 @@ uniform vec2 u_mouse;
 uniform float u_time;
 
 float rectangle(vec2 bl, vec2 tr) {
-  vec2 st = gl_FragCoord.xy / u_resolution;
+  vec2 st = gl_FragCoord.xy / u_resolution.xy;
   vec2 inRect = step(bl, st) * step(st, tr);
   return inRect.x * inRect.y;
 }
