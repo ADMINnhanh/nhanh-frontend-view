@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   NCard,
-  NSpace,
   NScrollbar,
   NIcon,
   NButton,
@@ -12,31 +11,23 @@ import {
   NAlert,
   NFlex,
   NTag,
-  NDrawer,
-  NDrawerContent,
-  NText,
-  NButtonGroup,
   NInputGroupLabel,
 } from "naive-ui";
-import {
-  ArrowBackOutline,
-  ArrowForwardOutline,
-  DocumentTextOutline,
-  SearchOutline,
-} from "@vicons/ionicons5";
+import { DocumentTextOutline, SearchOutline } from "@vicons/ionicons5";
 import { ref, watch } from "vue";
-import { NovelService, novelService, type Chapter, type Novel } from ".";
+import { novelService, type Chapter, type Novel } from ".";
 import {
   _Format_NumberWithCommas,
   _Format_NumberWithUnit,
 } from "nhanh-pure-function";
 import ChapterContent from "./ChapterContent.vue";
+import ReadingMode from "./ReadingMode.vue";
+import { useLocalStorage } from "@vueuse/core";
 
 interface Props {
   novelId?: number;
 }
 const props = defineProps<Props>();
-
 
 const loading = ref(false);
 const keyword = ref("");
@@ -80,35 +71,12 @@ function search() {
     .finally(() => (loading.value = false));
 }
 
-const active = ref(false);
-const chapterDetails = ref<Chapter & { content: string }>();
-/** 滚动条回归顶部 */
-function scrollToTop() {
-  const el = document.querySelector(
-    "#chapter-details .n-drawer-body-content-wrapper"
-  );
-  if (el) el.scrollTo(0, 0);
-}
+const chapterDetails = useLocalStorage<any>("novel-chapter-reading-mode", {});
 function openChapter(item: Chapter) {
-  novelService.getChapterContent(item.id!).then((v) => {
-    v = NovelService.formatString(v || "", keyword.value);
-    chapterDetails.value = { ...item, content: v };
-    scrollToTop();
-    active.value = true;
-  });
-}
-
-function goToPrevChapter() {
-  const order = chapterDetails.value!.order - 2;
-  const item = chapters.value![order];
-  if (item) openChapter(item);
-  else window.$message.warning("没有上一章了");
-}
-function goToNextChapter() {
-  const order = chapterDetails.value!.order;
-  const item = chapters.value![order];
-  if (item) openChapter(item);
-  else window.$message.warning("没有下一章了");
+  chapterDetails.value = {
+    novelId: props.novelId!,
+    order: item.order,
+  };
 }
 </script>
 
@@ -193,35 +161,11 @@ function goToNextChapter() {
   </NSpin>
   <NEmpty v-else description="还未选择小说" />
 
-  <NDrawer
-    v-model:show="active"
-    style="width: 1000px; max-width: 100vw"
-    :auto-focus="false"
-    id="chapter-details"
-  >
-    <NDrawerContent closable>
-      <template #header>
-        <NSpace align="center">
-          <NText>{{ chapterDetails?.title }}</NText>
-          <NButtonGroup>
-            <NButton @click="goToPrevChapter">
-              <template #icon>
-                <NIcon :component="ArrowBackOutline" />
-              </template>
-              上一章
-            </NButton>
-            <NButton @click="goToNextChapter" icon-placement="right">
-              <template #icon>
-                <NIcon :component="ArrowForwardOutline" />
-              </template>
-              下一章
-            </NButton>
-          </NButtonGroup>
-        </NSpace>
-      </template>
-      <ChapterContent v-html="chapterDetails?.content" />
-    </NDrawerContent>
-  </NDrawer>
+  <ReadingMode
+    v-if="chapterDetails.novelId && chapterDetails.order"
+    :="chapterDetails"
+    @close="chapterDetails = {}"
+  />
 </template>
 
 <style scoped lang="less">

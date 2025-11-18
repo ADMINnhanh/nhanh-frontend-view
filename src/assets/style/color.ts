@@ -38,6 +38,10 @@ const dark = {
 
 watch(
   () => Settings.value.theme,
-  (theme) => InjectStyle(theme === "light" ? light : dark),
+  (theme, oldTheme) => {
+    InjectStyle(theme === "light" ? light : dark);
+    oldTheme && document.body.classList.remove(oldTheme);
+    document.body.classList.add(theme);
+  },
   { immediate: true }
 );

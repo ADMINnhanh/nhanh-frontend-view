@@ -23,6 +23,7 @@ hljs.registerLanguage("xml", xml);
 const ThemeOverrides: GlobalThemeOverrides = {
   common: {},
 };
+
 export const configProviderPropsRef = computed<ConfigProviderProps>(() => ({
   theme: Settings.value.theme === "light" ? lightTheme : darkTheme,
   "theme-overrides": ThemeOverrides,

@@ -13,8 +13,7 @@ import { computed } from "vue";
 import katex from "katex";
 import "katex/dist/katex.css";
 
-import { _Utility_WaitForCondition, _Test, _Test2 } from "nhanh-pure-function";
-console.log("_Test", _Test, _Test2);
+import { _Utility_WaitForCondition } from "nhanh-pure-function";
 
 const NSpinApi = computed(() => {
   return {
