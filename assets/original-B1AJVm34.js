@@ -1,0 +1,1 @@
+import{d as n,aO as o,cv as t,ay as c,dr as l,aS as r,c as i,o as m,u}from"./index-CMHVWPy1.js";const _=["id"],h=n({__name:"original",setup(d,{expose:s}){const e=o();let a=t();return c(()=>{a.value=new l({id:e,theme:r.value.theme})}),s({myCanvas:a}),(p,f)=>(m(),i("canvas",{id:u(e),class:"my-canvas"},null,8,_))}});export{h as default};
