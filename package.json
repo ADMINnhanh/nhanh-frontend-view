@@ -48,5 +48,8 @@
     "vite-plugin-mkcert": "^1.17.8",
     "vite-plugin-vue-devtools": "^7.7.7",
     "vue-tsc": "^2.0.21"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.9.5"
   }
 }
