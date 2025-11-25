@@ -26,7 +26,7 @@ const themeVars = useThemeVars();
 }
 .chapter-content {
   line-height: 3;
-  font-size: 25px;
+  font-size: 22px;
   font-weight: bold;
   font-family: cursive;
   /* 保留空白和换行，且内容会自动换行 */

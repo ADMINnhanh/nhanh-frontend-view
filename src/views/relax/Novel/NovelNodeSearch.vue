@@ -76,6 +76,7 @@ function openChapter(item: Chapter) {
   chapterDetails.value = {
     novelId: props.novelId!,
     order: item.order,
+    min: false,
   };
 }
 </script>
