@@ -77,6 +77,8 @@ function openChapter(item: Chapter) {
     novelId: props.novelId!,
     order: item.order,
     min: false,
+    color: "rgba(255, 255, 255, 0.4)",
+    size: 22,
   };
 }
 </script>
@@ -164,7 +166,6 @@ function openChapter(item: Chapter) {
 
   <ReadingMode
     v-if="chapterDetails.novelId && chapterDetails.order"
-    :="chapterDetails"
     @close="chapterDetails = {}"
   />
 </template>

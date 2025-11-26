@@ -19,16 +19,15 @@ const themeVars = useThemeVars();
 <style scoped lang="less">
 .min.chapter-content {
   line-height: 2;
-  font-size: 18px;
+  padding: 0 50px;
   :deep(.gap) {
     height: 10px;
   }
 }
 .chapter-content {
   line-height: 3;
-  font-size: 22px;
   font-weight: bold;
-  font-family: cursive;
+  font-family: unset;
   /* 保留空白和换行，且内容会自动换行 */
   white-space: pre-wrap;
   tab-size: 4;

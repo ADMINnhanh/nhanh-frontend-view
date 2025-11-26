@@ -13,18 +13,16 @@ import {
   NSpace,
   NRadioGroup,
   NRadioButton,
+  NInputNumber,
+  NColorPicker,
 } from "naive-ui";
 import { ArrowBackOutline, ArrowForwardOutline } from "@vicons/ionicons5";
-import { onUnmounted, ref } from "vue";
+import { computed, onUnmounted, ref } from "vue";
 import { novelService, type Chapter } from ".";
 import ChapterContent from "./ChapterContent.vue";
 import { useLocalStorage } from "@vueuse/core";
+import Collapse from "@/components/singleFile/Collapse.vue";
 
-interface Props {
-  novelId: number;
-  order: number;
-}
-const props = defineProps<Props>();
 interface Emit {
   (e: "close"): void;
 }
@@ -37,11 +35,29 @@ const loading = ref(true);
 const chapters = ref<Chapter[]>();
 const chapterDetails = ref<Chapter & { content: string }>();
 
+type ChapterDetailsLocalType = {
+  novelId: number;
+  order: number;
+  min: boolean;
+  color: string;
+  size: number;
+};
+const chapterDetailsLocal = useLocalStorage<ChapterDetailsLocalType>(
+  "novel-chapter-reading-mode",
+  {} as any
+);
+
+const readingStyle = computed(() => ({
+  width: "1300px",
+  "--reading-text-color": chapterDetailsLocal.value.color,
+  "--reading-text-size": chapterDetailsLocal.value.size + "px",
+}));
+
 novelService
-  .getChapters(props.novelId)
+  .getChapters(chapterDetailsLocal.value.novelId)
   .then((v) => {
     chapters.value = v;
-    openChapter(v[props.order - 1]);
+    openChapter(v[chapterDetailsLocal.value.order - 1]);
 
     const mask = document
       .getElementById("ReadingMode")
@@ -61,16 +77,10 @@ function scrollTo(y: number) {
   const container = scrollbarRef.value?.$el.nextSibling.querySelector(
     ".n-scrollbar-container"
   ) as HTMLElement;
-
-  const scrollTop = container.getAttribute("scrollTop");
-  container.setAttribute("scrollToTop", Number(scrollTop) + y + "");
+  if (container) container.scrollTop += y;
 }
 
 const virtualListInst = ref<VirtualListInst>();
-const chapterDetailsLocal = useLocalStorage<any>(
-  "novel-chapter-reading-mode",
-  {}
-);
 function openChapter(item: Chapter) {
   novelService.getChapterContent(item.id!).then((v) => {
     chapterDetailsLocal.value.order = item.order;
@@ -99,6 +109,8 @@ function goToNextChapter() {
 }
 /** 快捷键 */
 function shortcutKey(e: KeyboardEvent) {
+  console.log(e.key);
+
   if (e.key === "ArrowLeft") goToPrevChapter();
   else if (e.key === "ArrowRight") goToNextChapter();
   else if (e.key === "ArrowUp") scrollTo(-100);
@@ -113,21 +125,39 @@ onUnmounted(() => window.removeEventListener("keydown", shortcutKey));
     v-model:show="active"
     @after-leave="emit('close')"
     :auto-focus="false"
+    :mask-closable="false"
     preset="card"
     :title="chapterDetails?.title"
-    style="width: 1300px"
+    :style="readingStyle"
     id="ReadingMode"
   >
     <template #header-extra>
-      <NSpace>
-        <NRadioGroup
-          v-model:value="chapterDetailsLocal.min"
-          size="small"
-          class="size-radio"
-        >
-          <NRadioButton :value="true" label="min" />
-          <NRadioButton :value="false" label="max" />
-        </NRadioGroup>
+      <NSpace align="center">
+        <Collapse>
+          <NSpace align="center">
+            <NColorPicker
+              v-model:value="chapterDetailsLocal.color"
+              style="width: 200px"
+              size="small"
+            />
+            <NInputNumber
+              v-model:value="chapterDetailsLocal.size"
+              style="width: 100px"
+              :min="12"
+              size="small"
+            >
+              <template #suffix>px</template>
+            </NInputNumber>
+            <NRadioGroup
+              v-model:value="chapterDetailsLocal.min"
+              size="small"
+              class="size-radio"
+            >
+              <NRadioButton :value="true" label="min" />
+              <NRadioButton :value="false" label="max" />
+            </NRadioGroup>
+          </NSpace>
+        </Collapse>
         <NButtonGroup size="small">
           <NButton @click="goToPrevChapter">
             <template #icon>
@@ -167,14 +197,16 @@ onUnmounted(() => window.removeEventListener("keydown", shortcutKey));
         </NVirtualList>
       </template>
       <template #2>
-        <NScrollbar ref="scrollbarRef">
-          <NSpin :show="loading">
-            <ChapterContent
-              v-html="chapterDetails?.content"
-              :min="chapterDetailsLocal.min"
-            />
-          </NSpin>
-        </NScrollbar>
+        <div style="height: 100%; padding: 40px 0">
+          <NScrollbar ref="scrollbarRef">
+            <NSpin :show="loading">
+              <ChapterContent
+                v-html="chapterDetails?.content"
+                :min="chapterDetailsLocal.min"
+              />
+            </NSpin>
+          </NScrollbar>
+        </div>
       </template>
     </NSplit>
   </NModal>
@@ -182,7 +214,13 @@ onUnmounted(() => window.removeEventListener("keydown", shortcutKey));
 
 <style lang="less">
 body.dark #ReadingMode * {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--reading-text-color, rgba(255, 255, 255, 0.4));
+  .chapter-content {
+    font-size: var(--reading-text-size, 18px);
+  }
+  .n-space > div {
+    display: flex;
+  }
 }
 .size-radio {
   --n-button-border-color-active: #63e2b87a !important;
