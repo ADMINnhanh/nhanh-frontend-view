@@ -5,9 +5,13 @@ import { ref, shallowRef } from "vue";
 
 interface Props {
   defaultSize?: number;
+  min?: number;
+  max?: number;
 }
 const props = withDefaults(defineProps<Props>(), {
   defaultSize: 0.25,
+  min: 0.25,
+  max: 0.75,
 });
 
 const size = ref(props.defaultSize);
@@ -32,7 +36,7 @@ requestAnimationFrame(() => {
         oldClientX = clientX;
       }
 
-      size.value = Math.max(0.25, Math.min(0.75, size.value));
+      size.value = Math.max(props.min, Math.min(props.max, size.value));
     });
     triggerDom.addEventListener("touchend", () => {
       oldClientX = oldClientY = undefined;
@@ -45,9 +49,8 @@ requestAnimationFrame(() => {
   <NSplit
     ref="split"
     :direction="Media.isMobileStyle ? 'vertical' : 'horizontal'"
-    :resize-trigger-size="Media.isMobileStyle ? 6 : 3"
-    :max="0.75"
-    :min="0.25"
+    :resize-trigger-size="Media.isMobileStyle ? 6 : 4"
+    :="{ max, min }"
     v-model:size="size"
   >
     <template #1>

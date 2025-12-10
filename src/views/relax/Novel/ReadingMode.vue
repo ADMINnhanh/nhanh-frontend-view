@@ -22,6 +22,8 @@ import { novelService, type Chapter } from ".";
 import ChapterContent from "./ChapterContent.vue";
 import { useLocalStorage } from "@vueuse/core";
 import Collapse from "@/components/singleFile/Collapse.vue";
+import SvgGather from "@/assets/icon/gather";
+import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
 
 interface Emit {
   (e: "close"): void;
@@ -31,6 +33,8 @@ const emit = defineEmits<Emit>();
 const active = ref(false);
 requestAnimationFrame(() => (active.value = true));
 
+/** 收缩 */
+const shrinkScreen = ref(false);
 const loading = ref(true);
 const chapters = ref<Chapter[]>();
 const chapterDetails = ref<Chapter & { content: string }>();
@@ -47,11 +51,33 @@ const chapterDetailsLocal = useLocalStorage<ChapterDetailsLocalType>(
   {} as any
 );
 
-const readingStyle = computed(() => ({
-  width: "1300px",
-  "--reading-text-color": chapterDetailsLocal.value.color,
-  "--reading-text-size": chapterDetailsLocal.value.size + "px",
-}));
+const readingStyle = computed(() => {
+  const style = {
+    width: "1300px",
+    "--reading-text-color": chapterDetailsLocal.value.color,
+    "--reading-text-size": chapterDetailsLocal.value.size + "px",
+  };
+  if (shrinkScreen.value) {
+    Object.assign(style, {
+      position: "fixed",
+      top: "10px",
+      left: "calc(50vw - 200px)",
+      width: "400px",
+    });
+  }
+  return style;
+});
+function toggleShrinkScreen() {
+  shrinkScreen.value = !shrinkScreen.value;
+  requestAnimationFrame(setReadingModeMaskColor);
+}
+function setReadingModeMaskColor() {
+  const mask = document
+    .getElementById("ReadingMode")
+    ?.closest(".n-scrollbar-content")
+    ?.querySelector(".n-modal-mask") as HTMLElement;
+  if (mask) mask.style.backgroundColor = "rgba(0,0,0,0.85)";
+}
 
 novelService
   .getChapters(chapterDetailsLocal.value.novelId)
@@ -59,11 +85,7 @@ novelService
     chapters.value = v;
     openChapter(v[chapterDetailsLocal.value.order - 1]);
 
-    const mask = document
-      .getElementById("ReadingMode")
-      ?.closest(".n-scrollbar-content")
-      ?.querySelector(".n-modal-mask") as HTMLElement;
-    mask.style.backgroundColor = "rgba(0,0,0,0.85)";
+    setReadingModeMaskColor();
   })
   .finally(() => (loading.value = false));
 
@@ -130,57 +152,67 @@ onUnmounted(() => window.removeEventListener("keydown", shortcutKey));
     :title="chapterDetails?.title"
     :style="readingStyle"
     id="ReadingMode"
+    :show-mask="!shrinkScreen"
+    :draggable="shrinkScreen"
   >
     <template #header-extra>
-      <NSpace align="center">
-        <Collapse>
-          <NSpace align="center">
-            <NColorPicker
-              v-model:value="chapterDetailsLocal.color"
-              style="width: 200px"
-              size="small"
-            />
-            <NInputNumber
-              v-model:value="chapterDetailsLocal.size"
-              style="width: 100px"
-              :min="12"
-              size="small"
-            >
-              <template #suffix>px</template>
-            </NInputNumber>
-            <NRadioGroup
-              v-model:value="chapterDetailsLocal.min"
-              size="small"
-              class="size-radio"
-            >
-              <NRadioButton :value="true" label="min" />
-              <NRadioButton :value="false" label="max" />
-            </NRadioGroup>
-          </NSpace>
-        </Collapse>
-        <NButtonGroup size="small">
-          <NButton @click="goToPrevChapter">
-            <template #icon>
-              <NIcon :component="ArrowBackOutline" />
-            </template>
-            上一章
-          </NButton>
-          <NButton @click="goToNextChapter" icon-placement="right">
-            <template #icon>
-              <NIcon :component="ArrowForwardOutline" />
-            </template>
-            下一章
-          </NButton>
-        </NButtonGroup>
-      </NSpace>
+      <div class="flex-box">
+        <template v-if="!shrinkScreen">
+          <Collapse>
+            <div class="flex-box">
+              <NColorPicker
+                v-model:value="chapterDetailsLocal.color"
+                style="width: 200px"
+                size="small"
+              />
+              <NInputNumber
+                v-model:value="chapterDetailsLocal.size"
+                style="width: 100px"
+                :min="12"
+                size="small"
+              >
+                <template #suffix>px</template>
+              </NInputNumber>
+              <NRadioGroup
+                v-model:value="chapterDetailsLocal.min"
+                size="small"
+                class="size-radio"
+              >
+                <NRadioButton :value="true" label="min" />
+                <NRadioButton :value="false" label="max" />
+              </NRadioGroup>
+            </div>
+          </Collapse>
+          <NButtonGroup size="small">
+            <NButton @click="goToPrevChapter">
+              <template #icon>
+                <NIcon :component="ArrowBackOutline" />
+              </template>
+              上一章
+            </NButton>
+            <NButton @click="goToNextChapter" icon-placement="right">
+              <template #icon>
+                <NIcon :component="ArrowForwardOutline" />
+              </template>
+              下一章
+            </NButton>
+          </NButtonGroup>
+        </template>
+        <NButton @click="toggleShrinkScreen" size="small">
+          <template #icon>
+            <SvgGather icon="ShrinkScreen" />
+          </template>
+        </NButton>
+      </div>
     </template>
-    <NSplit
-      style="height: calc(100vh - 88px)"
+    <ResponsiveDirectionLayout
+      :style="{ height: shrinkScreen ? 0 : 'calc(100vh - 88px)' }"
       direction="horizontal"
       :max="0.75"
+      :min="0"
       :default-size="0.25"
     >
-      <template #1>
+      <template #left>
         <NVirtualList
           ref="virtualListInst"
           key-field="order"
@@ -196,7 +228,7 @@ onUnmounted(() => window.removeEventListener("keydown", shortcutKey));
           </template>
         </NVirtualList>
       </template>
-      <template #2>
+      <template #right>
         <div style="height: 100%; padding: 40px 0">
           <NScrollbar ref="scrollbarRef">
             <NSpin :show="loading">
@@ -208,7 +240,7 @@ onUnmounted(() => window.removeEventListener("keydown", shortcutKey));
           </NScrollbar>
         </div>
       </template>
-    </NSplit>
+    </ResponsiveDirectionLayout>
   </NModal>
 </template>
 
@@ -227,6 +259,12 @@ body.dark #ReadingMode * {
   .n-radio-button {
     background: transparent !important;
     line-height: calc(var(--n-height) - 2px) !important;
+  }
+}
+.flex-box {
+  display: flex;
+  > *:not(:last-child) {
+    margin-right: 8px;
   }
 }
 </style>

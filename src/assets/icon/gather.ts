@@ -151,6 +151,9 @@ export const SystemSvg = {
 
   /** 灯 */
   Bulb: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h1m8-9v1m8 8h1M5.6 5.6l.7.7m12.1-.7l-.7.7"></path><path d="M9 16a5 5 0 1 1 6 0a3.5 3.5 0 0 0-1 3a2 2 0 0 1-4 0a3.5 3.5 0 0 0-1-3"></path><path d="M9.7 17h4.6"></path></g></svg>`,
+
+  /** 收缩 */
+  ShrinkScreen: `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32"><path d="M28 28H17a2.002 2.002 0 0 1-2-2v-6a2.002 2.002 0 0 1 2-2h11a2.003 2.003 0 0 1 2 2v6a2.003 2.003 0 0 1-2 2zm-11-8v6h11.002L28 20z" fill="currentColor"></path><path d="M12 10v3.586L7.707 9.293l-1.414 1.414L10.586 15H7v2h7v-7h-2z" fill="currentColor"></path><path d="M13 22H4a2.002 2.002 0 0 1-2-2V7a2.002 2.002 0 0 1 2-2h22a2.002 2.002 0 0 1 2 2v9h-2V7H4v13h9z" fill="currentColor"></path></svg>`,
   /**  */
 };
 

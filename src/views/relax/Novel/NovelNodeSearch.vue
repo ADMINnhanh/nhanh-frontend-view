@@ -73,13 +73,16 @@ function search() {
 
 const chapterDetails = useLocalStorage<any>("novel-chapter-reading-mode", {});
 function openChapter(item: Chapter) {
-  chapterDetails.value = {
-    novelId: props.novelId!,
-    order: item.order,
-    min: false,
-    color: "rgba(255, 255, 255, 0.4)",
-    size: 22,
-  };
+  chapterDetails.value = {};
+  requestAnimationFrame(() => {
+    chapterDetails.value = {
+      novelId: props.novelId!,
+      order: item.order,
+      min: false,
+      color: "rgba(255, 255, 255, 0.4)",
+      size: 22,
+    };
+  });
 }
 </script>
 

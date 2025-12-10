@@ -41,4 +41,12 @@ const themeVars = useThemeVars();
     text-decoration: underline;
   }
 }
+.is-mobile {
+  .min.chapter-content {
+    padding: 0 10px;
+  }
+  .chapter-content {
+    padding: 0 30px;
+  }
+}
 </style>

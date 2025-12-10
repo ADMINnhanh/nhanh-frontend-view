@@ -53,7 +53,7 @@ function addNovelCallback(promie: Promise<void>) {
 </script>
 
 <template>
-  <ResponsiveDirectionLayout :default-size="0.35">
+  <ResponsiveDirectionLayout :default-size="0.35" :min="0">
     <template #left>
       <NSpin :show="loading">
         <AddNovel :callback="addNovelCallback" />
