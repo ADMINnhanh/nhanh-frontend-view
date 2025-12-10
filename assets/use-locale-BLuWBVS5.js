@@ -1,1 +1,0 @@
-import{p as r,y as d,de as u,df as c,ak as i}from"./index-NQnjzWl8.js";function f(n){const{mergedLocaleRef:o,mergedDateLocaleRef:a}=r(i,null)||{},t=d(()=>{var e,l;return(l=(e=o==null?void 0:o.value)===null||e===void 0?void 0:e[n])!==null&&l!==void 0?l:u[n]});return{dateLocaleRef:d(()=>{var e;return(e=a==null?void 0:a.value)!==null&&e!==void 0?e:c}),localeRef:t}}export{f as u};
