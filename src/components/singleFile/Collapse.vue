@@ -19,7 +19,6 @@ const hide = ref(false);
 const resizeObserver = new ResizeObserver((entries) => {
   const target = entries[0].target as HTMLElement;
   const { width } = target.getBoundingClientRect();
-  console.log(target, width);
   target.parentElement!.style.setProperty("--width", width + "px");
 });
 setTimeout(() => {

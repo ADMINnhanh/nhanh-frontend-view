@@ -15,6 +15,7 @@ import {
   NRadioButton,
   NInputNumber,
   NColorPicker,
+  NH4,
 } from "naive-ui";
 import { ArrowBackOutline, ArrowForwardOutline } from "@vicons/ionicons5";
 import { computed, onUnmounted, ref } from "vue";
@@ -24,6 +25,7 @@ import { useLocalStorage } from "@vueuse/core";
 import Collapse from "@/components/singleFile/Collapse.vue";
 import SvgGather from "@/assets/icon/gather";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
+import Media from "@/stores/media";
 
 interface Emit {
   (e: "close"): void;
@@ -144,6 +146,88 @@ onUnmounted(() => window.removeEventListener("keydown", shortcutKey));
 
 <template>
   <NModal
+    v-if="Media.isMobileStyle"
+    v-model:show="active"
+    @after-leave="emit('close')"
+    :auto-focus="false"
+    :mask-closable="false"
+    preset="card"
+    :title="chapterDetails?.title"
+    :style="readingStyle"
+    id="ReadingMode"
+    :show-mask="!shrinkScreen"
+    :draggable="shrinkScreen"
+    size="small"
+  >
+    <template v-if="shrinkScreen" #header-extra>
+      <NButton @click="toggleShrinkScreen" size="small">
+        <template #icon>
+          <SvgGather icon="ShrinkScreen" />
+        </template>
+      </NButton>
+    </template>
+    <div v-if="!shrinkScreen" class="flex-box">
+      <NInputNumber
+        v-model:value="chapterDetailsLocal.size"
+        style="width: 100px"
+        :min="12"
+        size="small"
+      >
+        <template #suffix>px</template>
+      </NInputNumber>
+      <NButtonGroup size="small">
+        <NButton @click="goToPrevChapter">
+          <template #icon>
+            <NIcon :component="ArrowBackOutline" />
+          </template>
+          上一章
+        </NButton>
+        <NButton @click="goToNextChapter" icon-placement="right">
+          <template #icon>
+            <NIcon :component="ArrowForwardOutline" />
+          </template>
+          下一章
+        </NButton>
+      </NButtonGroup>
+      <NButton @click="toggleShrinkScreen" size="small">
+        <template #icon>
+          <SvgGather icon="ShrinkScreen" />
+        </template>
+      </NButton>
+    </div>
+    <ResponsiveDirectionLayout
+      :style="{ height: shrinkScreen ? 0 : 'calc(100vh - 95px)' }"
+      :max="0.75"
+      :min="0"
+      :default-size="0.25"
+    >
+      <template #left>
+        <NVirtualList
+          ref="virtualListInst"
+          key-field="order"
+          :item-size="54"
+          :items="chapters"
+        >
+          <template #default="{ item }">
+            <NMenu
+              :value="chapterDetails?.id"
+              @update:value="openChapter(item)"
+              :options="[{ label: item.title, key: item.id }]"
+            />
+          </template>
+        </NVirtualList>
+      </template>
+      <template #right>
+        <NScrollbar ref="scrollbarRef">
+          <NSpin :show="loading">
+            <ChapterContent v-html="chapterDetails?.content" min />
+          </NSpin>
+        </NScrollbar>
+      </template>
+    </ResponsiveDirectionLayout>
+  </NModal>
+  <NModal
+    v-else
     v-model:show="active"
     @after-leave="emit('close')"
     :auto-focus="false"
@@ -263,6 +347,7 @@ body.dark #ReadingMode * {
 }
 .flex-box {
   display: flex;
+  flex-wrap: wrap;
   > *:not(:last-child) {
     margin-right: 8px;
   }

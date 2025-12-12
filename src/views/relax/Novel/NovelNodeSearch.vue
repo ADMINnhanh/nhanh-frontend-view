@@ -23,6 +23,7 @@ import {
 import ChapterContent from "./ChapterContent.vue";
 import ReadingMode from "./ReadingMode.vue";
 import { useLocalStorage } from "@vueuse/core";
+import Media from "@/stores/media";
 
 interface Props {
   novelId?: number;
@@ -80,7 +81,7 @@ function openChapter(item: Chapter) {
       order: item.order,
       min: false,
       color: "rgba(255, 255, 255, 0.4)",
-      size: 22,
+      size: Media.value.isMobileStyle ? 19 : 22,
     };
   });
 }
@@ -88,7 +89,7 @@ function openChapter(item: Chapter) {
 
 <template>
   <NSpin v-if="novelId" :show="loading">
-    <NAlert v-if="novel" type="info" :title="novel.name">
+    <NAlert v-if="novel" type="info" :title="novel.name" closable>
       <NFlex>
         <NTag round type="info">
           章节总数: {{ _Format_NumberWithCommas(novel.chapterCount) }}
