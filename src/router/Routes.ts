@@ -85,6 +85,17 @@ const canvas: CustomRouteRecord = {
       },
       component: () => import("@/views/canvas/GLSL/index.vue"),
     },
+    {
+      path: "ImageScatterRecombine",
+      name: "ImageScatterRecombine",
+      meta: {
+        name: {
+          zhCN: "图片打散重组",
+          enUS: "Image Scatter and Recombine",
+        },
+      },
+      component: () => import("@/views/canvas/ImageScatterRecombine/index.vue"),
+    },
   ],
 };
 
