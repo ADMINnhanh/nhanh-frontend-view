@@ -1,61 +1,68 @@
-import type { ImageScatterAnimationType } from "..";
-import Draw from "./draw";
+import BlockManager from "./BlockGridManager";
+import CanvasProcessor from "./CanvasProcessor";
 import ImageProcessor from "./ImageProcessor";
-
-// // 获取Canvas并转移控制权
-// const canvas = document.getElementById("myCanvas") as HTMLCanvasElement;
-// const offscreen: OffscreenCanvas = canvas.transferControlToOffscreen();
-
-// // 创建Worker并传递OffscreenCanvas（使用transferToFixedArray避免拷贝）
-// const worker = new Worker("worker.js");
-// worker.postMessage({ type: "init", canvas: offscreen }, [offscreen]);
-
-/** 图像打散重组配置项 */
-type ImageScatterConfig = {
-  /** 画布上下文 */
-  ctx?: CanvasRenderingContext2D;
-  /** 图片 */
-  url: string | Blob | URL;
-  /** 数据块大小 */
-  blockSize: number;
-  /** 动画类型 */
-  animation: ImageScatterAnimationType;
-};
 
 /** 打散图像并重组 */
 class ImageScatterRecombine {
-  // /** 状态 “待处理” | “运行中” | “已完成” */
-  // private status: "pending" | "running" | "finished" = "pending";
-
+  /** 状态 "静止" | "运行" */
+  private status: "static" | "running" = "static";
   /** 图片 */
-  private imageProcessor = new ImageProcessor();
+  readonly imageProcessor = new ImageProcessor(this);
   /** 绘制类 */
-  draw = new Draw();
-  /** 动画类型 */
-  private animation: ImageScatterAnimationType = "像素块依次飞入";
-  /** 数据块大小 */
-  private blockSize: number = 6;
+  readonly canvasProcessor = new CanvasProcessor(this);
+  /** 区块管理器 */
+  readonly blockManager = new BlockManager(this);
+
+  /** 配置 */
+  readonly config: Partial<ImageScatterConfig> = {};
 
   /** 开始 */
-  async start(config: Partial<ImageScatterConfig>) {
-    this.pause();
+  async start(config?: Partial<ImageScatterConfig>) {
+    if (config) {
+      this.pause();
 
-    await this.initConfig(config);
+      await this.updateConfig(config);
 
-    console.log(this.imageProcessor.getBlockData(0, 0, this.blockSize));
+      const data = this.blockManager.blockCoordinates[0];
+      console.log(data);
+      // this.canvasProcessor.rendering(data);
+    } else {
+    }
+    this.status = "running";
   }
   /** 暂停 */
-  pause() {}
+  pause() {
+    this.status = "static";
+  }
 
-  /** 初始化参数 */
-  private async initConfig(config: Partial<ImageScatterConfig>) {
-    if (config.ctx) this.draw.ctx = config.ctx;
+  /** 更新配置 */
+  async updateConfig(config: Partial<ImageScatterConfig>) {
+    if (this.status == "running") {
+      this.start(config);
+      return false;
+    }
 
-    if (config.animation) this.animation = config.animation;
+    Object.assign(this.config, config);
 
-    if (config.blockSize) this.blockSize = Math.max(1, config.blockSize);
+    this.canvasProcessor.update();
 
-    await this.imageProcessor.update(config.url);
+    await this.imageProcessor.update();
+
+    this.calculateOrigin();
+
+    this.blockManager.update();
+  }
+
+  /** 计算原点 */
+  private calculateOrigin() {
+    if (!this.config.origin) {
+      const { imageWidth, imageHeight } = this.imageProcessor.export;
+      const { canvasWidth, canvasHeight } = this.canvasProcessor.export;
+      this.config.origin = {
+        x: Math.round((canvasWidth - imageWidth) / 2),
+        y: Math.round((canvasHeight - imageHeight) / 2),
+      };
+    }
   }
 }
 

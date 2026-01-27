@@ -1,23 +1,22 @@
 <script setup lang="ts">
 import { watch } from "vue";
-import type { ImageScatterAnimationType } from "..";
 import ImageScatterRecombine from ".";
+import { _Utility_GenerateUUID } from "nhanh-pure-function";
 
 interface Props {
   url: string;
-  animation: ImageScatterAnimationType;
 }
 
 const props = defineProps<Props>();
 
+const id = _Utility_GenerateUUID();
 const imageScatterRecombine = new ImageScatterRecombine();
 
 watch(
-  [() => props.url, () => props.animation],
-  ([url, animation]) => {
-    imageScatterRecombine.start({
-      url,
-      animation,
+  () => props.url,
+  (url) => {
+    requestAnimationFrame(() => {
+      imageScatterRecombine.start({ id, url });
     });
   },
   { immediate: true }
@@ -25,7 +24,7 @@ watch(
 </script>
 
 <template>
-  <canvas />
+  <canvas :id="id" />
 </template>
 
 <style scoped lang="less">

@@ -8,30 +8,21 @@ import {
   NRadioGroup,
 } from "naive-ui";
 import { ref } from "vue";
-import { ANIMATION_TYPES, type ImageScatterAnimationType } from ".";
 import Core from "./core/index.vue";
 
 const urls = [
-  "https://picsum.photos/200/300",
-  "https://picsum.photos/400/300",
-  "https://picsum.photos/200/200",
-  "https://picsum.photos/350/300",
+  new URL("@/assets/img/picsum/200x200.jpg", import.meta.url).href,
+  new URL("@/assets/img/picsum/200x300.jpg", import.meta.url).href,
+  new URL("@/assets/img/picsum/350x300.jpg", import.meta.url).href,
+  new URL("@/assets/img/picsum/400x300.jpg", import.meta.url).href,
 ];
 
 const currentIndex = ref(0);
-const animation = ref<ImageScatterAnimationType>("像素块依次飞入");
 </script>
 
 <template>
   <ResponsiveDirectionLayout :default-size="0.35" :min="0">
     <template #left>
-      <NRadioGroup v-model:value="animation" name="radiogroup">
-        <NSpace>
-          <NRadio v-for="type in ANIMATION_TYPES" :key="type" :value="type">
-            {{ type }}
-          </NRadio>
-        </NSpace>
-      </NRadioGroup>
       <NCarousel
         v-model:current-index="currentIndex"
         :space-between="30"
@@ -46,7 +37,7 @@ const animation = ref<ImageScatterAnimationType>("像素块依次飞入");
       </NCarousel>
     </template>
     <template #right>
-      <Core :animation="animation" :url="urls[currentIndex]" />
+      <Core :url="urls[currentIndex]" />
     </template>
   </ResponsiveDirectionLayout>
 </template>
