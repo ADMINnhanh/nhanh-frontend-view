@@ -1,4 +1,5 @@
-import BlockManager from "./BlockGridManager";
+import BlockAnimationManager from "./BlockAnimation";
+import BlockManager from "./BlockManager";
 import CanvasProcessor from "./CanvasProcessor";
 import ImageProcessor from "./ImageProcessor";
 
@@ -12,6 +13,8 @@ class ImageScatterRecombine {
   readonly canvasProcessor = new CanvasProcessor(this);
   /** 区块管理器 */
   readonly blockManager = new BlockManager(this);
+  /** 区块动画管理器 */
+  readonly animationManager = new BlockAnimationManager(this);
 
   /** 配置 */
   readonly config: Partial<ImageScatterConfig> = {};

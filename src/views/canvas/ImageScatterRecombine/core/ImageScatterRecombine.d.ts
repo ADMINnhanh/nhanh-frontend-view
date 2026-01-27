@@ -14,8 +14,13 @@ type ImageScatterConfig = {
   blockSortType: "sortInSequence" | "sortRandomly";
   /** 区块起始位置生成方式 */
   blockStartPositionGenerator: "center" | "top" | "bottom" | "left" | "right";
-  /** 区块移动方式 */
-  blockMoveType: "linear" | "ease";
+  /** 动画 */
+  animation: {
+    /** 动画类型 */
+    name?: "linear" | "ease";
+    /** 动画周期 秒 */
+    duration?: number;
+  };
 };
 
 /** 块数据类型 */

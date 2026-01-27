@@ -45,11 +45,7 @@ class BlockSortGenerator {
   };
 }
 
-/**
- * 区块网格起始位置生成器
- * 负责根据预设/自定义的位置计算方法，生成区块在画布中的起始坐标
- * 支持内置位置算法（center/top/bottom/left/right）和用户自定义位置算法
- */
+/** 区块网格起始位置生成器 */
 class BlockStartPositionGenerator {
   /**
    * 当前使用的位置计算方法名称
@@ -164,57 +160,6 @@ class BlockStartPositionGenerator {
   };
 }
 
-/** 区块网格移动 */
-class BlockMoveGenerator {
-  /** 当前使用的位置计算方法名称  */
-  private _moveMethod: ImageScatterConfig["blockMoveType"] = "linear";
-
-  /** 获取当前使用的位置计算方法名称 */
-  get moveMethod() {
-    return this._moveMethod;
-  }
-  set moveMethod(value: ImageScatterConfig["blockMoveType"] | undefined) {
-    if (value && value in this) this._moveMethod = value;
-  }
-
-  /** 移动 */
-  move(blockCoordinate: BlockCoordinate[]) {
-    const method = this[this.moveMethod!];
-    blockCoordinate.forEach((item) => {
-      if (item.progress == 0) {
-        item.currentX = item.startX;
-        item.currentY = item.startY;
-      } else if (item.progress == 1) {
-        item.currentX = item.endX;
-        item.currentY = item.endY;
-      } else {
-        const { x, y } = method(item);
-        item.currentX = x;
-        item.currentY = y;
-      }
-    });
-  }
-
-  /** 平滑（线性） */
-  private linear: BlockMoveFunction = (block) => {
-    const { progress, startX, startY, endX, endY } = block;
-    return {
-      x: (endX - startX) * progress + startX,
-      y: (endY - startY) * progress + startY,
-    };
-  };
-
-  /** 慢-快-慢（缓动） */
-  private ease: BlockMoveFunction = (block) => {
-    const { progress, startX, startY, endX, endY } = block;
-    const easeProgress = 0.5 * (1 - Math.cos(progress * Math.PI));
-    return {
-      x: (endX - startX) * easeProgress + startX,
-      y: (endY - startY) * easeProgress + startY,
-    };
-  };
-}
-
 /** 区块网格管理器 */
 class BlockManager {
   /** x轴方向的区块总数 */
@@ -228,8 +173,6 @@ class BlockManager {
   private blockSort = new BlockSortGenerator();
   /** 起始位置 */
   private blockStartPosition: BlockStartPositionGenerator;
-  /** 移动 */
-  private blockMove = new BlockMoveGenerator();
 
   /** 区块坐标列表 */
   blockCoordinates: BlockCoordinate[] = [];
@@ -252,7 +195,6 @@ class BlockManager {
     const {
       blockSortType: sortType,
       blockStartPositionGenerator: positionMethod,
-      blockMoveType,
     } = this.main.config;
 
     // 判断配置是否发生变化
@@ -267,7 +209,6 @@ class BlockManager {
     this.totalXBlocks = totalXBlocks;
     this.totalYBlocks = totalYBlocks;
     this.blockSize = blockSize;
-    this.blockMove.moveMethod = blockMoveType;
 
     // 如果配置变更，重新生成区块坐标
     if (isConfigChanged) {
