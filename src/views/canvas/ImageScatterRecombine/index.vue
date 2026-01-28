@@ -34,7 +34,7 @@ const config = ref<Partial<ImageScatterConfig>>({
   blockSortType: "sortInSequence",
   blockStartPositionGenerator: "bottom",
   animation: {
-    name: "linear",
+    name: "bounce",
     duration: 0.5,
   },
   throw: {
@@ -140,7 +140,13 @@ const coreRef = ref<InstanceType<typeof Core>>();
               <n-radio-group v-model:value="config.animation!.name">
                 <n-space>
                   <n-radio
-                    v-for="item in ['linear', 'ease']"
+                    v-for="item in [
+                      'linear',
+                      'ease',
+                      'easeOut',
+                      'easeIn',
+                      'bounce',
+                    ]"
                     :key="item"
                     :value="item"
                   >

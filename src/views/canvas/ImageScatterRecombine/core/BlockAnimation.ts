@@ -3,7 +3,7 @@ import type ImageScatterRecombine from ".";
 /** 区块网格移动 */
 class BlockMoveGenerator {
   /** 当前使用的位置计算方法名称  */
-  private _moveMethod: ImageScatterConfig["animation"]["name"] = "linear";
+  private _moveMethod: ImageScatterConfig["animation"]["name"] = "bounce";
 
   /** 获取当前使用的位置计算方法名称 */
   get moveMethod() {
@@ -48,6 +48,54 @@ class BlockMoveGenerator {
     return {
       x: (endX - startX) * easeProgress + startX,
       y: (endY - startY) * easeProgress + startY,
+    };
+  };
+
+  /** 快速开始，然后减速（缓出） */
+  private easeOut: BlockMoveFunction = (block) => {
+    const { progress, startX, startY, endX, endY } = block;
+    // 使用二次方曲线实现缓出效果，progress越接近1，变化越慢
+    const easeProgress = 1 - Math.pow(1 - progress, 2);
+    return {
+      x: (endX - startX) * easeProgress + startX,
+      y: (endY - startY) * easeProgress + startY,
+    };
+  };
+
+  /** 缓慢开始，然后加速（缓入） */
+  private easeIn: BlockMoveFunction = (block) => {
+    const { progress, startX, startY, endX, endY } = block;
+    // 二次方曲线实现缓入效果，progress越接近1，变化越快
+    const easeProgress = Math.pow(progress, 2);
+    return {
+      x: (endX - startX) * easeProgress + startX,
+      y: (endY - startY) * easeProgress + startY,
+    };
+  };
+
+  /** 弹跳效果（多次回弹） */
+  private bounce: BlockMoveFunction = (block) => {
+    const { startX, startY, endX, endY } = block;
+    let progress = block.progress;
+
+    // 定义弹跳的参数
+    const n1 = 7.5625;
+    const d1 = 2.75;
+    let bounceProgress = 0;
+
+    if (progress < 1 / d1) {
+      bounceProgress = n1 * progress * progress;
+    } else if (progress < 2 / d1) {
+      bounceProgress = n1 * (progress -= 1.5 / d1) * progress + 0.75;
+    } else if (progress < 2.5 / d1) {
+      bounceProgress = n1 * (progress -= 2.25 / d1) * progress + 0.9375;
+    } else {
+      bounceProgress = n1 * (progress -= 2.625 / d1) * progress + 0.984375;
+    }
+
+    return {
+      x: (endX - startX) * bounceProgress + startX,
+      y: (endY - startY) * bounceProgress + startY,
     };
   };
 }

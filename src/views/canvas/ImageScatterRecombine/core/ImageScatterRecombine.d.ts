@@ -17,7 +17,7 @@ type ImageScatterConfig = {
   /** 动画 */
   animation: {
     /** 动画类型 */
-    name?: "linear" | "ease";
+    name?: "linear" | "ease" | "easeOut" | "easeIn" | "bounce";
     /** 动画周期 秒 */
     duration?: number;
   };
