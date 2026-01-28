@@ -4,7 +4,7 @@ import ImageScatterRecombine from ".";
 import { _Utility_GenerateUUID } from "nhanh-pure-function";
 
 interface Props {
-  url: string;
+  config: Partial<ImageScatterConfig>;
 }
 
 const props = defineProps<Props>();
@@ -13,14 +13,16 @@ const id = _Utility_GenerateUUID();
 const imageScatterRecombine = new ImageScatterRecombine();
 
 watch(
-  () => props.url,
-  (url) => {
-    requestAnimationFrame(() => {
-      imageScatterRecombine.start({ id, url });
-    });
+  () => props.config,
+  (config) => {
+    requestAnimationFrame(() => imageScatterRecombine.start({ id, ...config }));
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
+
+defineExpose({
+  imageScatterRecombine,
+});
 </script>
 
 <template>

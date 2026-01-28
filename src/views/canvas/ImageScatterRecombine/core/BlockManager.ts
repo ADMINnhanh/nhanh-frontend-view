@@ -52,7 +52,7 @@ class BlockStartPositionGenerator {
    * 内置值：center/top/bottom/left/right，也可存储用户自定义方法名
    */
   private _positionMethod: ImageScatterConfig["blockStartPositionGenerator"] =
-    "center";
+    "bottom";
 
   /** 获取当前使用的位置计算方法名称 */
   get positionMethod() {
@@ -101,12 +101,12 @@ class BlockStartPositionGenerator {
    */
   protected getDimensions() {
     const { canvasWidth, canvasHeight } = this.main.canvasProcessor.export;
-    const { blockSize } = this.main.imageProcessor.export;
+    const { width, height } = this.main.imageProcessor.export.blockSizeClamped;
     return {
       canvasWidth,
       canvasHeight,
-      blockWidth: blockSize.width,
-      blockHeight: blockSize.height,
+      blockWidth: width,
+      blockHeight: height,
     };
   }
 
@@ -162,13 +162,18 @@ class BlockStartPositionGenerator {
 
 /** 区块网格管理器 */
 class BlockManager {
-  /** x轴方向的区块总数 */
-  private totalXBlocks = 0;
-  /** y轴方向的区块总数 */
-  private totalYBlocks = 0;
-  /** 数据块大小 */
-  private blockSize?: ImageScatterConfig["blockSize"];
+  /** 原点 */
+  private get origin() {
+    const origin = this.main.config.origin;
+    if (origin) return origin;
 
+    const { imageWidth, imageHeight } = this.main.imageProcessor.export;
+    const { canvasWidth, canvasHeight } = this.main.canvasProcessor.export;
+    return {
+      x: Math.round((canvasWidth - imageWidth) / 2),
+      y: Math.round((canvasHeight - imageHeight) / 2),
+    };
+  }
   /** 排序 */
   private blockSort = new BlockSortGenerator();
   /** 起始位置 */
@@ -178,7 +183,7 @@ class BlockManager {
   blockCoordinates: BlockCoordinate[] = [];
 
   /** 主类 */
-  main: ImageScatterRecombine;
+  private main: ImageScatterRecombine;
   constructor(main: ImageScatterRecombine) {
     this.main = main;
     this.blockStartPosition = new BlockStartPositionGenerator(main);
@@ -189,38 +194,29 @@ class BlockManager {
    * @param config 网格配置项
    * @returns 是否发生了配置变更
    */
-  update() {
-    const { totalXBlocks, totalYBlocks, blockSize } =
-      this.main.imageProcessor.export;
+  update(imageChange: boolean) {
     const {
       blockSortType: sortType,
       blockStartPositionGenerator: positionMethod,
     } = this.main.config;
 
-    // 判断配置是否发生变化
-    const isConfigChanged =
-      totalXBlocks !== this.totalXBlocks ||
-      totalYBlocks !== this.totalYBlocks ||
-      JSON.stringify(blockSize) !== JSON.stringify(this.blockSize) ||
-      (sortType && sortType !== this.blockSort.sortType) ||
-      (positionMethod &&
-        positionMethod !== this.blockStartPosition.positionMethod);
+    const sortTypeChange = sortType && sortType !== this.blockSort.sortType;
+    const positionMethodChange =
+      positionMethod &&
+      positionMethod !== this.blockStartPosition.positionMethod;
 
-    this.totalXBlocks = totalXBlocks;
-    this.totalYBlocks = totalYBlocks;
-    this.blockSize = blockSize;
+    this.blockSort.sortType = sortType;
+    this.blockStartPosition.positionMethod = positionMethod;
 
-    // 如果配置变更，重新生成区块坐标
-    if (isConfigChanged) {
-      this.blockSort.sortType = sortType;
-      this.blockStartPosition.positionMethod = positionMethod;
-      this.regenerateBlockCoordinates();
-    }
+    const changed = !!(imageChange || sortTypeChange || positionMethodChange);
+    if (changed) this.regenerateBlockCoordinates();
+
+    return changed;
   }
 
   /** 重新生成区块坐标列表 */
   private regenerateBlockCoordinates() {
-    const { totalXBlocks, totalYBlocks } = this;
+    const { totalXBlocks, totalYBlocks } = this.main.imageProcessor.export;
     const blockCoordinates = this.blockSort.sort(
       totalXBlocks,
       totalYBlocks
@@ -235,11 +231,20 @@ class BlockManager {
   private initializeBlockPositionProperties(
     blockCoordinates: BlockCoordinate[]
   ) {
-    const origin = this.main.config.origin!;
-    const { width, height } = this.blockSize!;
+    const origin = this.origin;
+
+    const { width, height } = this.main.imageProcessor.export.blockSizeClamped;
+
     blockCoordinates.forEach((item) => {
-      item.endX = item.blockXIndex * width + origin.x;
-      item.endY = item.blockYIndex * height + origin.y;
+      item.endX = Math.floor(item.blockXIndex * width + origin.x);
+      item.endY = Math.floor(item.blockYIndex * height + origin.y);
+      item.progress = 0;
+    });
+  }
+
+  /** 重置区块 */
+  reset() {
+    this.blockCoordinates.forEach((item) => {
       item.progress = 0;
     });
   }

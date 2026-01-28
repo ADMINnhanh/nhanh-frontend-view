@@ -16,6 +16,7 @@ class BlockMoveGenerator {
   /** 移动 */
   move(blockCoordinate: BlockCoordinate[]) {
     const method = this[this.moveMethod!];
+
     blockCoordinate.forEach((item) => {
       if (item.progress == 0) {
         item.currentX = item.startX;
@@ -54,18 +55,37 @@ class BlockMoveGenerator {
 /** 区块网格动画 */
 class BlockAnimationManager {
   /** 动画周期 秒 */
-  private duration = 5;
+  private duration = 0.5;
   /** 移动 */
   private blockMove = new BlockMoveGenerator();
 
+  /** 暴露一些属性 */
+  get export() {
+    return {
+      /** 动画周期 秒 */
+      duration: this.duration,
+      /** 移动方法名称 */
+      moveMethod: this.blockMove.moveMethod,
+    };
+  }
+
   /** 主类 */
-  main: ImageScatterRecombine;
+  private main: ImageScatterRecombine;
   constructor(main: ImageScatterRecombine) {
     this.main = main;
   }
 
+  /** 更新 */
   update() {
-    const { name, duration } = this.main.config.animation || {};
+    if (!this.main.config.animation) return;
+    const { name, duration } = this.main.config.animation;
+    this.blockMove.moveMethod = name;
+    this.duration = duration || this.duration;
+  }
+
+  /** 计算区块当前位置 */
+  calculateBlockPosition() {
+    this.blockMove.move(this.main.throwManager.runningBlocks);
   }
 }
 

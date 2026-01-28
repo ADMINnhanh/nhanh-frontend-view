@@ -13,28 +13,41 @@ class ImageProcessor {
   /** 数据块大小 */
   private _blockSize?: ImageScatterConfig["blockSize"];
   /** 数据块大小 */
-  private get blockSize() {
+  private get blockSize(): Exclude<ImageScatterConfig["blockSize"], null> {
     if (this._blockSize) return this._blockSize;
+
     const { width = 0, height = 0 } = this.imageData ?? {};
     return {
-      width: Math.max(6, Math.round(width / 100)),
-      height: Math.max(6, Math.round(height / 100)),
+      width: Math.max(40, Math.round(width / 50)),
+      height: Math.max(40, Math.round(height / 50)),
     };
   }
   private set blockSize(value: ImageScatterConfig["blockSize"]) {
-    const { width, height } = value;
-    if (!Number.isInteger(width) || !Number.isInteger(height)) {
-      console.warn("blockSize must be integer.");
-    } else if (width < 0 || height < 0) {
-      console.warn("blockSize must be positive.");
-    }
+    if (value) this._blockSize = { ...value };
+    else this._blockSize = value;
+  }
+  /** 受限的数据块大小 */
+  private get blockSizeClamped() {
+    const { imageData, blockSize } = this;
+    const imageWidth = imageData?.width || 0;
+    const imageHeight = imageData?.height || 0;
 
-    this._blockSize = value;
+    const width = Math.min(blockSize.width, imageWidth);
+    const height = Math.min(blockSize.height, imageHeight);
+    return { width, height };
   }
   /** 图像渲染大小 */
-  private renderSize?: { width: number; height: number };
+  private _renderSize?: ImageScatterConfig["renderSize"];
+  /** 图像渲染大小 */
+  private get renderSize() {
+    return this._renderSize;
+  }
+  private set renderSize(value: ImageScatterConfig["renderSize"] | undefined) {
+    if (value) this._renderSize = { ...value };
+    else this._renderSize = value;
+  }
   /** 存储所有行的区块数据 */
-  private blockRows: BlockData[][] = [];
+  private blockRows: ImageData[][] = [];
   /** x轴方向的区块总数 */
   private totalXBlocks = 0;
   /** y轴方向的区块总数 */
@@ -42,28 +55,43 @@ class ImageProcessor {
 
   /** 暴露一些属性 */
   get export() {
+    const {
+      imageData,
+      blockSize,
+      totalXBlocks,
+      totalYBlocks,
+      blockSizeClamped,
+    } = this;
+    const imageWidth = imageData?.width || 0;
+    const imageHeight = imageData?.height || 0;
+
     return {
-      blockSize: this.blockSize,
-      totalXBlocks: this.totalXBlocks,
-      totalYBlocks: this.totalYBlocks,
-      imageWidth: this.imageData?.width || 0,
-      imageHeight: this.imageData?.height || 0,
+      blockSize,
+      blockSizeClamped,
+      totalXBlocks,
+      totalYBlocks,
+      imageWidth,
+      imageHeight,
     };
   }
 
   /** 主类 */
-  main: ImageScatterRecombine;
+  private main: ImageScatterRecombine;
   constructor(main: ImageScatterRecombine) {
     this.main = main;
   }
 
+  private jsonNotEqual(v: any, v1: any) {
+    return v !== undefined && JSON.stringify(v) !== JSON.stringify(v1);
+  }
+
   /** 更新图像资源并重新加载像素数据 */
-  async update() {
+  async update(canvasChange: boolean) {
     const { id, url, blockSize, renderSize } = this.main.config;
     const idChanged = id && id !== this.canvasId;
     const urlChanged = url && url !== this.imageSource;
-    const blockSizeChanged = blockSize && blockSize !== this.blockSize;
-    const renderSizeChanged = renderSize && renderSize !== this.renderSize;
+    const blockSizeChanged = this.jsonNotEqual(blockSize, this.blockSize);
+    const renderSizeChanged = this.jsonNotEqual(renderSize, this.renderSize);
 
     if (renderSizeChanged) {
       this.renderSize = renderSize;
@@ -71,20 +99,22 @@ class ImageProcessor {
     if (idChanged) {
       this.canvasId = id;
     }
-    if (blockSizeChanged) {
-      this.blockSize = blockSize;
-    }
     if (urlChanged) {
       this.imageSource = url;
       await this.loadImageData();
-    } else if (renderSizeChanged || idChanged) {
+    } else if (renderSizeChanged || idChanged || canvasChange) {
       this.getImageDataFromElement();
+    }
+    if (blockSizeChanged) {
+      this.blockSize = blockSize!;
     }
 
     const changed =
       idChanged || urlChanged || blockSizeChanged || renderSizeChanged;
 
     if (changed) this.organizeBlockPixelData();
+
+    return !!changed;
   }
 
   /** 加载图像数据（处理不同类型的URL/Blob） */
@@ -135,20 +165,9 @@ class ImageProcessor {
    * @returns 适配后的宽高对象（保证等比例，且不超出Canvas容器尺寸）
    */
   private calculateFitSize(originalWidth: number, originalHeight: number) {
-    if (this.renderSize) return { ...this.renderSize };
+    if (this.renderSize) return this.renderSize;
 
-    const canvas = document.getElementById(
-      this.canvasId!
-    ) as HTMLCanvasElement | null;
-    if (!canvas) {
-      console.warn(
-        `[Canvas适配] 未找到ID为"${this.canvasId}"的Canvas元素，返回原始尺寸`
-      );
-      return { width: originalWidth, height: originalHeight };
-    }
-
-    const canvasWidth = canvas.width;
-    const canvasHeight = canvas.height;
+    const { canvasWidth, canvasHeight } = this.main.canvasProcessor.export;
 
     if (canvasWidth > originalWidth && canvasHeight > originalHeight) {
       return { width: originalWidth, height: originalHeight };
@@ -176,13 +195,13 @@ class ImageProcessor {
    * @param blockYIndex 区块在Y轴的索引（从0开始）
    * @returns 对应区块的像素数据数组，若参数无效返回空数组
    */
-  getBlockPixelData(blockXIndex: number, blockYIndex: number): BlockData {
+  getBlockPixelData(blockXIndex: number, blockYIndex: number) {
     // 1. 校验参数类型是否为整数
     if (!Number.isInteger(blockXIndex) || !Number.isInteger(blockYIndex)) {
       console.warn(
         `获取区块数据失败: 索引必须为整数，当前x: ${blockXIndex}, y: ${blockYIndex}`
       );
-      return [];
+      return;
     }
 
     // 2. 校验索引是否在有效范围内（包含0，且不超过最大索引）
@@ -197,7 +216,7 @@ class ImageProcessor {
           this.totalYBlocks - 1
         }]`
       );
-      return [];
+      return;
     }
 
     // 3. 安全获取区块数据（防止blockRows未初始化/索引越界）
@@ -218,7 +237,7 @@ class ImageProcessor {
     this.totalYBlocks = Math.ceil(imageData.height / blockSize.height);
 
     for (let y = 0; y < this.totalYBlocks; y++) {
-      const cols: BlockData[] = [];
+      const cols: ImageData[] = [];
       for (let x = 0; x < this.totalXBlocks; x++) {
         cols.push(this.getSingleBlockPixelData(x, y));
       }
@@ -236,8 +255,6 @@ class ImageProcessor {
     const imageData = this.imageData!;
     const blockSize = this.blockSize;
 
-    const rows: BlockData = [];
-
     /** x轴起始索引 */
     const xStart = x * blockSize.width;
     /** x轴结束索引 */
@@ -247,8 +264,10 @@ class ImageProcessor {
     /** y轴结束索引 */
     const yEnd = Math.min(yStart + blockSize.height, imageData.height);
 
+    let blockIndex = 0;
+    const blockImageData = new ImageData(xEnd - xStart, yEnd - yStart);
+
     for (let y = yStart; y < yEnd; y++) {
-      const cols: (typeof rows)[0] = [];
       for (let x = xStart; x < xEnd; x++) {
         const index = (y * imageData.width + x) * 4;
         const r = imageData.data[index];
@@ -256,12 +275,14 @@ class ImageProcessor {
         const b = imageData.data[index + 2];
         const a = imageData.data[index + 3];
 
-        cols.push([r, g, b, a]);
+        blockImageData.data[blockIndex++] = r;
+        blockImageData.data[blockIndex++] = g;
+        blockImageData.data[blockIndex++] = b;
+        blockImageData.data[blockIndex++] = a;
       }
-      rows.push(cols);
     }
 
-    return rows;
+    return blockImageData;
   }
 }
 

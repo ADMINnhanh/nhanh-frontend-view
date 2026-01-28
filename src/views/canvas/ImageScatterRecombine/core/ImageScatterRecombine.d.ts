@@ -7,9 +7,9 @@ type ImageScatterConfig = {
   /** 原点 */
   origin: { x: number; y: number };
   /** 渲染大小 */
-  renderSize: { width: number; height: number };
+  renderSize: { width: number; height: number } | null;
   /** 数据块大小 */
-  blockSize: { width: number; height: number };
+  blockSize: { width: number; height: number } | null;
   /** 区块排序方式 */
   blockSortType: "sortInSequence" | "sortRandomly";
   /** 区块起始位置生成方式 */
@@ -21,10 +21,14 @@ type ImageScatterConfig = {
     /** 动画周期 秒 */
     duration?: number;
   };
+  /** 抛出 */
+  throw: {
+    /** 抛出方式 */
+    type: "auto" | "manual";
+    /** 自动抛出时间间隔 秒 */
+    autoThrowInterval: number;
+  };
 };
-
-/** 块数据类型 */
-type BlockData = [number, number, number, number][][];
 
 /** 定义区块排序函数的类型，输入区块总数，返回坐标数组 */
 type BlockSortFunction = (
