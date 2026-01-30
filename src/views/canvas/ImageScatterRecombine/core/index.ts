@@ -59,9 +59,10 @@ class ImageScatterRecombine {
   }
 
   /** 开始循环检测 */
-  private loopCheck(timestamp?: number) {
-    const next = () =>
+  private loopCheck(timestamp?: number): void {
+    const next = () => {
       requestAnimationFrame((timestamp) => this.loopCheck(timestamp));
+    };
 
     if (this.status != "running") return;
     if (!timestamp) return next();
