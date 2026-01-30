@@ -11,7 +11,7 @@ type ImageScatterConfig = {
   /** 数据块大小 */
   blockSize: { width: number; height: number } | null;
   /** 区块排序方式 */
-  blockSortType: "sortInSequence" | "sortRandomly";
+  blockSortType: "sequence" | "randomly" | "tetris";
   /** 区块起始位置生成方式 */
   blockStartPositionGenerator: "center" | "top" | "bottom" | "left" | "right";
   /** 动画 */
@@ -59,6 +59,8 @@ type BlockCoordinate = {
   endY: number;
   /** 区块移动进度（0-1之间的数值，0表示未开始，1表示完成） */
   progress: number;
+  /** 动画周期 秒 */
+  duration?: number;
 };
 /**
  * 区块起始位置生成方法

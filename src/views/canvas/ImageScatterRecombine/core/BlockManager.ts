@@ -3,7 +3,7 @@ import type ImageScatterRecombine from ".";
 /** 区块网格生成和排序 */
 class BlockSortGenerator {
   /** 当前使用的排序类型 */
-  private _sortType: ImageScatterConfig["blockSortType"] = "sortInSequence";
+  private _sortType: ImageScatterConfig["blockSortType"] = "sequence";
   get sortType() {
     return this._sortType;
   }
@@ -16,10 +16,8 @@ class BlockSortGenerator {
     return this[this.sortType!](totalXBlocks, totalYBlocks);
   };
 
-  /**
-   * 按顺序排序：从上到下、从左到右生成区块坐标
-   */
-  private sortInSequence: BlockSortFunction = (totalXBlocks, totalYBlocks) => {
+  /** 按顺序排序：从上到下、从左到右生成区块坐标 */
+  private sequence: BlockSortFunction = (totalXBlocks, totalYBlocks) => {
     const coordinates: ReturnType<BlockSortFunction> = [];
     for (let y = 0; y < totalYBlocks; y++) {
       for (let x = 0; x < totalXBlocks; x++) {
@@ -29,11 +27,9 @@ class BlockSortGenerator {
     return coordinates;
   };
 
-  /**
-   * 随机排序：在顺序排序的基础上打乱坐标顺序
-   */
-  private sortRandomly: BlockSortFunction = (totalXBlocks, totalYBlocks) => {
-    const coordinates = this.sortInSequence(totalXBlocks, totalYBlocks);
+  /** 随机排序：在顺序排序的基础上打乱坐标顺序 */
+  private randomly: BlockSortFunction = (totalXBlocks, totalYBlocks) => {
+    const coordinates = this.sequence(totalXBlocks, totalYBlocks);
 
     // Fisher-Yates 洗牌算法实现随机打乱
     for (let i = coordinates.length - 1; i > 0; i--) {
@@ -42,6 +38,43 @@ class BlockSortGenerator {
     }
 
     return coordinates;
+  };
+
+  /** 俄罗斯方块：方块坐标排序（随机填充） */
+  private tetris: BlockSortFunction = (totalColumnCount, totalRowCount) => {
+    // 存储最终生成的所有方块坐标
+    const blockCoordinates: ReturnType<BlockSortFunction> = [];
+
+    // 每一列当前可填充的最后一行索引（初始化为最后一行）
+    const columnLastAvailableRowIndices = Array.from<number>({
+      length: totalColumnCount,
+    }).fill(totalRowCount - 1);
+
+    // 总方块数 = 列数 * 行数
+    const totalBlockCount = totalColumnCount * totalRowCount;
+
+    for (let i = 0; i < totalBlockCount; i++) {
+      // 标记每一列是否还有可填充的行（行索引 >= 0 表示可用）
+      const isColumnAvailable = columnLastAvailableRowIndices.map(
+        (rowIndex) => rowIndex >= 0
+      );
+
+      // 随机选择一个列索引
+      let targetColumnIndex = Math.floor(Math.random() * totalColumnCount);
+
+      // 循环直到选中一个可用的列
+      while (!isColumnAvailable[targetColumnIndex]) {
+        targetColumnIndex = Math.floor(Math.random() * totalColumnCount);
+      }
+
+      // 记录当前选中的方块坐标
+      blockCoordinates.push({
+        blockXIndex: targetColumnIndex,
+        blockYIndex: columnLastAvailableRowIndices[targetColumnIndex]--,
+      });
+    }
+
+    return blockCoordinates;
   };
 }
 

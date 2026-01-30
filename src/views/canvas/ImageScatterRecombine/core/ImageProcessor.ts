@@ -18,8 +18,8 @@ class ImageProcessor {
 
     const { width = 0, height = 0 } = this.imageData ?? {};
     return {
-      width: Math.max(40, Math.round(width / 50)),
-      height: Math.max(40, Math.round(height / 50)),
+      width: Math.max(40, Math.round(width / 10)),
+      height: Math.max(40, Math.round(height / 10)),
     };
   }
   private set blockSize(value: ImageScatterConfig["blockSize"]) {

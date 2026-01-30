@@ -31,7 +31,7 @@ const renderSizeCustom = ref(false);
 const config = ref<Partial<ImageScatterConfig>>({
   renderSize: { width: 200, height: 300 },
   blockSize: { width: 50, height: 50 },
-  blockSortType: "sortInSequence",
+  blockSortType: "sequence",
   blockStartPositionGenerator: "bottom",
   animation: {
     name: "bounce",
@@ -109,7 +109,7 @@ const coreRef = ref<InstanceType<typeof Core>>();
             <n-radio-group v-model:value="config.blockSortType">
               <n-space>
                 <n-radio
-                  v-for="item in ['sortInSequence', 'sortRandomly']"
+                  v-for="item in ['sequence', 'randomly', 'tetris']"
                   :key="item"
                   :value="item"
                 >

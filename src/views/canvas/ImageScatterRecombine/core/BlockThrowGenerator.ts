@@ -47,7 +47,12 @@ class BlockThrowGenerator {
     const { duration } = this.main.animationManager.export;
     const progressIncrement = delta / (duration * 1000);
     this.runningBlocks.forEach((block) => {
-      block.progress = Math.min(block.progress + progressIncrement, 1);
+      if (typeof block.duration == "number") {
+        const progressIncrement = delta / (block.duration * 1000);
+        block.progress = Math.min(block.progress + progressIncrement, 1);
+      } else {
+        block.progress = Math.min(block.progress + progressIncrement, 1);
+      }
     });
     this.check();
   }
