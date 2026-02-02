@@ -85,10 +85,7 @@ class BlockSortGenerator {
 
 /** 区块网格起始位置生成器 */
 class BlockStartPositionGenerator {
-  /**
-   * 当前使用的位置计算方法名称
-   * 内置值：center/top/bottom/left/right，也可存储用户自定义方法名
-   */
+  /** 当前使用的位置计算方法名称 */
   private _positionMethod: ImageScatterConfig["blockStartPositionGenerator"] =
     "bottom_middle";
 
@@ -161,10 +158,10 @@ class BlockStartPositionGenerator {
 
   /** 顶部居中对齐 */
   private top_middle: BlockPositionFunction = () => {
-    const { canvasWidth, blockWidth } = this.getDimensions();
+    const { canvasWidth, blockWidth, blockHeight } = this.getDimensions();
     return {
       startX: (canvasWidth - blockWidth) / 2,
-      startY: 0,
+      startY: -blockHeight,
     };
   };
   /** 顶部对齐 */
@@ -178,11 +175,10 @@ class BlockStartPositionGenerator {
 
   /** 底部居中对齐 */
   private bottom_middle: BlockPositionFunction = () => {
-    const { canvasWidth, canvasHeight, blockWidth, blockHeight } =
-      this.getDimensions();
+    const { canvasWidth, canvasHeight, blockWidth } = this.getDimensions();
     return {
       startX: (canvasWidth - blockWidth) / 2,
-      startY: canvasHeight - blockHeight,
+      startY: canvasHeight,
     };
   };
   /** 底部对齐 */
@@ -196,9 +192,9 @@ class BlockStartPositionGenerator {
 
   /** 左侧居中对齐 */
   private left_center: BlockPositionFunction = () => {
-    const { canvasHeight, blockHeight } = this.getDimensions();
+    const { canvasHeight, blockWidth, blockHeight } = this.getDimensions();
     return {
-      startX: 0,
+      startX: -blockWidth,
       startY: (canvasHeight - blockHeight) / 2,
     };
   };
@@ -213,10 +209,9 @@ class BlockStartPositionGenerator {
 
   /** 右侧居中对齐 */
   private right_center: BlockPositionFunction = () => {
-    const { canvasWidth, canvasHeight, blockWidth, blockHeight } =
-      this.getDimensions();
+    const { canvasWidth, canvasHeight, blockHeight } = this.getDimensions();
     return {
-      startX: canvasWidth - blockWidth,
+      startX: canvasWidth,
       startY: (canvasHeight - blockHeight) / 2,
     };
   };
