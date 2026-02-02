@@ -62,7 +62,7 @@ _Element_FullscreenObserver((isFull) => (isFullScreen.value = isFull));
 
 <template>
   <NSpace class="layout-header-button-group">
-    <WeatherInfo v-if="!Media.isMobileStyle" />
+    <!-- <WeatherInfo v-if="!Media.isMobileStyle" /> -->
     <NButton quaternary @click="toggleFullScreen">
       <template #icon>
         <NIcon :component="isFullScreen ? Contract : Expand" />

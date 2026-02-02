@@ -211,7 +211,13 @@ const relaxRouting: CustomRouteRecord = {
   ],
 };
 
-const AllRoute = [home, canvas, math, multimedia, relaxRouting];
+const AllRoute = [
+  // home,
+  canvas,
+  math,
+  multimedia,
+  relaxRouting,
+];
 
 /** 路由重名检测 */
 function CheckPath(item: CustomRouteRecord[]) {
