@@ -31,7 +31,7 @@ export default function main(id: string) {
 
   const glsl = new Canvas(canvas, options);
 
-  const fragment = new URL("./sun.glsl", import.meta.url).href;
+  const fragment = new URL("./sun.fs.glsl", import.meta.url).href;
   _File_Read(fragment).then((data) => {
     glsl.load(data);
   });

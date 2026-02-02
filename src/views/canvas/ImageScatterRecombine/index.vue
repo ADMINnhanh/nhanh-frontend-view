@@ -18,9 +18,6 @@ import {
 import { computed, ref } from "vue";
 import Core from "./core/index.vue";
 import { LogoElectron } from "@vicons/ionicons5";
-import _ from "lodash";
-
-console.log(_);
 
 const urls = [
   new URL("@/assets/img/picsum/200x200.jpg", import.meta.url).href,
