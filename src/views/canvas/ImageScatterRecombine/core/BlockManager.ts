@@ -16,7 +16,7 @@ class BlockSortGenerator {
     return this[this.sortType!](totalXBlocks, totalYBlocks);
   };
 
-  /** 按顺序排序：从上到下、从左到右生成区块坐标 */
+  /** 顺序排序：从上到下、从左到右生成区块坐标 */
   private sequence: BlockSortFunction = (totalXBlocks, totalYBlocks) => {
     const coordinates: ReturnType<BlockSortFunction> = [];
     for (let y = 0; y < totalYBlocks; y++) {
@@ -25,6 +25,11 @@ class BlockSortGenerator {
       }
     }
     return coordinates;
+  };
+  /** 倒序排序：从下到上、从右到左生成区块坐标 */
+  private reverse: BlockSortFunction = (totalXBlocks, totalYBlocks) => {
+    const coordinates = this.sequence(totalXBlocks, totalYBlocks);
+    return coordinates.reverse();
   };
 
   /** 随机排序：在顺序排序的基础上打乱坐标顺序 */
@@ -40,8 +45,8 @@ class BlockSortGenerator {
     return coordinates;
   };
 
-  /** 俄罗斯方块：方块坐标排序（随机填充） */
-  private tetris: BlockSortFunction = (totalColumnCount, totalRowCount) => {
+  /** 堆叠：从下至上（随机填充） */
+  private stack: BlockSortFunction = (totalColumnCount, totalRowCount) => {
     // 存储最终生成的所有方块坐标
     const blockCoordinates: ReturnType<BlockSortFunction> = [];
 
@@ -85,7 +90,7 @@ class BlockStartPositionGenerator {
    * 内置值：center/top/bottom/left/right，也可存储用户自定义方法名
    */
   private _positionMethod: ImageScatterConfig["blockStartPositionGenerator"] =
-    "bottom";
+    "bottom_middle";
 
   /** 获取当前使用的位置计算方法名称 */
   get positionMethod() {
@@ -117,8 +122,8 @@ class BlockStartPositionGenerator {
       // 根据当前选中的方法名获取坐标（兼容内置/自定义方法）
       const position = this[this.positionMethod!](block);
       // 四舍五入确保坐标为整数
-      const startX = Math.round(position.x);
-      const startY = Math.round(position.y);
+      const startX = Math.round(position.startX);
+      const startY = Math.round(position.startY);
 
       // 初始化区块的起始和当前坐标
       block.startX = startX;
@@ -144,51 +149,83 @@ class BlockStartPositionGenerator {
   }
 
   // ===================== 内置位置计算方法（私有，外部通过positionMethod调用） =====================
-  /** 居中对齐（内置） */
+  /** 居中对齐 */
   private center: BlockPositionFunction = () => {
     const { canvasWidth, canvasHeight, blockWidth, blockHeight } =
       this.getDimensions();
     return {
-      x: (canvasWidth - blockWidth) / 2,
-      y: (canvasHeight - blockHeight) / 2,
+      startX: (canvasWidth - blockWidth) / 2,
+      startY: (canvasHeight - blockHeight) / 2,
     };
   };
 
-  /** 顶部对齐（内置） */
-  private top: BlockPositionFunction = () => {
+  /** 顶部居中对齐 */
+  private top_middle: BlockPositionFunction = () => {
     const { canvasWidth, blockWidth } = this.getDimensions();
     return {
-      x: (canvasWidth - blockWidth) / 2,
-      y: 0,
+      startX: (canvasWidth - blockWidth) / 2,
+      startY: 0,
+    };
+  };
+  /** 顶部对齐 */
+  private top: BlockPositionFunction = (block) => {
+    const { blockHeight } = this.getDimensions();
+    return {
+      startX: block.endX,
+      startY: -blockHeight,
     };
   };
 
-  /** 底部对齐（内置） */
-  private bottom: BlockPositionFunction = () => {
+  /** 底部居中对齐 */
+  private bottom_middle: BlockPositionFunction = () => {
     const { canvasWidth, canvasHeight, blockWidth, blockHeight } =
       this.getDimensions();
     return {
-      x: (canvasWidth - blockWidth) / 2,
-      y: canvasHeight - blockHeight,
+      startX: (canvasWidth - blockWidth) / 2,
+      startY: canvasHeight - blockHeight,
+    };
+  };
+  /** 底部对齐 */
+  private bottom: BlockPositionFunction = (block) => {
+    const { canvasHeight } = this.getDimensions();
+    return {
+      startX: block.endX,
+      startY: canvasHeight,
     };
   };
 
-  /** 左侧对齐（内置） */
-  private left: BlockPositionFunction = () => {
+  /** 左侧居中对齐 */
+  private left_center: BlockPositionFunction = () => {
     const { canvasHeight, blockHeight } = this.getDimensions();
     return {
-      x: 0,
-      y: (canvasHeight - blockHeight) / 2,
+      startX: 0,
+      startY: (canvasHeight - blockHeight) / 2,
+    };
+  };
+  /** 左侧对齐 */
+  private left: BlockPositionFunction = (block) => {
+    const { blockWidth } = this.getDimensions();
+    return {
+      startX: -blockWidth,
+      startY: block.endY,
     };
   };
 
-  /** 右侧对齐（内置） */
-  private right: BlockPositionFunction = () => {
+  /** 右侧居中对齐 */
+  private right_center: BlockPositionFunction = () => {
     const { canvasWidth, canvasHeight, blockWidth, blockHeight } =
       this.getDimensions();
     return {
-      x: canvasWidth - blockWidth,
-      y: (canvasHeight - blockHeight) / 2,
+      startX: canvasWidth - blockWidth,
+      startY: (canvasHeight - blockHeight) / 2,
+    };
+  };
+  /** 右侧对齐 */
+  private right: BlockPositionFunction = (block) => {
+    const { canvasWidth } = this.getDimensions();
+    return {
+      startX: canvasWidth,
+      startY: block.endY,
     };
   };
 }

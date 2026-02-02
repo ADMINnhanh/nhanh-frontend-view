@@ -31,10 +31,10 @@ const renderSizeCustom = ref(false);
 const config = ref<Partial<ImageScatterConfig>>({
   renderSize: { width: 200, height: 300 },
   blockSize: { width: 50, height: 50 },
-  blockSortType: "sequence",
-  blockStartPositionGenerator: "bottom",
+  blockSortType: "stack",
+  blockStartPositionGenerator: "top",
   animation: {
-    name: "bounce",
+    name: "easeIn",
     duration: 0.5,
   },
   throw: {
@@ -109,7 +109,7 @@ const coreRef = ref<InstanceType<typeof Core>>();
             <n-radio-group v-model:value="config.blockSortType">
               <n-space>
                 <n-radio
-                  v-for="item in ['sequence', 'randomly', 'tetris']"
+                  v-for="item in ['sequence', 'reverse', 'randomly', 'stack']"
                   :key="item"
                   :value="item"
                 >
@@ -126,7 +126,17 @@ const coreRef = ref<InstanceType<typeof Core>>();
             <n-radio-group v-model:value="config.blockStartPositionGenerator">
               <n-space>
                 <n-radio
-                  v-for="item in ['center', 'top', 'bottom', 'left', 'right']"
+                  v-for="item in [
+                    'center',
+                    'top',
+                    'top_middle',
+                    'bottom',
+                    'bottom_middle',
+                    'left',
+                    'left_center',
+                    'right',
+                    'right_center',
+                  ]"
                   :key="item"
                   :value="item"
                 >

@@ -11,9 +11,18 @@ type ImageScatterConfig = {
   /** 数据块大小 */
   blockSize: { width: number; height: number } | null;
   /** 区块排序方式 */
-  blockSortType: "sequence" | "randomly" | "tetris";
+  blockSortType: "sequence" | "reverse" | "randomly" | "stack";
   /** 区块起始位置生成方式 */
-  blockStartPositionGenerator: "center" | "top" | "bottom" | "left" | "right";
+  blockStartPositionGenerator:
+    | "center"
+    | "top"
+    | "top_middle"
+    | "bottom"
+    | "bottom_middle"
+    | "left"
+    | "left_center"
+    | "right"
+    | "right_center";
   /** 动画 */
   animation: {
     /** 动画类型 */
@@ -59,8 +68,6 @@ type BlockCoordinate = {
   endY: number;
   /** 区块移动进度（0-1之间的数值，0表示未开始，1表示完成） */
   progress: number;
-  /** 动画周期 秒 */
-  duration?: number;
 };
 /**
  * 区块起始位置生成方法
@@ -68,8 +75,8 @@ type BlockCoordinate = {
  * @returns 计算后的区块起始位置坐标对象，包含 x/y 轴像素值
  */
 type BlockPositionFunction = (block: BlockCoordinate) => {
-  x: number;
-  y: number;
+  startX: number;
+  startY: number;
 };
 /**
  * 区块移动方法
@@ -77,6 +84,6 @@ type BlockPositionFunction = (block: BlockCoordinate) => {
  * @returns 移动后的区块目标位置坐标对象，包含 x/y 轴像素值
  */
 type BlockMoveFunction = (block: BlockCoordinate) => {
-  x: number;
-  y: number;
+  currentX: number;
+  currentY: number;
 };

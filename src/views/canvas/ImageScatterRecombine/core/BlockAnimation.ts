@@ -25,9 +25,9 @@ class BlockMoveGenerator {
         item.currentX = item.endX;
         item.currentY = item.endY;
       } else {
-        const { x, y } = method(item);
-        item.currentX = x;
-        item.currentY = y;
+        const { currentX, currentY } = method(item);
+        item.currentX = currentX;
+        item.currentY = currentY;
       }
     });
   }
@@ -36,8 +36,8 @@ class BlockMoveGenerator {
   private linear: BlockMoveFunction = (block) => {
     const { progress, startX, startY, endX, endY } = block;
     return {
-      x: (endX - startX) * progress + startX,
-      y: (endY - startY) * progress + startY,
+      currentX: (endX - startX) * progress + startX,
+      currentY: (endY - startY) * progress + startY,
     };
   };
 
@@ -46,8 +46,8 @@ class BlockMoveGenerator {
     const { progress, startX, startY, endX, endY } = block;
     const easeProgress = 0.5 * (1 - Math.cos(progress * Math.PI));
     return {
-      x: (endX - startX) * easeProgress + startX,
-      y: (endY - startY) * easeProgress + startY,
+      currentX: (endX - startX) * easeProgress + startX,
+      currentY: (endY - startY) * easeProgress + startY,
     };
   };
 
@@ -57,8 +57,8 @@ class BlockMoveGenerator {
     // 使用二次方曲线实现缓出效果，progress越接近1，变化越慢
     const easeProgress = 1 - Math.pow(1 - progress, 2);
     return {
-      x: (endX - startX) * easeProgress + startX,
-      y: (endY - startY) * easeProgress + startY,
+      currentX: (endX - startX) * easeProgress + startX,
+      currentY: (endY - startY) * easeProgress + startY,
     };
   };
 
@@ -68,8 +68,8 @@ class BlockMoveGenerator {
     // 二次方曲线实现缓入效果，progress越接近1，变化越快
     const easeProgress = Math.pow(progress, 2);
     return {
-      x: (endX - startX) * easeProgress + startX,
-      y: (endY - startY) * easeProgress + startY,
+      currentX: (endX - startX) * easeProgress + startX,
+      currentY: (endY - startY) * easeProgress + startY,
     };
   };
 
@@ -94,8 +94,8 @@ class BlockMoveGenerator {
     }
 
     return {
-      x: (endX - startX) * bounceProgress + startX,
-      y: (endY - startY) * bounceProgress + startY,
+      currentX: (endX - startX) * bounceProgress + startX,
+      currentY: (endY - startY) * bounceProgress + startY,
     };
   };
 }
