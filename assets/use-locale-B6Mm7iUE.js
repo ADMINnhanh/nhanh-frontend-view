@@ -1,0 +1,1 @@
+import{f as c,g as d,c$ as r,d0 as u,h as i}from"./index-WoHDOd6n.js";function f(n){const{mergedLocaleRef:o,mergedDateLocaleRef:a}=c(i,null)||{},t=d(()=>{var e,l;return(l=(e=o==null?void 0:o.value)===null||e===void 0?void 0:e[n])!==null&&l!==void 0?l:r[n]});return{dateLocaleRef:d(()=>{var e;return(e=a==null?void 0:a.value)!==null&&e!==void 0?e:u}),localeRef:t}}export{f as u};
