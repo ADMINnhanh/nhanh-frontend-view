@@ -96,6 +96,17 @@ const canvas: CustomRouteRecord = {
       },
       component: () => import("@/views/canvas/ImageScatterRecombine/index.vue"),
     },
+    {
+      path: "GridTextGenerator",
+      name: "GridTextGenerator",
+      meta: {
+        name: {
+          zhCN: "网格文字生成",
+          enUS: "Grid Text Generator",
+        },
+      },
+      component: () => import("@/views/canvas/GridTextGenerator/index.vue"),
+    },
   ],
 };
 
