@@ -13,7 +13,8 @@ permissions:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
-    if: contains(github.event.head_commit.message, '[publish]') # 只有当提交消息包含 '[publish]' 时才执行
+    # 关键修改：判断是手动触发 或 提交信息包含[publish]
+    if: github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[publish]')
 
     steps:
       - name: Checkout 🛎️
