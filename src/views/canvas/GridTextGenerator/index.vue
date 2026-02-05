@@ -3,6 +3,7 @@ import {
   _File_Download,
   _Utility_Debounce,
   _Utility_GenerateUUID,
+  _Utility_Throttle,
 } from "nhanh-pure-function";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
 import gridTextGenerator, { FontFamilyOptions } from ".";
@@ -15,6 +16,7 @@ import {
   NInputGroupLabel,
   NInputNumber,
   NSelect,
+  NSlider,
   NSpace,
   NSwitch,
 } from "naive-ui";
@@ -38,11 +40,14 @@ const config = ref({
   uniformization: true,
   gridCount: 44,
   fontColorThresholdRatio: 0.4,
+  textOffset: { x: 0, y: 0 },
 });
 
-const generator = _Utility_Debounce(() => {
-  gridTextGenerator.generator();
-  textOccupiedGridCount.value = gridTextGenerator.textOccupiedGridCount;
+const generator = _Utility_Throttle(() => {
+  requestAnimationFrame(() => {
+    gridTextGenerator.generator();
+    textOccupiedGridCount.value = gridTextGenerator.textOccupiedGridCount;
+  });
 }, 200);
 watch(
   [config, fontStyle],
@@ -57,13 +62,6 @@ watch(
   },
   { immediate: true, deep: true }
 );
-
-/** 导出图片 */
-function exportImage() {
-  const canvas = document.getElementById(id) as HTMLCanvasElement;
-  const href = canvas.toDataURL("image/png");
-  _File_Download({ href, fileName: `网格文字 ${config.value.text}` });
-}
 </script>
 
 <template>
@@ -106,6 +104,18 @@ function exportImage() {
                 :options="fontFamilyOptions"
               />
             </NInputGroup>
+            <FontFamily v-model:fontFamilyOptions="fontFamilyOptions" />
+            <NInputGroup>
+              <NInputGroupLabel>文字偏移</NInputGroupLabel>
+              <NInputNumber v-model:value="config.textOffset.x" :precision="0">
+                <template #prefix>X</template>
+                <template #suffix>px</template>
+              </NInputNumber>
+              <NInputNumber v-model:value="config.textOffset.y" :precision="0">
+                <template #prefix>Y</template>
+                <template #suffix>px</template>
+              </NInputNumber>
+            </NInputGroup>
           </div>
         </NCard>
 
@@ -121,12 +131,11 @@ function exportImage() {
             </NInputGroup>
             <NInputGroup>
               <NInputGroupLabel>字体颜色阈值比率</NInputGroupLabel>
-              <NInputNumber
+              <NSlider
                 v-model:value="config.fontColorThresholdRatio"
                 :min="0.01"
                 :max="1"
                 :step="0.01"
-                :precision="2"
               />
             </NInputGroup>
 
@@ -139,8 +148,11 @@ function exportImage() {
 
         <NCard title="其他" size="small">
           <div class="button-panel">
-            <FontFamily v-model:fontFamilyOptions="fontFamilyOptions" />
-            <NButton type="success" ghost @click="exportImage">
+            <NButton
+              type="success"
+              ghost
+              @click="gridTextGenerator.exportImage()"
+            >
               <template #icon>
                 <NIcon :component="CloudDownloadOutline" />
               </template>
@@ -180,6 +192,12 @@ function exportImage() {
   .n-input-number {
     text-align: center;
     flex-grow: 1;
+  }
+  .n-slider {
+    display: flex;
+    align-items: center;
+    margin: 0 10px;
+    margin-left: 10px !important;
   }
 }
 .button-panel {

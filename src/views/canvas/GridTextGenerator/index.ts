@@ -1,3 +1,5 @@
+import { _File_Download } from "nhanh-pure-function";
+
 type InitConfig = Exclude<
   ReturnType<GridTextGenerator["initCanvas"]>,
   undefined
@@ -8,6 +10,8 @@ class GridTextGenerator {
   id?: string;
   /** 文字 */
   text = "你好!";
+  /** 文字偏移 */
+  textOffset = { x: 0, y: 0 };
   /** 文字样式 */
   fontStyle = "280px cursive";
   /** 字体颜色阈值比率：当字体颜色像素占比低于40%时，才选择出现次数最多的颜色 */
@@ -18,6 +22,9 @@ class GridTextGenerator {
   gridCount = 44;
   /** 文本占用网格计数 */
   textOccupiedGridCount = 0;
+
+  /** 配置项 */
+  config?: InitConfig;
   private initCanvas() {
     const canvas = document.getElementById(this.id!) as HTMLCanvasElement;
     const rect = canvas.parentElement!.getBoundingClientRect();
@@ -63,7 +70,23 @@ class GridTextGenerator {
     ctx.fillStyle = "#000";
     const center = gridSize * this.gridCount * 0.5;
     ctx.save();
-    ctx.translate(center, center);
+
+    const { x, y } = this.textOffset;
+    const offset = { x: 0, y: 0 };
+
+    const getDiagonalOffset = (n: number) => Math.abs(n) / Math.sqrt(2);
+    if (x !== 0) {
+      const xOffset = getDiagonalOffset(x);
+      offset.x += x > 0 ? xOffset : -xOffset;
+      offset.y += x > 0 ? -xOffset : xOffset;
+    }
+    if (y !== 0) {
+      const yOffset = getDiagonalOffset(y);
+      offset.x += y > 0 ? -yOffset : yOffset;
+      offset.y += y > 0 ? -yOffset : yOffset;
+    }
+
+    ctx.translate(center + offset.x, center + offset.y);
     ctx.rotate(-Math.PI / 4);
     ctx.fillText(this.text, 0, 0);
     ctx.restore();
@@ -170,16 +193,37 @@ class GridTextGenerator {
 
     ctx.putImageData(newImageData, 0, 0);
   }
+  /** 生成 */
   generator() {
     if (!this.id) return;
 
-    const config = this.initCanvas();
-    if (!config) return;
+    this.config = this.initCanvas();
+    if (!this.config) return;
 
-    this.renderGird(config);
-    this.renderText(config);
+    this.renderGird(this.config);
+    this.renderText(this.config);
 
-    if (this.uniformization) this.gridColorUniformization(config);
+    if (this.uniformization) this.gridColorUniformization(this.config);
+  }
+  /** 导出图片 */
+  exportImage() {
+    if (!this.id || !this.config) return;
+
+    const { ctx } = this.config;
+
+    const canvas = document.createElement("canvas");
+    const width = Math.sqrt(Math.pow(ctx.canvas.width, 2) * 2);
+    canvas.width = width;
+    canvas.height = width;
+    const _ctx = canvas.getContext("2d")!;
+
+    const center = width * 0.5;
+    _ctx.translate(center, center);
+    _ctx.rotate(Math.PI / 4);
+    _ctx.drawImage(ctx.canvas, -ctx.canvas.width / 2, -ctx.canvas.width / 2);
+
+    const href = canvas.toDataURL("image/png");
+    _File_Download({ href, fileName: `网格文字 ${this.text}` });
   }
 }
 

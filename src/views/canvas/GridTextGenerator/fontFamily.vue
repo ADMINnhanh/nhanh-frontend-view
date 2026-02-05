@@ -7,9 +7,11 @@ import {
 import {
   NButton,
   NDynamicInput,
+  NH5,
   NIcon,
   NModal,
   NSpace,
+  NText,
   NUpload,
   type UploadFileInfo,
 } from "naive-ui";
@@ -27,6 +29,53 @@ const fileList = ref<UploadFileInfo[]>([]);
 const newFamily = ref<Array<Record<"key" | "value", string>>>([]);
 
 const tempUrls: string[] = [];
+
+/**
+ * 字体名称校验方法（修复空格+数字结尾规则）
+ * @param {string} fontFamily - 待校验的字体名称
+ * @returns {Object} 校验结果：{ valid: 布尔值, reason: 错误原因（若无效） }
+ */
+function validateFontFamily(fontFamily: string) {
+  fontFamily = fontFamily.trim();
+
+  // 步骤1：空字符串直接判定无效
+  if (fontFamily === "") {
+    return { valid: false, reason: "字体名称不允许：为空" };
+  }
+
+  // 步骤2：校验基础字符
+  if (!/^[\u4e00-\u9fa5a-zA-Z0-9\s-]+$/.test(fontFamily)) {
+    return {
+      valid: false,
+      reason: "字体名称仅允许包含：中文、英文、数字、空格、中划线",
+    };
+  }
+
+  // 步骤3：校验数字开头
+  if (/^[\d-]/.test(fontFamily)) {
+    return { valid: false, reason: "字体名称不允许：以 数字/中划线 开头" };
+  }
+
+  // 步骤4：校验必须包含中文/英文
+  if (!/[a-zA-Z\u4e00-\u9fa5]/.test(fontFamily)) {
+    return { valid: false, reason: "字体名称必须包含：中文或英文" };
+  }
+
+  // 步骤5：校验空格 + 数字/中划线
+  if (/\s+[\d-]+/.test(fontFamily)) {
+    return { valid: false, reason: "字体名称不允许：空格 + 数字/中划线" };
+  }
+
+  // 所有规则通过
+  return { valid: true, reason: "校验通过" };
+}
+function showErrorMessage(msg: string) {
+  window.$message.error(msg, {
+    duration: 0,
+    closable: true,
+  });
+}
+
 function getUrl() {
   return fileList.value.map((file) => {
     const key = file.name;
@@ -37,11 +86,18 @@ function getUrl() {
 }
 function getOptions() {
   const options = getUrl();
-  const familys = newFamily.value.filter((v) => v.key && v.value);
+  const familys = newFamily.value.filter((v) => {
+    if (v.value) {
+      const { valid, reason } = validateFontFamily(v.key);
+      if (valid) return true;
+      showErrorMessage(`"${v.key}" ` + +reason);
+      return false;
+    } else {
+      showErrorMessage(`"${v.key}" ` + "：请填写字体文件地址");
+    }
+  });
 
-  if (familys.length != newFamily.value.length) {
-    window.$message.warning("请填写完整");
-  }
+  if (familys.length != newFamily.value.length) return;
 
   options.push(...familys);
 
@@ -62,7 +118,7 @@ function delOptions(key: string, value: string) {
 function loadFinish(font: FontFace, key: string, value: string) {
   delOptions(key, value);
   document.fonts.add(font);
-  fontFamilyOptions.value.push({
+  fontFamilyOptions.value.unshift({
     value: key,
     label: key,
   });
@@ -77,8 +133,8 @@ function reload() {
       return fontFace
         .load()
         .then(() => loadFinish(fontFace, font.key, font.value))
-        .catch(() => {
-          window.$message.error(`字体加载失败：${font.key}`);
+        .catch((err) => {
+          showErrorMessage(`字体加载失败：${font.key}`);
           return Promise.reject();
         });
     });
@@ -86,9 +142,6 @@ function reload() {
       .then(function () {
         window.$message.success("字体加载成功");
         close();
-      })
-      .catch(function (err) {
-        window.$message.error("余下字体加载失败");
       })
       .finally(function () {
         loading.value = false;
@@ -106,6 +159,20 @@ function close() {
 watch(active, (active) => {
   if (!active) close();
 });
+watch(fileList, (fileList) => {
+  const last = fileList[fileList.length - 1];
+  if (!last) return;
+  const lastDotIndex = last.name.lastIndexOf(".");
+  const name = last.name.substring(0, lastDotIndex).trim();
+
+  const { valid, reason } = validateFontFamily(name);
+  if (valid) {
+    last.name = name;
+  } else {
+    showErrorMessage(`"${name}" ` + reason);
+    fileList.pop();
+  }
+});
 </script>
 
 <template>
@@ -122,6 +189,22 @@ watch(active, (active) => {
     title="导入临时字体"
     style="width: 800px"
   >
+    <NH5 prefix="bar" type="info">
+      <NH5 prefix="bar" type="warning">
+        字体名称仅能包含：中文、英文、数字、空格、中划线
+      </NH5>
+      <NH5 prefix="bar" type="warning" style="margin-top: 0px">
+        <NText type="error">必须包含</NText>
+        <NText type="info">‘中文或英文’</NText>
+        ，
+        <NText type="error">不允许</NText>
+        <NText type="info">‘数字/中划线’</NText>
+        开头，
+        <NText type="error">不允许</NText>
+        <NText type="info">‘空格 + 数字/中划线’</NText>
+        。
+      </NH5>
+    </NH5>
     <NDynamicInput
       v-model:value="newFamily"
       preset="pair"
