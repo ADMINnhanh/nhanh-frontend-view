@@ -1,6 +1,8 @@
 name: Build and Deploy
 
 on:
+  # 手动触发
+  workflow_dispatch:
   push:
     branches:
       - main # 可选，确保只在特定分支上触发
