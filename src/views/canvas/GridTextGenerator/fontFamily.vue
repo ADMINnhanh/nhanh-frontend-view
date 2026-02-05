@@ -13,6 +13,7 @@ import {
   NSpace,
   NText,
   NUpload,
+  NA,
   type UploadFileInfo,
 } from "naive-ui";
 import { CloudUploadOutline, Reload } from "@vicons/ionicons5";
@@ -190,10 +191,10 @@ watch(fileList, (fileList) => {
     style="width: 800px"
   >
     <NH5 prefix="bar" type="info">
-      <NH5 prefix="bar" type="warning">
+      <NH5 prefix="bar" type="warning" style="margin: 0px">
         字体名称仅能包含：中文、英文、数字、空格、中划线
       </NH5>
-      <NH5 prefix="bar" type="warning" style="margin-top: 0px">
+      <NH5 prefix="bar" type="warning" style="margin: 20px 0">
         <NText type="error">必须包含</NText>
         <NText type="info">‘中文或英文’</NText>
         ，
@@ -203,6 +204,12 @@ watch(fileList, (fileList) => {
         <NText type="error">不允许</NText>
         <NText type="info">‘空格 + 数字/中划线’</NText>
         。
+      </NH5>
+      <NH5 prefix="bar" type="success" style="margin: 0px">
+        若导入失败，可尝试转换格式：
+        <n-a href="https://transfonter.org/" target="_blank">
+          https://transfonter.org/
+        </n-a>
       </NH5>
     </NH5>
     <NDynamicInput
