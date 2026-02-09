@@ -23,6 +23,7 @@ import {
 import { ref, watch } from "vue";
 import { CloudDownloadOutline } from "@vicons/ionicons5";
 import FontFamily from "./fontFamily.vue";
+import ImageViewerHelp from "./imageViewerHelp.vue";
 
 const fontFamilyOptions = ref([...FontFamilyOptions]);
 
@@ -62,6 +63,11 @@ watch(
   },
   { immediate: true, deep: true }
 );
+
+/** 下载 ‘图片查看器.exe’ */
+function downloadImageViewer() {
+  _File_Download({ href: "/script/nhanh的图片查看器.exe" });
+}
 </script>
 
 <template>
@@ -158,6 +164,16 @@ watch(
               </template>
               导出图片
             </NButton>
+
+            <NInputGroup>
+              <NButton type="info" ghost @click="downloadImageViewer">
+                <template #icon>
+                  <NIcon :component="CloudDownloadOutline" />
+                </template>
+                图片查看器.exe
+              </NButton>
+              <ImageViewerHelp />
+            </NInputGroup>
           </div>
         </NCard>
       </div>
@@ -202,10 +218,10 @@ watch(
 }
 .button-panel {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   gap: 10px;
   > * {
-    flex-grow: 1;
+    width: auto;
   }
 }
 </style>
