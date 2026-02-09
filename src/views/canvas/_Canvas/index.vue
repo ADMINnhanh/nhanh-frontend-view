@@ -8,7 +8,7 @@ import { _Utility_WaitForCondition } from "nhanh-pure-function";
 const anchorPrefix = location.hash.replace(/(#[^/]+)*$/, "#");
 
 const independent: [string, string][] = [
-  // ["China%2Findex.vue", "最佳实践 - 中国地图"],
+  ["China%2Findex.vue", "最佳实践 - 中国地图"],
 ];
 const demoName: [string, string][] = [
   ["text.vue", "文字"],

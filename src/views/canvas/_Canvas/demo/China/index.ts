@@ -66,7 +66,7 @@ function ChinaData() {
       properties.centroid =
         properties.centroid && _Math_LngLatToPlane(...properties.centroid);
 
-      if (geometry.type == "MultiPolygon")
+      if (geometry.type == "MultiPolygon") {
         geometry.coordinates.forEach((v) => {
           v.forEach((item) => {
             chinaDataItem.geometry.push(
@@ -74,12 +74,13 @@ function ChinaData() {
             );
           });
         });
-      else
+      } else {
         geometry.coordinates.forEach((v) =>
           chinaDataItem.geometry.push(
             v.map((location) => _Math_LngLatToPlane(...location))
           )
         );
+      }
     });
 
     return chinaData;
@@ -105,6 +106,7 @@ ChinaData().then((chinaData) => {
       const point = Array.from(overlayGroup.overlays).find(
         (v) => v instanceof _Canvas.Point
       );
+
       if (point) {
         GetProvinceInfoMap(overlayGroup.extData, point as unknown as Point);
       } else {
@@ -118,6 +120,7 @@ ChinaData().then((chinaData) => {
         provinceInfo.value = undefined;
       }
     };
+
     const commonDblClickEvent: EventHandler<"doubleClick"> = (event) => {
       if (event.data.state) {
         myCanvas.value?.setFitView(overlayGroup);
