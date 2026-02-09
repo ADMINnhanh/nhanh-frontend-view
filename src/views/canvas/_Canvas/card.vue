@@ -50,7 +50,7 @@ watch(
 /** 当前状态是否是全屏 */
 const isFullScreen = ref(false);
 const toggleFullScreen = ref();
-let cleanup: () => void;
+let cleanup: undefined | (() => void);
 
 onMounted(() => {
   toggleFullScreen.value = _Element_Fullscreen(cardRef.value.$el);
