@@ -9,7 +9,7 @@ class GridTextGenerator {
   /** 画布ID */
   id?: string;
   /** 文字 */
-  text = "你好!";
+  text = "你好";
   /** 文字偏移 */
   textOffset = { x: 0, y: 0 };
   /** 文字样式 */
@@ -231,7 +231,6 @@ const gridTextGenerator = new GridTextGenerator();
 export default gridTextGenerator;
 
 export const FontFamilyOptions = [
-  // ========== 通用字体家族（CSS 标准通用族） ==========
   { label: "衬线字体", value: "serif" },
   { label: "无衬线字体", value: "sans-serif" },
   { label: "等宽字体", value: "monospace" },

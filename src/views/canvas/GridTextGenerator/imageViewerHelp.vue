@@ -40,7 +40,7 @@ const active = ref(false);
         源码 **/Main.ahk
       </NA>
     </NH5>
-    <video src="/script/ImageViewerHelp.mp4" controls />
+    <video src="/multimedia/ImageViewerHelp.mp4" controls />
   </NModal>
 </template>
 

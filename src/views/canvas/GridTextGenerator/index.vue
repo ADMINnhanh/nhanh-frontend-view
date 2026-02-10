@@ -17,7 +17,6 @@ import {
   NInputNumber,
   NSelect,
   NSlider,
-  NSpace,
   NSwitch,
 } from "naive-ui";
 import { ref, watch } from "vue";
@@ -140,15 +139,15 @@ function downloadImageViewer() {
               <NSlider
                 v-model:value="config.fontColorThresholdRatio"
                 :min="0.01"
-                :max="1"
+                :max="0.49"
                 :step="0.01"
               />
             </NInputGroup>
 
-            <NSpace align="center">
+            <NInputGroup>
+              <NInputGroupLabel>网格颜色统一化</NInputGroupLabel>
               <NSwitch v-model:value="config.uniformization" />
-              网格颜色统一化
-            </NSpace>
+            </NInputGroup>
           </div>
         </NCard>
 
@@ -204,15 +203,16 @@ function downloadImageViewer() {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  .n-input-group {
+    align-items: center;
+  }
   .n-input,
   .n-input-number {
     text-align: center;
     flex-grow: 1;
   }
-  .n-slider {
-    display: flex;
-    align-items: center;
-    margin: 0 10px;
+  .n-slider,
+  .n-switch {
     margin-left: 10px !important;
   }
 }

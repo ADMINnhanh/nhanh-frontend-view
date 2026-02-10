@@ -171,9 +171,19 @@ const multimedia: CustomRouteRecord = {
       },
       component: () => import("@/views/multimedia/TakeFlow/index.vue"),
     },
+    {
+      path: "AudioPlayer",
+      name: "AudioPlayer",
+      meta: {
+        name: {
+          zhCN: "音频播放器",
+          enUS: "Audio Player",
+        },
+      },
+      component: () => import("@/views/multimedia/AudioPlayer/index.vue"),
+    },
   ],
 };
-
 /** 解乏 */
 const relaxRouting: CustomRouteRecord = {
   path: "relax",
