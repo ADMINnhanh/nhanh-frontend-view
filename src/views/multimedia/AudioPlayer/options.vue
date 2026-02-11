@@ -8,6 +8,7 @@ import {
 } from "naive-ui";
 import { Endianness, type PCMPlayOptions } from "./core";
 
+const volume = defineModel<number>("volume", { required: true });
 const options = defineModel<PCMPlayOptions>("options", { required: true });
 </script>
 
@@ -56,7 +57,7 @@ const options = defineModel<PCMPlayOptions>("options", { required: true });
     </NInputGroup>
     <NInputGroup>
       <NInputGroupLabel>音量</NInputGroupLabel>
-      <NSlider v-model:value="options.volume" :min="0" :max="1" :step="0.01" />
+      <NSlider v-model:value="volume" :min="0" :max="1" :step="0.01" />
     </NInputGroup>
     <slot name="suffix" />
   </div>

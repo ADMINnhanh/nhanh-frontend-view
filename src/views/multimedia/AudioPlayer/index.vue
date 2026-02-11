@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-import { _Utility_GenerateUUID } from "nhanh-pure-function";
+import {
+  _Browser_GetFrameRate,
+  _Utility_GenerateUUID,
+} from "nhanh-pure-function";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
 import {
   NButton,
@@ -11,7 +14,6 @@ import {
   NSpace,
   NTag,
   NText,
-  NScrollbar,
 } from "naive-ui";
 import { ref, watch } from "vue";
 import {
@@ -25,15 +27,22 @@ import PCMAudioPlayer, { Endianness, type PCMPlayOptions } from "./core";
 import axios from "axios";
 import HandleFileDrag from "@/components/singleFile/HandleFileDrag.vue";
 import {
+  FormatTime,
   getTargetFileConfig,
   type AudioFileList,
   type TargetFileConfig,
 } from ".";
+import AudioVisualizationManager from "./core/AudioVisualizationManager";
 
 const id = _Utility_GenerateUUID("audio-player-");
 const fileListId = _Utility_GenerateUUID("file-list-");
 
 const play = ref(false);
+const accept = ".mp3,.pcm,.wav";
+const fileIndex = ref<number | undefined>(undefined);
+const fileList = ref<AudioFileList>([]);
+
+const volume = ref(0.5);
 const options = ref<PCMPlayOptions>({
   sampleRate: 16000,
   bitDepth: 16,
@@ -41,18 +50,25 @@ const options = ref<PCMPlayOptions>({
   startTime: 0,
   duration: 0,
   endianness: Endianness.LE,
-  volume: 0.5,
 });
+const targetFileConfig = ref<TargetFileConfig>();
+
 const audioPlayer = new PCMAudioPlayer();
+const audioVisualization = new AudioVisualizationManager();
+
 audioPlayer.onPlayCompleted = () => {
   play.value = false;
 };
 
-const accept = ".mp3,.pcm,.wav";
-const fileIndex = ref<number | undefined>(undefined);
-const fileList = ref<AudioFileList>([]);
-
-const targetFileConfig = ref<TargetFileConfig>();
+audioPlayer.playProgressCallback = (
+  currentTime,
+  totalDuration,
+  progressPercentage
+) => {
+  const progress = Number(progressPercentage);
+  audioVisualization.render(progress);
+  targetFileConfig.value!.currentTime = FormatTime(Number(currentTime));
+};
 
 watch(
   [options, fileIndex],
@@ -65,10 +81,26 @@ watch(
         file,
         audioPlayer.totalDuration
       );
+
+      requestAnimationFrame(() => {
+        const canvas = document.getElementById(id) as HTMLCanvasElement;
+        const audioBuffer = audioPlayer.audioBuffer!;
+        const duration = audioPlayer.totalDuration!;
+        const channelCount = options.channelCount!;
+        audioVisualization.init({
+          canvas,
+          audioBuffer,
+          channelCount,
+          duration,
+        });
+      });
     }
   },
   { deep: true }
 );
+watch(volume, (volume) => {
+  audioPlayer.setVolume(volume);
+});
 watch(play, (play) => {
   if (play) audioPlayer.play();
   else audioPlayer.stop();
@@ -152,7 +184,7 @@ function handleFileListClick(ev: PointerEvent) {
   <HandleFileDrag @drop-callback="handleDrop">
     <ResponsiveDirectionLayout :default-size="0.35" :min="0">
       <template #left>
-        <Options v-model:options="options">
+        <Options v-model:options="options" v-model:volume="volume">
           <template #prefix>
             <n-upload
               v-model:file-list="fileList"
@@ -214,10 +246,7 @@ function handleFileListClick(ev: PointerEvent) {
             <n-tag> {{ targetFileConfig.channelCount }}ch </n-tag>
             <n-tag> {{ targetFileConfig.bitDepth }}bit </n-tag>
           </NSpace>
-          <canvas
-            :id="id"
-            :style="{ '--channel-count': options.channelCount }"
-          />
+          <canvas :id="id" />
           <div class="time-container">
             <n-text>{{ targetFileConfig.currentTime }}</n-text>
             <n-text>{{ targetFileConfig.totalDuration }}</n-text>
@@ -263,7 +292,6 @@ function handleFileListClick(ev: PointerEvent) {
   }
   canvas {
     width: 100%;
-    height: calc(var(--channel-count) * 160px);
     border-radius: 6px;
     box-shadow: 0px 0px 10px 5px var(--box-shadow);
   }

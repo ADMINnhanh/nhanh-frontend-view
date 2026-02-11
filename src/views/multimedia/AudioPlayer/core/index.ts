@@ -59,7 +59,7 @@ export class PCMAudioPlayer {
   /** 音频源节点 */
   private source?: AudioBufferSourceNode;
   /** 缓存音频缓冲区，方便重复播放 */
-  private audioBuffer?: AudioBuffer;
+  public audioBuffer?: AudioBuffer;
   /** 增益节点（用于音量控制） */
   private gainNode?: GainNode;
   /** 当前音量（0~1，默认 1） */
@@ -138,6 +138,7 @@ export class PCMAudioPlayer {
 
     this.startTime = startTime;
     this.duration = duration;
+    this.offsetTime = 0;
 
     // 初始化后立即设置播放音量
     this.setVolume(volume);
@@ -227,9 +228,11 @@ export class PCMAudioPlayer {
     this.playStartTime = this.audioContext.currentTime;
 
     this.source.onended = () => {
-      this.isPlaying = false;
-      this.offsetTime +=
-        (this.audioContext?.currentTime || 0) - this.playStartTime;
+      if (this.isPlaying) {
+        this.isPlaying = false;
+        this.offsetTime +=
+          (this.audioContext?.currentTime || 0) - this.playStartTime;
+      }
       this.onPlayCompleted?.();
     };
   }
@@ -339,11 +342,6 @@ export class PCMAudioPlayer {
     const formattedTotalDuration = audioBuffer.duration.toFixed(2);
     const formattedProgressPercent = progressPercent.toFixed(1);
 
-    // 日志输出（保留调试信息，格式优化）
-    console.log(
-      `播放进度：${formattedCurrentTime}秒 / ${formattedTotalDuration}秒 (${formattedProgressPercent}%)`
-    );
-
     // 执行回调（传递格式化后的进度数据）
     playProgressCallback(
       formattedCurrentTime,
@@ -361,7 +359,6 @@ export class PCMAudioPlayer {
       if (offsetTime + startTime >= this.totalDuration) {
         this.offsetTime = 0;
       }
-
       this.playFromPosition(startTime + this.offsetTime, duration);
       this.updatePlayProgress();
     }
@@ -376,6 +373,7 @@ export class PCMAudioPlayer {
       }
       this.source.disconnect();
       this.source = undefined;
+      this.isPlaying = false;
     }
   }
 

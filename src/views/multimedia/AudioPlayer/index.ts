@@ -20,7 +20,7 @@ export type TargetFileConfig = PCMPlayOptions & {
 const padZeroToTwoDigits = (numberToFormat: string | number) =>
   numberToFormat.toString().padStart(2, "0");
 /** 格式化时间 */
-function FormatTime(seconds: number): string {
+export function FormatTime(seconds: number): string {
   const minutes = padZeroToTwoDigits(Math.floor(seconds / 60));
   return `${minutes}:${padZeroToTwoDigits((seconds % 60).toFixed(0))}`;
 }
