@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/</loc>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 画布相关路由 -->
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/canvas</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/canvas/_Canvas</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/canvas/YOLOFormatAnnotator</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/canvas/Threejs</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/canvas/GLSL</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/canvas/ImageScatterRecombine</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/canvas/GridTextGenerator</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 数学相关路由 -->
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/math</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/math/DynamicDiagram</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 多媒体相关路由 -->
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/multimedia</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/multimedia/Peerjs</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/multimedia/TakeFlow</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/multimedia/AudioPlayer</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 解乏相关路由 -->
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/relax</loc>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/relax/Bounce</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/relax/Knowledge</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://adminnhanh.github.io/nhanh-frontend-view/#/relax/Novel</loc>
+    <priority>0.8</priority>
+  </url>
+</urlset>
