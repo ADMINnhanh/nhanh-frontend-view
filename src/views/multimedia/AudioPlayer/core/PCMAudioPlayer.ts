@@ -239,8 +239,6 @@ export class PCMAudioPlayer {
     this.playStartTime = this.audioContext.currentTime;
 
     this.source.onended = () => {
-      console.log("onended");
-
       this.isPlaying = false;
       if (typeof this.offsetTime === "number") {
         this.offsetTime +=
