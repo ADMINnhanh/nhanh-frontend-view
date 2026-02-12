@@ -6,10 +6,12 @@ import {
   NSelect,
   NSlider,
 } from "naive-ui";
-import { Endianness, type PCMPlayOptions } from "./core";
+import { Endianness } from ".";
 
 const volume = defineModel<number>("volume", { required: true });
-const options = defineModel<PCMPlayOptions>("options", { required: true });
+const options = defineModel<Partial<PCMPlayOptions>>("options", {
+  required: true,
+});
 </script>
 
 <template>

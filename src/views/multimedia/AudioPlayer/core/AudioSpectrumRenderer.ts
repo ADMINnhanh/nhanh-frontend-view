@@ -36,7 +36,7 @@ class AudioSpectrumRenderer {
     const { amplitudeBarMetrics, barColor, barWidth } = this;
     const { width, height } = canvasContext.canvas;
 
-    const timelineX = Math.floor((width * progress) / 100);
+    const timelineX = Math.floor(((width - 2) * progress) / 100);
 
     if (this.lastTimelineX == timelineX) return;
     this.lastTimelineX = timelineX;
@@ -119,6 +119,12 @@ class AudioSpectrumRenderer {
       // 更新下一个振幅柱的起始X坐标（当前X + 柱宽 + 间距）
       currentBarStartX += barWidth + barGap;
     }
+  }
+
+  /** 清理 */
+  clear() {
+    this.amplitudeValues = [];
+    this.amplitudeBarMetrics = [];
   }
 }
 

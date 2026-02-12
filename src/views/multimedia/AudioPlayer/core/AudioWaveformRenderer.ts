@@ -181,6 +181,11 @@ class AudioWaveformRenderer {
       }
     }
   }
+
+  /** 清理 */
+  clear() {
+    this.channelAmplitudeData = [];
+  }
 }
 
 export default AudioWaveformRenderer;

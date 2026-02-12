@@ -1,13 +1,24 @@
 import type { UploadFileInfo } from "naive-ui";
-import type { PCMPlayOptions } from "./core";
 import {
   _Format_FileSize,
   _Format_MillisecondToReadable,
 } from "nhanh-pure-function";
 
-export type AudioFileList = (UploadFileInfo & { options: PCMPlayOptions })[];
+/** 字节序枚举 */
+export enum Endianness {
+  /** 小端序（Little Endian）- 低字节在前，主流设备/音频格式默认 */
+  LE = "le",
+  /** 大端序（Big Endian）- 高字节在前，部分专业音频设备使用 */
+  BE = "be",
+  /** 小端序别名（兼容常见命名） */
+  LittleEndian = "le",
+  /** 大端序别名（兼容常见命名） */
+  BigEndian = "be",
+}
 
-export type TargetFileConfig = PCMPlayOptions & {
+export type AudioFileList = (UploadFileInfo & { options: Partial<PCMPlayOptions> })[];
+
+export type TargetFileConfig = Partial<PCMPlayOptions> & {
   name: string;
   type: string;
   size: string;

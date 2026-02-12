@@ -1,51 +1,5 @@
-/** 字节序枚举 */
-export enum Endianness {
-  /** 小端序（Little Endian）- 低字节在前，主流设备/音频格式默认 */
-  LE = "le",
-  /** 大端序（Big Endian）- 高字节在前，部分专业音频设备使用 */
-  BE = "be",
-  /** 小端序别名（兼容常见命名） */
-  LittleEndian = "le",
-  /** 大端序别名（兼容常见命名） */
-  BigEndian = "be",
-}
-
-/** 音频采样率联合类型 */
-type SampleRate =
-  /** 低质量语音（如早期电话），大部分浏览器支持 */
-  | 8000
-  /** 语音通话/语音识别（如讯飞、百度语音），通用支持 */
-  | 16000
-  /** 低音质音乐，通用支持 */
-  | 22050
-  /** 中等质量语音/低码率音频（播客/短视频），大部分现代浏览器支持 */
-  | 24000
-  /** 标准CD音质、大部分音频文件，所有浏览器都支持 */
-  | 44100
-  /** 专业音频、视频配套音频，所有现代浏览器支持 */
-  | 48000
-  /** 高解析音频（Hi-Res），仅部分现代浏览器/设备支持 */
-  | 96000
-  /** 超高解析音频（Hi-Res），仅部分现代浏览器/设备支持 */
-  | 192000;
-
-/** PCM 播放配置项类型定义 */
-export interface PCMPlayOptions {
-  /** 采样率（默认 16000） */
-  sampleRate?: SampleRate;
-  /** 位深（默认 16） */
-  bitDepth?: 8 | 16 | 24 | 32;
-  /** 声道数（默认 1） */
-  channelCount?: number;
-  /** 起始播放位置（秒，默认 0） */
-  startTime?: number;
-  /** 播放时长（秒，默认播放剩余全部） */
-  duration?: number;
-  /** 字节序（默认小端序 LE） */
-  endianness?: Endianness;
-  /** 音量（0~1，默认 1） */
-  volume?: number;
-}
+import { _Utility_WaitForCondition } from "nhanh-pure-function";
+import { Endianness } from "..";
 
 /**
  * PCM 音频播放器（TypeScript 版本）
@@ -71,11 +25,40 @@ export class PCMAudioPlayer {
   /** 播放开始的AudioContext时间（用于计算已播放时长） */
   private playStartTime = 0;
   /** 暂停时记录的已播放时间（秒） */
-  private offsetTime = 0;
+  private offsetTime?: number;
 
+  /** 音频参数配置 */
+  public options: PCMPlayOptions = {
+    sampleRate: 16000,
+    channelCount: 1,
+    bitDepth: 16,
+    startTime: 0,
+    duration: 0,
+    endianness: Endianness.LE,
+    volume: 1,
+  };
   /** 获取音频总时长（秒） */
   public get totalDuration() {
     return this.audioBuffer ? this.audioBuffer.duration : 0;
+  }
+  /** 是否准备好 */
+  public get ready() {
+    return !!this.audioContext;
+  }
+
+  /**
+   * 设置音量（实时生效，不中断播放）
+   * @param volume 音量值（0~1，0=静音，1=最大音量）
+   */
+  public setVolume(volume: number): void {
+    if (!this.gainNode) {
+      console.warn("增益节点未初始化，请先调用 init()");
+      return;
+    }
+    // 限制音量范围在 0~1 之间（避免音量过大失真）
+    const clampedVolume = Math.max(0, Math.min(1, volume));
+    this.currentVolume = clampedVolume;
+    this.gainNode.gain.value = clampedVolume;
   }
 
   /** 初始化音频上下文（兼容不同浏览器） */
@@ -94,21 +77,6 @@ export class PCMAudioPlayer {
   }
 
   /**
-   * 设置音量（实时生效，不中断播放）
-   * @param volume 音量值（0~1，0=静音，1=最大音量）
-   */
-  public setVolume(volume: number): void {
-    if (!this.gainNode) {
-      console.warn("增益节点未初始化，请先调用 init() 或 playPCM()");
-      return;
-    }
-    // 限制音量范围在 0~1 之间（避免音量过大失真）
-    const clampedVolume = Math.max(0, Math.min(1, volume));
-    this.currentVolume = clampedVolume;
-    this.gainNode.gain.value = clampedVolume;
-  }
-
-  /**
    * 播放 PCM 音频数据（支持指定起始位置、字节序）
    * @param pcmData PCM 原始数据
    * @param options 音频参数配置
@@ -116,7 +84,7 @@ export class PCMAudioPlayer {
    */
   public async initPCM(
     pcmData: ArrayBuffer,
-    options: PCMPlayOptions = {}
+    options: Partial<PCMPlayOptions> = {}
   ): Promise<void> {
     // 确保音频上下文已初始化
     this.init();
@@ -125,20 +93,21 @@ export class PCMAudioPlayer {
       return;
     }
 
+    Object.assign(this.options, options);
     // 默认参数（增加字节序默认值）
     const {
-      sampleRate = 16000,
-      channelCount = 1,
-      bitDepth = 16,
-      startTime = 0,
-      duration = 0,
-      endianness = Endianness.LE, // 默认小端序
-      volume = 1, // 默认最大音量
-    } = options;
+      sampleRate,
+      channelCount,
+      bitDepth,
+      startTime,
+      duration,
+      endianness,
+      volume,
+    } = this.options;
 
     this.startTime = startTime;
     this.duration = duration;
-    this.offsetTime = 0;
+    this.offsetTime = undefined;
 
     // 初始化后立即设置播放音量
     this.setVolume(volume);
@@ -168,74 +137,6 @@ export class PCMAudioPlayer {
       console.error("播放 PCM 失败：", error);
     }
   }
-  /**
-   * 播放 PCM 音频数据（支持指定起始位置、字节序）
-   * @param pcmData PCM 原始数据
-   * @param options 音频参数配置
-   * @returns Promise<void>
-   */
-  public async playPCM(): Promise<void>;
-  public async playPCM(
-    pcmData?: ArrayBuffer,
-    options?: PCMPlayOptions
-  ): Promise<void> {
-    if (pcmData) {
-      this.initPCM(pcmData, options);
-    } else if (!this.audioBuffer) {
-      console.error("请传入 PCM 音频数据");
-      return;
-    }
-
-    if (!this.audioContext) return;
-
-    this.offsetTime = 0;
-    this.play();
-  }
-
-  /**
-   * 播放完成回调函数（playFromPosition 播放结束时触发）
-   */
-  public onPlayCompleted?: () => void;
-  /**
-   * 从指定位置重新播放已加载的 PCM（无需重新解析数据）
-   * @param startTime 起始播放位置（秒）
-   * @param duration 播放时长（秒，可选）
-   */
-  public playFromPosition(startTime: number = 0, duration: number = 0): void {
-    if (!this.audioBuffer || !this.audioContext) {
-      console.error("请先加载 PCM 数据");
-      return;
-    }
-
-    // 停止之前的播放
-    if (this.isPlaying) {
-      this.stop();
-    }
-
-    // 校验参数
-    const totalDuration = this.audioBuffer.duration;
-    const playOffset = Math.max(0, Math.min(startTime, totalDuration));
-    const playDuration =
-      duration > 0 ? Math.min(duration, totalDuration - playOffset) : undefined;
-
-    // 创建新的音频源播放
-    this.source = this.audioContext.createBufferSource();
-    this.source.buffer = this.audioBuffer;
-    this.source.connect(this.gainNode!);
-    this.source.start(0, playOffset, playDuration);
-
-    this.isPlaying = true;
-    this.playStartTime = this.audioContext.currentTime;
-
-    this.source.onended = () => {
-      if (this.isPlaying) {
-        this.isPlaying = false;
-        this.offsetTime +=
-          (this.audioContext?.currentTime || 0) - this.playStartTime;
-      }
-      this.onPlayCompleted?.();
-    };
-  }
 
   /**
    * 将不同位深、不同字节序的 PCM 转换为 Float32Array（范围 -1 ~ 1）
@@ -247,7 +148,7 @@ export class PCMAudioPlayer {
   private convertPCMToFloat32(
     pcmData: ArrayBuffer,
     bitDepth: 8 | 16 | 24 | 32,
-    endianness: Endianness = Endianness.LE
+    endianness: PCMPlayOptions["endianness"] = Endianness.LE
   ): Float32Array {
     const dataView = new DataView(pcmData);
     const bytesPerSample = bitDepth / 8;
@@ -303,6 +204,53 @@ export class PCMAudioPlayer {
   }
 
   /**
+   * 播放完成回调函数（playFromPosition 播放结束时触发）
+   */
+  public onPlayCompleted?: () => void;
+  /**
+   * 从指定位置重新播放已加载的 PCM（无需重新解析数据）
+   * @param startTime 起始播放位置（秒）
+   * @param duration 播放时长（秒，可选）
+   */
+  public playFromPosition(startTime: number = 0, duration: number = 0): void {
+    if (!this.audioBuffer || !this.audioContext) {
+      console.error("请先加载 PCM 数据");
+      return;
+    }
+
+    // 停止之前的播放
+    if (this.isPlaying) {
+      this.stop();
+    }
+
+    // 校验参数
+    const totalDuration = this.audioBuffer.duration;
+    const playOffset = Math.max(0, Math.min(startTime, totalDuration));
+    const playDuration =
+      duration > 0 ? Math.min(duration, totalDuration - playOffset) : undefined;
+
+    // 创建新的音频源播放
+    this.source = this.audioContext.createBufferSource();
+    this.source.buffer = this.audioBuffer;
+    this.source.connect(this.gainNode!);
+    this.source.start(0, playOffset, playDuration);
+
+    this.isPlaying = true;
+    this.playStartTime = this.audioContext.currentTime;
+
+    this.source.onended = () => {
+      console.log("onended");
+
+      this.isPlaying = false;
+      if (typeof this.offsetTime === "number") {
+        this.offsetTime +=
+          (this.audioContext?.currentTime || 0) - this.playStartTime;
+      }
+      this.onPlayCompleted?.();
+    };
+  }
+
+  /**
    * 播放进度更新回调函数类型定义
    * @param currentTime - 当前播放时间（秒，保留2位小数）
    * @param totalDuration - 音频总时长（秒，保留2位小数）
@@ -333,7 +281,7 @@ export class PCMAudioPlayer {
 
     // 计算当前播放进度（秒）
     const currentPlayTime =
-      offsetTime + (audioContext.currentTime - playStartTime);
+      (offsetTime || 0) + (audioContext.currentTime - playStartTime);
     // 计算进度百分比
     const progressPercent = (currentPlayTime / audioBuffer.duration) * 100;
 
@@ -353,15 +301,21 @@ export class PCMAudioPlayer {
     requestAnimationFrame(() => this.updatePlayProgress());
   }
   /** 播放 */
-  public play(): void {
-    if (!this.isPlaying) {
-      const { startTime, duration, offsetTime } = this;
-      if (offsetTime + startTime >= this.totalDuration) {
+  public async play(startTime?: number) {
+    if (typeof startTime === "number") {
+      this.stop();
+      await _Utility_WaitForCondition(() => !this.isPlaying, 500);
+      this.offsetTime = startTime;
+    } else {
+      if (this.isPlaying) return;
+      const { startTime, offsetTime } = this;
+      if (!offsetTime || offsetTime + startTime >= this.totalDuration) {
         this.offsetTime = 0;
       }
-      this.playFromPosition(startTime + this.offsetTime, duration);
-      this.updatePlayProgress();
     }
+
+    this.playFromPosition(this.startTime + this.offsetTime!, this.duration);
+    this.updatePlayProgress();
   }
   /** 停止播放 */
   public stop(): void {
@@ -373,7 +327,6 @@ export class PCMAudioPlayer {
       }
       this.source.disconnect();
       this.source = undefined;
-      this.isPlaying = false;
     }
   }
 

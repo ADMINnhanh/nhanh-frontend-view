@@ -23,10 +23,10 @@ import {
   StopOutline,
 } from "@vicons/ionicons5";
 import Options from "./options.vue";
-import PCMAudioPlayer, { Endianness, type PCMPlayOptions } from "./core";
 import axios from "axios";
 import HandleFileDrag from "@/components/singleFile/HandleFileDrag.vue";
 import {
+  Endianness,
   FormatTime,
   getTargetFileConfig,
   type AudioFileList,
@@ -43,7 +43,7 @@ const fileIndex = ref<number | undefined>(undefined);
 const fileList = ref<AudioFileList>([]);
 
 const volume = ref(0.5);
-const options = ref<PCMPlayOptions>({
+const options = ref<Partial<PCMPlayOptions>>({
   sampleRate: 16000,
   bitDepth: 16,
   channelCount: 1,
@@ -53,58 +53,57 @@ const options = ref<PCMPlayOptions>({
 });
 const targetFileConfig = ref<TargetFileConfig>();
 
-const audioPlayer = new PCMAudioPlayer();
 const audioVisualization = new AudioVisualizationManager();
 
-audioPlayer.onPlayCompleted = () => {
+audioVisualization.onPlayCompleted = () => {
   play.value = false;
 };
-
-audioPlayer.playProgressCallback = (
-  currentTime,
-  totalDuration,
-  progressPercentage
-) => {
-  const progress = Number(progressPercentage);
-  audioVisualization.render(progress);
+audioVisualization.playProgressCallback = (currentTime) => {
   targetFileConfig.value!.currentTime = FormatTime(Number(currentTime));
 };
 
 watch(
   [options, fileIndex],
-  async ([options, index]) => {
+  async ([pcmOptions, index]) => {
     if (typeof index == "number") {
       const file = fileList.value[index];
-      const arrayBuffer = await file.file!.arrayBuffer();
-      audioPlayer.initPCM(arrayBuffer, options);
-      targetFileConfig.value = getTargetFileConfig(
-        file,
-        audioPlayer.totalDuration
-      );
-
+      const pcmData = await file.file!.arrayBuffer();
+      targetFileConfig.value = getTargetFileConfig(file, 0);
       requestAnimationFrame(() => {
         const canvas = document.getElementById(id) as HTMLCanvasElement;
-        const audioBuffer = audioPlayer.audioBuffer!;
-        const duration = audioPlayer.totalDuration!;
-        const channelCount = options.channelCount!;
         audioVisualization.init({
           canvas,
-          audioBuffer,
-          channelCount,
-          duration,
+          pcmData,
+          pcmOptions,
         });
+        targetFileConfig.value!.totalDuration = FormatTime(
+          Number(audioVisualization.totalDuration)
+        );
       });
     }
   },
   { deep: true }
 );
 watch(volume, (volume) => {
-  audioPlayer.setVolume(volume);
+  audioVisualization.setVolume(volume);
 });
-watch(play, (play) => {
-  if (play) audioPlayer.play();
-  else audioPlayer.stop();
-});
+
+function playAudio() {
+  audioVisualization.play();
+  play.value = true;
+}
+function pauseAudio() {
+  audioVisualization.stop();
+  play.value = false;
+}
+/** 从指定时间开始播放 */
+async function playFromPosition(payload: PointerEvent) {
+  const { offsetX, target } = payload;
+  const width = (target as HTMLElement).clientWidth;
+  const position = (offsetX / width) * audioVisualization.totalDuration;
+  await audioVisualization.play(position);
+  play.value = true;
+}
 
 /** 拖拽放手时触发 */
 function handleDrop(files: File[]) {
@@ -171,7 +170,7 @@ function handleFileListClick(ev: PointerEvent) {
     if (index == fileIndex.value) {
       fileIndex.value = undefined;
       play.value = false;
-      audioPlayer.clear();
+      audioVisualization.clear();
     }
     return;
   }
@@ -217,7 +216,7 @@ function handleFileListClick(ev: PointerEvent) {
               :disabled="typeof fileIndex != 'number'"
               :type="play ? 'error' : 'success'"
               ghost
-              @click="play = !play"
+              @click="play ? pauseAudio() : playAudio()"
             >
               <template #icon>
                 <NIcon :component="play ? StopOutline : PlayOutline" />
@@ -246,7 +245,10 @@ function handleFileListClick(ev: PointerEvent) {
             <n-tag> {{ targetFileConfig.channelCount }}ch </n-tag>
             <n-tag> {{ targetFileConfig.bitDepth }}bit </n-tag>
           </NSpace>
-          <canvas :id="id" />
+          <div class="canvas-container">
+            <canvas :id="id" />
+            <div class="progress" @click="playFromPosition"></div>
+          </div>
           <div class="time-container">
             <n-text>{{ targetFileConfig.currentTime }}</n-text>
             <n-text>{{ targetFileConfig.totalDuration }}</n-text>
@@ -290,11 +292,24 @@ function handleFileListClick(ev: PointerEvent) {
   .n-text {
     font-weight: bold;
   }
-  canvas {
-    width: 100%;
-    border-radius: 6px;
-    box-shadow: 0px 0px 10px 5px var(--box-shadow);
+  .canvas-container {
+    display: flex;
+    position: relative;
+    canvas {
+      width: 100%;
+      border-radius: 6px;
+      box-shadow: 0px 0px 10px 5px var(--box-shadow);
+    }
+    .progress {
+      cursor: pointer;
+      width: 100%;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 100px;
+    }
   }
+
   .time-container {
     display: flex;
     justify-content: space-between;
