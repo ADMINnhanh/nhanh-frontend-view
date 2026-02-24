@@ -81,5 +81,9 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
     text-align: center;
     flex-grow: 1;
   }
+  .n-input-group-label {
+    text-align: center;
+    width: 70px;
+  }
 }
 </style>

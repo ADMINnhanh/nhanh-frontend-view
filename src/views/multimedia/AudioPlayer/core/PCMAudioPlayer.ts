@@ -2,7 +2,7 @@ import { _Utility_WaitForCondition } from "nhanh-pure-function";
 import { Endianness } from "..";
 
 /**
- * PCM 音频播放器（TypeScript 版本）
+ * PCM 音频播放器
  * 支持播放 PCM 原始音频数据，可指定起始播放位置、播放时长和字节序
  */
 export class PCMAudioPlayer {
@@ -239,6 +239,7 @@ export class PCMAudioPlayer {
     this.playStartTime = this.audioContext.currentTime;
 
     this.source.onended = () => {
+      // console.log("播放完成");
       this.isPlaying = false;
       if (typeof this.offsetTime === "number") {
         this.offsetTime +=
@@ -319,6 +320,7 @@ export class PCMAudioPlayer {
   public stop(): void {
     if (this.source) {
       try {
+        // console.log("source.stop() 调用");
         this.source.stop();
       } catch (e) {
         /* 忽略已停止的错误 */

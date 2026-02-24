@@ -14,6 +14,7 @@ import {
   NSpace,
   NTag,
   NText,
+  NScrollbar,
 } from "naive-ui";
 import { ref, watch } from "vue";
 import {
@@ -33,6 +34,7 @@ import {
   type TargetFileConfig,
 } from ".";
 import AudioVisualizationManager from "./core/AudioVisualizationManager";
+import MP3FileParser from "./core/MP3FileParser/main";
 
 const id = _Utility_GenerateUUID("audio-player-");
 const fileListId = _Utility_GenerateUUID("file-list-");
@@ -76,6 +78,7 @@ watch(
           pcmData,
           pcmOptions,
         });
+        targetFileConfig.value!.currentTime = FormatTime(0);
         targetFileConfig.value!.totalDuration = FormatTime(
           Number(audioVisualization.totalDuration)
         );
@@ -112,14 +115,23 @@ function handleDrop(files: File[]) {
   const audios = files.filter((file) => isAudioFile(file.name));
 
   if (audios.length > 0) {
-    audios.forEach((audio) => {
-      fileList.value.push({
-        id: String(audio.lastModified),
-        name: audio.name,
-        status: "pending",
-        file: audio,
-        options: {},
-      });
+    audios.forEach(async (audio) => {
+      const buffer = await audio.arrayBuffer();
+
+      const index = audio.name.lastIndexOf(".");
+      const type = audio.name.slice(index + 1);
+
+      if (type.toLocaleLowerCase() == "mp3") {
+        const info = MP3FileParser(buffer);
+        console.log(info);
+      } else {
+        fileList.value.push({
+          id: String(audio.lastModified),
+          name: audio.name,
+          status: "pending",
+          options: {},
+        });
+      }
     });
   } else {
     window.$message.warning("请拖拽音频文件");
@@ -183,48 +195,53 @@ function handleFileListClick(ev: PointerEvent) {
   <HandleFileDrag @drop-callback="handleDrop">
     <ResponsiveDirectionLayout :default-size="0.35" :min="0">
       <template #left>
-        <Options v-model:options="options" v-model:volume="volume">
-          <template #prefix>
-            <n-upload
-              v-model:file-list="fileList"
-              abstract
-              :accept="accept"
-              multiple
-            >
-              <NButtonGroup>
-                <n-upload-trigger #="{ handleClick }" abstract>
-                  <n-button type="info" @click="handleClick">
-                    <template #icon>
-                      <n-icon :component="Add" />
-                    </template>
-                    选择或拖入文件
-                  </n-button>
-                </n-upload-trigger>
+        <NScrollbar>
+          <Options v-model:options="options" v-model:volume="volume">
+            <template #prefix>
+              <n-upload
+                v-model:file-list="fileList"
+                abstract
+                :accept="accept"
+                multiple
+              >
+                <NButtonGroup>
+                  <n-upload-trigger #="{ handleClick }" abstract>
+                    <n-button type="info" @click="handleClick">
+                      <template #icon>
+                        <n-icon :component="Add" />
+                      </template>
+                      选择或拖入文件
+                    </n-button>
+                  </n-upload-trigger>
 
-                <n-button type="info" ghost @click="loadExample">
-                  <template #icon>
-                    <n-icon :component="CloudDownloadOutline" />
-                  </template>
-                  加载样例
-                </n-button>
-              </NButtonGroup>
-              <NUploadFileList :id="fileListId" @click="handleFileListClick" />
-            </n-upload>
-          </template>
-          <template #suffix>
-            <NButton
-              :disabled="typeof fileIndex != 'number'"
-              :type="play ? 'error' : 'success'"
-              ghost
-              @click="play ? pauseAudio() : playAudio()"
-            >
-              <template #icon>
-                <NIcon :component="play ? StopOutline : PlayOutline" />
-              </template>
-              {{ play ? "暂停" : "播放" }}
-            </NButton>
-          </template>
-        </Options>
+                  <n-button type="info" ghost @click="loadExample">
+                    <template #icon>
+                      <n-icon :component="CloudDownloadOutline" />
+                    </template>
+                    加载样例
+                  </n-button>
+                </NButtonGroup>
+                <NUploadFileList
+                  :id="fileListId"
+                  @click="handleFileListClick"
+                />
+              </n-upload>
+            </template>
+            <template #suffix>
+              <NButton
+                :disabled="typeof fileIndex != 'number'"
+                :type="play ? 'error' : 'success'"
+                ghost
+                @click="play ? pauseAudio() : playAudio()"
+              >
+                <template #icon>
+                  <NIcon :component="play ? StopOutline : PlayOutline" />
+                </template>
+                {{ play ? "暂停" : "播放" }}
+              </NButton>
+            </template>
+          </Options>
+        </NScrollbar>
       </template>
       <template #right>
         <div v-if="targetFileConfig" class="audio-player-container">
