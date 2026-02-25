@@ -158,7 +158,7 @@ type ALL_FRAME_IDS =
   | (typeof FRAME_ID_MAP)[2.4][keyof (typeof FRAME_ID_MAP)[2.4]];
 
 /** ID3v2 标签信息 */
-export type ID3v2Tag = {
+type ID3v2Tag = {
   /** "2.2" | "2.3" | "2.4" */
   版本: string;
   /** 标签大小 (字节) */

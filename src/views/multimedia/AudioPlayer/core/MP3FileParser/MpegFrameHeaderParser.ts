@@ -1,13 +1,4 @@
-/**
- * MPEG 音频帧头解析核心类
- * 功能隔离设计：
- * - MpegFrameHeaderParser: 单帧头解析（核心）
- * - MpegFrameFinder: 有效帧查找（辅助）
- * - MpegFrameCalculator: 帧参数计算（衍生）
- * - MpegAudioParser: 对外统一接口（整合）
- */
-
-// MPEG 版本枚举
+/** MPEG 版本枚举 */
 export enum MpegVersion {
   MPEG_VERSION_1 = "MPEG Version 1",
   MPEG_VERSION_2 = "MPEG Version 2",
@@ -15,7 +6,7 @@ export enum MpegVersion {
   MPEG_VERSION_UNKNOWN = "Unknown",
 }
 
-// MPEG 层枚举
+/** MPEG 层枚举 */
 export enum MpegLayer {
   LAYER_I = "Layer I",
   LAYER_II = "Layer II",
@@ -23,7 +14,7 @@ export enum MpegLayer {
   LAYER_UNKNOWN = "Unknown",
 }
 
-// 声道模式枚举
+/** 声道模式枚举 */
 export enum MpegChannelMode {
   STEREO = "Stereo",
   JOINT_STEREO = "Joint Stereo",
@@ -32,40 +23,69 @@ export enum MpegChannelMode {
   UNKNOWN = "Unknown",
 }
 
-// 帧头解析结果类型
-export interface MpegFrameHeader {
-  // 基础信息
+/** 异常帧类型枚举 */
+export enum MpegErrorFrameType {
+  SYNC_WORD_INVALID = "同步字无效",
+  BITRATE_SAMPLERATE_ZERO = "比特率/采样率为0",
+  CRC_CHECK_FAILED = "CRC校验失败",
+  FRAME_SIZE_INVALID = "帧大小计算异常",
+  OFFSET_OUT_OF_BOUNDS = "偏移量越界",
+  OTHER_PARSE_ERROR = "其他解析错误",
+}
+
+/** 异常帧详情接口 */
+export type MpegErrorFrameDetail = {
+  offset: number; // 异常帧偏移量
+  errorType: MpegErrorFrameType; // 异常类型
+  errorMsg?: string; // 异常描述
+};
+
+/** 音频基础信息接口 - 新增位深字段 */
+export type MpegAudioBasicInfo = {
+  bitrate: number; // 比特率 (kbps)
+  sampleRate: number; // 采样率 (Hz)
+  bitDepth: number; // 位深（默认16bit）
+  channelCount: number; // 声道数 (1=单声道, 2=立体声)
+  totalDuration: number; // 总时长 (ms)
+};
+
+/** 帧头解析结果类型 */
+export type MpegFrameHeader = {
   offset: number; // 帧头在 buffer 中的偏移量
   isValid: boolean; // 是否为有效帧头
   syncWord: number; // 同步字 (11位，0xFFE)
-  // 版本/层信息
-  mpegVersion: MpegVersion;
-  layer: MpegLayer;
-  // 保护位 & CRC
+  mpegVersion: MpegVersion; // MPEG版本
+  layer: MpegLayer; // 音频层
   protectionBit: boolean; // false=有CRC校验, true=无CRC校验
   crcValid: boolean | null; // CRC校验结果 (无校验时为null)
   crcValue?: number; // CRC值 (存在时)
-  // 比特率/采样率
-  bitrateIndex: number;
+  bitrateIndex: number; // 比特率索引
   bitrate: number; // 实际比特率 (kbps)
-  sampleRateIndex: number;
+  sampleRateIndex: number; // 采样率索引
   sampleRate: number; // 实际采样率 (Hz)
   sampleRateExtension: boolean; // 是否启用采样率扩展
   bitrateExtension: boolean; // 是否启用比特率扩展
-  // 帧结构
   paddingBit: boolean; // 填充位
   privateBit: boolean; // 私有位
   frameSize: number; // 帧总字节数 (含帧头+数据+CRC)
   frameDuration: number; // 帧时长 (ms)
-  // 声道信息
-  channelMode: MpegChannelMode;
+  channelMode: MpegChannelMode; // 声道模式
   modeExtension: number; // 模式扩展 (仅Joint Stereo有效)
   copyright: boolean; // 版权位
   original: boolean; // 原版位
   emphasis: number; // 强调位 (0=无,1=50/15ms,2=保留,3=CCIT J.17)
-}
+};
 
-// 空帧头常量（无效帧返回）
+/** 最终解析结果接口 */
+export type MpegAudioParseResult = {
+  frameHeader: MpegFrameHeader; // 第一个有效帧的完整帧头
+  frameCount: number; // 总检测帧数 (有效+异常)
+  errorFrameCount: number; // 异常帧数量
+  errorFrameDetails: MpegErrorFrameDetail[]; // 异常帧详情列表
+  audioBasicInfo: MpegAudioBasicInfo; // 音频基础信息
+};
+
+/** 空帧头常量（无效帧返回） */
 const EMPTY_FRAME_HEADER: MpegFrameHeader = {
   offset: -1,
   isValid: false,
@@ -97,10 +117,15 @@ const EMPTY_FRAME_HEADER: MpegFrameHeader = {
  */
 class MpegFrameHeaderParser {
   private dataView: DataView;
-  private static readonly SYNC_WORD_MASK = 0xffe00000; // 同步字掩码 (11位)
-  private static readonly SYNC_WORD_VALUE = 0xffe00000; // 有效同步字值
+  /** 同步字掩码 (11位) */
+  private static readonly SYNC_WORD_MASK = 0xffe00000;
+  /** 有效同步字值 */
+  private static readonly SYNC_WORD_VALUE = 0xffe00000;
 
-  // 比特率表 (kbps) [版本][层][索引]
+  /**
+   * 比特率表 (kbps) [版本][层][索引]
+   * 遵循MPEG标准定义的比特率映射关系
+   */
   private static readonly BITRATE_TABLE: Record<
     string,
     Record<string, number[]>
@@ -140,7 +165,10 @@ class MpegFrameHeaderParser {
     },
   };
 
-  // 采样率表 (Hz) [版本][索引]
+  /**
+   * 采样率表 (Hz) [版本][索引]
+   * 遵循MPEG标准定义的采样率映射关系
+   */
   private static readonly SAMPLE_RATE_TABLE: Record<MpegVersion, number[]> = {
     [MpegVersion.MPEG_VERSION_1]: [44100, 48000, 32000, 0],
     [MpegVersion.MPEG_VERSION_2]: [22050, 24000, 16000, 0],
@@ -148,38 +176,72 @@ class MpegFrameHeaderParser {
     [MpegVersion.MPEG_VERSION_UNKNOWN]: [0, 0, 0, 0],
   };
 
+  /**
+   * 构造函数
+   * @param buffer 音频数据缓冲区
+   */
   constructor(buffer: ArrayBuffer) {
     this.dataView = new DataView(buffer);
   }
 
   /**
-   * 解析指定偏移量的单个帧头
+   * 解析指定偏移量的单个帧头（含异常判定）
    * @param offset 帧头起始偏移量
-   * @returns 帧头信息（无效则返回EMPTY_FRAME_HEADER）
+   * @returns {frameHeader: 帧头信息, errorDetail: 异常详情(无则为null)}
    */
-  parseFrameHeader(offset: number): MpegFrameHeader {
-    // 基础校验：偏移量越界/帧头不足4字节
+  parseFrameHeaderWithError(offset: number): {
+    frameHeader: MpegFrameHeader;
+    errorDetail: MpegErrorFrameDetail | null;
+  } {
+    // 1. 偏移量越界校验
     if (offset + 4 > this.dataView.byteLength) {
-      return { ...EMPTY_FRAME_HEADER, offset };
+      const errorDetail: MpegErrorFrameDetail = {
+        offset,
+        errorType: MpegErrorFrameType.OFFSET_OUT_OF_BOUNDS,
+        errorMsg: `偏移量${offset}超出buffer范围（总长度${this.dataView.byteLength}）`,
+      };
+      return {
+        frameHeader: { ...EMPTY_FRAME_HEADER, offset },
+        errorDetail,
+      };
     }
 
-    // 读取帧头4字节 (big-endian)
+    // 2. 读取帧头4字节
     const headerBytes = this.readHeaderBytes(offset);
+
     if (headerBytes === null) {
-      return { ...EMPTY_FRAME_HEADER, offset };
+      const errorDetail: MpegErrorFrameDetail = {
+        offset,
+        errorType: MpegErrorFrameType.OTHER_PARSE_ERROR,
+        errorMsg: "读取帧头4字节失败",
+      };
+      return {
+        frameHeader: { ...EMPTY_FRAME_HEADER, offset },
+        errorDetail,
+      };
     }
 
-    // 1. 同步字校验 (11位)
+    // 3. 同步字校验
     const syncWord =
-      (headerBytes & MpegFrameHeaderParser.SYNC_WORD_MASK) >>> 21;
+      (headerBytes & MpegFrameHeaderParser.SYNC_WORD_MASK) >>> 20;
+
     if (
-      (headerBytes & MpegFrameHeaderParser.SYNC_WORD_VALUE) !==
+      (headerBytes & MpegFrameHeaderParser.SYNC_WORD_VALUE) >>> 0 !==
       MpegFrameHeaderParser.SYNC_WORD_VALUE
     ) {
-      return { ...EMPTY_FRAME_HEADER, offset, syncWord };
+      const errorDetail: MpegErrorFrameDetail = {
+        offset,
+        errorType: MpegErrorFrameType.SYNC_WORD_INVALID,
+        errorMsg: `同步字${syncWord.toString(16)}无效，预期0xFFE`,
+      };
+
+      return {
+        frameHeader: { ...EMPTY_FRAME_HEADER, offset, syncWord },
+        errorDetail,
+      };
     }
 
-    // 2. 解析基础字段
+    // 4. 解析基础字段
     const frameHeader: MpegFrameHeader = {
       ...EMPTY_FRAME_HEADER,
       offset,
@@ -212,7 +274,7 @@ class MpegFrameHeaderParser {
     // 强调位 (2位)
     frameHeader.emphasis = headerBytes & 0x03;
 
-    // 3. 解析比特率（支持扩展）
+    // 5. 解析比特率（支持扩展）
     const bitrateInfo = this.parseBitrate(
       frameHeader.mpegVersion,
       frameHeader.layer,
@@ -221,7 +283,7 @@ class MpegFrameHeaderParser {
     frameHeader.bitrate = bitrateInfo.bitrate;
     frameHeader.bitrateExtension = bitrateInfo.isExtended;
 
-    // 4. 解析采样率（支持扩展）
+    // 6. 解析采样率（支持扩展）
     const sampleRateInfo = this.parseSampleRate(
       frameHeader.mpegVersion,
       frameHeader.sampleRateIndex
@@ -229,22 +291,59 @@ class MpegFrameHeaderParser {
     frameHeader.sampleRate = sampleRateInfo.sampleRate;
     frameHeader.sampleRateExtension = sampleRateInfo.isExtended;
 
-    // 5. CRC校验（保护位为false时校验）
+    // 7. 比特率/采样率为0校验
+    if (frameHeader.bitrate === 0 || frameHeader.sampleRate === 0) {
+      const errorDetail: MpegErrorFrameDetail = {
+        offset,
+        errorType: MpegErrorFrameType.BITRATE_SAMPLERATE_ZERO,
+        errorMsg: `比特率${frameHeader.bitrate}kbps/采样率${frameHeader.sampleRate}Hz无效`,
+      };
+      frameHeader.isValid = false;
+      return { frameHeader, errorDetail };
+    }
+
+    // 8. CRC校验（保护位为false时校验）
     if (!frameHeader.protectionBit) {
       const crcResult = this.validateCrc(offset, headerBytes);
       frameHeader.crcValid = crcResult.isValid;
       frameHeader.crcValue = crcResult.crcValue;
+      if (!crcResult.isValid) {
+        const errorDetail: MpegErrorFrameDetail = {
+          offset,
+          errorType: MpegErrorFrameType.CRC_CHECK_FAILED,
+          errorMsg: `CRC校验失败，实际值${
+            crcResult.crcValue?.toString(16) || "未知"
+          }，计算值${crcResult.calculatedCrc?.toString(16) || "未知"}`,
+        };
+        frameHeader.isValid = false;
+        return { frameHeader, errorDetail };
+      }
     } else {
       frameHeader.crcValid = null;
     }
 
-    // 6. 计算帧参数（帧大小/时长）
+    // 9. 计算帧参数（帧大小/时长）
     const frameCalculator = new MpegFrameCalculator();
     frameHeader.frameSize = frameCalculator.calculateFrameSize(frameHeader);
     frameHeader.frameDuration =
       frameCalculator.calculateFrameDuration(frameHeader);
 
-    return frameHeader;
+    // 10. 帧大小异常校验
+    if (
+      frameHeader.frameSize <= 0 ||
+      frameHeader.frameSize > this.dataView.byteLength - offset
+    ) {
+      const errorDetail: MpegErrorFrameDetail = {
+        offset,
+        errorType: MpegErrorFrameType.FRAME_SIZE_INVALID,
+        errorMsg: `帧大小${frameHeader.frameSize}字节无效（超出剩余buffer长度）`,
+      };
+      frameHeader.isValid = false;
+      return { frameHeader, errorDetail };
+    }
+
+    // 无异常
+    return { frameHeader, errorDetail: null };
   }
 
   /**
@@ -254,7 +353,6 @@ class MpegFrameHeaderParser {
    */
   private readHeaderBytes(offset: number): number | null {
     try {
-      // 读取4字节并拼接为32位整数 (big-endian)
       return this.dataView.getUint32(offset, false);
     } catch (e) {
       return null;
@@ -333,7 +431,6 @@ class MpegFrameHeaderParser {
     layer: MpegLayer,
     index: number
   ): { bitrate: number; isExtended: boolean } {
-    // 无效索引/版本/层
     if (
       version === MpegVersion.MPEG_VERSION_UNKNOWN ||
       layer === MpegLayer.LAYER_UNKNOWN ||
@@ -343,10 +440,8 @@ class MpegFrameHeaderParser {
       return { bitrate: 0, isExtended: false };
     }
 
-    // 基础比特率
     const baseBitrate =
       MpegFrameHeaderParser.BITRATE_TABLE[version]?.[layer]?.[index] || 0;
-    // 比特率扩展（处理非标准扩展场景）
     const isExtended = baseBitrate === 0 && index !== 0;
 
     return {
@@ -365,7 +460,6 @@ class MpegFrameHeaderParser {
     version: MpegVersion,
     index: number
   ): { sampleRate: number; isExtended: boolean } {
-    // 无效索引/版本
     if (
       version === MpegVersion.MPEG_VERSION_UNKNOWN ||
       index > 3 ||
@@ -374,10 +468,8 @@ class MpegFrameHeaderParser {
       return { sampleRate: 0, isExtended: false };
     }
 
-    // 基础采样率
     const baseSampleRate =
       MpegFrameHeaderParser.SAMPLE_RATE_TABLE[version]?.[index] || 0;
-    // 采样率扩展（处理非标准扩展场景）
     const isExtended = baseSampleRate === 0 && index !== 3;
 
     return {
@@ -387,105 +479,112 @@ class MpegFrameHeaderParser {
   }
 
   /**
-   * 验证CRC校验（保护位为false时）
+   * 修复后的CRC校验方法（符合MPEG标准的CRC-16/CCITT校验）
    * @param offset 帧头偏移量
-   * @param headerBytes 帧头4字节
-   * @returns CRC校验结果
+   * @param headerBytes 帧头4字节原始值
+   * @returns CRC校验结果（包含实际值、计算值、是否有效）
    */
   private validateCrc(
     offset: number,
     headerBytes: number
-  ): { isValid: boolean; crcValue?: number } {
+  ): { isValid: boolean; crcValue?: number; calculatedCrc?: number } {
     try {
-      // CRC值在帧头后2字节 (offset+4)
+      // 1. 读取帧头后2字节的CRC值（存储的校验值）
       const crcValue = this.dataView.getUint16(offset + 4, false);
-      // 简化CRC校验（实际需根据MPEG标准计算，此处为示例逻辑）
-      // 注：完整CRC校验需计算帧数据的CRC并对比，此处仅做存在性验证
+
+      // 2. 准备CRC计算的原始数据（帧头前4字节去掉最后2位 + 帧数据）
+      //    MPEG标准：CRC计算不包含帧头的最后2位（emphasis）
+      const headerForCrc = headerBytes & 0xfffffffc; // 清除最后2位
+      const headerBytesArray = new Uint8Array(4);
+      headerBytesArray[0] = (headerForCrc >> 24) & 0xff;
+      headerBytesArray[1] = (headerForCrc >> 16) & 0xff;
+      headerBytesArray[2] = (headerForCrc >> 8) & 0xff;
+      headerBytesArray[3] = headerForCrc & 0xff;
+
+      // 3. 计算帧数据长度（帧总大小 - 帧头4字节 - CRC2字节）
+      const frameSize = new MpegFrameCalculator().calculateFrameSize({
+        ...EMPTY_FRAME_HEADER,
+        mpegVersion: this.parseMpegVersion((headerBytes >> 19) & 0x03),
+        layer: this.parseLayer((headerBytes >> 17) & 0x03),
+        bitrate: this.parseBitrate(
+          this.parseMpegVersion((headerBytes >> 19) & 0x03),
+          this.parseLayer((headerBytes >> 17) & 0x03),
+          (headerBytes >> 12) & 0x0f
+        ).bitrate,
+        sampleRate: this.parseSampleRate(
+          this.parseMpegVersion((headerBytes >> 19) & 0x03),
+          (headerBytes >> 10) & 0x03
+        ).sampleRate,
+        paddingBit: ((headerBytes >> 9) & 0x01) === 1,
+        isValid: true,
+      });
+
+      const dataLength = frameSize - 6; // 4字节头 + 2字节CRC = 6字节
+      if (
+        dataLength <= 0 ||
+        offset + 6 + dataLength > this.dataView.byteLength
+      ) {
+        return { isValid: false, crcValue };
+      }
+
+      // 4. 读取帧数据（帧头+CRC之后的部分）
+      const frameData = new Uint8Array(
+        this.dataView.buffer,
+        offset + 6,
+        dataLength
+      );
+
+      // 5. 拼接CRC计算的完整数据（处理后的帧头 + 帧数据）
+      const crcInput = new Uint8Array(4 + frameData.length);
+      crcInput.set(headerBytesArray, 0);
+      crcInput.set(frameData, 4);
+
+      // 6. 计算CRC值（符合MPEG标准的CRC-16/CCITT）
+      const calculatedCrc = this.calculateCrc16(crcInput);
+
+      // 7. 对比校验值（MPEG存储的是CRC补码，需要取反后对比）
+      const isCrcValid = (calculatedCrc ^ 0xffff) === crcValue;
+
       return {
-        isValid: crcValue > 0,
+        isValid: isCrcValid,
         crcValue,
+        calculatedCrc,
       };
     } catch (e) {
+      console.error("CRC校验计算失败:", e);
       return { isValid: false };
     }
   }
-}
-
-/**
- * 辅助：有效帧查找类
- * 负责跳过ID3标签、遍历查找有效帧头
- */
-class MpegFrameFinder {
-  private dataView: DataView;
-  private frameParser: MpegFrameHeaderParser;
-  private audioStartOffset: number; // 音频数据起始偏移（跳过ID3v2）
-  private audioEndOffset: number; // 音频数据结束偏移（排除ID3v1）
-
-  constructor(buffer: ArrayBuffer, tagSize: number, isId3v1: boolean) {
-    this.dataView = new DataView(buffer);
-    this.frameParser = new MpegFrameHeaderParser(buffer);
-
-    // 计算音频数据范围
-    this.audioStartOffset = Math.max(0, tagSize); // 跳过ID3v2
-    this.audioEndOffset = this.dataView.byteLength - (isId3v1 ? 128 : 0); // 排除ID3v1
-  }
 
   /**
-   * 查找下一个有效帧头
-   * @param startOffset 起始查找偏移量
-   * @returns 有效帧头（无则返回EMPTY_FRAME_HEADER）
+   * CRC-16/CCITT 校验计算（严格遵循MPEG标准）
+   * @param data 待校验数据
+   * @returns 计算后的CRC值
    */
-  findNextFrame(startOffset: number): MpegFrameHeader {
-    // 边界校验
-    if (
-      startOffset < this.audioStartOffset ||
-      startOffset >= this.audioEndOffset
-    ) {
-      return { ...EMPTY_FRAME_HEADER, offset: startOffset };
-    }
+  private calculateCrc16(data: Uint8Array): number {
+    let crc = 0xffff; // 初始值
+    const polynomial = 0x1021; // CCITT多项式
 
-    // 逐字节查找（跳过无效帧头）
-    for (let offset = startOffset; offset < this.audioEndOffset - 4; offset++) {
-      const frameHeader = this.frameParser.parseFrameHeader(offset);
-      // 有效帧头：同步字有效+比特率/采样率有效
-      if (
-        frameHeader.isValid &&
-        frameHeader.bitrate > 0 &&
-        frameHeader.sampleRate > 0
-      ) {
-        return frameHeader;
+    for (let i = 0; i < data.length; i++) {
+      crc ^= (data[i] << 8) & 0xff00; // 左移8位，与CRC高8位异或
+
+      for (let j = 0; j < 8; j++) {
+        if (crc & 0x8000) {
+          // 最高位为1
+          crc = (crc << 1) ^ polynomial;
+        } else {
+          crc <<= 1;
+        }
+        crc &= 0xffff; // 保持16位
       }
     }
 
-    return { ...EMPTY_FRAME_HEADER, offset: startOffset };
-  }
-
-  /**
-   * 查找所有有效帧头
-   * @returns 所有有效帧头列表
-   */
-  findAllFrames(): MpegFrameHeader[] {
-    const frames: MpegFrameHeader[] = [];
-    let currentOffset = this.audioStartOffset;
-
-    // 循环查找直到音频结束
-    while (currentOffset < this.audioEndOffset - 4) {
-      const frame = this.findNextFrame(currentOffset);
-      if (!frame.isValid) {
-        break;
-      }
-
-      frames.push(frame);
-      // 移动到下一帧（按帧大小偏移）
-      currentOffset += frame.frameSize || 1;
-    }
-
-    return frames;
+    return crc;
   }
 }
 
 /**
- * 衍生：帧参数计算类
+ * 辅助：帧参数计算类
  * 负责计算帧大小、帧时长等衍生参数
  */
 class MpegFrameCalculator {
@@ -503,9 +602,6 @@ class MpegFrameCalculator {
       return 0;
     }
 
-    // MPEG帧大小公式：
-    // Layer I: (12 * bitrate * 1000 / sampleRate) + paddingBit * 4
-    // Layer II/III: (144 * bitrate * 1000 / sampleRate) + paddingBit
     const bitrateKbps = frameHeader.bitrate;
     const sampleRateHz = frameHeader.sampleRate;
     const padding = frameHeader.paddingBit ? 1 : 0;
@@ -533,7 +629,6 @@ class MpegFrameCalculator {
       return 0;
     }
 
-    // 每帧样本数
     let samplesPerFrame = 0;
     switch (frameHeader.layer) {
       case MpegLayer.LAYER_I:
@@ -550,18 +645,76 @@ class MpegFrameCalculator {
         return 0;
     }
 
-    // 帧时长 = 样本数 / 采样率 * 1000 (ms)
     return (samplesPerFrame / frameHeader.sampleRate) * 1000;
   }
 }
 
 /**
- * 对外统一接口：MPEG音频解析器
- * 整合所有功能，提供简洁的对外API
+ * 辅助：有效帧查找类
+ * 支持总帧数/异常帧统计，定位有效MPEG帧
  */
-export class MpegAudioParser {
-  private frameFinder: MpegFrameFinder;
+class MpegFrameFinder {
+  dataView: DataView;
   private frameParser: MpegFrameHeaderParser;
+  private audioStartOffset: number;
+  private audioEndOffset: number;
+
+  /**
+   * 构造函数
+   * @param buffer 音频数据缓冲区
+   * @param tagSize ID3v2标签大小（字节）
+   * @param isId3v1 是否包含ID3v1标签
+   */
+  constructor(buffer: ArrayBuffer, tagSize: number, isId3v1: boolean) {
+    this.dataView = new DataView(buffer);
+    this.frameParser = new MpegFrameHeaderParser(buffer);
+    this.audioStartOffset = Math.max(0, tagSize);
+    this.audioEndOffset = this.dataView.byteLength - (isId3v1 ? 128 : 0);
+  }
+
+  /**
+   * 查找所有帧（含有效/异常），统计总帧数&异常帧
+   * @returns 帧统计结果
+   */
+  findAllFramesWithError(): {
+    validFrames: MpegFrameHeader[];
+    totalFrameCount: number;
+    errorFrameDetails: MpegErrorFrameDetail[];
+  } {
+    const validFrames: MpegFrameHeader[] = [];
+    const errorFrameDetails: MpegErrorFrameDetail[] = [];
+    let currentOffset = this.audioStartOffset;
+    let totalFrameCount = 0;
+
+    while (currentOffset < this.audioEndOffset - 4) {
+      totalFrameCount++;
+      const { frameHeader, errorDetail } =
+        this.frameParser.parseFrameHeaderWithError(currentOffset);
+
+      if (errorDetail) {
+        errorFrameDetails.push(errorDetail);
+        currentOffset += 1; // 异常帧逐字节偏移
+      } else {
+        validFrames.push(frameHeader);
+        currentOffset += frameHeader.frameSize || 1; // 有效帧按帧大小偏移
+      }
+    }
+
+    return {
+      validFrames,
+      totalFrameCount,
+      errorFrameDetails,
+    };
+  }
+}
+
+/**
+ * 对外统一接口：MPEG音频解析器
+ * 整合所有功能，提供最终解析结果
+ */
+export default class MpegAudioParser {
+  private frameFinder: MpegFrameFinder;
+  private static readonly DEFAULT_BIT_DEPTH = 16; // 默认位深16bit
 
   /**
    * 构造函数
@@ -570,32 +723,42 @@ export class MpegAudioParser {
    * @param isId3v1 是否包含ID3v1标签
    */
   constructor(buffer: ArrayBuffer, tagSize: number, isId3v1: boolean) {
-    this.frameParser = new MpegFrameHeaderParser(buffer);
     this.frameFinder = new MpegFrameFinder(buffer, tagSize, isId3v1);
   }
 
   /**
-   * 解析单个帧头（指定偏移量）
-   * @param offset 帧头偏移量
-   * @returns 帧头信息
+   * 完整解析MPEG音频（核心API）
+   * @returns 最终解析结果
    */
-  parseSingleFrame(offset: number): MpegFrameHeader {
-    return this.frameParser.parseFrameHeader(offset);
-  }
+  parseComplete(): MpegAudioParseResult {
+    // 1. 查找所有帧（含有效/异常）
+    const { validFrames, totalFrameCount, errorFrameDetails } =
+      this.frameFinder.findAllFramesWithError();
 
-  /**
-   * 查找并解析第一个有效帧头
-   * @returns 第一个有效帧头
-   */
-  parseFirstFrame(): MpegFrameHeader {
-    return this.frameFinder.findNextFrame(this.frameFinder["audioStartOffset"]);
-  }
+    // 2. 获取第一个有效帧头
+    const firstValidFrame =
+      validFrames.find((frame) => frame.isValid) || EMPTY_FRAME_HEADER;
 
-  /**
-   * 解析所有有效帧头
-   * @returns 所有有效帧头列表
-   */
-  parseAllFrames(): MpegFrameHeader[] {
-    return this.frameFinder.findAllFrames();
+    // 3. 计算音频基础信息（新增bitDepth字段）
+    const audioBasicInfo: MpegAudioBasicInfo = {
+      sampleRate: firstValidFrame.sampleRate,
+      bitrate: firstValidFrame.bitrate,
+      channelCount:
+        firstValidFrame.channelMode === MpegChannelMode.MONO ? 1 : 2,
+      totalDuration: validFrames.reduce(
+        (sum, frame) => sum + frame.frameDuration,
+        0
+      ),
+      bitDepth: MpegAudioParser.DEFAULT_BIT_DEPTH, // 默认16位深
+    };
+
+    // 5. 组装最终结果
+    return {
+      frameHeader: firstValidFrame,
+      frameCount: totalFrameCount,
+      errorFrameCount: errorFrameDetails.length,
+      errorFrameDetails,
+      audioBasicInfo,
+    };
   }
 }

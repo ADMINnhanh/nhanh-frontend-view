@@ -1,8 +1,8 @@
-import type { UploadFileInfo } from "naive-ui";
 import {
   _Format_FileSize,
   _Format_MillisecondToReadable,
 } from "nhanh-pure-function";
+import type MP3FileParser from "./core/MP3FileParser/main";
 
 /** 字节序枚举 */
 export enum Endianness {
@@ -16,7 +16,14 @@ export enum Endianness {
   BigEndian = "be",
 }
 
-export type AudioFileList = (UploadFileInfo & { options: Partial<PCMPlayOptions> })[];
+export type AudioOptions = {
+  fileName: string;
+  fileSize: number;
+  audioBasicInfo: Partial<PCMPlayOptions>;
+  pcm: ArrayBuffer;
+  mp3Info?: Exclude<Awaited<ReturnType<typeof MP3FileParser>>, null>;
+  wav?: any;
+};
 
 export type TargetFileConfig = Partial<PCMPlayOptions> & {
   name: string;
@@ -36,20 +43,20 @@ export function FormatTime(seconds: number): string {
   return `${minutes}:${padZeroToTwoDigits((seconds % 60).toFixed(0))}`;
 }
 export function getTargetFileConfig(
-  file: AudioFileList[number],
+  options: AudioOptions,
   totalDuration: number
 ): TargetFileConfig {
-  const { options, name } = file;
-  const lastIndex = name.lastIndexOf(".");
-  const type = lastIndex > 0 ? name.substring(lastIndex + 1) : "异常！";
+  const { audioBasicInfo, fileSize, fileName } = options;
+  const lastIndex = fileName.lastIndexOf(".");
+  const type = lastIndex > 0 ? fileName.substring(lastIndex + 1) : "异常！";
 
-  const currentTime = FormatTime(options.startTime || 0);
+  const currentTime = FormatTime(audioBasicInfo.startTime || 0);
   return {
-    ...options,
-    name,
+    ...audioBasicInfo,
+    name: fileName,
     currentTime,
     totalDuration: FormatTime(totalDuration),
-    size: _Format_FileSize(file.file!.size),
+    size: _Format_FileSize(fileSize),
     type: type.toLocaleUpperCase(),
   };
 }

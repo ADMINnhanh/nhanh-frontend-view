@@ -1,7 +1,7 @@
 /**
  * ID3v1 解析结果类型
  */
-export interface ID3v1Tag {
+type ID3v1Tag = {
   title: string; // 歌曲名
   artist: string; // 艺术家
   album: string; // 专辑
@@ -10,7 +10,7 @@ export interface ID3v1Tag {
   track: number; // 音轨号（v1.1 有效，v1.0 为 0）
   genre: string; // 流派
   isID3v1_1: boolean; // 是否为 v1.1（仅用于标识，非标准字段）
-}
+};
 
 /** 流派表（简化版，可扩展） */
 const GENRE_TABLE = [

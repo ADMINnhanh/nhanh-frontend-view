@@ -28,4 +28,7 @@ export default defineConfig({
     host: "0.0.0.0",
     cors: true, // 允许跨域
   },
+  optimizeDeps: {
+    exclude: ["@ffmpeg/ffmpeg", "@ffmpeg/core", "@ffmpeg/util"],
+  },
 });

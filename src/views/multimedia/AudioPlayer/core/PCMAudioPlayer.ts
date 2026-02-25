@@ -112,7 +112,7 @@ export class PCMAudioPlayer {
     // 初始化后立即设置播放音量
     this.setVolume(volume);
 
-    this.stop();
+    await this.stop();
 
     try {
       // 将 PCM 数据转换为 Float32Array（传入字节序参数）
@@ -212,7 +212,7 @@ export class PCMAudioPlayer {
    * @param startTime 起始播放位置（秒）
    * @param duration 播放时长（秒，可选）
    */
-  public playFromPosition(startTime: number = 0, duration: number = 0): void {
+  public async playFromPosition(startTime: number = 0, duration: number = 0) {
     if (!this.audioBuffer || !this.audioContext) {
       console.error("请先加载 PCM 数据");
       return;
@@ -220,7 +220,7 @@ export class PCMAudioPlayer {
 
     // 停止之前的播放
     if (this.isPlaying) {
-      this.stop();
+      await this.stop();
     }
 
     // 校验参数
@@ -302,8 +302,7 @@ export class PCMAudioPlayer {
   /** 播放 */
   public async play(startTime?: number) {
     if (typeof startTime === "number") {
-      this.stop();
-      await _Utility_WaitForCondition(() => !this.isPlaying, 500);
+      await this.stop();
       this.offsetTime = startTime;
     } else {
       if (this.isPlaying) return;
@@ -317,16 +316,14 @@ export class PCMAudioPlayer {
     this.updatePlayProgress();
   }
   /** 停止播放 */
-  public stop(): void {
+  public async stop() {
     if (this.source) {
-      try {
-        // console.log("source.stop() 调用");
-        this.source.stop();
-      } catch (e) {
-        /* 忽略已停止的错误 */
-      }
+      // console.log("stop");
+      this.source.stop();
       this.source.disconnect();
       this.source = undefined;
+
+      await _Utility_WaitForCondition(() => !this.isPlaying, 500);
     }
   }
 

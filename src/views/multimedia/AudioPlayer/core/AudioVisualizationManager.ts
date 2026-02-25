@@ -60,15 +60,15 @@ class AudioVisualizationManager {
   }
 
   /** 初始化 */
-  init(config: AudioVisualizationManagerConfig) {
-    this.initPCM(config);
+  async init(config: AudioVisualizationManagerConfig) {
+    await this.initPCM(config);
     if (!this.audioPlayer.ready) return;
     this.initCanvas(config);
   }
-  private initPCM(config: AudioVisualizationManagerConfig) {
+  private async initPCM(config: AudioVisualizationManagerConfig) {
     const { audioPlayer } = this;
     const { pcmData, pcmOptions } = config;
-    audioPlayer.initPCM(pcmData, pcmOptions);
+    await audioPlayer.initPCM(pcmData, pcmOptions);
   }
   /** 初始化音频可视化 */
   private initCanvas(config: AudioVisualizationManagerConfig) {

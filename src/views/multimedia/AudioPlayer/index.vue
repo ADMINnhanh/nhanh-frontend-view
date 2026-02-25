@@ -30,11 +30,12 @@ import {
   Endianness,
   FormatTime,
   getTargetFileConfig,
-  type AudioFileList,
+  type AudioOptions,
   type TargetFileConfig,
 } from ".";
 import AudioVisualizationManager from "./core/AudioVisualizationManager";
 import MP3FileParser from "./core/MP3FileParser/main";
+import type { UploadFileInfo } from "naive-ui";
 
 const id = _Utility_GenerateUUID("audio-player-");
 const fileListId = _Utility_GenerateUUID("file-list-");
@@ -42,7 +43,8 @@ const fileListId = _Utility_GenerateUUID("file-list-");
 const play = ref(false);
 const accept = ".mp3,.pcm,.wav";
 const fileIndex = ref<number | undefined>(undefined);
-const fileList = ref<AudioFileList>([]);
+const fileList = ref<UploadFileInfo[]>([]);
+const audioOptions = new Map<string, AudioOptions>();
 
 const volume = ref(0.5);
 const options = ref<Partial<PCMPlayOptions>>({
@@ -69,11 +71,12 @@ watch(
   async ([pcmOptions, index]) => {
     if (typeof index == "number") {
       const file = fileList.value[index];
-      const pcmData = await file.file!.arrayBuffer();
-      targetFileConfig.value = getTargetFileConfig(file, 0);
-      requestAnimationFrame(() => {
+      const audioOption = audioOptions.get(file.id)!;
+      targetFileConfig.value = getTargetFileConfig(audioOption, 0);
+      requestAnimationFrame(async () => {
         const canvas = document.getElementById(id) as HTMLCanvasElement;
-        audioVisualization.init({
+        const pcmData = audioOption.pcm;
+        await audioVisualization.init({
           canvas,
           pcmData,
           pcmOptions,
@@ -115,23 +118,14 @@ function handleDrop(files: File[]) {
   const audios = files.filter((file) => isAudioFile(file.name));
 
   if (audios.length > 0) {
-    audios.forEach(async (audio) => {
-      const buffer = await audio.arrayBuffer();
-
-      const index = audio.name.lastIndexOf(".");
-      const type = audio.name.slice(index + 1);
-
-      if (type.toLocaleLowerCase() == "mp3") {
-        const info = MP3FileParser(buffer);
-        console.log(info);
-      } else {
-        fileList.value.push({
-          id: String(audio.lastModified),
-          name: audio.name,
-          status: "pending",
-          options: {},
-        });
-      }
+    audios.forEach((audio) => {
+      const id = String(audio.lastModified);
+      fileList.value.push({
+        id,
+        name: audio.name,
+        status: "finished",
+        file: audio,
+      });
     });
   } else {
     window.$message.warning("请拖拽音频文件");
@@ -142,27 +136,92 @@ function handleDrop(files: File[]) {
 function loadExample() {
   axios
     .get("./multimedia/Jay Chou.pcm", { responseType: "blob" })
-    .then((res) => {
+    .then(async (res) => {
       const file = new File([res.data], "Jay Chou.pcm");
-      fileList.value.push({
-        id: String(file.lastModified),
-        name: file.name,
-        status: "finished",
-        file,
-        options: {
+      const pcm = await file.arrayBuffer();
+      const id = String(file.lastModified);
+      audioOptions.set(id, {
+        fileName: file.name,
+        fileSize: file.size,
+        audioBasicInfo: {
           sampleRate: 24000,
           bitDepth: 16,
           channelCount: 2,
           endianness: Endianness.LE,
         },
+        pcm,
+      });
+      fileList.value.push({
+        id,
+        name: file.name,
+        status: "finished",
       });
       setActiveUploadFile(fileList.value.length - 1);
     });
 }
 
-function setActiveUploadFile(index: number) {
+async function setActiveUploadFile(index: number) {
+  const file = fileList.value[index];
+  let audioOption = audioOptions.get(file.id);
+
+  const msg = window.$message.loading("解析中... 希望不会太久~", {
+    duration: 0,
+  });
+  const finish = () => {
+    setTimeout(() => {
+      msg.type = "success";
+      msg.content = `解析完成。久等了~`;
+      setTimeout(() => msg.destroy(), 3000);
+    }, 1000);
+  };
+  const error = (str: string) => {
+    msg.type = "error";
+    msg.content = `解析失败，${str}。额~`;
+    setTimeout(() => msg.destroy(), 3000);
+  };
+
+  if (!audioOption) {
+    const audio = file.file;
+    if (!audio) return error("数据异常");
+
+    const index = audio.name.lastIndexOf(".");
+    const type = audio.name.slice(index + 1);
+
+    if (type.toLocaleLowerCase() == "mp3") {
+      const info = await MP3FileParser(audio);
+      if (info) {
+        const { audioBasicInfo } = info.mpegAudio;
+        audioOptions.set(file.id, {
+          fileName: audio.name,
+          fileSize: audio.size,
+          audioBasicInfo: {
+            sampleRate: audioBasicInfo.sampleRate as any,
+            channelCount: audioBasicInfo.channelCount,
+            bitDepth: audioBasicInfo.bitDepth as any,
+          },
+          pcm: info.pcm,
+          mp3Info: info,
+        });
+      } else {
+        return error("MP3文件解析失败");
+      }
+    } else {
+      return error("敬请期待~");
+      // fileList.value.push({
+      //   id: String(audio.lastModified),
+      //   name: audio.name,
+      //   status: "pending",
+      //   options: {},
+      // });
+    }
+
+    audioOption = audioOptions.get(file.id);
+  }
   fileIndex.value = index;
-  Object.assign(options.value, fileList.value[index].options);
+
+  finish();
+
+  Object.assign(options.value, audioOption!.audioBasicInfo);
   setTimeout(() => {
     const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
     files.forEach((v, i) => {
