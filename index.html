@@ -21,6 +21,16 @@
   <link rel="icon" href="/nhanh.ico">
   <!-- 谷歌验证 -->
   <meta name="google-site-verification" content="wCCj5uujiQ7iy_oS9IrTi-5BlZE_y_AH_uZBlWait0o" />
+
+  <script>
+    (function () {
+      const redir = sessionStorage.redirect;
+      delete sessionStorage.redirect;
+      if (redir && redir !== location.href) {
+        history.replaceState(null, null, redir);
+      }
+    })();
+  </script>
 </head>
 
 <body>

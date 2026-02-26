@@ -7,7 +7,7 @@ import vueDevTools from "vite-plugin-vue-devtools";
 import checker from "vite-plugin-checker";
 
 export default defineConfig({
-  base: "./",
+  base: "/nhanh-frontend-view/",
   plugins: [
     vue(),
     vueJsx(),
