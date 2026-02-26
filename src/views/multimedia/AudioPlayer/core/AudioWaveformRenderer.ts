@@ -23,11 +23,13 @@ class AudioWaveformRenderer {
   ];
   /** 每个声道分配的渲染高度（像素） */
   private channelRenderHeight = 0;
-  /** 预处理后的波形数据总长度 */
-  private waveformDataLength = 0;
+  /** 计算波形数据块大小 */
+  private waveformDataSize = 0;
+  /** 计算波形数据块数量 */
+  private waveformDataCount = 0;
 
   /** 各声道的振幅数据缓存（预处理后的值，范围 [-1, 1]） */
-  private channelAmplitudeData: Float32Array[] = [];
+  private channelAmplitudeData: Float32Array[][] = [];
   /** 上一次渲染的起始数据索引（用于防抖，避免重复渲染） */
   private lastRenderedStartIndex?: number;
 
@@ -77,11 +79,12 @@ class AudioWaveformRenderer {
    */
   render(progress: number): void {
     const {
-      waveformDataLength,
       channelRenderHeight,
       channelAmplitudeData,
       config,
       channelColors,
+      waveformDataSize,
+      waveformDataCount,
     } = this;
 
     // 校验必要参数，避免渲染异常
@@ -91,9 +94,7 @@ class AudioWaveformRenderer {
     const { width, height } = canvasContext.canvas;
 
     // 根据进度计算当前渲染的起始数据索引
-    const currentStartIndex = Math.floor(
-      ((waveformDataLength - width) * progress) / 100
-    );
+    const currentStartIndex = Math.floor((waveformDataCount * progress) / 100);
 
     // 防抖：如果起始索引未变化，不重复渲染
     if (this.lastRenderedStartIndex === currentStartIndex) return;
@@ -110,14 +111,13 @@ class AudioWaveformRenderer {
       const channelCenterY =
         channelRenderHeight * channelIndex + channelRenderHeight / 2;
 
+      const amplitude = channelAmplitudeData[channelIndex][currentStartIndex];
+
       // 逐像素绘制水平方向的波形点
-      for (let x = 0; x < width; x++) {
-        // 获取当前位置的振幅值（注意边界，避免越界）
-        const amplitude =
-          channelAmplitudeData[channelIndex][x + currentStartIndex] || 0;
+      for (let x = 0; x < waveformDataSize; x++) {
         // 计算波形点的 Y 坐标（振幅越大，偏离中心越远）
         const waveformY = Math.floor(
-          channelCenterY - (channelRenderHeight / 2) * amplitude
+          channelCenterY - (channelRenderHeight / 2) * amplitude[x]
         );
         // 绘制单个像素点（构成波形）
         canvasContext.fillRect(x, waveformY, 1, 1);
@@ -134,24 +134,19 @@ class AudioWaveformRenderer {
    */
   private preprocessAudioData(): void {
     if (!this.config) return;
-    const { canvasContext, audioBuffer, channelCount, fps, duration } =
-      this.config;
+    const { canvasContext, audioBuffer, channelCount } = this.config;
 
-    // 计算总数据块数量（帧率 * 时长）
-    const totalDataBlocks = Math.floor(duration * fps);
-    // 计算波形数据总长度（限制最大值，避免数据量过大）
-    this.waveformDataLength = Math.min(
-      audioBuffer.length,
-      canvasContext.canvas.width * totalDataBlocks
-    );
-    // 计算每个数据块包含的音频样本数
-    const sampleCountPerBlock = Math.floor(
-      audioBuffer.length / this.waveformDataLength
-    );
+    // 计算波形数据块大小
+    const waveformDataSize = Math.floor(canvasContext.canvas.width);
+    // 计算波形数据块数量
+    const waveformDataCount = Math.floor(audioBuffer.length / waveformDataSize);
+
+    this.waveformDataSize = waveformDataSize;
+    this.waveformDataCount = waveformDataCount;
 
     // 初始化各声道的振幅数据缓存
     this.channelAmplitudeData = Array.from({ length: channelCount }).map(
-      () => new Float32Array(this.waveformDataLength)
+      () => new Array(waveformDataCount)
     );
 
     // 逐声道处理音频数据
@@ -160,24 +155,14 @@ class AudioWaveformRenderer {
       const channelRawData = audioBuffer.getChannelData(channelIndex);
 
       // 逐数据块计算平均振幅
-      for (
-        let blockIndex = 0;
-        blockIndex < this.waveformDataLength;
-        blockIndex++
-      ) {
-        const startSampleIndex = blockIndex * sampleCountPerBlock;
+      for (let blockIndex = 0; blockIndex < waveformDataCount; blockIndex++) {
+        const startSampleIndex = blockIndex * waveformDataSize;
         // 截取当前数据块的样本数据
-        const blockSamples = channelRawData.slice(
-          startSampleIndex,
-          startSampleIndex + sampleCountPerBlock
-        );
-        // 计算当前数据块的平均振幅（求和后取平均值）
-        const averageAmplitude =
-          blockSamples.reduce((sum, sample) => sum + sample, 0) /
-          sampleCountPerBlock;
-
-        // 缓存平均振幅值
-        this.channelAmplitudeData[channelIndex][blockIndex] = averageAmplitude;
+        this.channelAmplitudeData[channelIndex][blockIndex] =
+          channelRawData.slice(
+            startSampleIndex,
+            startSampleIndex + waveformDataSize
+          );
       }
     }
   }

@@ -253,7 +253,7 @@ export class PCMAudioPlayer {
    * 播放进度更新回调函数类型定义
    * @param currentTime - 当前播放时间（秒，保留2位小数）
    * @param totalDuration - 音频总时长（秒，保留2位小数）
-   * @param progressPercentage - 播放进度百分比（保留1位小数）
+   * @param progressPercentage - 播放进度百分比（保留8位小数）
    */
   playProgressCallback?: (
     currentTime: string,
@@ -287,7 +287,7 @@ export class PCMAudioPlayer {
     // 格式化数值（变量名语义化）
     const formattedCurrentTime = currentPlayTime.toFixed(2);
     const formattedTotalDuration = audioBuffer.duration.toFixed(2);
-    const formattedProgressPercent = progressPercent.toFixed(1);
+    const formattedProgressPercent = progressPercent.toFixed(8);
 
     // 执行回调（传递格式化后的进度数据）
     playProgressCallback(

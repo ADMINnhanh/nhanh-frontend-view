@@ -1,11 +1,6 @@
 import AudioSpectrumRenderer from "./AudioSpectrumRenderer";
 import AudioWaveformRenderer from "./AudioWaveformRenderer";
 import PCMAudioPlayer from "./PCMAudioPlayer";
-import { _Browser_GetFrameRate } from "nhanh-pure-function";
-
-// 初始帧率默认值（60FPS）
-let fps = 60;
-_Browser_GetFrameRate((targetFrameRate) => (fps = targetFrameRate), 60);
 
 /** 音频可视化管理器 */
 class AudioVisualizationManager {
@@ -13,11 +8,13 @@ class AudioVisualizationManager {
   private audioSpectrum = new AudioSpectrumRenderer();
   private audioSpectrumCanvas = document.createElement("canvas");
   private audioSpectrumCtx = this.audioSpectrumCanvas.getContext("2d");
+  public audioSpectrumHeight = 100;
 
   /** 音频波形渲染器实例 */
   private audioWaveform = new AudioWaveformRenderer();
   private audioWaveformCanvas = document.createElement("canvas");
   private audioWaveformCtx = this.audioWaveformCanvas.getContext("2d");
+  public audioWaveformHeight = 100;
 
   /** 音频播放器实例 */
   private audioPlayer = new PCMAudioPlayer();
@@ -76,8 +73,10 @@ class AudioVisualizationManager {
       audioPlayer,
       audioSpectrumCanvas,
       audioSpectrumCtx,
+      audioSpectrumHeight,
       audioWaveformCanvas,
       audioWaveformCtx,
+      audioWaveformHeight,
     } = this;
 
     const { canvas } = config;
@@ -87,7 +86,7 @@ class AudioVisualizationManager {
 
     const width = Math.floor(canvas.getBoundingClientRect().width);
     canvas.width = width;
-    canvas.height = 100 * (channelCount + 1);
+    canvas.height = audioWaveformHeight * channelCount + audioSpectrumHeight;
 
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
@@ -98,16 +97,15 @@ class AudioVisualizationManager {
     }
 
     audioSpectrumCanvas.width = width;
-    audioSpectrumCanvas.height = 100;
+    audioSpectrumCanvas.height = audioSpectrumHeight;
 
     audioWaveformCanvas.width = width;
-    audioWaveformCanvas.height = 100 * channelCount;
+    audioWaveformCanvas.height = audioWaveformHeight * channelCount;
 
     const audioVisualizationConfig = {
       channelCount,
       audioBuffer,
       duration,
-      fps,
     };
     this.audioWaveform.init({
       ...audioVisualizationConfig,

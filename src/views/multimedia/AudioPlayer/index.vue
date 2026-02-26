@@ -15,6 +15,7 @@ import {
   NTag,
   NText,
   NScrollbar,
+  NH3,
 } from "naive-ui";
 import { ref, watch } from "vue";
 import {
@@ -36,6 +37,7 @@ import {
 import AudioVisualizationManager from "./core/AudioVisualizationManager";
 import MP3FileParser from "./core/MP3FileParser/main";
 import type { UploadFileInfo } from "naive-ui";
+import AudioBasicInfo from "./audioBasicInfo.vue";
 
 const id = _Utility_GenerateUUID("audio-player-");
 const fileListId = _Utility_GenerateUUID("file-list-");
@@ -46,7 +48,7 @@ const fileIndex = ref<number | undefined>(undefined);
 const fileList = ref<UploadFileInfo[]>([]);
 const audioOptions = new Map<string, AudioOptions>();
 
-const volume = ref(0.5);
+const volume = ref(0.2);
 const options = ref<Partial<PCMPlayOptions>>({
   sampleRate: 16000,
   bitDepth: 16,
@@ -109,6 +111,21 @@ async function playFromPosition(payload: PointerEvent) {
   const position = (offsetX / width) * audioVisualization.totalDuration;
   await audioVisualization.play(position);
   play.value = true;
+}
+/** 时间轴提示 */
+function handleMouseMove(mouse: MouseEvent) {
+  const { offsetX, target } = mouse;
+  const dom = target as HTMLElement;
+  const width = dom.clientWidth;
+  const position = (offsetX / width) * audioVisualization.totalDuration;
+  dom.dataset.time = FormatTime(position);
+  dom.style.setProperty("--after-x", offsetX - 46 / 2 + "px");
+}
+/** 获取元数据 */
+function getMetadata() {
+  if (fileIndex.value === undefined) return;
+  const file = fileList.value[fileIndex.value];
+  return audioOptions.get(file.id);
 }
 
 /** 拖拽放手时触发 */
@@ -205,8 +222,20 @@ async function setActiveUploadFile(index: number) {
       } else {
         return error("MP3文件解析失败");
       }
+    } else if (type.toLocaleLowerCase() == "pcm") {
+      const pcm = await audio.arrayBuffer();
+      audioOptions.set(file.id, {
+        fileName: audio.name,
+        fileSize: audio.size,
+        audioBasicInfo: {
+          sampleRate: 8000,
+          channelCount: 2,
+          bitDepth: 16,
+        },
+        pcm,
+      });
     } else {
-      return error("敬请期待~");
+      return error("敬请期待");
       // fileList.value.push({
       //   id: String(audio.lastModified),
       //   name: audio.name,
@@ -238,6 +267,8 @@ function handleFileListClick(ev: PointerEvent) {
   const index = Array.from(files).findIndex((v) => v === file);
 
   if (isButton) {
+    const file = fileList.value[index];
+    audioOptions.delete(file.id);
     if (index == fileIndex.value) {
       fileIndex.value = undefined;
       play.value = false;
@@ -255,6 +286,13 @@ function handleFileListClick(ev: PointerEvent) {
     <ResponsiveDirectionLayout :default-size="0.35" :min="0">
       <template #left>
         <NScrollbar>
+          <NH3 prefix="bar">
+            <NText type="success">
+              PCM / MP3 /
+              <NText type="warning">WAV(额~)</NText>
+              音频可视化播放器
+            </NText>
+          </NH3>
           <Options v-model:options="options" v-model:volume="volume">
             <template #prefix>
               <n-upload
@@ -282,7 +320,7 @@ function handleFileListClick(ev: PointerEvent) {
                 </NButtonGroup>
                 <NUploadFileList
                   :id="fileListId"
-                  @click="handleFileListClick"
+                  @click.capture="handleFileListClick"
                 />
               </n-upload>
             </template>
@@ -304,26 +342,18 @@ function handleFileListClick(ev: PointerEvent) {
       </template>
       <template #right>
         <div v-if="targetFileConfig" class="audio-player-container">
-          <NSpace>
-            <n-text>{{ targetFileConfig.name }}</n-text>
-            <n-tag type="info"> {{ targetFileConfig.type }} </n-tag>
-            <n-tag
-              :color="{
-                color: '#8a2be21a',
-                textColor: '#9339E7FF',
-                borderColor: '#9339E7FF',
-              }"
-            >
-              {{ targetFileConfig.size }}
-            </n-tag>
-            <n-tag type="success"> {{ targetFileConfig.totalDuration }} </n-tag>
-            <n-tag type="warning"> {{ targetFileConfig.sampleRate }}Hz </n-tag>
-            <n-tag> {{ targetFileConfig.channelCount }}ch </n-tag>
-            <n-tag> {{ targetFileConfig.bitDepth }}bit </n-tag>
-          </NSpace>
+          <AudioBasicInfo
+            :is-running="play"
+            :info="targetFileConfig"
+            :getMetadata="getMetadata"
+          />
           <div class="canvas-container">
             <canvas :id="id" />
-            <div class="progress" @click="playFromPosition"></div>
+            <div
+              class="progress"
+              @mousemove="handleMouseMove"
+              @click="playFromPosition"
+            ></div>
           </div>
           <div class="time-container">
             <n-text>{{ targetFileConfig.currentTime }}</n-text>
@@ -383,6 +413,28 @@ function handleFileListClick(ev: PointerEvent) {
       bottom: 0;
       left: 0;
       height: 100px;
+      &::after {
+        /* 必须：显示data属性中的文本 */
+        content: attr(data-time);
+        /* 定位：可根据需求调整位置（如右上角、鼠标位置等） */
+        position: absolute;
+        top: 0; /* 向上偏移，避免遮挡时间轴 */
+        left: var(--after-x);
+        /* 样式：保证可读性 */
+        padding: 2px 8px;
+        background: #333;
+        color: #fff;
+        font-size: 12px;
+        border-radius: 3px;
+        pointer-events: none; /* 不影响鼠标交互 */
+        /* 关键：始终显示（去掉默认的hover触发） */
+        display: block;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      &:hover::after {
+        opacity: 1;
+      }
     }
   }
 

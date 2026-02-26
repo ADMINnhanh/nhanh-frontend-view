@@ -47,8 +47,6 @@ type AudioVisualizationConfig = {
   audioBuffer: AudioBuffer;
   /** 音频声道数量 */
   channelCount: number;
-  /** 目标帧率（每秒绘制次数） */
-  fps: number;
 };
 
 type AudioVisualizationManagerConfig = {

@@ -159,15 +159,15 @@ type ALL_FRAME_IDS =
 
 /** ID3v2 标签信息 */
 type ID3v2Tag = {
+  [key in ALL_FRAME_IDS]?: string | null;
+} & {
   /** "2.2" | "2.3" | "2.4" */
   版本: string;
   /** 标签大小 (字节) */
   标签大小: number;
   /** 图片二进制 */
-  附加图片?: { mime: string; data: ArrayBuffer } | null;
+  audioCover?: { mime: string; data: ArrayBuffer } | null;
   [key: string]: any;
-} & {
-  [key in ALL_FRAME_IDS]?: string | null;
 };
 
 // ======================== ID3v2 基类 ========================
@@ -388,6 +388,7 @@ abstract class ID3v2ParserBase {
       value = parseInt(frameValue) || 0;
     } else if (frameId == "APIC") {
       value = this.parseAPICFrame(frameOffset, frameSize);
+      tag.audioCover = value;
     }
 
     tag[key] = value;
