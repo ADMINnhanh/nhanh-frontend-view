@@ -176,7 +176,7 @@ const multimedia: CustomRouteRecord = {
       name: "AudioPlayer",
       meta: {
         name: {
-          zhCN: "音频播放器",
+          zhCN: "音频可视化播放器",
           enUS: "Audio Player",
         },
       },

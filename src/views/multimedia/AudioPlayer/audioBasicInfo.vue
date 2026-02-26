@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { NSpace, NTag, NText, NImage } from "naive-ui";
+import { NSpace, NTag, NText, NImage, NScrollbar } from "naive-ui";
 import { type AudioOptions, type TargetFileConfig } from ".";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
 
@@ -13,16 +13,25 @@ const props = defineProps<Props>();
 const audioCover = ref("");
 
 type Mp3Info = Exclude<AudioOptions["mp3Info"], undefined>;
-const id3v2 = shallowRef<Mp3Info["id3v2"]>();
+const id3v2Tag = shallowRef<string[]>([]);
 
 function init() {
   clear();
   const metadata = props.getMetadata();
+  // console.log(metadata);
+
   if (metadata) {
     const { mp3Info } = metadata;
     if (mp3Info) {
       const img = mp3Info.id3v2.audioCover;
-      id3v2.value = mp3Info.id3v2;
+      id3v2Tag.value = Object.keys(mp3Info.id3v2)
+        .filter((key) => {
+          const reg = /^[\u4e00-\u9fa5]+$/;
+          if (reg.test(key)) {
+            return typeof mp3Info.id3v2[key] == "string";
+          }
+        })
+        .map((key) => `${key}：${mp3Info.id3v2[key]}`);
       if (img && typeof img == "object") {
         const blob = new Blob([img.data], { type: img.mime });
         audioCover.value = URL.createObjectURL(blob);
@@ -32,7 +41,7 @@ function init() {
 }
 function clear() {
   if (audioCover.value) URL.revokeObjectURL(audioCover.value);
-  id3v2.value = undefined;
+  id3v2Tag.value = [];
   audioCover.value = "";
 }
 
@@ -51,11 +60,11 @@ onUnmounted(clear);
     <NSpace vertical>
       <NText>{{ info.name }}</NText>
 
-      <NSpace v-if="id3v2">
-        <n-tag> 标题： {{ id3v2.标题 }} </n-tag>
-        <n-tag> 专辑： {{ id3v2.专辑 }} </n-tag>
-        <n-tag> 艺术家: {{ id3v2.艺术家 }} </n-tag>
-      </NSpace>
+      <NScrollbar style="max-height: 100px">
+        <NSpace>
+          <n-tag v-for="tag in id3v2Tag" :key="tag"> {{ tag }} </n-tag>
+        </NSpace>
+      </NScrollbar>
 
       <NSpace>
         <n-tag type="info"> {{ info.type }} </n-tag>

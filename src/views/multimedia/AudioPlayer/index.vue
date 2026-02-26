@@ -215,6 +215,7 @@ async function setActiveUploadFile(index: number) {
             sampleRate: audioBasicInfo.sampleRate as any,
             channelCount: audioBasicInfo.channelCount,
             bitDepth: audioBasicInfo.bitDepth as any,
+            endianness: Endianness.LE,
           },
           pcm: info.pcm,
           mp3Info: info,
@@ -231,6 +232,7 @@ async function setActiveUploadFile(index: number) {
           sampleRate: 8000,
           channelCount: 2,
           bitDepth: 16,
+          endianness: Endianness.LE,
         },
         pcm,
       });
