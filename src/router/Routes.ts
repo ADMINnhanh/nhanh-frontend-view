@@ -46,8 +46,8 @@ const canvas: CustomRouteRecord = {
       name: "_Canvas",
       meta: {
         name: {
-          zhCN: "我的 Canvas 工具",
-          enUS: "My Canvas Tools",
+          zhCN: "Canvas 工具",
+          enUS: "Canvas Tools",
         },
       },
       component: () => import("@/views/canvas/_Canvas/index.vue"),

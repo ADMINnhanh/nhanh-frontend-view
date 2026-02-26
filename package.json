@@ -5,9 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --mode github",
-    "dev:aliyun": "vite --mode aliyun",
     "build": "run-p type-check && vite build --mode github",
-    "build:aliyun": "run-p type-check && vite build --mode aliyun",
     "predeploy": "touch dist/.nojekyll",
     "preview": "vite preview",
     "type-check": "vue-tsc --build --force"

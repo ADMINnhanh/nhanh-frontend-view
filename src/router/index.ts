@@ -6,11 +6,12 @@ import {
 import home from "../views/Layout/index.vue";
 import Routes from "./Routes";
 import { _Utility_WaitForCondition } from "nhanh-pure-function";
+import { Settings } from "@/components/popups/components/Settings";
+import { ref, watch } from "vue";
 
 const router = createRouter({
-  // history: createWebHistory(import.meta.env.BASE_URL),
-  history: createWebHashHistory(),
-  // history: createWebHistory(),
+  history: createWebHistory("/nhanh-frontend-view/"),
+  // history: createWebHashHistory(),
   routes: [
     {
       path: "/",
@@ -82,6 +83,14 @@ const router = createRouter({
       return savedPosition || { top: 0, left: 0 };
     }
   },
+});
+
+const title = ref<Record<string, string>>();
+router.afterEach((to, from) => {
+  title.value = to.meta.name as any;
+});
+watch([title, () => Settings.value.language], ([title, language]) => {
+  document.title = title?.[language] || "你好啊你好";
 });
 
 export default router;
