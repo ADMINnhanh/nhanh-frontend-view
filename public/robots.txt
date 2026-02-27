@@ -4,7 +4,7 @@ Disallow: /api/
 Disallow: /admin/
 Disallow: /private/
 
-Sitemap: https://adminnhanh.github.io/nhanh-frontend-view/sitemap.xml
+Sitemap: https://adminnhanh.github.io/nhanh-frontend-view/sitemap.txt
 
 # 允许的爬虫
 User-agent: Googlebot
