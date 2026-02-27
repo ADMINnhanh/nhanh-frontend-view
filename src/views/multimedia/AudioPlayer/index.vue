@@ -15,7 +15,7 @@ import {
   NScrollbar,
   NH3,
 } from "naive-ui";
-import { ref, watch } from "vue";
+import { onDeactivated, onUnmounted, ref, watch } from "vue";
 import {
   Add,
   CloudDownloadOutline,
@@ -288,6 +288,13 @@ function handleFileListClick(ev: PointerEvent) {
 
   if (index != -1) setActiveUploadFile(index);
 }
+
+onDeactivated(() => {
+  audioVisualization.stop();
+});
+onUnmounted(() => {
+  audioVisualization.clear();
+});
 </script>
 
 <template>

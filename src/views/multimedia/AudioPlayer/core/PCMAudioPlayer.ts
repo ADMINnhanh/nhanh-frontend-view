@@ -240,13 +240,14 @@ export class PCMAudioPlayer {
 
     this.source.onended = () => {
       // console.log("播放完成");
+      this.updatePlayProgress();
+
       this.isPlaying = false;
       if (typeof this.offsetTime === "number") {
         this.offsetTime +=
           (this.audioContext?.currentTime || 0) - this.playStartTime;
       }
       this.onPlayCompleted?.();
-      this.updatePlayProgress(true);
     };
   }
 
@@ -262,7 +263,7 @@ export class PCMAudioPlayer {
     progressPercentage: string
   ) => void;
   /** 播放进度实时更新方法 */
-  updatePlayProgress(isEnd?: boolean) {
+  private updatePlayProgress() {
     // 解构赋值，变量名语义化重命名
     const {
       isPlaying, // 保持原命名（语义已清晰）
@@ -273,12 +274,7 @@ export class PCMAudioPlayer {
       playProgressCallback, // 进度回调函数（替代原xxx）
     } = this;
 
-    if (
-      (!isPlaying && !isEnd) ||
-      !audioContext ||
-      !audioBuffer ||
-      !playProgressCallback
-    )
+    if (!isPlaying || !audioContext || !audioBuffer || !playProgressCallback)
       return;
 
     // 计算当前播放进度（秒）
@@ -286,8 +282,6 @@ export class PCMAudioPlayer {
       (offsetTime || 0) + (audioContext.currentTime - playStartTime);
     // 计算进度百分比
     const progressPercent = currentPlayTime / audioBuffer.duration;
-
-    if (isEnd && audioBuffer.duration - currentPlayTime > 0.01) return;
 
     // 格式化数值（变量名语义化）
     const formattedCurrentTime = currentPlayTime.toFixed(2);

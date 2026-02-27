@@ -23,16 +23,14 @@ const recordNumber = import.meta.env.VITE_SHOW_RECORD_NUMBER;
 let oldTab: string[] = [];
 const tab = ref();
 
-const panels = ref([
-  {
-    key: "home",
-    name: {
-      zhCN: "首页",
-      enUS: "Home",
-    },
-    closable: false,
-  },
-]);
+type Panels = {
+  key: string;
+  name: {
+    zhCN: string;
+    enUS: string;
+  };
+}[];
+const panels = ref<Panels>([]);
 function ClosePanel(key: string) {
   panels.value = panels.value.filter((item) => item.key != key);
   oldTab = oldTab.filter((item) => item != key);
@@ -41,9 +39,7 @@ function ClosePanel(key: string) {
 }
 function CloseOtherPanel() {
   oldTab = [tab.value];
-  panels.value = panels.value.filter(
-    (item) => !item.closable || item.key == tab.value
-  );
+  panels.value = panels.value.filter((item) => item.key == tab.value);
 }
 watch(
   () => router.currentRoute.value,
@@ -57,7 +53,6 @@ watch(
       panels.value.push({
         key: currentRoute.name,
         name: currentRoute.meta.name,
-        closable: true,
       } as any);
     }
   },
@@ -154,11 +149,11 @@ if (import.meta.env.DEV) {
           :key="item.key"
           :name="item.key"
           :tab="item.name?.[Settings.language]"
-          :closable="item.closable"
+          :closable="panels.length > 1"
         />
         <template #suffix>
           <NButton
-            v-if="panels.length > 2"
+            v-if="panels.length > 1"
             size="small"
             quaternary
             @click="CloseOtherPanel"

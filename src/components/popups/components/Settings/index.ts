@@ -7,7 +7,7 @@ const OldSettings = localStorage.getItem("Settings");
 
 const defaultSettings: SettingsType = {
   language: "zhCN",
-  theme: "light",
+  theme: "dark",
   customShortcutKeys: [],
 };
 export const Settings = ref<SettingsType>(

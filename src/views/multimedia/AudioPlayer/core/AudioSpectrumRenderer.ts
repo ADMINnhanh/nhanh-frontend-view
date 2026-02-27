@@ -62,7 +62,9 @@ class AudioSpectrumRenderer {
     const { barWidth, barGap } = this;
 
     // 计算振幅柱总数和最大高度
-    this.barCount = Math.ceil(canvasContext.canvas.width / (barWidth + barGap));
+    this.barCount = Math.floor(
+      canvasContext.canvas.width / (barWidth + barGap)
+    );
 
     // 提取各声道的音频数据
     const audioDataLength = audioBuffer.length;
