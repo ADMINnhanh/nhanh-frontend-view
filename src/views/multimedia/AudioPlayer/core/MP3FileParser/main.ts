@@ -74,22 +74,30 @@ export default async function MP3FileParser(file: File) {
   // 解析 ID3v2 标签
   const id3v2Tag = ID3v2Parser(buffer);
 
-  if (!id3v2Tag) return null;
-
   // 解析 ID3v1 标签
   const id3v1Tag = ID3v1Parser(buffer);
 
   // 计算音频数据大小
   const id3v1Size = id3v1Tag ? 128 : 0;
-  const audioSize = fileSize - id3v2Tag["标签大小"] - id3v1Size;
+  const audioSize = id3v2Tag && fileSize - id3v2Tag["标签大小"] - id3v1Size;
 
-  const mpegAudio = new MpegAudioParser(
-    buffer,
-    id3v2Tag["标签大小"],
-    !!id3v1Tag
-  ).parseComplete();
+  const mpegAudio =
+    id3v2Tag &&
+    new MpegAudioParser(
+      buffer,
+      id3v2Tag["标签大小"],
+      !!id3v1Tag
+    ).parseComplete();
 
-  const pcm = await decodeMpegToPcmS16le(file, mpegAudio.audioBasicInfo);
+  const defaultAudioBasicInfo = {
+    bitDepth: 16,
+    bitrate: 340,
+    channelCount: 2,
+    sampleRate: 44100,
+    totalDuration: 0,
+  };
+  const audioBasicInfo = mpegAudio?.audioBasicInfo || defaultAudioBasicInfo;
+  const pcm = await decodeMpegToPcmS16le(file, audioBasicInfo);
   if (!pcm) return null;
 
   return {
@@ -99,5 +107,6 @@ export default async function MP3FileParser(file: File) {
     fileSize,
     mpegAudio,
     pcm,
+    audioBasicInfo,
   };
 }

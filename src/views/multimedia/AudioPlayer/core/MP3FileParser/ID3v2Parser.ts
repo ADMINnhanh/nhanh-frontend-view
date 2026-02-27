@@ -532,6 +532,7 @@ class ID3v2Parser extends ID3v2ParserBase {
   public parse(): ID3v2Tag | null {
     // 第一步：先获取实际的 ID3v2 版本号
     const version = this.getVersion();
+
     if (!version) return null;
 
     // 第二步：根据版本号调用对应解析器（精准匹配）

@@ -213,7 +213,7 @@ async function setActiveUploadFile(index: number) {
     if (type.toLocaleLowerCase() == "mp3") {
       const info = await MP3FileParser(audio);
       if (info) {
-        const { audioBasicInfo } = info.mpegAudio;
+        const audioBasicInfo = info.audioBasicInfo;
         audioOptions.set(file.id, {
           fileName: audio.name,
           fileSize: audio.size,

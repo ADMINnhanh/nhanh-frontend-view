@@ -5,7 +5,6 @@ import {
   NText,
   NImage,
   NScrollbar,
-  NEllipsis,
   NButton,
   NIcon,
 } from "naive-ui";
@@ -34,15 +33,17 @@ function init() {
   if (metadata) {
     const { mp3Info } = metadata;
     if (mp3Info) {
-      const img = mp3Info.id3v2.audioCover;
-      id3v2Tag.value = Object.keys(mp3Info.id3v2)
+      const { id3v2 } = mp3Info;
+      if (!id3v2) return;
+      const img = id3v2.audioCover;
+      id3v2Tag.value = Object.keys(id3v2)
         .filter((key) => {
           const reg = /^[\u4e00-\u9fa5]+$/;
           if (reg.test(key)) {
-            return typeof mp3Info.id3v2[key] == "string";
+            return typeof id3v2[key] == "string";
           }
         })
-        .map((key) => `${key}：${mp3Info.id3v2[key]}`);
+        .map((key) => `${key}：${id3v2[key]}`);
       if (img && typeof img == "object") {
         const blob = new Blob([img.data], { type: img.mime });
         audioCover.value = URL.createObjectURL(blob);
