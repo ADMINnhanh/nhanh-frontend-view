@@ -36,7 +36,7 @@ class AudioSpectrumRenderer {
     const { amplitudeBarMetrics, barColor, barWidth } = this;
     const { width, height } = canvasContext.canvas;
 
-    const timelineX = Math.floor(((width - 2) * progress) / 100);
+    const timelineX = Math.floor((width - 2) * progress);
 
     if (this.lastTimelineX == timelineX) return;
     this.lastTimelineX = timelineX;
@@ -76,15 +76,14 @@ class AudioSpectrumRenderer {
     this.amplitudeValues = [];
     for (let barIndex = 0; barIndex < this.barCount; barIndex++) {
       const startIndex = barIndex * dataBlockSize;
-      const maxAmplitude = channelDataList.reduce((maxValue, channelData) => {
-        // 计算当前数据块的均方根振幅（更贴合人耳听觉）
+      const amplitude = channelDataList.reduce((value, channelData) => {
         const sumOfSquares = channelData
           .slice(startIndex, startIndex + dataBlockSize)
           .reduce((sum, sample) => sum + sample ** 2, 0);
         const rmsAmplitude = Math.sqrt(sumOfSquares / dataBlockSize);
-        return Math.max(maxValue, rmsAmplitude);
+        return value + rmsAmplitude;
       }, 0);
-      this.amplitudeValues.push(maxAmplitude);
+      this.amplitudeValues.push(amplitude);
     }
   }
   /**

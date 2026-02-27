@@ -94,7 +94,9 @@ class AudioWaveformRenderer {
     const { width, height } = canvasContext.canvas;
 
     // 根据进度计算当前渲染的起始数据索引
-    const currentStartIndex = Math.floor((waveformDataCount * progress) / 100);
+    const currentStartIndex = Math.floor(
+      Math.min(waveformDataCount * progress, waveformDataCount - 1)
+    );
 
     // 防抖：如果起始索引未变化，不重复渲染
     if (this.lastRenderedStartIndex === currentStartIndex) return;

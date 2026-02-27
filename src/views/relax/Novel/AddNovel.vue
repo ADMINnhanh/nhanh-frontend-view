@@ -137,7 +137,7 @@ function analysis(fileList: UploadFileInfo[]) {
               type="success"
               @click="
                 _Tip
-                  .success('复制成功')
+                  .success('复制完成')
                   .error('复制失败')
                   .run(_Browser_CopyToClipboard('第1章 初入'))
               "
@@ -157,7 +157,7 @@ function analysis(fileList: UploadFileInfo[]) {
               type="success"
               @click="
                 _Tip
-                  .success('复制成功')
+                  .success('复制完成')
                   .error('复制失败')
                   .run(
                     _Browser_CopyToClipboard(

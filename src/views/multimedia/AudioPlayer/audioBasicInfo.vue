@@ -1,7 +1,18 @@
 <script lang="ts" setup>
-import { NSpace, NTag, NText, NImage, NScrollbar } from "naive-ui";
+import {
+  NSpace,
+  NTag,
+  NText,
+  NImage,
+  NScrollbar,
+  NEllipsis,
+  NButton,
+  NIcon,
+} from "naive-ui";
 import { type AudioOptions, type TargetFileConfig } from ".";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
+import { CopyOutline } from "@vicons/ionicons5";
+import { _Browser_CopyToClipboard, _Tip } from "nhanh-pure-function";
 
 interface Props {
   isRunning: boolean;
@@ -62,7 +73,24 @@ onUnmounted(clear);
 
       <NScrollbar style="max-height: 100px">
         <NSpace>
-          <n-tag v-for="tag in id3v2Tag" :key="tag"> {{ tag }} </n-tag>
+          <n-tag v-for="tag in id3v2Tag" :key="tag">
+            <template v-if="tag.length > 30">
+              {{ tag.slice(0, 28) }}..
+              <NButton
+                type="info"
+                text
+                @click="
+                  _Tip
+                    .success('复制完成')
+                    .error('复制失败')
+                    .run(_Browser_CopyToClipboard(tag))
+                "
+              >
+                <NIcon :component="CopyOutline" />
+              </NButton>
+            </template>
+            <template v-else>{{ tag }}</template>
+          </n-tag>
         </NSpace>
       </NScrollbar>
 
@@ -105,9 +133,12 @@ onUnmounted(clear);
 
 .record-player {
   position: relative;
-  padding-top: 20px;
   display: flex;
+  background: linear-gradient(135deg, black, transparent);
+  border-radius: 5px;
+  padding: 25px 5px 5px;
   --img-size: 130px;
+
   .img-box {
     overflow: hidden;
     width: var(--img-size);
@@ -131,8 +162,8 @@ onUnmounted(clear);
 
   .tonarm-lift {
     position: absolute;
-    top: 0;
-    left: calc(var(--img-size) / 2 - 4px);
+    top: 5px;
+    left: calc(var(--img-size) / 2 + 5px - 4px);
     width: calc(179px * 0.35);
     height: calc(90px * 0.35);
     background-image: url("../../../assets/img/tonarm-lift.png");

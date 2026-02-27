@@ -11,8 +11,6 @@ import {
   NUpload,
   NUploadTrigger,
   NUploadFileList,
-  NSpace,
-  NTag,
   NText,
   NScrollbar,
   NH3,
@@ -81,7 +79,10 @@ watch(
         await audioVisualization.init({
           canvas,
           pcmData,
-          pcmOptions,
+          pcmOptions: {
+            volume: volume.value,
+            ...pcmOptions,
+          },
         });
 
         targetFileConfig.value!.currentTime = FormatTime(0);
@@ -281,6 +282,7 @@ function handleFileListClick(ev: PointerEvent) {
       play.value = false;
       audioVisualization.clear();
     }
+    targetFileConfig.value = undefined;
     return;
   }
 

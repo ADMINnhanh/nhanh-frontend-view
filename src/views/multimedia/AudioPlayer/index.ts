@@ -34,13 +34,11 @@ export type TargetFileConfig = Partial<PCMPlayOptions> & {
   currentTime: string;
 };
 
-/** “补0到2位” */
-const padZeroToTwoDigits = (numberToFormat: string | number) =>
-  numberToFormat.toString().padStart(2, "0");
 /** 格式化时间 */
 export function FormatTime(seconds: number): string {
-  const minutes = padZeroToTwoDigits(Math.floor(seconds / 60));
-  return `${minutes}:${padZeroToTwoDigits((seconds % 60).toFixed(0))}`;
+  const padZero = (number: number) => number.toString().padStart(2, "0");
+  const minutes = padZero(Math.floor(seconds / 60));
+  return `${minutes}:${padZero(Math.floor(seconds % 60))}`;
 }
 export function getTargetFileConfig(
   options: AudioOptions,

@@ -246,6 +246,7 @@ export class PCMAudioPlayer {
           (this.audioContext?.currentTime || 0) - this.playStartTime;
       }
       this.onPlayCompleted?.();
+      this.updatePlayProgress(true);
     };
   }
 
@@ -253,17 +254,15 @@ export class PCMAudioPlayer {
    * 播放进度更新回调函数类型定义
    * @param currentTime - 当前播放时间（秒，保留2位小数）
    * @param totalDuration - 音频总时长（秒，保留2位小数）
-   * @param progressPercentage - 播放进度百分比（保留8位小数）
+   * @param progressPercentage - 播放进度（保留6位小数）
    */
   playProgressCallback?: (
     currentTime: string,
     totalDuration: string,
     progressPercentage: string
   ) => void;
-  /**
-   * 播放进度实时更新方法（替代原xxProgress）
-   */
-  updatePlayProgress() {
+  /** 播放进度实时更新方法 */
+  updatePlayProgress(isEnd?: boolean) {
     // 解构赋值，变量名语义化重命名
     const {
       isPlaying, // 保持原命名（语义已清晰）
@@ -274,20 +273,26 @@ export class PCMAudioPlayer {
       playProgressCallback, // 进度回调函数（替代原xxx）
     } = this;
 
-    // 边界条件判断（保持逻辑不变，仅变量名优化）
-    if (!isPlaying || !audioContext || !audioBuffer || !playProgressCallback)
+    if (
+      (!isPlaying && !isEnd) ||
+      !audioContext ||
+      !audioBuffer ||
+      !playProgressCallback
+    )
       return;
 
     // 计算当前播放进度（秒）
     const currentPlayTime =
       (offsetTime || 0) + (audioContext.currentTime - playStartTime);
     // 计算进度百分比
-    const progressPercent = (currentPlayTime / audioBuffer.duration) * 100;
+    const progressPercent = currentPlayTime / audioBuffer.duration;
+
+    if (isEnd && audioBuffer.duration - currentPlayTime > 0.01) return;
 
     // 格式化数值（变量名语义化）
     const formattedCurrentTime = currentPlayTime.toFixed(2);
     const formattedTotalDuration = audioBuffer.duration.toFixed(2);
-    const formattedProgressPercent = progressPercent.toFixed(8);
+    const formattedProgressPercent = Math.min(1, progressPercent).toFixed(6);
 
     // 执行回调（传递格式化后的进度数据）
     playProgressCallback(
