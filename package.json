@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --mode github",
-    "build": "run-p type-check && vite build --mode github",
+    "dev": "vite",
+    "build": "run-p type-check && vite build && npm run predeploy",
     "predeploy": "touch dist/.nojekyll",
     "preview": "vite preview",
     "type-check": "vue-tsc --build --force"

@@ -83,6 +83,7 @@ watch(
           pcmData,
           pcmOptions,
         });
+
         targetFileConfig.value!.currentTime = FormatTime(0);
         targetFileConfig.value!.totalDuration = FormatTime(
           Number(audioVisualization.totalDuration)
@@ -152,11 +153,14 @@ function handleDrop(files: File[]) {
 /** 加载样例 */
 function loadExample() {
   axios
-    .get("./multimedia/Jay Chou.pcm", { responseType: "blob" })
+    .get("/nhanh-frontend-view/multimedia/Jay Chou.pcm", {
+      responseType: "blob",
+    })
     .then(async (res) => {
       const file = new File([res.data], "Jay Chou.pcm");
       const pcm = await file.arrayBuffer();
       const id = String(file.lastModified);
+
       audioOptions.set(id, {
         fileName: file.name,
         fileSize: file.size,
@@ -173,6 +177,7 @@ function loadExample() {
         name: file.name,
         status: "finished",
       });
+
       setActiveUploadFile(fileList.value.length - 1);
     });
 }

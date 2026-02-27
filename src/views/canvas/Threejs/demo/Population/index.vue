@@ -36,7 +36,9 @@ function main() {
 
   {
     const loader = new THREE.TextureLoader();
-    const texture = loader.load("three/world.jpg", () => render(true));
+    const texture = loader.load("/nhanh-frontend-view/three/world.jpg", () =>
+      render(true)
+    );
     texture.colorSpace = THREE.SRGBColorSpace;
     const geometry = new THREE.SphereGeometry(1, 64, 32);
     const material = new THREE.MeshStandardMaterial({ map: texture });
@@ -195,7 +197,7 @@ function main() {
   }
 
   loadFile(
-    "three/gpw_v4_basic_demographic_characteristics_rev10_a000_014mt_2010_cntm_1_deg.asc"
+    "/nhanh-frontend-view/three/gpw_v4_basic_demographic_characteristics_rev10_a000_014mt_2010_cntm_1_deg.asc"
   )
     .then(parseData)
     .then(addBoxes)

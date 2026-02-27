@@ -149,17 +149,17 @@ const multimedia: CustomRouteRecord = {
     },
   },
   children: [
-    {
-      path: "Peerjs",
-      name: "Peerjs",
-      meta: {
-        name: {
-          zhCN: "Peerjs 音视频通话",
-          enUS: "Peerjs Video Call",
-        },
-      },
-      component: () => import("@/views/multimedia/Peerjs/index.vue"),
-    },
+    // {
+    //   path: "Peerjs",
+    //   name: "Peerjs",
+    //   meta: {
+    //     name: {
+    //       zhCN: "Peerjs 音视频通话",
+    //       enUS: "Peerjs Video Call",
+    //     },
+    //   },
+    //   component: () => import("@/views/multimedia/Peerjs/index.vue"),
+    // },
     {
       path: "TakeFlow",
       name: "TakeFlow",
