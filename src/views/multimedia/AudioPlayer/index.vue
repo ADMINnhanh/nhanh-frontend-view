@@ -357,25 +357,27 @@ onUnmounted(() => {
         </NScrollbar>
       </template>
       <template #right>
-        <div v-if="targetFileConfig" class="audio-player-container">
-          <AudioBasicInfo
-            :is-running="play"
-            :info="targetFileConfig"
-            :getMetadata="getMetadata"
-          />
-          <div class="canvas-container">
-            <canvas :id="id" />
-            <div
-              class="progress"
-              @mousemove="handleMouseMove"
-              @click="playFromPosition"
-            ></div>
+        <NScrollbar>
+          <div v-if="targetFileConfig" class="audio-player-container">
+            <AudioBasicInfo
+              :is-running="play"
+              :info="targetFileConfig"
+              :getMetadata="getMetadata"
+            />
+            <div class="canvas-container">
+              <canvas :id="id" />
+              <div
+                class="progress"
+                @mousemove="handleMouseMove"
+                @click="playFromPosition"
+              ></div>
+            </div>
+            <div class="time-container">
+              <n-text>{{ targetFileConfig.currentTime }}</n-text>
+              <n-text>{{ targetFileConfig.totalDuration }}</n-text>
+            </div>
           </div>
-          <div class="time-container">
-            <n-text>{{ targetFileConfig.currentTime }}</n-text>
-            <n-text>{{ targetFileConfig.totalDuration }}</n-text>
-          </div>
-        </div>
+        </NScrollbar>
       </template>
     </ResponsiveDirectionLayout>
   </HandleFileDrag>
@@ -406,7 +408,6 @@ onUnmounted(() => {
 }
 
 .audio-player-container {
-  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;

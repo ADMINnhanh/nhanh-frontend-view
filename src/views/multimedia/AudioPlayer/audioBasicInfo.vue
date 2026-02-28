@@ -72,7 +72,7 @@ onUnmounted(clear);
     <NSpace vertical>
       <NText>{{ info.name }}</NText>
 
-      <NScrollbar style="max-height: 100px">
+      <NScrollbar style="max-height: 90px">
         <NSpace>
           <n-tag v-for="tag in id3v2Tag" :key="tag">
             <template v-if="tag.length > 30">

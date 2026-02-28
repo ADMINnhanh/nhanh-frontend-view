@@ -81,22 +81,23 @@ export default async function MP3FileParser(file: File) {
   const id3v1Size = id3v1Tag ? 128 : 0;
   const audioSize = id3v2Tag && fileSize - id3v2Tag["标签大小"] - id3v1Size;
 
-  const mpegAudio =
-    id3v2Tag &&
-    new MpegAudioParser(
-      buffer,
-      id3v2Tag["标签大小"],
-      !!id3v1Tag
-    ).parseComplete();
+  const mpegAudio = new MpegAudioParser(
+    buffer,
+    id3v2Tag?.["标签大小"] || 0,
+    !!id3v1Tag
+  ).parseComplete();
 
-  const defaultAudioBasicInfo = {
+  const defaultAudioBasicInfo: MpegAudioBasicInfo = {
     bitDepth: 16,
     bitrate: 340,
     channelCount: 2,
     sampleRate: 44100,
     totalDuration: 0,
   };
-  const audioBasicInfo = mpegAudio?.audioBasicInfo || defaultAudioBasicInfo;
+  const audioBasicInfo = mpegAudio.frameHeader.isValid
+    ? mpegAudio.audioBasicInfo
+    : defaultAudioBasicInfo;
+
   const pcm = await decodeMpegToPcmS16le(file, audioBasicInfo);
   if (!pcm) return null;
 
