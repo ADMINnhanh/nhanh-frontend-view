@@ -1,1 +1,0 @@
-import{d as n,ao as o,bi as t,q as c,dh as l,ab as i,c as r,o as m,u}from"./index-DjFE_Gz4.js";const _=["id"],v=n({__name:"original",setup(d,{expose:s}){const e=o();let a=t();return c(()=>{a.value=new l({id:e,theme:i.value.theme})}),s({myCanvas:a}),(p,f)=>(m(),r("canvas",{id:u(e),class:"my-canvas"},null,8,_))}});export{v as default};
