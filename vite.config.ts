@@ -8,7 +8,7 @@ import checker from "vite-plugin-checker";
 
 export default defineConfig({
   // base: "/nhanh-frontend-view/",
-  base: "./",
+  base: "/",
   plugins: [
     vue(),
     vueJsx(),
