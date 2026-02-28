@@ -154,7 +154,7 @@ function handleDrop(files: File[]) {
 /** 加载样例 */
 function loadExample() {
   axios
-    .get("/nhanh-frontend-view/multimedia/Jay Chou.pcm", {
+    .get("/multimedia/Jay Chou.pcm", {
       responseType: "blob",
     })
     .then(async (res) => {

@@ -140,7 +140,7 @@ function main() {
   const cars: (THREE.Object3D<THREE.Object3DEventMap> | undefined)[] = [];
   {
     const gltfLoader = new GLTFLoader();
-    gltfLoader.load("/nhanh-frontend-view/glb/MiniCity.glb", (gltf) => {
+    gltfLoader.load("/glb/MiniCity.glb", (gltf) => {
       const root = gltf.scene;
       scene.add(root);
 

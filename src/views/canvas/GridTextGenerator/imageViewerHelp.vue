@@ -35,7 +35,7 @@ const active = ref(false);
         <NText type="error">Esc</NText> 退出程序<br />
       </NH5>
       <NA
-        href="https://github.com/ADMINnhanh/AHK-Scripts/blob/main/ImageViewer/Main.ahk"
+        href="https://github.com/nha-nh/AHK-Scripts/blob/main/ImageViewer/Main.ahk"
       >
         源码 **/Main.ahk
       </NA>

@@ -50,7 +50,7 @@ function OpenSettings() {
 
 /** 前往 GitHub */
 function GotoGitHub() {
-  window.open("https://github.com/ADMINnhanh/nhanh-frontend-view", "_blank");
+  window.open("https://github.com/nha-nh", "_blank");
 }
 
 /** 当前状态是否是全屏 */

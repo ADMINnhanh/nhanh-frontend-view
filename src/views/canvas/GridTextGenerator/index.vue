@@ -65,7 +65,7 @@ watch(
 
 /** 下载 ‘图片查看器.exe’ */
 function downloadImageViewer() {
-  _File_Download({ href: "/nhanh-frontend-view/script/nhanh的图片查看器.exe" });
+  _File_Download({ href: "/script/nhanh的图片查看器.exe" });
 }
 </script>
 

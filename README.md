@@ -1,6 +1,6 @@
 # nhanh-frontend-view
 
-[你好啊你好 的前端项目](https://adminnhanh.github.io/nhanh-frontend-view/)
+[你好啊你好 的前端项目](https://nha-nh.github.io)
 
 # inspiration
 

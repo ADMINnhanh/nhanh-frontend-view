@@ -94,7 +94,7 @@ onBeforeUnmount(() => {
             <NButton
               tag="a"
               :href="
-                'https://github.com/ADMINnhanh/nhanh-frontend-view/tree/main/src/views/canvas/_Canvas/demo/' +
+                'https://github.com/nha-nh/nha-nh.github.io/tree/main/src/views/canvas/_Canvas/demo/' +
                 path
               "
               target="_blank"

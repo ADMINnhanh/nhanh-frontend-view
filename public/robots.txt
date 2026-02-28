@@ -4,7 +4,7 @@ Disallow: /api/
 Disallow: /admin/
 Disallow: /private/
 
-Sitemap: https://adminnhanh.github.io/nhanh-frontend-view/sitemap.txt
+Sitemap: https://nha-nh.github.io/sitemap.txt
 
 # 允许的爬虫
 User-agent: Googlebot
@@ -23,4 +23,4 @@ Allow: /
 Crawl-delay: 1
 
 # 主机设置
-Host: https://adminnhanh.github.io
+Host: https://nha-nh.github.io

@@ -75,14 +75,14 @@ function main() {
   };
 
   const models: Record<string, any> = {
-    pig: { url: "/nhanh-frontend-view/gltf/Pig.gltf" },
-    cow: { url: "/nhanh-frontend-view/gltf/Cow.gltf" },
-    llama: { url: "/nhanh-frontend-view/gltf/Llama.gltf" },
-    pug: { url: "/nhanh-frontend-view/gltf/Pug.gltf" },
-    sheep: { url: "/nhanh-frontend-view/gltf/Sheep.gltf" },
-    zebra: { url: "/nhanh-frontend-view/gltf/Zebra.gltf" },
-    horse: { url: "/nhanh-frontend-view/gltf/Horse.gltf" },
-    knight: { url: "/nhanh-frontend-view/gltf/KnightCharacter.gltf" },
+    pig: { url: "/gltf/Pig.gltf" },
+    cow: { url: "/gltf/Cow.gltf" },
+    llama: { url: "/gltf/Llama.gltf" },
+    pug: { url: "/gltf/Pug.gltf" },
+    sheep: { url: "/gltf/Sheep.gltf" },
+    zebra: { url: "/gltf/Zebra.gltf" },
+    horse: { url: "/gltf/Horse.gltf" },
+    knight: { url: "/gltf/KnightCharacter.gltf" },
   };
 
   {

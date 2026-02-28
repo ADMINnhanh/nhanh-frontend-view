@@ -10,7 +10,7 @@ import { Settings } from "@/components/popups/components/Settings";
 import { ref, watch } from "vue";
 
 const router = createRouter({
-  history: createWebHistory("/nhanh-frontend-view/"),
+  history: createWebHistory(),
   // history: createWebHashHistory(),
   routes: [
     {
