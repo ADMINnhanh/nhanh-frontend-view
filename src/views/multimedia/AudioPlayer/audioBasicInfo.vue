@@ -135,7 +135,8 @@ onUnmounted(clear);
 .record-player {
   position: relative;
   display: flex;
-  background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), transparent);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.6), transparent);
+
   border-radius: 5px;
   padding: 25px 5px 5px;
   --img-size: 130px;

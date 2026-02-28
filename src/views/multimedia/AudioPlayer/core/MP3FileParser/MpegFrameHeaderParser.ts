@@ -43,8 +43,8 @@ export type MpegErrorFrameDetail = {
 /** 音频基础信息接口 - 新增位深字段 */
 export type MpegAudioBasicInfo = {
   bitrate: number; // 比特率 (kbps)
-  sampleRate: number; // 采样率 (Hz)
-  bitDepth: number; // 位深（默认16bit）
+  sampleRate: PCMPlayOptions["sampleRate"]; // 采样率 (Hz)
+  bitDepth: PCMPlayOptions["bitDepth"]; // 位深（默认16bit）
   channelCount: number; // 声道数 (1=单声道, 2=立体声)
   totalDuration: number; // 总时长 (ms)
 };
@@ -741,7 +741,7 @@ export default class MpegAudioParser {
 
     // 3. 计算音频基础信息（新增bitDepth字段）
     const audioBasicInfo: MpegAudioBasicInfo = {
-      sampleRate: firstValidFrame.sampleRate,
+      sampleRate: firstValidFrame.sampleRate as any,
       bitrate: firstValidFrame.bitrate,
       channelCount:
         firstValidFrame.channelMode === MpegChannelMode.MONO ? 1 : 2,

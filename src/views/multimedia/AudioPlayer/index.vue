@@ -111,7 +111,7 @@ async function playFromPosition(payload: PointerEvent) {
   const { offsetX, target } = payload;
   const width = (target as HTMLElement).clientWidth;
   const position = (offsetX / width) * audioVisualization.totalDuration;
-  await audioVisualization.play(position);
+  await audioVisualization.play(Math.max(0, position));
   play.value = true;
 }
 /** 时间轴提示 */
@@ -119,9 +119,10 @@ function handleMouseMove(mouse: MouseEvent) {
   const { offsetX, target } = mouse;
   const dom = target as HTMLElement;
   const width = dom.clientWidth;
-  const position = (offsetX / width) * audioVisualization.totalDuration;
+  const x = Math.max(0, offsetX);
+  const position = (x / width) * audioVisualization.totalDuration;
   dom.dataset.time = FormatTime(position);
-  dom.style.setProperty("--after-x", offsetX - 46 / 2 + "px");
+  dom.style.setProperty("--after-x", x - 46 / 2 + "px");
 }
 /** 获取元数据 */
 function getMetadata() {
