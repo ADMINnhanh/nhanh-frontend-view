@@ -3,6 +3,7 @@ import {
   _Format_MillisecondToReadable,
 } from "nhanh-pure-function";
 import type MP3FileParser from "./core/MP3FileParser/main";
+import type WAVFileParser from "./core/WAVFileParser/main";
 
 /** 字节序枚举 */
 export enum Endianness {
@@ -22,7 +23,7 @@ export type AudioOptions = {
   audioBasicInfo: Partial<PCMPlayOptions>;
   pcm: ArrayBuffer;
   mp3Info?: Exclude<Awaited<ReturnType<typeof MP3FileParser>>, null>;
-  wav?: any;
+  wav?: Exclude<Awaited<ReturnType<typeof WAVFileParser>>, null>;
 };
 
 export type TargetFileConfig = Partial<PCMPlayOptions> & {

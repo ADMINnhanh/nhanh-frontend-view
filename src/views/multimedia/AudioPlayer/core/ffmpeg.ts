@@ -1,7 +1,7 @@
 import { FFmpeg } from "@ffmpeg/ffmpeg";
 import { fetchFile, toBlobURL } from "@ffmpeg/util";
 
-const ffmpeg = new FFmpeg();
+export const ffmpeg = new FFmpeg();
 ffmpeg.load();
 
 /**
@@ -10,9 +10,9 @@ ffmpeg.load();
  * @param audioBasicInfo 音频基础信息（声道数、采样率）
  * @returns 原始 PCM 数据的 ArrayBuffer，转换失败返回 null
  */
-export default async function decodeAudioToPcmS16le(
+async function decodeAudioToPcm(
   file: File,
-  audioBasicInfo: Partial<PCMPlayOptions>
+  audioBasicInfo: Partial<PCMPlayOptions & { isFloat: boolean }>
 ): Promise<ArrayBuffer | null> {
   // 定义虚拟文件系统中的文件名，语义更清晰
   const inputVirtualFileName = file.name;
@@ -23,8 +23,14 @@ export default async function decodeAudioToPcmS16le(
     channelCount = 2,
     bitDepth = 16,
     endianness = "le",
+    isFloat = false,
   } = audioBasicInfo;
-  const pcmFormat = `s${bitDepth}${endianness}`;
+
+  const pcmSampleTypePrefix = bitDepth == 8 ? "u" : isFloat ? "f" : "s";
+
+  const pcmFormat = `${pcmSampleTypePrefix}${bitDepth}${
+    bitDepth == 8 ? "" : endianness
+  }`;
   const pcmCodecName = `pcm_${pcmFormat}`;
 
   try {
@@ -69,4 +75,28 @@ export default async function decodeAudioToPcmS16le(
       console.warn("清理虚拟文件失败：", cleanupError);
     }
   }
+}
+
+/**
+ * 解码音频文件为PCM格式（优先整数模式，失败则兜底浮点模式）
+ * @param file - 待解码的音频文件
+ * @param audioBasicInfo - 音频基础配置（采样率、声道数、位深等）
+ * @returns 解码后的PCM数据（失败返回null）
+ */
+export default async function decodeAudioToPcmWithFallback(
+  file: File,
+  audioBasicInfo: Partial<PCMPlayOptions>
+) {
+  let pcm = await decodeAudioToPcm(file, {
+    ...audioBasicInfo,
+    isFloat: false,
+  }).catch(() => null);
+
+  if (!pcm)
+    pcm = await decodeAudioToPcm(file, {
+      ...audioBasicInfo,
+      isFloat: true,
+    });
+
+  return pcm;
 }

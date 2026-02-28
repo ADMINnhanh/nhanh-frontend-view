@@ -147,7 +147,7 @@ export class PCMAudioPlayer {
    */
   private convertPCMToFloat32(
     pcmData: ArrayBuffer,
-    bitDepth: 8 | 16 | 24 | 32,
+    bitDepth: PCMPlayOptions["bitDepth"],
     endianness: PCMPlayOptions["endianness"] = Endianness.LE
   ): Float32Array {
     const dataView = new DataView(pcmData);
@@ -196,6 +196,12 @@ export class PCMAudioPlayer {
         case 32:
           float32Array[i] =
             dataView.getInt32(byteOffset, isLittleEndian) / 2147483648;
+          break;
+
+        // 若需要处理64位浮点（pcm_f64le），替换64位分支为：
+        case 64:
+          // 直接读取64位浮点数，本身就是-1.0~1.0范围，无需归一化
+          float32Array[i] = dataView.getFloat64(byteOffset, isLittleEndian);
           break;
       }
     }

@@ -36,6 +36,7 @@ import AudioVisualizationManager from "./core/AudioVisualizationManager";
 import MP3FileParser from "./core/MP3FileParser/main";
 import type { UploadFileInfo } from "naive-ui";
 import AudioBasicInfo from "./audioBasicInfo.vue";
+import WAVFileParser from "./core/WAVFileParser/main";
 
 const id = _Utility_GenerateUUID("audio-player-");
 const fileListId = _Utility_GenerateUUID("file-list-");
@@ -244,13 +245,24 @@ async function setActiveUploadFile(index: number) {
         pcm,
       });
     } else {
-      return error("敬请期待");
-      // fileList.value.push({
-      //   id: String(audio.lastModified),
-      //   name: audio.name,
-      //   status: "pending",
-      //   options: {},
-      // });
+      const info = await WAVFileParser(audio);
+      if (info) {
+        const fmt = info.fmt;
+        audioOptions.set(file.id, {
+          fileName: audio.name,
+          fileSize: audio.size,
+          audioBasicInfo: {
+            sampleRate: fmt.dwSamplesPerSec as any,
+            channelCount: fmt.wChannels,
+            bitDepth: fmt.dwBitsPerSample as any,
+            endianness: Endianness.LE,
+          },
+          pcm: info.pcm,
+          wav: info,
+        });
+      } else {
+        return error("WAV文件解析失败");
+      }
     }
 
     audioOption = audioOptions.get(file.id);
@@ -304,11 +316,7 @@ onUnmounted(() => {
       <template #left>
         <NScrollbar>
           <NH3 prefix="bar">
-            <NText type="success">
-              PCM / MP3 /
-              <NText type="warning">WAV(额~)</NText>
-              音频可视化播放器
-            </NText>
+            <NText type="success"> PCM / MP3 / WAV 音频可视化播放器 </NText>
           </NH3>
           <Options v-model:options="options" v-model:volume="volume">
             <template #prefix>

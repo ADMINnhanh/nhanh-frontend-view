@@ -34,7 +34,9 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
       <NInputGroupLabel>位深</NInputGroupLabel>
       <NSelect
         v-model:value="options.bitDepth"
-        :options="[8, 16, 24, 32].map((v) => ({ label: String(v), value: v }))"
+        :options="
+          [8, 16, 24, 32, 64].map((v) => ({ label: String(v), value: v }))
+        "
       />
       <NInputGroupLabel>bit</NInputGroupLabel>
     </NInputGroup>

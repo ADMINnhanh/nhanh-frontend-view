@@ -1,4 +1,4 @@
-import decodeAudioToPcmS16le from "../ffmpeg";
+import decodeAudioToPcm from "../ffmpeg";
 import ID3v1Parser from "./ID3v1Parser";
 import ID3v2Parser from "./ID3v2Parser";
 import MpegAudioParser, {
@@ -36,7 +36,7 @@ export default async function MP3FileParser(file: File) {
     ? mpegAudio.audioBasicInfo
     : defaultAudioBasicInfo;
 
-  const pcm = await decodeAudioToPcmS16le(file, audioBasicInfo);
+  const pcm = await decodeAudioToPcm(file, audioBasicInfo);
   if (!pcm) return null;
 
   return {

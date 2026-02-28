@@ -22,7 +22,7 @@ interface PCMPlayOptions {
   /** 采样率（默认 16000） */
   sampleRate: SampleRate;
   /** 位深（默认 16） */
-  bitDepth: 8 | 16 | 24 | 32;
+  bitDepth: 8 | 16 | 24 | 32 | 64;
   /** 声道数（默认 1） */
   channelCount: number;
   /** 起始播放位置（秒，默认 0） */
