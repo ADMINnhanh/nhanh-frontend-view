@@ -1,43 +1,34 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 
 <head>
-  <meta charset="utf-8">
-  <title>Single Page Apps for GitHub Pages</title>
-  <script type="text/javascript">
-    // Single Page Apps for GitHub Pages
-    // MIT License
-    // https://github.com/rafgraph/spa-github-pages
-    // This script takes the current url and converts the path and query
-    // string into just a query string, and then redirects the browser
-    // to the new url with only a query string and hash fragment,
-    // e.g. https://www.foo.tld/one/two?a=b&c=d#qwe, becomes
-    // https://www.foo.tld/?/one/two&a=b~and~c=d#qwe
-    // Note: this 404.html file must be at least 512 bytes for it to work
-    // with Internet Explorer (it is currently > 512 bytes)
+  <title>你好啊你好</title>
+  <!-- 字符编码设置 -->
+  <meta charset="UTF-8">
+  <!-- 响应式布局设置 -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- 页面描述，用于搜索引擎展示和用户预览 -->
+  <meta name="description"
+    content="涵盖Canvas绘画（YOLO8标注、Threejs、GLSL、图片打散重组、网格文字生成）、数学动态图解、多媒体（取流、在线PCM/MP3/WAV音频可视化播放器）、解乏小组件（弹跳球、小说搜索等）等前端实用工具集">
+  <!-- 关键词，有助于搜索引擎识别页面主题 -->
+  <meta name="keywords"
+    content="Canvas工具,HTML5 Canvas,YOLO8标注,Threejs,GLSL,图片打散重组,网格文字生成,数学动态图解,前端学习,绘图工具,在线PCM/MP3/WAV音频可视化播放器">
+  <!-- 搜索引擎爬虫 -->
+  <meta name="robots" content="index, follow">
+  <link rel="sitemap" type="application/txt" href="/sitemap.txt">
+  <!-- 页面作者信息 -->
+  <meta name="author" content="nhanh">
+  <link rel="icon" href="/nhanh.ico">
+  <!-- 谷歌验证 -->
+  <meta name="google-site-verification" content="wCCj5uujiQ7iy_oS9IrTi-5BlZE_y_AH_uZBlWait0o" />
 
-    // If you're creating a Project Pages site and NOT using a custom domain,
-    // then set pathSegmentsToKeep to 1 (enterprise users may need to set it to > 1).
-    // This way the code will only replace the route part of the path, and not
-    // the real directory in which the app resides, for example:
-    // https://username.github.io/repo-name/one/two?a=b&c=d#qwe becomes
-    // https://username.github.io/repo-name/?/one/two&a=b~and~c=d#qwe
-    // Otherwise, leave pathSegmentsToKeep as 0.
-    var pathSegmentsToKeep = 0;
-
-    var l = window.location;
-    l.replace(
-      l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
-      l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
-      l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
-      (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
-      l.hash
-    );
-
-  </script>
+  <!-- End Single Page Apps for GitHub Pages -->
+  <script type="module" crossorigin src="/assets/index-CWGjrrMU.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DxxWC8JE.css">
 </head>
 
 <body>
+  <div id="app"></div>
 </body>
 
 </html>
