@@ -22,7 +22,7 @@ export type AudioOptions = {
   fileSize: number;
   audioBasicInfo: Partial<PCMPlayOptions>;
   pcm: ArrayBuffer;
-  mp3Info?: Exclude<Awaited<ReturnType<typeof MP3FileParser>>, null>;
+  mp3?: Exclude<Awaited<ReturnType<typeof MP3FileParser>>, null>;
   wav?: Exclude<Awaited<ReturnType<typeof WAVFileParser>>, null>;
 };
 

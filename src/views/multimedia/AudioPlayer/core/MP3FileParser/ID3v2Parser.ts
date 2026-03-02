@@ -554,7 +554,7 @@ class ID3v2Parser extends ID3v2ParserBase {
  * @param buffer ArrayBuffer 类型的音频文件二进制数据
  * @returns ID3v2Tag | null
  */
-export default function (buffer: ArrayBuffer) {
-  const parsers = new ID3v2Parser(buffer);
+export default function (buffer: ArrayBuffer, offset?: number) {
+  const parsers = new ID3v2Parser(buffer, offset);
   return parsers.parse();
 }

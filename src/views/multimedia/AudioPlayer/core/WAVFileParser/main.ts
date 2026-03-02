@@ -1,5 +1,6 @@
 import decodeAudioToPcm from "../ffmpeg";
 import fmtParser from "./fmtParser";
+import OtherChunkParser from "./OtherChunkParser";
 import RIFFParser from "./RIFFParser";
 
 /**
@@ -25,10 +26,14 @@ export default async function WAVFileParser(file: File) {
   const buffer = await file.arrayBuffer();
   const fileSize = buffer.byteLength;
 
-  const RIFF = RIFFParser(buffer);
+  const dataView = new DataView(buffer);
+
+  const RIFF = RIFFParser(dataView);
   if (!RIFF) return null;
-  const fmt = fmtParser(buffer);
+  const fmt = fmtParser(dataView);
   if (!fmt) return null;
+
+  const otherChunk = OtherChunkParser(dataView);
 
   const pcm = await decodeAudioToPcm(file, {
     sampleRate: fmt.dwSamplesPerSec as any,
@@ -43,5 +48,6 @@ export default async function WAVFileParser(file: File) {
     fileSize,
     pcm,
     fmt,
+    otherChunk,
   };
 }

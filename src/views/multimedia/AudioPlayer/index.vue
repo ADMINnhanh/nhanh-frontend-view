@@ -42,7 +42,7 @@ const id = _Utility_GenerateUUID("audio-player-");
 const fileListId = _Utility_GenerateUUID("file-list-");
 
 const play = ref(false);
-const accept = ".mp3,.pcm,.wav";
+const accept = ".mp3,.pcm,.wav,.wave";
 const fileIndex = ref<number | undefined>(undefined);
 const fileList = ref<UploadFileInfo[]>([]);
 const audioOptions = new Map<string, AudioOptions>();
@@ -112,8 +112,10 @@ async function playFromPosition(payload: PointerEvent) {
   const { offsetX, target } = payload;
   const width = (target as HTMLElement).clientWidth;
   const position = (offsetX / width) * audioVisualization.totalDuration;
-  await audioVisualization.play(Math.max(0, position));
-  play.value = true;
+
+  audioVisualization
+    .play(Math.max(0, position), !play.value)
+    ?.then(() => (play.value = true));
 }
 /** 时间轴提示 */
 function handleMouseMove(mouse: MouseEvent) {
@@ -226,7 +228,7 @@ async function setActiveUploadFile(index: number) {
             endianness: Endianness.LE,
           },
           pcm: info.pcm,
-          mp3Info: info,
+          mp3: info,
         });
       } else {
         return error("MP3文件解析失败");

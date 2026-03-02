@@ -22,38 +22,44 @@ const props = defineProps<Props>();
 
 const audioCover = ref("");
 
-type Mp3Info = Exclude<AudioOptions["mp3Info"], undefined>;
-const id3v2Tag = shallowRef<string[]>([]);
+const audioTag = shallowRef<string[]>([]);
+
+function extractChinese(info: Record<string, string>) {
+  if (!info || typeof info !== "object") return [];
+
+  const hasChineseReg = /[\u4e00-\u9fa5]/;
+
+  return Object.keys(info)
+    .filter((key) => hasChineseReg.test(key) && typeof info[key] === "string")
+    .map((key) => `${key}：${info[key]}`);
+}
 
 function init() {
   clear();
   const metadata = props.getMetadata();
-  // console.log(metadata);
 
   if (metadata) {
-    const { mp3Info } = metadata;
-    if (mp3Info) {
-      const { id3v2 } = mp3Info;
+    const { mp3, wav } = metadata;
+    if (mp3) {
+      const { id3v2 } = mp3;
       if (!id3v2) return;
       const img = id3v2.audioCover;
-      id3v2Tag.value = Object.keys(id3v2)
-        .filter((key) => {
-          const reg = /^[\u4e00-\u9fa5]+$/;
-          if (reg.test(key)) {
-            return typeof id3v2[key] == "string";
-          }
-        })
-        .map((key) => `${key}：${id3v2[key]}`);
+      audioTag.value = extractChinese(id3v2);
       if (img && typeof img == "object") {
         const blob = new Blob([img.data], { type: img.mime });
         audioCover.value = URL.createObjectURL(blob);
       }
+    } else if (wav) {
+      const { id3, list_info } = wav.otherChunk;
+      audioTag.value = [];
+      if (id3) audioTag.value = extractChinese(id3);
+      if (list_info) audioTag.value.push(...extractChinese(list_info));
     }
   }
 }
 function clear() {
   if (audioCover.value) URL.revokeObjectURL(audioCover.value);
-  id3v2Tag.value = [];
+  audioTag.value = [];
   audioCover.value = "";
 }
 
@@ -74,7 +80,7 @@ onUnmounted(clear);
 
       <NScrollbar style="max-height: 90px">
         <NSpace>
-          <n-tag v-for="tag in id3v2Tag" :key="tag">
+          <n-tag v-for="tag in audioTag" :key="tag">
             <template v-if="tag.length > 30">
               {{ tag.slice(0, 28) }}..
               <NButton

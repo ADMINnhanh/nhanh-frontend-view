@@ -9,8 +9,7 @@ import { readChunkId } from "./main";
 // wBlockAlign	16	ushort	w通道数 * (dwBitsPerSample / 8)	多声道音频帧中的字节数。
 // dwBitsPerSample dwBits	32	无符号整数	变化	音频的位深度（每个样本的位数）。通常为 8、16 或 32 位。
 
-export default function fmtParser(buffer: ArrayBuffer) {
-  const dataView = new DataView(buffer);
+export default function fmtParser(dataView: DataView) {
   const fmt = readChunkId(dataView, 12, 4);
   if (fmt != "fmt ") return false;
   const dwChunkSize = dataView.getUint32(16, true);

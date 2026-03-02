@@ -25,7 +25,7 @@ export class PCMAudioPlayer {
   /** 播放开始的AudioContext时间（用于计算已播放时长） */
   private playStartTime = 0;
   /** 暂停时记录的已播放时间（秒） */
-  private offsetTime?: number;
+  public offsetTime?: number;
 
   /** 音频参数配置 */
   public options: PCMPlayOptions = {

@@ -23,8 +23,8 @@ class AudioVisualizationManager {
     return this.audioPlayer.totalDuration;
   }
 
-  canvas?: HTMLCanvasElement;
-  ctx?: CanvasRenderingContext2D | null;
+  private canvas?: HTMLCanvasElement;
+  private ctx?: CanvasRenderingContext2D | null;
 
   /** 播放完成回调函数（playFromPosition 播放结束时触发） */
   public onPlayCompleted: PCMAudioPlayer["onPlayCompleted"];
@@ -119,7 +119,7 @@ class AudioVisualizationManager {
     this.ctx.drawImage(audioSpectrumCanvas, 0, audioWaveformCanvas.height);
   }
   /** 渲染音频可视化 */
-  private render(progress: number) {
+  render(progress: number) {
     const {
       canvas,
       ctx,
@@ -149,7 +149,16 @@ class AudioVisualizationManager {
   setVolume(volume: number) {
     this.audioPlayer.setVolume(volume);
   }
-  play(startTime?: number) {
+  play(): Promise<void>;
+  play(startTime: number, isStatic?: boolean): Promise<void> | void;
+  play(startTime?: number, isStatic?: boolean) {
+    console.log(typeof startTime == "number", isStatic);
+
+    if (typeof startTime == "number" && isStatic) {
+      this.render(startTime / this.totalDuration);
+      this.audioPlayer.offsetTime = startTime;
+      return;
+    }
     return this.audioPlayer.play(startTime);
   }
   stop() {
