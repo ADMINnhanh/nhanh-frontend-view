@@ -9,27 +9,28 @@ import { _Utility_WaitForCondition } from "nhanh-pure-function";
 import { Settings } from "@/components/popups/components/Settings";
 import { ref, watch } from "vue";
 
+const routes = [
+  {
+    path: "/",
+    name: "main",
+    component: home,
+    redirect: { name: Routes[0].name },
+    children: Routes,
+  },
+  {
+    path: "/404",
+    name: "404",
+    component: () => import("@/views/404.vue"),
+  },
+  {
+    path: "/:pathMatch(.*)",
+    redirect: "/404",
+  },
+];
 const router = createRouter({
   history: createWebHistory(),
   // history: createWebHashHistory(),
-  routes: [
-    {
-      path: "/",
-      name: "main",
-      component: home,
-      redirect: { name: Routes[0].name },
-      children: Routes,
-    },
-    {
-      path: "/404",
-      name: "404",
-      component: () => import("@/views/404.vue"),
-    },
-    {
-      path: "/:pathMatch(.*)",
-      redirect: "/404",
-    },
-  ],
+  routes,
   scrollBehavior(to, from, savedPosition) {
     // 清除所有高亮
     const clearHighlights = () => {
@@ -92,5 +93,7 @@ router.afterEach((to, from) => {
 watch([title, () => Settings.value.language], ([title, language]) => {
   document.title = title?.[language] || "你好啊你好";
 });
+
+// console.log(router.getRoutes().map((item) => item.path));
 
 export default router;

@@ -13,18 +13,15 @@ import DynamicDiagramItem from "./components/DynamicDiagramItem.vue";
 import router from "@/router";
 import { useLocalStorage } from "@vueuse/core";
 import { _Utility_WaitForCondition } from "nhanh-pure-function";
+import { useRoute } from "vue-router";
 
-interface Props {
-  target?: string;
-}
-const props = defineProps<Props>();
-
-if (props.target) dynamicDiagram.value = props.target;
+const route = useRoute();
+dynamicDiagram.value = route.query.target as string;
 
 const dynamicDiagramComponent = computed(() => {
   if (!router.currentRoute.value.path.includes("DynamicDiagram")) return;
 
-  router.replace({ params: { target: dynamicDiagram.value } });
+  router.replace({ query: { target: dynamicDiagram.value } });
   const component = GetComponent(dynamicDiagram.value);
 
   const error = () =>

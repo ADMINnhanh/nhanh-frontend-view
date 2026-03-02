@@ -123,7 +123,7 @@ const math: CustomRouteRecord = {
   },
   children: [
     {
-      path: "DynamicDiagram/:target?",
+      path: "DynamicDiagram",
       name: "DynamicDiagram",
       meta: {
         name: {
