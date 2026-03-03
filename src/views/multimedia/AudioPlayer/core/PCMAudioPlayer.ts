@@ -34,6 +34,7 @@ export class PCMAudioPlayer {
     bitDepth: 16,
     startTime: 0,
     duration: 0,
+    sampleFormat: "int",
     endianness: Endianness.LE,
     volume: 1,
   };
@@ -103,6 +104,7 @@ export class PCMAudioPlayer {
       duration,
       endianness,
       volume,
+      sampleFormat,
     } = this.options;
 
     this.startTime = startTime;
@@ -116,7 +118,12 @@ export class PCMAudioPlayer {
 
     try {
       // 将 PCM 数据转换为 Float32Array（传入字节序参数）
-      const audioData = this.convertPCMToFloat32(pcmData, bitDepth, endianness);
+      const audioData = this.convertPCMToFloat32(
+        pcmData,
+        bitDepth,
+        endianness,
+        sampleFormat
+      );
 
       // 创建 AudioBuffer
       this.audioBuffer = this.audioContext.createBuffer(
@@ -148,7 +155,8 @@ export class PCMAudioPlayer {
   private convertPCMToFloat32(
     pcmData: ArrayBuffer,
     bitDepth: PCMPlayOptions["bitDepth"],
-    endianness: PCMPlayOptions["endianness"] = Endianness.LE
+    endianness: PCMPlayOptions["endianness"] = Endianness.LE,
+    format: SampleFormat = "int" // 新增参数，默认整数
   ): Float32Array {
     const dataView = new DataView(pcmData);
     const bytesPerSample = bitDepth / 8;
@@ -194,14 +202,33 @@ export class PCMAudioPlayer {
           break;
 
         case 32:
-          float32Array[i] =
-            dataView.getInt32(byteOffset, isLittleEndian) / 2147483648;
+          if (format === "float") {
+            float32Array[i] = dataView.getFloat32(byteOffset, isLittleEndian);
+          } else {
+            float32Array[i] =
+              dataView.getInt32(byteOffset, isLittleEndian) / 2147483648;
+          }
+
           break;
 
         // 若需要处理64位浮点（pcm_f64le），替换64位分支为：
         case 64:
           // 直接读取64位浮点数，本身就是-1.0~1.0范围，无需归一化
           float32Array[i] = dataView.getFloat64(byteOffset, isLittleEndian);
+
+          if (format === "float") {
+            // 64位双精度浮点
+            float32Array[i] = dataView.getFloat64(byteOffset, isLittleEndian);
+          } else {
+            // 64位有符号整数（罕见，按需支持）
+            // JavaScript 的 Number 无法精确表示所有 64 位整数，可能需要特殊处理
+            // 这里简化实现，只处理低 53 位安全整数范围，否则会失真
+            const int64 = dataView.getBigInt64(byteOffset, isLittleEndian);
+            // 归一化到 -1 ~ 1，需要将 BigInt 转换为 Number
+            // 注意：此转换会丢失精度
+            float32Array[i] = Number(int64) / Number(0x8000000000000000n);
+          }
+
           break;
       }
     }

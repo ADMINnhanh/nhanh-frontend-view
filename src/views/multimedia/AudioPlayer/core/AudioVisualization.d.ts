@@ -1,3 +1,6 @@
+/** 音频采样格式联合类型 */
+type SampleFormat = "int" | "float";
+
 /** 音频采样率联合类型 */
 type SampleRate =
   /** 低质量语音（如早期电话），大部分浏览器支持 */
@@ -25,14 +28,16 @@ interface PCMPlayOptions {
   bitDepth: 8 | 16 | 24 | 32 | 64;
   /** 声道数（默认 1） */
   channelCount: number;
+  /** 字节序（默认小端序 LE） */
+  endianness: "le" | "be";
+  /** 采样格式（默认整数） */
+  sampleFormat: SampleFormat;
+  /** 音量（0~1，默认 1） */
+  volume: number;
   /** 起始播放位置（秒，默认 0） */
   startTime: number;
   /** 播放时长（秒，默认播放剩余全部） */
   duration: number;
-  /** 字节序（默认小端序 LE） */
-  endianness: "le" | "be";
-  /** 音量（0~1，默认 1） */
-  volume: number;
 }
 /**
  * 音频振幅可视化绘制器

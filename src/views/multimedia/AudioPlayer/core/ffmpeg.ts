@@ -87,16 +87,17 @@ export default async function decodeAudioToPcmWithFallback(
   file: File,
   audioBasicInfo: Partial<PCMPlayOptions>
 ) {
+  const isFloat = (audioBasicInfo.bitDepth || 0) > 32;
   let pcm = await decodeAudioToPcm(file, {
     ...audioBasicInfo,
-    isFloat: false,
+    isFloat,
   }).catch(() => null);
 
   if (!pcm)
     pcm = await decodeAudioToPcm(file, {
       ...audioBasicInfo,
-      isFloat: true,
+      isFloat: !isFloat,
     });
 
-  return pcm;
+  return { pcm, isFloat };
 }

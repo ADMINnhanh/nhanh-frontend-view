@@ -36,7 +36,7 @@ export default async function MP3FileParser(file: File) {
     ? mpegAudio.audioBasicInfo
     : defaultAudioBasicInfo;
 
-  const pcm = await decodeAudioToPcm(file, audioBasicInfo);
+  const { pcm, isFloat } = await decodeAudioToPcm(file, audioBasicInfo);
   if (!pcm) return null;
 
   return {
@@ -47,5 +47,6 @@ export default async function MP3FileParser(file: File) {
     mpegAudio,
     pcm,
     audioBasicInfo,
+    isFloat,
   };
 }

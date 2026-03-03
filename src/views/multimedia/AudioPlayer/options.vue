@@ -60,6 +60,16 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
       />
     </NInputGroup>
     <NInputGroup>
+      <NInputGroupLabel>采样格式</NInputGroupLabel>
+      <NSelect
+        v-model:value="options.sampleFormat"
+        :options="[
+          { label: '整数', value: 'int' },
+          { label: '浮点数', value: 'float' },
+        ]"
+      />
+    </NInputGroup>
+    <NInputGroup>
       <NInputGroupLabel>音量</NInputGroupLabel>
       <NSlider v-model:value="volume" :min="0" :max="1" :step="0.01" />
     </NInputGroup>
@@ -85,7 +95,7 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
   }
   .n-input-group-label {
     text-align: center;
-    width: 70px;
+    width: 80px;
   }
 }
 </style>

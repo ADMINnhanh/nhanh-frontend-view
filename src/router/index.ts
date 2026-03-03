@@ -94,6 +94,15 @@ watch([title, () => Settings.value.language], ([title, language]) => {
   document.title = title?.[language] || "你好啊你好";
 });
 
-// console.log(router.getRoutes().map((item) => item.path));
+// console.log(
+//   router.getRoutes().map((item) => {
+//     const name = item.meta.name;
+//     const title = name
+//       ? /** @ts-ignore */
+//         name.zhCN + "/" + name.enUS
+//       : "你好啊你好/nhanh/nha-nh 的网站";
+//     return [title, item.path];
+//   })
+// );
 
 export default router;

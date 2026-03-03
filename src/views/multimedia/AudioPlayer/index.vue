@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import {
   _Browser_GetFrameRate,
+  _Utility_Debounce,
   _Utility_GenerateUUID,
 } from "nhanh-pure-function";
 import ResponsiveDirectionLayout from "@/components/layout/ResponsiveDirectionLayout.vue";
@@ -54,6 +55,7 @@ const options = ref<Partial<PCMPlayOptions>>({
   channelCount: 1,
   startTime: 0,
   duration: 0,
+  sampleFormat: "int",
   endianness: Endianness.LE,
 });
 const targetFileConfig = ref<TargetFileConfig>();
@@ -67,6 +69,15 @@ audioVisualization.playProgressCallback = (currentTime) => {
   targetFileConfig.value!.currentTime = FormatTime(Number(currentTime));
 };
 
+const fileListChange = _Utility_Debounce(
+  (list: UploadFileInfo[], lastList?: UploadFileInfo[]) => {
+    if (!targetFileConfig.value && list.length > (lastList?.length || 0)) {
+      setActiveUploadFile(0);
+    }
+  },
+  200
+);
+watch(fileList, fileListChange);
 watch(
   [options, fileIndex],
   async ([pcmOptions, index]) => {
@@ -74,6 +85,7 @@ watch(
       const file = fileList.value[index];
       const audioOption = audioOptions.get(file.id)!;
       targetFileConfig.value = getTargetFileConfig(audioOption, 0);
+      targetFileConfig.value.id = file.id;
       requestAnimationFrame(async () => {
         const canvas = document.getElementById(id) as HTMLCanvasElement;
         const pcmData = audioOption.pcm;
@@ -174,6 +186,7 @@ function loadExample() {
           bitDepth: 16,
           channelCount: 2,
           endianness: Endianness.LE,
+          sampleFormat: "int",
         },
         pcm,
       });
@@ -226,6 +239,7 @@ async function setActiveUploadFile(index: number) {
             channelCount: audioBasicInfo.channelCount,
             bitDepth: audioBasicInfo.bitDepth as any,
             endianness: Endianness.LE,
+            sampleFormat: info.isFloat ? "float" : "int",
           },
           pcm: info.pcm,
           mp3: info,
@@ -238,12 +252,7 @@ async function setActiveUploadFile(index: number) {
       audioOptions.set(file.id, {
         fileName: audio.name,
         fileSize: audio.size,
-        audioBasicInfo: {
-          sampleRate: 8000,
-          channelCount: 2,
-          bitDepth: 16,
-          endianness: Endianness.LE,
-        },
+        audioBasicInfo: {},
         pcm,
       });
     } else {
@@ -258,6 +267,7 @@ async function setActiveUploadFile(index: number) {
             channelCount: fmt.wChannels,
             bitDepth: fmt.dwBitsPerSample as any,
             endianness: Endianness.LE,
+            sampleFormat: info.isFloat ? "float" : "int",
           },
           pcm: info.pcm,
           wav: info,
@@ -284,24 +294,25 @@ async function setActiveUploadFile(index: number) {
 }
 function handleFileListClick(ev: PointerEvent) {
   const isButton = (ev.target as HTMLElement).closest(".n-button");
-  const file = (ev.target as HTMLElement).closest(".n-upload-file");
-  if (!file) return;
+  const fileDom = (ev.target as HTMLElement).closest(".n-upload-file");
+  if (!fileDom) return;
   const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
-  const index = Array.from(files).findIndex((v) => v === file);
+  const index = Array.from(files).findIndex((v) => v === fileDom);
 
+  const file = fileList.value[index];
   if (isButton) {
-    const file = fileList.value[index];
     audioOptions.delete(file.id);
-    if (index == fileIndex.value) {
+    if (file.id == targetFileConfig.value?.id) {
       fileIndex.value = undefined;
       play.value = false;
       audioVisualization.clear();
+      targetFileConfig.value = undefined;
     }
-    targetFileConfig.value = undefined;
     return;
   }
 
-  if (index != -1) setActiveUploadFile(index);
+  if (index != -1 && file.id != targetFileConfig.value?.id)
+    setActiveUploadFile(index);
 }
 
 onDeactivated(() => {
@@ -350,6 +361,11 @@ onUnmounted(() => {
                   @click.capture="handleFileListClick"
                 />
               </n-upload>
+              <NH3 prefix="bar" type="info">
+                <NText type="info"> 以下配置仅控制 PCM 的解析 </NText>
+                <br />
+                <NText type="info"> MP3 / WAV 解析为 PCM 的过程不受干扰 </NText>
+              </NH3>
             </template>
             <template #suffix>
               <NButton
@@ -470,5 +486,8 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
   }
+}
+.n-h3 {
+  margin-top: 0;
 }
 </style>

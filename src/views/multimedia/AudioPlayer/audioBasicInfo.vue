@@ -113,9 +113,11 @@ onUnmounted(clear);
           {{ info.size }}
         </n-tag>
         <n-tag type="success"> {{ info.totalDuration }} </n-tag>
-        <n-tag type="warning"> {{ info.sampleRate }}Hz </n-tag>
-        <n-tag> {{ info.channelCount }}ch </n-tag>
-        <n-tag> {{ info.bitDepth }}bit </n-tag>
+        <n-tag v-if="info.sampleRate" type="warning">
+          {{ info.sampleRate }}Hz
+        </n-tag>
+        <n-tag v-if="info.channelCount"> {{ info.channelCount }}ch </n-tag>
+        <n-tag v-if="info.bitDepth"> {{ info.bitDepth }}bit </n-tag>
       </NSpace>
     </NSpace>
   </div>

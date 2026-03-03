@@ -27,6 +27,7 @@ export type AudioOptions = {
 };
 
 export type TargetFileConfig = Partial<PCMPlayOptions> & {
+  id: string;
   name: string;
   type: string;
   size: string;
@@ -52,6 +53,7 @@ export function getTargetFileConfig(
   const currentTime = FormatTime(audioBasicInfo.startTime || 0);
   return {
     ...audioBasicInfo,
+    id: "",
     name: fileName,
     currentTime,
     totalDuration: FormatTime(totalDuration),
