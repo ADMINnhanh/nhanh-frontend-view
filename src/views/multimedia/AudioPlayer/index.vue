@@ -158,7 +158,7 @@ function handleDrop(files: File[]) {
 /** 加载样例 */
 function loadExample() {
   axios
-    .get("/multimedia/Jay Chou.pcm", {
+    .get("/public/multimedia/Jay Chou.pcm", {
       responseType: "blob",
     })
     .then(async (res) => {

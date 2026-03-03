@@ -152,8 +152,6 @@ class AudioVisualizationManager {
   play(): Promise<void>;
   play(startTime: number, isStatic?: boolean): Promise<void> | void;
   play(startTime?: number, isStatic?: boolean) {
-    console.log(typeof startTime == "number", isStatic);
-
     if (typeof startTime == "number" && isStatic) {
       this.render(startTime / this.totalDuration);
       this.audioPlayer.offsetTime = startTime;

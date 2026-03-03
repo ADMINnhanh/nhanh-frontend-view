@@ -3,8 +3,9 @@ import { Settings } from "@/components/popups/components/Settings/index";
 import router from "@/router";
 import Routes from "@/router/Routes";
 import { NMenu, type MenuOption } from "naive-ui";
-import { computed, ref } from "vue";
+import { computed, h, ref } from "vue";
 import { collapsed } from ".";
+import { RouterLink } from "vue-router";
 
 interface EmitType {
   (el: "updateActiveKey"): void;
@@ -16,12 +17,17 @@ const menuOptions = computed<MenuOption[]>(() => {
   /** 生成菜单 */
   const generateMenu = (item: typeof Routes) => {
     return item.map((item) => {
-      const i: MenuOption = {
-        label: item.meta.name[language],
-        key: item.name as string,
-      };
+      const label = item.meta.name[language];
+      const key = item.name as string;
+      const i: MenuOption = { key };
       if (item.meta.icon) i.icon = () => item.meta.icon;
-      if (item.children) i.children = generateMenu(item.children);
+      if (item.children) {
+        i.label = label;
+        i.children = generateMenu(item.children);
+      } else {
+        i.label = () =>
+          h(RouterLink, { to: { name: key } }, { default: () => label });
+      }
 
       return i;
     });
@@ -32,8 +38,7 @@ const activeKey = computed({
   get() {
     return (router.currentRoute.value.name || "") as string;
   },
-  set(key: string) {
-    router.push({ name: key });
+  set() {
     Emit("updateActiveKey");
   },
 });
