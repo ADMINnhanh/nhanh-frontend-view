@@ -50,10 +50,16 @@ function init() {
         audioCover.value = URL.createObjectURL(blob);
       }
     } else if (wav) {
-      const { id3, list_info } = wav.otherChunk;
+      const { fmt, otherChunk } = wav;
+      const { id3, list_info } = otherChunk;
       audioTag.value = [];
       if (id3) audioTag.value = extractChinese(id3);
       if (list_info) audioTag.value.push(...extractChinese(list_info));
+      if (fmt.waveFormat) {
+        audioTag.value.push(
+          `${fmt.waveFormat.name}：${fmt.waveFormat.description}`
+        );
+      }
     }
   }
 }

@@ -62,3 +62,10 @@ type AudioVisualizationManagerConfig = {
   /** 音频配置项 */
   pcmOptions?: Partial<PCMPlayOptions>;
 };
+
+/** LFE 混音配置项类型定义 */
+type LfeMix = {
+  enable: boolean;
+  level: number;
+  channelCount: number;
+};

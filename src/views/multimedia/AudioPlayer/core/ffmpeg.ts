@@ -47,6 +47,8 @@ async function decodeAudioToPcm(
       pcmCodecName, // 音频编码器：PCM s16le ("pcm_s16le")
       "-ac",
       String(channelCount), // 声道数
+      // "-lfe_mix_level",
+      // "1.0",
       "-ar",
       String(sampleRate), // 采样率
       outputPcmVirtualFileName, // 输出文件

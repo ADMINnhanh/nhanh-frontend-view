@@ -35,6 +35,8 @@ export default async function WAVFileParser(file: File) {
 
   const otherChunk = OtherChunkParser(dataView);
 
+  // console.log(fmt, otherChunk);
+
   const { pcm, isFloat } = await decodeAudioToPcm(file, {
     sampleRate: fmt.dwSamplesPerSec as any,
     channelCount: fmt.wChannels,

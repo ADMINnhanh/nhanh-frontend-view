@@ -60,6 +60,12 @@ const options = ref<Partial<PCMPlayOptions>>({
 });
 const targetFileConfig = ref<TargetFileConfig>();
 
+const lfeMix = ref<LfeMix>({
+  enable: false,
+  level: 1.0,
+  channelCount: 2,
+});
+
 const audioVisualization = new AudioVisualizationManager();
 
 audioVisualization.onPlayCompleted = () => {
@@ -129,6 +135,14 @@ async function playFromPosition(payload: PointerEvent) {
     .play(Math.max(0, position), !play.value)
     ?.then(() => (play.value = true));
 }
+let isDown = false;
+function handleMouseDown() {
+  isDown = true;
+}
+function handleMouseUp() {
+  isDown = false;
+}
+
 /** 时间轴提示 */
 function handleMouseMove(mouse: MouseEvent) {
   const { offsetX, target } = mouse;
@@ -138,6 +152,7 @@ function handleMouseMove(mouse: MouseEvent) {
   const position = (x / width) * audioVisualization.totalDuration;
   dom.dataset.time = FormatTime(position);
   dom.style.setProperty("--after-x", x - 46 / 2 + "px");
+  if (isDown && !play.value) playFromPosition(mouse as any);
 }
 /** 获取元数据 */
 function getMetadata() {
@@ -153,6 +168,7 @@ function handleDrop(files: File[]) {
   const audios = files.filter((file) => isAudioFile(file.name));
 
   if (audios.length > 0) {
+    // fileListChange()
     audios.forEach((audio) => {
       const id = String(audio.lastModified);
       fileList.value.push({
@@ -162,6 +178,8 @@ function handleDrop(files: File[]) {
         file: audio,
       });
     });
+    if (!targetFileConfig.value)
+      setActiveUploadFile(fileList.value.length - audios.length);
   } else {
     window.$message.warning("请拖拽音频文件");
   }
@@ -169,35 +187,45 @@ function handleDrop(files: File[]) {
 
 /** 加载样例 */
 function loadExample() {
-  axios
-    .get("/public/multimedia/Jay Chou.pcm", {
-      responseType: "blob",
-    })
-    .then(async (res) => {
-      const file = new File([res.data], "Jay Chou.pcm");
-      const pcm = await file.arrayBuffer();
-      const id = String(file.lastModified);
+  const base = "/public/multimedia/";
+  const jay_chou = "Jay Chou.pcm";
+  axios.get(base + jay_chou, { responseType: "blob" }).then(async (res) => {
+    const file = new File([res.data], jay_chou);
+    const pcm = await file.arrayBuffer();
+    const id = String(file.lastModified);
 
-      audioOptions.set(id, {
-        fileName: file.name,
-        fileSize: file.size,
-        audioBasicInfo: {
-          sampleRate: 24000,
-          bitDepth: 16,
-          channelCount: 2,
-          endianness: Endianness.LE,
-          sampleFormat: "int",
-        },
-        pcm,
-      });
+    audioOptions.set(id, {
+      fileName: file.name,
+      fileSize: file.size,
+      audioBasicInfo: {
+        sampleRate: 24000,
+        bitDepth: 16,
+        channelCount: 2,
+        endianness: Endianness.LE,
+        sampleFormat: "int",
+      },
+      pcm,
+    });
+    fileList.value.push({
+      id,
+      name: jay_chou,
+      status: "finished",
+    });
+
+    setActiveUploadFile(fileList.value.length - 1);
+  });
+  ["Phil Michalski.mp3", "M1F1-uint8-AFsp.wav"].forEach((fileName) => {
+    axios.get(base + fileName, { responseType: "blob" }).then(async (res) => {
+      const file = new File([res.data], fileName);
+      const id = String(file.lastModified);
       fileList.value.push({
         id,
-        name: file.name,
+        name: fileName,
         status: "finished",
+        file,
       });
-
-      setActiveUploadFile(fileList.value.length - 1);
     });
+  });
 }
 
 async function setActiveUploadFile(index: number) {
@@ -331,7 +359,12 @@ onUnmounted(() => {
           <NH3 prefix="bar">
             <NText type="success"> PCM / MP3 / WAV 音频可视化播放器 </NText>
           </NH3>
-          <Options v-model:options="options" v-model:volume="volume">
+
+          <Options
+            v-model:options="options"
+            v-model:volume="volume"
+            v-model:lfe-mix="lfeMix"
+          >
             <template #prefix>
               <n-upload
                 v-model:file-list="fileList"
@@ -361,11 +394,6 @@ onUnmounted(() => {
                   @click.capture="handleFileListClick"
                 />
               </n-upload>
-              <NH3 prefix="bar" type="info">
-                <NText type="info"> 以下配置仅控制 PCM 的解析 </NText>
-                <br />
-                <NText type="info"> MP3 / WAV 解析为 PCM 的过程不受干扰 </NText>
-              </NH3>
             </template>
             <template #suffix>
               <NButton
@@ -397,6 +425,8 @@ onUnmounted(() => {
                 class="progress"
                 @mousemove="handleMouseMove"
                 @click="playFromPosition"
+                @mousedown="handleMouseDown"
+                @mouseup="handleMouseUp"
               ></div>
             </div>
             <div class="time-container">
@@ -486,8 +516,5 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
   }
-}
-.n-h3 {
-  margin-top: 0;
 }
 </style>
