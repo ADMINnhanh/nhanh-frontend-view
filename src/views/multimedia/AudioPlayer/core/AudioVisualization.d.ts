@@ -20,6 +20,13 @@ type SampleRate =
   /** 超高解析音频（Hi-Res），仅部分现代浏览器/设备支持 */
   | 192000;
 
+/** LFE 混音配置项类型定义 */
+type LfeMix = {
+  enable: boolean;
+  level: number;
+  channelCount: number;
+};
+
 /** PCM 播放配置项类型定义 */
 interface PCMPlayOptions {
   /** 采样率（默认 16000） */
@@ -61,11 +68,4 @@ type AudioVisualizationManagerConfig = {
   pcmData: ArrayBuffer;
   /** 音频配置项 */
   pcmOptions?: Partial<PCMPlayOptions>;
-};
-
-/** LFE 混音配置项类型定义 */
-type LfeMix = {
-  enable: boolean;
-  level: number;
-  channelCount: number;
 };

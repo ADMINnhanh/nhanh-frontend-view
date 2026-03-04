@@ -22,18 +22,20 @@ export type AudioOptions = {
   fileSize: number;
   audioBasicInfo: Partial<PCMPlayOptions>;
   pcm: ArrayBuffer;
+  lfeMix?: LfeMix;
   mp3?: Exclude<Awaited<ReturnType<typeof MP3FileParser>>, null>;
   wav?: Exclude<Awaited<ReturnType<typeof WAVFileParser>>, null>;
 };
 
-export type TargetFileConfig = Partial<PCMPlayOptions> & {
+export type TargetAudioConfig = Partial<PCMPlayOptions> & {
   id: string;
   name: string;
-  type: string;
+  type: "MP3" | "WAV" | "WAVE" | "PCM";
   size: string;
   totalDuration: string;
   /** 当前播放时间（秒，保留2位小数） */
   currentTime: string;
+  lfeMix?: LfeMix;
 };
 
 /** 格式化时间 */
@@ -42,11 +44,8 @@ export function FormatTime(seconds: number): string {
   const minutes = padZero(Math.floor(seconds / 60));
   return `${minutes}:${padZero(Math.floor(seconds % 60))}`;
 }
-export function getTargetFileConfig(
-  options: AudioOptions,
-  totalDuration: number
-): TargetFileConfig {
-  const { audioBasicInfo, fileSize, fileName } = options;
+export function getTargetAudioConfig(options: AudioOptions): TargetAudioConfig {
+  const { audioBasicInfo, fileSize, fileName, lfeMix } = options;
   const lastIndex = fileName.lastIndexOf(".");
   const type = lastIndex > 0 ? fileName.substring(lastIndex + 1) : "异常！";
 
@@ -54,10 +53,11 @@ export function getTargetFileConfig(
   return {
     ...audioBasicInfo,
     id: "",
+    lfeMix,
     name: fileName,
     currentTime,
-    totalDuration: FormatTime(totalDuration),
+    totalDuration: "",
     size: _Format_FileSize(fileSize),
-    type: type.toLocaleUpperCase(),
+    type: type.toLocaleUpperCase() as any,
   };
 }

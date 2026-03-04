@@ -22,7 +22,7 @@ export function readChunkId(
   return str;
 }
 
-export default async function WAVFileParser(file: File) {
+export default async function WAVFileParser(file: File, lfeMix: LfeMix) {
   const buffer = await file.arrayBuffer();
   const fileSize = buffer.byteLength;
 
@@ -35,14 +35,20 @@ export default async function WAVFileParser(file: File) {
 
   const otherChunk = OtherChunkParser(dataView);
 
-  // console.log(fmt, otherChunk);
+  console.log(fmt, otherChunk);
 
-  const { pcm, isFloat } = await decodeAudioToPcm(file, {
-    sampleRate: fmt.dwSamplesPerSec as any,
-    channelCount: fmt.wChannels,
-    bitDepth: fmt.dwBitsPerSample as any,
-    endianness: "le",
-  });
+  const { pcm, sampleFormat } = await decodeAudioToPcm(
+    file,
+    {
+      sampleRate: fmt.dwSamplesPerSec as any,
+      channelCount: fmt.wChannels,
+      bitDepth: fmt.dwBitsPerSample as any,
+      endianness: "le",
+      sampleFormat:
+        fmt.wFormatTag == 3 || fmt.waveFormat?.tagHex == 3 ? "float" : "int",
+    },
+    lfeMix
+  );
 
   if (!pcm) return null;
 
@@ -51,6 +57,6 @@ export default async function WAVFileParser(file: File) {
     pcm,
     fmt,
     otherChunk,
-    isFloat,
+    sampleFormat,
   };
 }

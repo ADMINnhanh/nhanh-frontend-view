@@ -12,21 +12,23 @@ ffmpeg.load();
  */
 async function decodeAudioToPcm(
   file: File,
-  audioBasicInfo: Partial<PCMPlayOptions & { isFloat: boolean }>
+  audioBasicInfo: Partial<PCMPlayOptions>,
+  lfeMix: LfeMix
 ): Promise<ArrayBuffer | null> {
   // 定义虚拟文件系统中的文件名，语义更清晰
   const inputVirtualFileName = file.name;
-  const outputPcmVirtualFileName = "output_s16le.pcm";
+  const outputPcmVirtualFileName = "output.pcm";
 
   const {
     sampleRate = 44100,
     channelCount = 2,
     bitDepth = 16,
     endianness = "le",
-    isFloat = false,
+    sampleFormat,
   } = audioBasicInfo;
 
-  const pcmSampleTypePrefix = bitDepth == 8 ? "u" : isFloat ? "f" : "s";
+  const pcmSampleTypePrefix =
+    bitDepth == 8 ? "u" : sampleFormat == "float" ? "f" : "s";
 
   const pcmFormat = `${pcmSampleTypePrefix}${bitDepth}${
     bitDepth == 8 ? "" : endianness
@@ -37,6 +39,17 @@ async function decodeAudioToPcm(
     // 1. 将本地文件写入 FFmpeg 虚拟文件系统
     await ffmpeg.writeFile(inputVirtualFileName, await fetchFile(file));
 
+    /** 音频通道参数 */
+    const audioChannelArgs =
+      lfeMix.enable && channelCount > 2
+        ? [
+            "-ac",
+            String(lfeMix.channelCount),
+            "-lfe_mix_level",
+            String(lfeMix.level),
+          ]
+        : ["-ac", String(channelCount)];
+
     // 2. 执行 FFmpeg 命令：解码为 16 位小端 PCM 原始数据
     await ffmpeg.exec([
       "-i",
@@ -45,10 +58,7 @@ async function decodeAudioToPcm(
       pcmFormat, // 输出格式：16位小端原始 PCM   ("s16le")
       "-acodec",
       pcmCodecName, // 音频编码器：PCM s16le ("pcm_s16le")
-      "-ac",
-      String(channelCount), // 声道数
-      // "-lfe_mix_level",
-      // "1.0",
+      ...audioChannelArgs,
       "-ar",
       String(sampleRate), // 采样率
       outputPcmVirtualFileName, // 输出文件
@@ -87,19 +97,25 @@ async function decodeAudioToPcm(
  */
 export default async function decodeAudioToPcmWithFallback(
   file: File,
-  audioBasicInfo: Partial<PCMPlayOptions>
+  _audioBasicInfo: Partial<PCMPlayOptions>,
+  lfeMix: LfeMix
 ) {
-  const isFloat = (audioBasicInfo.bitDepth || 0) > 32;
-  let pcm = await decodeAudioToPcm(file, {
-    ...audioBasicInfo,
-    isFloat,
-  }).catch(() => null);
+  const audioBasicInfo = { ..._audioBasicInfo };
 
-  if (!pcm)
-    pcm = await decodeAudioToPcm(file, {
-      ...audioBasicInfo,
-      isFloat: !isFloat,
-    });
+  const { sampleFormat, bitDepth } = audioBasicInfo;
 
-  return { pcm, isFloat };
+  if (!sampleFormat)
+    audioBasicInfo.sampleFormat = (bitDepth || 0) > 32 ? "float" : "int";
+
+  const pcm = await decodeAudioToPcm(file, audioBasicInfo, lfeMix).then(
+    (pcm) => {
+      if (pcm) return pcm;
+      audioBasicInfo.sampleFormat =
+        audioBasicInfo.sampleFormat == "float" ? "int" : "float";
+
+      return decodeAudioToPcm(file, audioBasicInfo, lfeMix);
+    }
+  );
+
+  return { pcm, sampleFormat: audioBasicInfo.sampleFormat };
 }

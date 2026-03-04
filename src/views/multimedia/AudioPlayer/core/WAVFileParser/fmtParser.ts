@@ -144,7 +144,17 @@ export default function fmtParser(dataView: DataView) {
     fmt,
     /** 数据块剩余部分长度 */
     dwChunkSize,
-    /** 对于 WAV 文件，此值始终为 1，表示PCM格式 */
+    /**
+     * wFormatTag 字段（WAV文件fmt块核心标识）
+     * 字段位置：fmt块中偏移8-9字节（2字节，小端序）
+     * 取值说明：
+     *  1 = PCM (Integer) - 整数PCM格式（最常见，8/16/24/32位整数）
+     *  3 = IEEE Float - 浮点PCM格式（专业音频，32/64位浮点）
+     *  6 = ALAW - A律压缩（电话音频，整数）
+     *  7 = MULAW - μ律压缩（电话音频，整数）
+     *  0xFFFE = Extensible - 扩展格式（需解析扩展字段判断整数/浮点）
+     * 注意：仅整数PCM的wFormatTag=1，并非所有WAV都为1
+     */
     wFormatTag,
     /** 音频中的声道数 */
     wChannels,

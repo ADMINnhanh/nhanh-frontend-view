@@ -8,14 +8,14 @@ import {
   NButton,
   NIcon,
 } from "naive-ui";
-import { type AudioOptions, type TargetFileConfig } from ".";
+import { type AudioOptions, type TargetAudioConfig } from ".";
 import { onUnmounted, ref, shallowRef, watch } from "vue";
 import { CopyOutline } from "@vicons/ionicons5";
 import { _Browser_CopyToClipboard, _Tip } from "nhanh-pure-function";
 
 interface Props {
   isRunning: boolean;
-  info: TargetFileConfig;
+  info: TargetAudioConfig;
   getMetadata: () => AudioOptions | undefined;
 }
 const props = defineProps<Props>();
@@ -55,11 +55,7 @@ function init() {
       audioTag.value = [];
       if (id3) audioTag.value = extractChinese(id3);
       if (list_info) audioTag.value.push(...extractChinese(list_info));
-      if (fmt.waveFormat) {
-        audioTag.value.push(
-          `${fmt.waveFormat.name}：${fmt.waveFormat.description}`
-        );
-      }
+      if (fmt.waveFormat) audioTag.value.push(fmt.waveFormat.description);
     }
   }
 }
@@ -124,6 +120,9 @@ onUnmounted(clear);
         </n-tag>
         <n-tag v-if="info.channelCount"> {{ info.channelCount }}ch </n-tag>
         <n-tag v-if="info.bitDepth"> {{ info.bitDepth }}bit </n-tag>
+        <n-tag v-if="info.sampleFormat">
+          {{ info.sampleFormat }}
+        </n-tag>
       </NSpace>
     </NSpace>
   </div>

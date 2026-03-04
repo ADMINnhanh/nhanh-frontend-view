@@ -29,9 +29,9 @@ import HandleFileDrag from "@/components/singleFile/HandleFileDrag.vue";
 import {
   Endianness,
   FormatTime,
-  getTargetFileConfig,
+  getTargetAudioConfig,
   type AudioOptions,
-  type TargetFileConfig,
+  type TargetAudioConfig,
 } from ".";
 import AudioVisualizationManager from "./core/AudioVisualizationManager";
 import MP3FileParser from "./core/MP3FileParser/main";
@@ -44,11 +44,9 @@ const fileListId = _Utility_GenerateUUID("file-list-");
 
 const play = ref(false);
 const accept = ".mp3,.pcm,.wav,.wave";
-const fileIndex = ref<number | undefined>(undefined);
 const fileList = ref<UploadFileInfo[]>([]);
-const audioOptions = new Map<string, AudioOptions>();
 
-const volume = ref(0.2);
+const volume = ref(0.5);
 const options = ref<Partial<PCMPlayOptions>>({
   sampleRate: 16000,
   bitDepth: 16,
@@ -58,64 +56,77 @@ const options = ref<Partial<PCMPlayOptions>>({
   sampleFormat: "int",
   endianness: Endianness.LE,
 });
-const targetFileConfig = ref<TargetFileConfig>();
-
 const lfeMix = ref<LfeMix>({
   enable: false,
   level: 1.0,
   channelCount: 2,
 });
 
-const audioVisualization = new AudioVisualizationManager();
+const audioOptions = new Map<string, AudioOptions>();
+const targetAudioConfig = ref<TargetAudioConfig>();
 
+const audioVisualization = new AudioVisualizationManager();
 audioVisualization.onPlayCompleted = () => {
   play.value = false;
 };
 audioVisualization.playProgressCallback = (currentTime) => {
-  targetFileConfig.value!.currentTime = FormatTime(Number(currentTime));
+  targetAudioConfig.value!.currentTime = FormatTime(Number(currentTime));
 };
 
 const fileListChange = _Utility_Debounce(
   (list: UploadFileInfo[], lastList?: UploadFileInfo[]) => {
-    if (!targetFileConfig.value && list.length > (lastList?.length || 0)) {
+    if (!targetAudioConfig.value && list.length > (lastList?.length || 0)) {
       setActiveUploadFile(0);
     }
   },
   200
 );
 watch(fileList, fileListChange);
-watch(
-  [options, fileIndex],
-  async ([pcmOptions, index]) => {
-    if (typeof index == "number") {
-      const file = fileList.value[index];
-      const audioOption = audioOptions.get(file.id)!;
-      targetFileConfig.value = getTargetFileConfig(audioOption, 0);
-      targetFileConfig.value.id = file.id;
-      requestAnimationFrame(async () => {
-        const canvas = document.getElementById(id) as HTMLCanvasElement;
-        const pcmData = audioOption.pcm;
-        await audioVisualization.init({
-          canvas,
-          pcmData,
-          pcmOptions: {
-            volume: volume.value,
-            ...pcmOptions,
-          },
-        });
+watch(options, initAudio, { deep: true });
+watch(volume, (volume) => audioVisualization.setVolume(volume));
+const lfeMixChange = _Utility_Debounce((newLfeMix: LfeMix) => {
+  if (targetAudioConfig.value) {
+    const { type, lfeMix } = targetAudioConfig.value;
+    if ((!lfeMix?.enable && !newLfeMix.enable) || type == "PCM") return;
+    const index = getActivationFileIndex();
+    if (index === undefined) return;
+    setActiveUploadFile(index, true);
+  }
+}, 200);
+watch(lfeMix, lfeMixChange, { deep: true });
 
-        targetFileConfig.value!.currentTime = FormatTime(0);
-        targetFileConfig.value!.totalDuration = FormatTime(
-          Number(audioVisualization.totalDuration)
-        );
-      });
-    }
-  },
-  { deep: true }
-);
-watch(volume, (volume) => {
-  audioVisualization.setVolume(volume);
-});
+function getActivationFileIndex() {
+  const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
+  const index = Array.from(files).findIndex((v) =>
+    v.classList.contains("active")
+  );
+  return index != -1 ? index : undefined;
+}
+function initAudio() {
+  const index = getActivationFileIndex();
+  if (index === undefined) return;
+
+  const file = fileList.value[index];
+  const audioOption = audioOptions.get(file.id)!;
+  targetAudioConfig.value = getTargetAudioConfig(audioOption);
+  targetAudioConfig.value.id = file.id;
+  requestAnimationFrame(async () => {
+    const canvas = document.getElementById(id) as HTMLCanvasElement;
+    const pcmData = audioOption.pcm;
+    await audioVisualization.init({
+      canvas,
+      pcmData,
+      pcmOptions: {
+        volume: volume.value,
+        ...options.value,
+      },
+    });
+    targetAudioConfig.value!.currentTime = FormatTime(0);
+    targetAudioConfig.value!.totalDuration = FormatTime(
+      Number(audioVisualization.totalDuration)
+    );
+  });
+}
 
 function playAudio() {
   audioVisualization.play();
@@ -156,8 +167,10 @@ function handleMouseMove(mouse: MouseEvent) {
 }
 /** 获取元数据 */
 function getMetadata() {
-  if (fileIndex.value === undefined) return;
-  const file = fileList.value[fileIndex.value];
+  const index = getActivationFileIndex();
+  if (index === undefined) return;
+
+  const file = fileList.value[index];
   return audioOptions.get(file.id);
 }
 
@@ -168,7 +181,6 @@ function handleDrop(files: File[]) {
   const audios = files.filter((file) => isAudioFile(file.name));
 
   if (audios.length > 0) {
-    // fileListChange()
     audios.forEach((audio) => {
       const id = String(audio.lastModified);
       fileList.value.push({
@@ -178,7 +190,7 @@ function handleDrop(files: File[]) {
         file: audio,
       });
     });
-    if (!targetFileConfig.value)
+    if (!targetAudioConfig.value)
       setActiveUploadFile(fileList.value.length - audios.length);
   } else {
     window.$message.warning("请拖拽音频文件");
@@ -212,7 +224,8 @@ function loadExample() {
       status: "finished",
     });
 
-    setActiveUploadFile(fileList.value.length - 1);
+    const index = fileList.value.length - 1;
+    setTimeout(() => setActiveUploadFile(index), 100);
   });
   ["Phil Michalski.mp3", "M1F1-uint8-AFsp.wav"].forEach((fileName) => {
     axios.get(base + fileName, { responseType: "blob" }).then(async (res) => {
@@ -228,7 +241,7 @@ function loadExample() {
   });
 }
 
-async function setActiveUploadFile(index: number) {
+async function setActiveUploadFile(index: number, forceParse = false) {
   const file = fileList.value[index];
   let audioOption = audioOptions.get(file.id);
 
@@ -248,15 +261,16 @@ async function setActiveUploadFile(index: number) {
     setTimeout(() => msg.destroy(), 3000);
   };
 
-  if (!audioOption) {
+  if (!audioOption || forceParse) {
     const audio = file.file;
     if (!audio) return error("数据异常");
 
     const index = audio.name.lastIndexOf(".");
     const type = audio.name.slice(index + 1);
 
+    const _lfeMix = { ...lfeMix.value };
     if (type.toLocaleLowerCase() == "mp3") {
-      const info = await MP3FileParser(audio);
+      const info = await MP3FileParser(audio, _lfeMix);
       if (info) {
         const audioBasicInfo = info.audioBasicInfo;
         audioOptions.set(file.id, {
@@ -267,10 +281,11 @@ async function setActiveUploadFile(index: number) {
             channelCount: audioBasicInfo.channelCount,
             bitDepth: audioBasicInfo.bitDepth as any,
             endianness: Endianness.LE,
-            sampleFormat: info.isFloat ? "float" : "int",
+            sampleFormat: info.sampleFormat,
           },
           pcm: info.pcm,
           mp3: info,
+          lfeMix: _lfeMix,
         });
       } else {
         return error("MP3文件解析失败");
@@ -284,7 +299,7 @@ async function setActiveUploadFile(index: number) {
         pcm,
       });
     } else {
-      const info = await WAVFileParser(audio);
+      const info = await WAVFileParser(audio, _lfeMix);
       if (info) {
         const fmt = info.fmt;
         audioOptions.set(file.id, {
@@ -295,10 +310,11 @@ async function setActiveUploadFile(index: number) {
             channelCount: fmt.wChannels,
             bitDepth: fmt.dwBitsPerSample as any,
             endianness: Endianness.LE,
-            sampleFormat: info.isFloat ? "float" : "int",
+            sampleFormat: info.sampleFormat,
           },
           pcm: info.pcm,
           wav: info,
+          lfeMix: _lfeMix,
         });
       } else {
         return error("WAV文件解析失败");
@@ -307,18 +323,20 @@ async function setActiveUploadFile(index: number) {
 
     audioOption = audioOptions.get(file.id);
   }
-  fileIndex.value = index;
 
   finish();
 
   Object.assign(options.value, audioOption!.audioBasicInfo);
-  setTimeout(() => {
-    const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
-    files.forEach((v, i) => {
-      v.classList.remove("active");
-      if (i == index) v.classList.add("active");
-    });
-  }, 100);
+
+  if (audioOption?.lfeMix?.enable)
+    options.value.channelCount = audioOption.lfeMix.channelCount;
+
+  const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
+  files.forEach((v, i) => {
+    v.classList.remove("active");
+    if (i == index) v.classList.add("active");
+  });
+  initAudio();
 }
 function handleFileListClick(ev: PointerEvent) {
   const isButton = (ev.target as HTMLElement).closest(".n-button");
@@ -330,16 +348,15 @@ function handleFileListClick(ev: PointerEvent) {
   const file = fileList.value[index];
   if (isButton) {
     audioOptions.delete(file.id);
-    if (file.id == targetFileConfig.value?.id) {
-      fileIndex.value = undefined;
+    if (file.id == targetAudioConfig.value?.id) {
       play.value = false;
       audioVisualization.clear();
-      targetFileConfig.value = undefined;
+      targetAudioConfig.value = undefined;
     }
     return;
   }
 
-  if (index != -1 && file.id != targetFileConfig.value?.id)
+  if (index != -1 && file.id != targetAudioConfig.value?.id)
     setActiveUploadFile(index);
 }
 
@@ -389,15 +406,17 @@ onUnmounted(() => {
                     加载样例
                   </n-button>
                 </NButtonGroup>
-                <NUploadFileList
-                  :id="fileListId"
-                  @click.capture="handleFileListClick"
-                />
+                <NScrollbar style="max-height: 125px">
+                  <NUploadFileList
+                    :id="fileListId"
+                    @click.capture="handleFileListClick"
+                  />
+                </NScrollbar>
               </n-upload>
             </template>
             <template #suffix>
               <NButton
-                :disabled="typeof fileIndex != 'number'"
+                :disabled="!targetAudioConfig"
                 :type="play ? 'error' : 'success'"
                 ghost
                 @click="play ? pauseAudio() : playAudio()"
@@ -413,10 +432,10 @@ onUnmounted(() => {
       </template>
       <template #right>
         <NScrollbar>
-          <div v-if="targetFileConfig" class="audio-player-container">
+          <div v-if="targetAudioConfig" class="audio-player-container">
             <AudioBasicInfo
               :is-running="play"
-              :info="targetFileConfig"
+              :info="targetAudioConfig"
               :getMetadata="getMetadata"
             />
             <div class="canvas-container">
@@ -430,8 +449,8 @@ onUnmounted(() => {
               ></div>
             </div>
             <div class="time-container">
-              <n-text>{{ targetFileConfig.currentTime }}</n-text>
-              <n-text>{{ targetFileConfig.totalDuration }}</n-text>
+              <n-text>{{ targetAudioConfig.currentTime }}</n-text>
+              <n-text>{{ targetAudioConfig.totalDuration }}</n-text>
             </div>
           </div>
         </NScrollbar>

@@ -5,7 +5,7 @@ import MpegAudioParser, {
   type MpegAudioBasicInfo,
 } from "./MpegFrameHeaderParser";
 
-export default async function MP3FileParser(file: File) {
+export default async function MP3FileParser(file: File, lfeMix: LfeMix) {
   const buffer = await file.arrayBuffer();
   const fileSize = buffer.byteLength;
 
@@ -36,7 +36,11 @@ export default async function MP3FileParser(file: File) {
     ? mpegAudio.audioBasicInfo
     : defaultAudioBasicInfo;
 
-  const { pcm, isFloat } = await decodeAudioToPcm(file, audioBasicInfo);
+  const { pcm, sampleFormat } = await decodeAudioToPcm(
+    file,
+    audioBasicInfo,
+    lfeMix
+  );
   if (!pcm) return null;
 
   return {
@@ -47,6 +51,6 @@ export default async function MP3FileParser(file: File) {
     mpegAudio,
     pcm,
     audioBasicInfo,
-    isFloat,
+    sampleFormat,
   };
 }

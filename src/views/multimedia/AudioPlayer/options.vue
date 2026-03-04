@@ -24,7 +24,10 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
     <slot name="prefix" />
     <NH3 prefix="bar" type="info" style="margin: 10px 0">
       <div class="options-panel">
-        <NText type="info"> LFE 混合 作用于 MP3 / WAV 解析为 PCM 的过程 </NText>
+        <NText type="info">
+          <NText type="warning">LFE 混合</NText>
+          作用于 MP3 / WAV 解析为 PCM 的过程
+        </NText>
         <NInputGroup>
           <NInputGroupLabel>启用</NInputGroupLabel>
           <NSwitch v-model:value="lfeMix.enable" />
@@ -53,8 +56,7 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
 
     <NH3 prefix="bar" type="info" style="margin: 10px 0">
       <div class="options-panel">
-        <NText type="info"> 以下配置仅控制 PCM 的解析 </NText>
-        <NText type="info"> MP3 / WAV 解析为 PCM 的过程不受干扰 </NText>
+        <NText type="info"> 作用于 PCM 的解析 </NText>
         <NInputGroup>
           <NInputGroupLabel>采样率</NInputGroupLabel>
           <NSelect
