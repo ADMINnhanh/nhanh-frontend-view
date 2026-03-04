@@ -406,7 +406,7 @@ onUnmounted(() => {
                     加载样例
                   </n-button>
                 </NButtonGroup>
-                <NScrollbar style="max-height: 125px">
+                <NScrollbar style="max-height: calc(100vh - 794px)">
                   <NUploadFileList
                     :id="fileListId"
                     @click.capture="handleFileListClick"
