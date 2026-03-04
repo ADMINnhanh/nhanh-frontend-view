@@ -74,7 +74,6 @@ class AudioSpectrumRenderer {
     );
     const dataBlockSize = Math.floor(audioDataLength / this.barCount);
 
-    // 计算每个振幅柱对应的平均振幅（取各声道最大值）
     this.amplitudeValues = [];
     for (let barIndex = 0; barIndex < this.barCount; barIndex++) {
       const startIndex = barIndex * dataBlockSize;

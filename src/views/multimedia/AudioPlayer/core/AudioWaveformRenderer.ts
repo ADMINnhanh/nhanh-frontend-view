@@ -11,7 +11,6 @@ class AudioWaveformRenderer {
 
   /** 各声道波形渲染的颜色集合（循环使用） */
   private channelColors = [
-    "#5470c6",
     "#91cc75",
     "#fac858",
     "#ee6666",
@@ -20,18 +19,16 @@ class AudioWaveformRenderer {
     "#fc8452",
     "#9a60b4",
     "#ea7ccc",
+    "#5470c6",
   ];
   /** 每个声道分配的渲染高度（像素） */
   private channelRenderHeight = 0;
-  /** 计算波形数据块大小 */
-  private waveformDataSize = 0;
-  /** 计算波形数据块数量 */
-  private waveformDataCount = 0;
-
-  /** 各声道的振幅数据缓存（预处理后的值，范围 [-1, 1]） */
-  private channelAmplitudeData: Float32Array[][] = [];
-  /** 上一次渲染的起始数据索引（用于防抖，避免重复渲染） */
-  private lastRenderedStartIndex?: number;
+  /** 绘制压缩比例 */
+  private compressionRatio = 1;
+  /** 最大偏移下标 */
+  private maxOffsetIndex = 0;
+  /** 预期的绘制帧数（默认每秒30帧） */
+  public fps = 60;
 
   /**
    * 初始化音频振幅可视化渲染器
@@ -39,11 +36,19 @@ class AudioWaveformRenderer {
    */
   init(config: AudioVisualizationConfig): void {
     this.config = config;
-    this.lastRenderedStartIndex = undefined; // 重置上一次渲染索引
-    this.channelRenderHeight = Math.floor(
-      config.canvasContext.canvas.height / config.channelCount
+
+    const { canvasContext, channelCount, duration, audioBuffer } = config;
+    const { width, height } = canvasContext.canvas;
+
+    this.channelRenderHeight = Math.floor(height / channelCount);
+    this.compressionRatio = Math.max(
+      1,
+      Math.floor(audioBuffer.length / (duration * this.fps * width))
     );
-    this.preprocessAudioData(); // 预处理音频振幅数据
+    this.maxOffsetIndex = Math.floor(
+      audioBuffer.length / this.compressionRatio - width
+    );
+
     this.renderChannelBaseLines(); // 绘制声道基准线（辅助可视化）
   }
 
@@ -75,32 +80,20 @@ class AudioWaveformRenderer {
 
   /**
    * 根据播放进度绘制音频波形
-   * @param progress 播放进度（百分比，0-100）
+   * @param progress 播放进度（0~1）
    */
   render(progress: number): void {
-    const {
-      channelRenderHeight,
-      channelAmplitudeData,
-      config,
-      channelColors,
-      waveformDataSize,
-      waveformDataCount,
-    } = this;
+    const { channelRenderHeight, config, channelColors, compressionRatio } =
+      this;
 
     // 校验必要参数，避免渲染异常
-    if (!config || !channelAmplitudeData.length) return;
+    if (!config) return;
 
-    const { channelCount, canvasContext } = config;
+    const { channelCount, canvasContext, audioBuffer } = config;
     const { width, height } = canvasContext.canvas;
 
     // 根据进度计算当前渲染的起始数据索引
-    const currentStartIndex = Math.floor(
-      Math.min(waveformDataCount * progress, waveformDataCount - 1)
-    );
-
-    // 防抖：如果起始索引未变化，不重复渲染
-    if (this.lastRenderedStartIndex === currentStartIndex) return;
-    this.lastRenderedStartIndex = currentStartIndex;
+    const currentStartIndex = Math.floor(this.maxOffsetIndex * progress);
 
     // 清空画布，准备绘制新帧
     canvasContext.clearRect(0, 0, width, height);
@@ -113,65 +106,22 @@ class AudioWaveformRenderer {
       const channelCenterY =
         channelRenderHeight * channelIndex + channelRenderHeight / 2;
 
-      const amplitude = channelAmplitudeData[channelIndex][currentStartIndex];
+      const channelRawData = audioBuffer.getChannelData(channelIndex);
 
       // 逐像素绘制水平方向的波形点
-      for (let x = 0; x < waveformDataSize; x++) {
-        // 计算波形点的 Y 坐标（振幅越大，偏离中心越远）
+      for (let x = 0; x < width; x++) {
+        const start = (currentStartIndex + x) * compressionRatio;
+        const end = start + compressionRatio;
+        const amplitude =
+          channelRawData.slice(start, end).reduce((acc, cur) => acc + cur, 0) /
+          compressionRatio;
+
         const waveformY = Math.floor(
-          channelCenterY - (channelRenderHeight / 2) * amplitude[x]
+          channelCenterY - (channelRenderHeight / 2) * amplitude
         );
-        // 绘制单个像素点（构成波形）
         canvasContext.fillRect(x, waveformY, 1, 1);
       }
     }
-  }
-
-  /**
-   * 预处理音频数据，计算各时间点的振幅值
-   * 核心逻辑：
-   * 1. 根据帧率和时长计算数据块数量
-   * 2. 对音频样本数据分块求平均，得到简化的振幅数据
-   * 3. 缓存各声道的振幅数据，提升渲染性能
-   */
-  private preprocessAudioData(): void {
-    if (!this.config) return;
-    const { canvasContext, audioBuffer, channelCount } = this.config;
-
-    // 计算波形数据块大小
-    const waveformDataSize = Math.floor(canvasContext.canvas.width);
-    // 计算波形数据块数量
-    const waveformDataCount = Math.floor(audioBuffer.length / waveformDataSize);
-
-    this.waveformDataSize = waveformDataSize;
-    this.waveformDataCount = waveformDataCount;
-
-    // 初始化各声道的振幅数据缓存
-    this.channelAmplitudeData = Array.from({ length: channelCount }).map(
-      () => new Array(waveformDataCount)
-    );
-
-    // 逐声道处理音频数据
-    for (let channelIndex = 0; channelIndex < channelCount; channelIndex++) {
-      // 获取当前声道的原始样本数据
-      const channelRawData = audioBuffer.getChannelData(channelIndex);
-
-      // 逐数据块计算平均振幅
-      for (let blockIndex = 0; blockIndex < waveformDataCount; blockIndex++) {
-        const startSampleIndex = blockIndex * waveformDataSize;
-        // 截取当前数据块的样本数据
-        this.channelAmplitudeData[channelIndex][blockIndex] =
-          channelRawData.slice(
-            startSampleIndex,
-            startSampleIndex + waveformDataSize
-          );
-      }
-    }
-  }
-
-  /** 清理 */
-  clear() {
-    this.channelAmplitudeData = [];
   }
 }
 

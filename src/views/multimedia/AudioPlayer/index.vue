@@ -82,34 +82,14 @@ const fileListChange = _Utility_Debounce(
   200
 );
 watch(fileList, fileListChange);
-watch(options, initAudio, { deep: true });
-watch(volume, (volume) => audioVisualization.setVolume(volume));
-const lfeMixChange = _Utility_Debounce((newLfeMix: LfeMix) => {
-  if (targetAudioConfig.value) {
-    const { type, lfeMix } = targetAudioConfig.value;
-    if ((!lfeMix?.enable && !newLfeMix.enable) || type == "PCM") return;
-    const index = getActivationFileIndex();
-    if (index === undefined) return;
-    setActiveUploadFile(index, true);
-  }
-}, 200);
-watch(lfeMix, lfeMixChange, { deep: true });
-
-function getActivationFileIndex() {
-  const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
-  const index = Array.from(files).findIndex((v) =>
-    v.classList.contains("active")
-  );
-  return index != -1 ? index : undefined;
-}
-function initAudio() {
+const initAudio = _Utility_Debounce(() => {
   const index = getActivationFileIndex();
   if (index === undefined) return;
-
   const file = fileList.value[index];
   const audioOption = audioOptions.get(file.id)!;
   targetAudioConfig.value = getTargetAudioConfig(audioOption);
   targetAudioConfig.value.id = file.id;
+
   requestAnimationFrame(async () => {
     const canvas = document.getElementById(id) as HTMLCanvasElement;
     const pcmData = audioOption.pcm;
@@ -126,6 +106,26 @@ function initAudio() {
       Number(audioVisualization.totalDuration)
     );
   });
+}, 200);
+watch(options, initAudio, { deep: true });
+watch(volume, (volume) => audioVisualization.setVolume(volume));
+const lfeMixChange = _Utility_Debounce((newLfeMix: LfeMix) => {
+  if (targetAudioConfig.value) {
+    const { type, lfeMix } = targetAudioConfig.value;
+    if ((!lfeMix?.enable && !newLfeMix.enable) || type == "PCM") return;
+    const index = getActivationFileIndex();
+    if (index === undefined) return;
+    setActiveUploadFile(index, true);
+  }
+}, 400);
+watch(lfeMix, lfeMixChange, { deep: true });
+
+function getActivationFileIndex() {
+  const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
+  const index = Array.from(files).findIndex((v) =>
+    v.classList.contains("active")
+  );
+  return index != -1 ? index : undefined;
 }
 
 function playAudio() {
@@ -223,9 +223,10 @@ function loadExample() {
       name: jay_chou,
       status: "finished",
     });
-
-    const index = fileList.value.length - 1;
-    setTimeout(() => setActiveUploadFile(index), 100);
+    if (!targetAudioConfig.value) {
+      const index = fileList.value.length - 1;
+      setTimeout(() => setActiveUploadFile(index), 100);
+    }
   });
   ["Phil Michalski.mp3", "M1F1-uint8-AFsp.wav"].forEach((fileName) => {
     axios.get(base + fileName, { responseType: "blob" }).then(async (res) => {
@@ -241,14 +242,20 @@ function loadExample() {
   });
 }
 
+const parserLoading = ref(false);
 async function setActiveUploadFile(index: number, forceParse = false) {
+  if (parserLoading.value) return window.$message.warning("请稍等~");
+
   const file = fileList.value[index];
   let audioOption = audioOptions.get(file.id);
 
   const msg = window.$message.loading("解析中... 希望不会太久~", {
     duration: 0,
   });
+  parserLoading.value = true;
+
   const finish = () => {
+    parserLoading.value = false;
     setTimeout(() => {
       msg.type = "success";
       msg.content = `解析完成。久等了~`;
@@ -256,6 +263,8 @@ async function setActiveUploadFile(index: number, forceParse = false) {
     }, 1000);
   };
   const error = (str: string) => {
+    parserLoading.value = false;
+
     msg.type = "error";
     msg.content = `解析失败，${str}。额~`;
     setTimeout(() => msg.destroy(), 3000);

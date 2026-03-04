@@ -49,15 +49,15 @@ export class PCMAudioPlayer {
 
   /**
    * 设置音量（实时生效，不中断播放）
-   * @param volume 音量值（0~1，0=静音，1=最大音量）
+   * @param volume 音量值（0~3，0=静音，3=最大音量）
    */
   public setVolume(volume: number): void {
     if (!this.gainNode) {
       console.warn("增益节点未初始化，请先调用 init()");
       return;
     }
-    // 限制音量范围在 0~1 之间（避免音量过大失真）
-    const clampedVolume = Math.max(0, Math.min(1, volume));
+
+    const clampedVolume = Math.max(0, Math.min(3, volume));
     this.currentVolume = clampedVolume;
     this.gainNode.gain.value = clampedVolume;
   }

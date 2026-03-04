@@ -49,6 +49,12 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
             :min="0"
             :max="3"
             :step="0.01"
+            :marks="{
+              0: '0',
+              1: '1',
+              2: '2',
+              3: '3',
+            }"
           />
         </NInputGroup>
       </div>
@@ -113,7 +119,18 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
         </NInputGroup>
         <NInputGroup>
           <NInputGroupLabel>音量</NInputGroupLabel>
-          <NSlider v-model:value="volume" :min="0" :max="1" :step="0.01" />
+          <NSlider
+            v-model:value="volume"
+            :min="0"
+            :max="3"
+            :step="0.01"
+            :marks="{
+              0: '0',
+              1: '1',
+              2: '2',
+              3: '3',
+            }"
+          />
         </NInputGroup>
       </div>
     </NH3>
@@ -129,9 +146,14 @@ const options = defineModel<Partial<PCMPlayOptions>>("options", {
   gap: 10px;
   .n-input-group {
     align-items: center;
-    .n-slider,
     .n-switch {
       margin-left: 10px !important;
+    }
+    .n-slider {
+      margin: -15px 0 0 10px !important;
+      :deep(.n-slider-marks) {
+        top: 5px;
+      }
     }
   }
   .n-select,

@@ -41,7 +41,7 @@ async function decodeAudioToPcm(
 
     /** 音频通道参数 */
     const audioChannelArgs =
-      lfeMix.enable && channelCount > 2
+      lfeMix.enable && channelCount > lfeMix.channelCount
         ? [
             "-ac",
             String(lfeMix.channelCount),

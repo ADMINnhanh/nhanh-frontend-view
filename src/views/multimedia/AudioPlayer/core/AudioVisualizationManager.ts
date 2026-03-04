@@ -32,7 +32,7 @@ class AudioVisualizationManager {
    * 播放进度更新回调函数类型定义
    * @param currentTime - 当前播放时间（秒，保留2位小数）
    * @param totalDuration - 音频总时长（秒，保留2位小数）
-   * @param progressPercentage - 播放进度百分比（保留1位小数）
+   * @param progressPercentage - 播放进度百分比（保留6位小数）
    */
   playProgressCallback: PCMAudioPlayer["playProgressCallback"];
 
@@ -144,7 +144,7 @@ class AudioVisualizationManager {
   }
   /**
    * 设置音量（实时生效，不中断播放）
-   * @param volume 音量值（0~1，0=静音，1=最大音量）
+   * @param volume 音量值（0~3，0=静音，3=最大音量）
    */
   setVolume(volume: number) {
     this.audioPlayer.setVolume(volume);
@@ -165,7 +165,6 @@ class AudioVisualizationManager {
   clear() {
     this.audioPlayer.clear();
     this.audioSpectrum.clear();
-    this.audioWaveform.clear();
 
     const { ctx, canvas } = this;
     if (ctx && canvas) {

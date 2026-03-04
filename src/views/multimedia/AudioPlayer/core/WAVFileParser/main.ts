@@ -35,7 +35,7 @@ export default async function WAVFileParser(file: File, lfeMix: LfeMix) {
 
   const otherChunk = OtherChunkParser(dataView);
 
-  console.log(fmt, otherChunk);
+  // console.log(fmt, otherChunk);
 
   const { pcm, sampleFormat } = await decodeAudioToPcm(
     file,
