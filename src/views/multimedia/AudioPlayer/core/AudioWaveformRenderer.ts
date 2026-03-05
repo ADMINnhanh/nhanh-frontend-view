@@ -30,6 +30,8 @@ class AudioWaveformRenderer {
   /** 预期的绘制帧数（默认每秒30帧） */
   public fps = 60;
 
+  /** 静音的声道 */
+  public mutedChannels = new Set<number>();
   /**
    * 初始化音频振幅可视化渲染器
    * @param config 渲染配置项，包含 Canvas、音频数据、声道数等核心参数
@@ -83,8 +85,13 @@ class AudioWaveformRenderer {
    * @param progress 播放进度（0~1）
    */
   render(progress: number): void {
-    const { channelRenderHeight, config, channelColors, compressionRatio } =
-      this;
+    const {
+      channelRenderHeight,
+      config,
+      channelColors,
+      compressionRatio,
+      mutedChannels,
+    } = this;
 
     // 校验必要参数，避免渲染异常
     if (!config) return;
@@ -108,17 +115,23 @@ class AudioWaveformRenderer {
 
       const channelRawData = audioBuffer.getChannelData(channelIndex);
 
+      const muted = mutedChannels.has(channelIndex);
+
       // 逐像素绘制水平方向的波形点
       for (let x = 0; x < width; x++) {
-        const start = (currentStartIndex + x) * compressionRatio;
-        const end = start + compressionRatio;
-        const amplitude =
-          channelRawData.slice(start, end).reduce((acc, cur) => acc + cur, 0) /
-          compressionRatio;
+        let waveformY = channelCenterY;
+        if (!muted) {
+          const start = (currentStartIndex + x) * compressionRatio;
+          const end = start + compressionRatio;
+          const amplitude =
+            channelRawData
+              .slice(start, end)
+              .reduce((acc, cur) => acc + cur, 0) / compressionRatio;
+          waveformY = Math.floor(
+            channelCenterY - (channelRenderHeight / 2) * amplitude
+          );
+        }
 
-        const waveformY = Math.floor(
-          channelCenterY - (channelRenderHeight / 2) * amplitude
-        );
         canvasContext.fillRect(x, waveformY, 1, 1);
       }
     }

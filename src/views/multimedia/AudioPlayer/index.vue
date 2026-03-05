@@ -15,6 +15,9 @@ import {
   NText,
   NScrollbar,
   NH3,
+  NInputGroup,
+  NInputGroupLabel,
+  NSlider,
 } from "naive-ui";
 import { onDeactivated, onUnmounted, ref, watch } from "vue";
 import {
@@ -47,6 +50,7 @@ const accept = ".mp3,.pcm,.wav,.wave";
 const fileList = ref<UploadFileInfo[]>([]);
 
 const volume = ref(0.5);
+const channelVolume = ref<number[]>([]);
 const options = ref<Partial<PCMPlayOptions>>({
   sampleRate: 16000,
   bitDepth: 16,
@@ -61,6 +65,9 @@ const lfeMix = ref<LfeMix>({
   level: 1.0,
   channelCount: 2,
 });
+
+let initChannelVolumeTips = false;
+const channelVolumeTips = ref(false);
 
 const audioOptions = new Map<string, AudioOptions>();
 const targetAudioConfig = ref<TargetAudioConfig>();
@@ -85,10 +92,23 @@ watch(fileList, fileListChange);
 const initAudio = _Utility_Debounce(() => {
   const index = getActivationFileIndex();
   if (index === undefined) return;
+
   const file = fileList.value[index];
   const audioOption = audioOptions.get(file.id)!;
   targetAudioConfig.value = getTargetAudioConfig(audioOption);
   targetAudioConfig.value.id = file.id;
+
+  const channelCount = options.value.channelCount || 0;
+  for (let i = channelVolume.value.length; i < channelCount; i++) {
+    channelVolume.value[i] = 1;
+  }
+  if (!initChannelVolumeTips) {
+    initChannelVolumeTips = true;
+    channelVolumeTips.value = true;
+    setTimeout(() => {
+      channelVolumeTips.value = false;
+    }, 5000);
+  }
 
   requestAnimationFrame(async () => {
     const canvas = document.getElementById(id) as HTMLCanvasElement;
@@ -109,6 +129,15 @@ const initAudio = _Utility_Debounce(() => {
 }, 200);
 watch(options, initAudio, { deep: true });
 watch(volume, (volume) => audioVisualization.setVolume(volume));
+watch(
+  channelVolume,
+  (channelVolume) => {
+    channelVolume.forEach((volume, index) => {
+      audioVisualization.setChannelVolume(index, volume);
+    });
+  },
+  { deep: true }
+);
 const lfeMixChange = _Utility_Debounce((newLfeMix: LfeMix) => {
   if (targetAudioConfig.value) {
     const { type, lfeMix } = targetAudioConfig.value;
@@ -198,48 +227,64 @@ function handleDrop(files: File[]) {
 }
 
 /** 加载样例 */
-function loadExample() {
+async function loadExample() {
+  const msg = window.$message.loading("加载样例中...", { duration: 0 });
+
   const base = "/public/multimedia/";
   const jay_chou = "Jay Chou.pcm";
-  axios.get(base + jay_chou, { responseType: "blob" }).then(async (res) => {
-    const file = new File([res.data], jay_chou);
-    const pcm = await file.arrayBuffer();
-    const id = String(file.lastModified);
 
-    audioOptions.set(id, {
-      fileName: file.name,
-      fileSize: file.size,
-      audioBasicInfo: {
-        sampleRate: 24000,
-        bitDepth: 16,
-        channelCount: 2,
-        endianness: Endianness.LE,
-        sampleFormat: "int",
-      },
-      pcm,
-    });
-    fileList.value.push({
-      id,
-      name: jay_chou,
-      status: "finished",
-    });
-    if (!targetAudioConfig.value) {
-      const index = fileList.value.length - 1;
-      setTimeout(() => setActiveUploadFile(index), 100);
-    }
-  });
-  ["Phil Michalski.mp3", "M1F1-uint8-AFsp.wav"].forEach((fileName) => {
-    axios.get(base + fileName, { responseType: "blob" }).then(async (res) => {
-      const file = new File([res.data], fileName);
+  await axios
+    .get(base + jay_chou, { responseType: "blob" })
+    .then(async (res) => {
+      const file = new File([res.data], jay_chou);
+      const pcm = await file.arrayBuffer();
       const id = String(file.lastModified);
+
+      audioOptions.set(id, {
+        fileName: file.name,
+        fileSize: file.size,
+        audioBasicInfo: {
+          sampleRate: 24000,
+          bitDepth: 16,
+          channelCount: 2,
+          endianness: Endianness.LE,
+          sampleFormat: "int",
+        },
+        pcm,
+      });
       fileList.value.push({
         id,
-        name: fileName,
+        name: jay_chou,
         status: "finished",
-        file,
       });
+      if (!targetAudioConfig.value) {
+        const index = fileList.value.length - 1;
+        setTimeout(() => setActiveUploadFile(index), 100);
+      }
     });
-  });
+
+  const promises = ["Phil Michalski.mp3", "M1F1-uint8-AFsp.wav"].map(
+    (fileName) => {
+      return axios
+        .get(base + fileName, { responseType: "blob" })
+        .then(async (res) => {
+          const file = new File([res.data], fileName);
+          const id = String(file.lastModified);
+          fileList.value.push({
+            id,
+            name: fileName,
+            status: "finished",
+            file,
+          });
+        });
+    }
+  );
+
+  await Promise.allSettled(promises);
+
+  msg.type = "success";
+  msg.content = "加载完成。";
+  setTimeout(() => msg.destroy(), 3000);
 }
 
 const parserLoading = ref(false);
@@ -448,6 +493,34 @@ onUnmounted(() => {
               :getMetadata="getMetadata"
             />
             <div class="canvas-container">
+              <div
+                :class="['channel-volume', channelVolumeTips && 'show']"
+                :style="{
+                  height: (options.channelCount || 0) * 100 + 'px',
+                }"
+              >
+                <NInputGroup
+                  v-for="(_, index) in channelVolume.slice(
+                    0,
+                    options.channelCount || 0
+                  )"
+                  :key="index"
+                >
+                  <NInputGroupLabel>声道 {{ index + 1 }} 音量</NInputGroupLabel>
+                  <NSlider
+                    v-model:value="channelVolume[index]"
+                    :min="0"
+                    :max="3"
+                    :step="0.01"
+                    :marks="{
+                      0: '0',
+                      1: '1',
+                      2: '2',
+                      3: '3',
+                    }"
+                  />
+                </NInputGroup>
+              </div>
               <canvas :id="id" />
               <div
                 class="progress"
@@ -503,6 +576,29 @@ onUnmounted(() => {
   .canvas-container {
     display: flex;
     position: relative;
+    .channel-volume {
+      position: absolute;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-around;
+      background-color: #464646cf;
+      opacity: 0;
+      transition: opacity 0.3s linear;
+      &:hover {
+        opacity: 1;
+      }
+      .n-input-group {
+        width: 50%;
+        .n-slider {
+          margin: 8px 0 8px 10px !important;
+        }
+      }
+    }
+    .channel-volume.show {
+      opacity: 1;
+    }
     canvas {
       width: 100%;
       border-radius: 6px;

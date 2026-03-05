@@ -16,8 +16,17 @@ export class PCMAudioPlayer {
   public audioBuffer?: AudioBuffer;
   /** 增益节点（用于音量控制） */
   private gainNode?: GainNode;
-  /** 当前音量（0~1，默认 1） */
-  public currentVolume = 1;
+  /** 节点分离器 */
+  private channelSplitter: ChannelSplitterNode | null = null;
+  /** 节点合并器 */
+  private channelMerger: ChannelMergerNode | null = null;
+  /** 存储各声道的音量控制节点 */
+  private channelGainNodes: GainNode[] = [];
+  /** 当前音量（0~3，默认 1） */
+  public volume = 1;
+  /** 声道音量（0~3，默认 1） */
+  public channelVolume: number[] = [];
+
   /** 播放开始位置（秒） */
   public startTime = 0;
   /** 播放时长（秒） */
@@ -58,8 +67,25 @@ export class PCMAudioPlayer {
     }
 
     const clampedVolume = Math.max(0, Math.min(3, volume));
-    this.currentVolume = clampedVolume;
+    this.volume = clampedVolume;
     this.gainNode.gain.value = clampedVolume;
+  }
+  /**
+   * 设置声道音量（实时生效，不中断播放）
+   * @param index 声道索引，从0开始
+   * @param volume 音量值（0~3，0=静音，3=最大音量）
+   */
+  public setChannelVolume(index: number, volume: number) {
+    volume = Math.max(0, Math.min(3, volume));
+    this.channelVolume[index] = volume;
+    if (this.channelGainNodes[index]) {
+      this.channelGainNodes[index].gain.value = volume;
+    }
+  }
+  /** 获取声道音量 */
+  public getChannelVolume(index: number) {
+    const volume = this.channelVolume[index];
+    return typeof volume == "number" ? volume : 1;
   }
 
   /** 初始化音频上下文（兼容不同浏览器） */
@@ -73,7 +99,7 @@ export class PCMAudioPlayer {
       // 将增益节点连接到扬声器
       this.gainNode.connect(this.audioContext.destination);
       // 设置初始音量
-      this.gainNode.gain.value = this.currentVolume;
+      this.gainNode.gain.value = this.volume;
     }
   }
 
@@ -265,7 +291,30 @@ export class PCMAudioPlayer {
     // 创建新的音频源播放
     this.source = this.audioContext.createBufferSource();
     this.source.buffer = this.audioBuffer;
-    this.source.connect(this.gainNode!);
+
+    // 2. 创建声道分离/合并节点
+    const channelCount = this.audioBuffer.numberOfChannels;
+    this.channelSplitter =
+      this.audioContext.createChannelSplitter(channelCount);
+    this.channelMerger = this.audioContext.createChannelMerger(channelCount);
+
+    // 3. 为每个声道创建音量控制节点
+    this.channelGainNodes = [];
+    for (let i = 0; i < channelCount; i++) {
+      const gainNode = this.audioContext.createGain();
+      gainNode.gain.value = this.getChannelVolume(i);
+
+      this.channelGainNodes.push(gainNode);
+      // 连接：分离声道 → 音量控制 → 合并声道
+      this.channelSplitter.connect(gainNode, i, 0);
+      gainNode.connect(this.channelMerger, 0, i);
+    }
+
+    // 4. 连接音频链路：源 → 分离器 → 合并器 → 输出
+    this.source.connect(this.channelSplitter);
+    this.channelMerger.connect(this.gainNode!);
+
+    // this.source.connect(this.gainNode!);
     this.source.start(0, playOffset, playDuration);
 
     this.isPlaying = true;
@@ -349,14 +398,22 @@ export class PCMAudioPlayer {
   }
   /** 停止播放 */
   public async stop() {
-    if (this.source) {
-      // console.log("stop");
-      this.source.stop();
-      this.source.disconnect();
-      this.source = undefined;
+    // console.log("stop");
 
-      await _Utility_WaitForCondition(() => !this.isPlaying, 500);
-    }
+    this.source?.stop();
+    this.source?.disconnect();
+    this.source = undefined;
+
+    this.channelGainNodes.forEach((node) => node.disconnect());
+    this.channelGainNodes = [];
+
+    // 断开分离器/合并器
+    this.channelSplitter?.disconnect();
+    this.channelSplitter = null;
+    this.channelMerger?.disconnect();
+    this.channelMerger = null;
+
+    await _Utility_WaitForCondition(() => !this.isPlaying, 500);
   }
 
   /** 清理 */

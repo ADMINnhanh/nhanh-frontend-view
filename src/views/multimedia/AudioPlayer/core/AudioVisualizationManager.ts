@@ -149,6 +149,20 @@ class AudioVisualizationManager {
   setVolume(volume: number) {
     this.audioPlayer.setVolume(volume);
   }
+  /**
+   * 设置声道音量（实时生效，不中断播放）
+   * @param index 声道索引，从0开始
+   * @param volume 音量值（0~3，0=静音，3=最大音量）
+   */
+  setChannelVolume(index: number, volume: number) {
+    this.audioPlayer.setChannelVolume(index, volume);
+
+    if (volume > 0) {
+      this.audioWaveform.mutedChannels.delete(index);
+    } else {
+      this.audioWaveform.mutedChannels.add(index);
+    }
+  }
   play(): Promise<void>;
   play(startTime: number, isStatic?: boolean): Promise<void> | void;
   play(startTime?: number, isStatic?: boolean) {
