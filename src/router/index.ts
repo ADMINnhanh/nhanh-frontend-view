@@ -95,14 +95,31 @@ watch([title, () => Settings.value.language], ([title, language]) => {
 });
 
 // console.log(
-//   router.getRoutes().map((item) => {
-//     const name = item.meta.name;
-//     const title = name
-//       ? /** @ts-ignore */
-//         name.zhCN + "/" + name.enUS
-//       : "你好啊你好/nhanh/nha-nh 的网站";
-//     return [title, item.path];
-//   })
+//   router
+//     .getRoutes()
+//     .map((item) => {
+//       if (item.path == "/:pathMatch(.*)") return;
+
+//       const meta: any = item.meta || {};
+//       const name: any = meta.name;
+//       const details: any = meta.details;
+
+//       const fallback = {
+//         title:
+//           "前端Canvas工具集 - 可视化/绘图/音频/数学动态图解/Frontend Canvas Toolkit - Visualization/Drawing/Audio/Math Dynamic Diagram",
+//         seo: "涵盖Canvas绘画（YOLO8标注、Threejs、GLSL、图片打散重组、网格文字生成）、数学动态图解、多媒体（取流、在线PCM/MP3/WAV音频可视化播放器）、解乏小组件（弹跳球、小说搜索等）等前端实用工具集。",
+//       };
+//       const title =
+//         name && name.zhCN && name.enUS
+//           ? `${name.zhCN}/${name.enUS}`
+//           : fallback.title;
+//       const seo =
+//         details && details.zhCN && details.enUS
+//           ? `${details.zhCN}/${details.enUS}`
+//           : fallback.seo;
+//       return [title, item.path, seo];
+//     })
+//     .filter(Boolean)
 // );
 
 export default router;
