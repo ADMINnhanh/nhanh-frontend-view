@@ -1,0 +1,1 @@
+import{f as r,g as d,h as u,d7 as c,d8 as i}from"./index-BiWbZ_LE.js";function f(n){const{mergedLocaleRef:o,mergedDateLocaleRef:a}=r(u,null)||{},t=d(()=>{var e,l;return(l=(e=o==null?void 0:o.value)===null||e===void 0?void 0:e[n])!==null&&l!==void 0?l:c[n]});return{dateLocaleRef:d(()=>{var e;return(e=a==null?void 0:a.value)!==null&&e!==void 0?e:i}),localeRef:t}}export{f as u};
