@@ -19,7 +19,7 @@ import {
   NInputGroupLabel,
   NSlider,
 } from "naive-ui";
-import { onDeactivated, onUnmounted, ref, watch } from "vue";
+import { h, onDeactivated, onUnmounted, ref, watch } from "vue";
 import {
   Add,
   CloudDownloadOutline,
@@ -385,6 +385,21 @@ async function setActiveUploadFile(index: number, forceParse = false) {
   if (audioOption?.lfeMix?.enable)
     options.value.channelCount = audioOption.lfeMix.channelCount;
 
+  if (
+    !audioOption?.lfeMix?.enable &&
+    (audioOption?.audioBasicInfo.channelCount || 0) > 6
+  ) {
+    const div = (str: string) =>
+      h("div", { style: { textAlign: "center" } }, str);
+    window.$message.warning(
+      () => [
+        div("Web Audio API 不支持大于 6 声道自动下混。"),
+        div("仅会保留 1、2 声道，建议启用 LFE 混合。"),
+      ],
+      { closable: true, duration: 20000 }
+    );
+  }
+
   const files = document.querySelectorAll(`#${fileListId} .n-upload-file`);
   files.forEach((v, i) => {
     v.classList.remove("active");
@@ -460,7 +475,10 @@ onUnmounted(() => {
                     加载样例
                   </n-button>
                 </NButtonGroup>
-                <NScrollbar style="max-height: calc(100vh - 794px)">
+                <NScrollbar
+                  style="max-height: calc(100vh - 794px)"
+                  trigger="none"
+                >
                   <NUploadFileList
                     :id="fileListId"
                     @click.capture="handleFileListClick"
