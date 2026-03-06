@@ -1,1 +1,0 @@
-import{d as n,ao as o,p as t,dj as c,bj as l,ab as r,c as i,o as m,u}from"./index-BiWbZ_LE.js";const _=["id"],v=n({__name:"original",setup(d,{expose:s}){const e=o();let a=l();return t(()=>{a.value=new c({id:e,theme:r.value.theme})}),s({myCanvas:a}),(p,f)=>(m(),i("canvas",{id:u(e),class:"my-canvas"},null,8,_))}});export{v as default};
