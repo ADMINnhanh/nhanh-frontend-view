@@ -30,6 +30,7 @@ import Options from "./options.vue";
 import axios from "axios";
 import HandleFileDrag from "@/components/singleFile/HandleFileDrag.vue";
 import {
+  downloadPCM,
   Endianness,
   FormatTime,
   getTargetAudioConfig,
@@ -51,12 +52,10 @@ const fileList = ref<UploadFileInfo[]>([]);
 
 const volume = ref(0.5);
 const channelVolume = ref<number[]>([]);
-const options = ref<Partial<PCMPlayOptions>>({
+const options = ref<Omit<PCMPlayOptions, "volume" | "startTime" | "duration">>({
   sampleRate: 16000,
   bitDepth: 16,
   channelCount: 1,
-  startTime: 0,
-  duration: 0,
   sampleFormat: "int",
   endianness: Endianness.LE,
 });
@@ -396,7 +395,7 @@ async function setActiveUploadFile(index: number, forceParse = false) {
       h("div", { style: { textAlign: "center" } }, str);
     window.$message.warning(
       () => [
-        div("Web Audio API 不支持大于 6 声道自动下混。"),
+        div("Web Audio API 不支持大于 6 声道的自动下混。"),
         div("仅会保留 1、2 声道，建议启用 LFE 混合。"),
       ],
       { closable: true, duration: 20000 }
@@ -490,17 +489,31 @@ onUnmounted(() => {
               </n-upload>
             </template>
             <template #suffix>
-              <NButton
-                :disabled="!targetAudioConfig"
-                :type="play ? 'error' : 'success'"
-                ghost
-                @click="play ? pauseAudio() : playAudio()"
-              >
-                <template #icon>
-                  <NIcon :component="play ? StopOutline : PlayOutline" />
-                </template>
-                {{ play ? "暂停" : "播放" }}
-              </NButton>
+              <NButtonGroup>
+                <n-button
+                  type="info"
+                  ghost
+                  @click="() => downloadPCM(options, getMetadata())"
+                  :disabled="!targetAudioConfig"
+                  style="width: 150px; flex-grow: 0"
+                >
+                  <template #icon>
+                    <n-icon :component="CloudDownloadOutline" />
+                  </template>
+                  下载 PCM
+                </n-button>
+                <NButton
+                  :disabled="!targetAudioConfig"
+                  :type="play ? 'error' : 'success'"
+                  ghost
+                  @click="play ? pauseAudio() : playAudio()"
+                >
+                  <template #icon>
+                    <NIcon :component="play ? StopOutline : PlayOutline" />
+                  </template>
+                  {{ play ? "暂停" : "播放" }}
+                </NButton>
+              </NButtonGroup>
             </template>
           </Options>
         </NScrollbar>

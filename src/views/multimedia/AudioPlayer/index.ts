@@ -1,4 +1,5 @@
 import {
+  _File_Download,
   _Format_FileSize,
   _Format_MillisecondToReadable,
 } from "nhanh-pure-function";
@@ -60,4 +61,30 @@ export function getTargetAudioConfig(options: AudioOptions): TargetAudioConfig {
     size: _Format_FileSize(fileSize),
     type: type.toLocaleUpperCase() as any,
   };
+}
+
+/** 下载PCM */
+export function downloadPCM(
+  options: Omit<PCMPlayOptions, "volume" | "startTime" | "duration">,
+  audioOptions?: AudioOptions
+) {
+  if (!audioOptions) return;
+
+  const { audioBasicInfo, lfeMix, pcm } = audioOptions;
+  options = Object.assign({}, options, audioBasicInfo);
+  if (lfeMix?.enable) options.channelCount = lfeMix.channelCount;
+
+  const { sampleRate, bitDepth, channelCount, endianness, sampleFormat } =
+    options;
+
+  const audioName = audioOptions.fileName.slice(
+    0,
+    audioOptions.fileName.lastIndexOf(".")
+  );
+  const fileName = `${audioName}_${sampleRate}Hz_${bitDepth}bit_${channelCount}ch_${endianness}_${sampleFormat}.pcm`;
+
+  const blob = new Blob([pcm], { type: "application/octet-stream" });
+  const href = URL.createObjectURL(blob);
+
+  _File_Download({ href, fileName });
 }

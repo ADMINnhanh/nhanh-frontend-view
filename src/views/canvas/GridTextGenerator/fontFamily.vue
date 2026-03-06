@@ -1,9 +1,5 @@
 <script lang="ts" setup>
-import {
-  _File_Download,
-  _Utility_Debounce,
-  _Utility_GenerateUUID,
-} from "nhanh-pure-function";
+import { _Utility_Debounce, _Utility_GenerateUUID } from "nhanh-pure-function";
 import {
   NButton,
   NDynamicInput,

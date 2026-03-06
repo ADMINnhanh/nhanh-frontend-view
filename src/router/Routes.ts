@@ -205,21 +205,6 @@ const multimedia: CustomRouteRecord = {
     //   component: () => import("@/views/multimedia/Peerjs/index.vue"),
     // },
     {
-      path: "TakeFlow",
-      name: "TakeFlow",
-      meta: {
-        name: {
-          zhCN: "取流",
-          enUS: "TakeFlow",
-        },
-        details: {
-          zhCN: "取流工具，演示媒体流获取与播放流程，便于调试与学习。",
-          enUS: "Stream capture tool demonstrating media retrieval and playback.",
-        },
-      },
-      component: () => import("@/views/multimedia/TakeFlow/index.vue"),
-    },
-    {
       path: "AudioPlayer",
       name: "AudioPlayer",
       meta: {
@@ -233,6 +218,22 @@ const multimedia: CustomRouteRecord = {
         },
       },
       component: () => import("@/views/multimedia/AudioPlayer/index.vue"),
+    },
+
+    {
+      path: "TakeFlow",
+      name: "TakeFlow",
+      meta: {
+        name: {
+          zhCN: "取流",
+          enUS: "TakeFlow",
+        },
+        details: {
+          zhCN: "取流工具，演示媒体流获取与播放流程，便于调试与学习。",
+          enUS: "Stream capture tool demonstrating media retrieval and playback.",
+        },
+      },
+      component: () => import("@/views/multimedia/TakeFlow/index.vue"),
     },
   ],
 };
@@ -302,9 +303,9 @@ const relaxRouting: CustomRouteRecord = {
 
 const AllRoute = [
   // home,
+  multimedia,
   canvas,
   math,
-  multimedia,
   relaxRouting,
 ];
 

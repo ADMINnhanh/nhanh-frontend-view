@@ -1,9 +1,5 @@
 <script lang="ts" setup>
-import {
-  _File_Download,
-  _Utility_Debounce,
-  _Utility_GenerateUUID,
-} from "nhanh-pure-function";
+import { _Utility_Debounce, _Utility_GenerateUUID } from "nhanh-pure-function";
 import { NA, NButton, NH5, NIcon, NModal, NText } from "naive-ui";
 import { HelpCircleOutline } from "@vicons/ionicons5";
 import { ref } from "vue";
