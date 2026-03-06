@@ -141,9 +141,12 @@ watch(
 const lfeMixChange = _Utility_Debounce((newLfeMix: LfeMix) => {
   if (targetAudioConfig.value) {
     const { type, lfeMix } = targetAudioConfig.value;
-    if ((!lfeMix?.enable && !newLfeMix.enable) || type == "PCM") return;
+    if (!lfeMix || type == "PCM") return;
+    if (!lfeMix.enable && !newLfeMix.enable) return;
+
     const index = getActivationFileIndex();
     if (index === undefined) return;
+
     setActiveUploadFile(index, true);
   }
 }, 400);
@@ -303,7 +306,7 @@ async function setActiveUploadFile(index: number, forceParse = false) {
     parserLoading.value = false;
     setTimeout(() => {
       msg.type = "success";
-      msg.content = `解析完成。久等了~`;
+      msg.content = `解析完成，久等了~`;
       setTimeout(() => msg.destroy(), 3000);
     }, 1000);
   };
