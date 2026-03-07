@@ -37,17 +37,18 @@ interface ResourceMeta {
 
 const workspace = "s-team-20-3177";
 const name = "nha-nh_github_io";
-const url = `https://api.counterapi.dev/v2/${workspace}/${name}/up`;
+const url = `https://api.counterapi.dev/v2/${workspace}/${name}${
+  import.meta.env.PROD ? "/up" : ""
+}`;
 const up_count = ref(0);
-async function upCount() {
+(async function () {
   try {
     const { data } = await axios.get<{ data: ResourceMeta }>(url);
     up_count.value = data.data.up_count;
   } catch (error: any) {
     console.error("Failed to track event:", error.message);
   }
-}
-if (import.meta.env.PROD) upCount();
+})();
 </script>
 
 <template>
