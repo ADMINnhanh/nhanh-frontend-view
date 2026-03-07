@@ -22,6 +22,7 @@ import {
 import { ref } from "vue";
 import WeatherInfo from "./weatherInfo/index.vue";
 import Media from "@/stores/media";
+import Counter from "./counter.vue";
 
 /** 切换语言 */
 function ChangeLanguage() {
@@ -62,28 +63,32 @@ _Element_FullscreenObserver((isFull) => (isFullScreen.value = isFull));
 
 <template>
   <NSpace class="layout-header-button-group">
-    <!-- <WeatherInfo v-if="!Media.isMobileStyle" /> -->
-    <NButton quaternary @click="toggleFullScreen">
+    <template v-if="!Media.isMobileStyle">
+      <Counter />
+      <!-- <WeatherInfo /> -->
+    </template>
+
+    <NButton title="全屏切换" quaternary @click="toggleFullScreen">
       <template #icon>
         <NIcon :component="isFullScreen ? Contract : Expand" />
       </template>
     </NButton>
-    <NButton quaternary @click="ChangeTheme">
+    <NButton title="主题切换" quaternary @click="ChangeTheme">
       <template #icon>
         <NIcon
           :component="Settings.theme == 'light' ? SunnyOutline : MoonOutline"
         />
       </template>
     </NButton>
-    <NButton quaternary @click="ChangeLanguage">
+    <NButton title="语言切换" quaternary @click="ChangeLanguage">
       <template #icon>
         <NIcon :component="LanguageOutline" />
       </template>
     </NButton>
-    <NButton quaternary @click="GotoGitHub">
+    <NButton title="GitHub 主页" quaternary @click="GotoGitHub">
       <template #icon><NIcon :component="LogoGithub" /></template>
     </NButton>
-    <NButton quaternary @click="OpenSettings">
+    <NButton title="设置" quaternary @click="OpenSettings">
       <template #icon><NIcon :component="SettingsOutline" /></template>
     </NButton>
   </NSpace>
