@@ -41,9 +41,7 @@ function tan(x: number) {
 }
 function cycleLimit(x: number): number {
   x = (x - center.x) / unitCircleRadius;
-  if (x > 1) return ((x - 1) % 2) - 1;
-  if (x < -1) return ((x + 1) % 2) + 1;
-  return x;
+  return ((((x + 1) % 2) + 2) % 2) - 1;
 }
 /** 反正弦 */
 function arcsin(x: number) {
@@ -53,7 +51,7 @@ function arcsin(x: number) {
 /** 反余弦 */
 function arccos(x: number) {
   const value = cycleLimit(x);
-  return Math.acos(value) * unitCircleRadius;
+  return (Math.acos(value) - 3.14 / 2) * unitCircleRadius;
 }
 /** 反正切 */
 function arctan(x: number) {
@@ -68,7 +66,7 @@ export default function draw(canvas: _Canvas, ctx: CanvasRenderingContext2D) {
   ctx.lineWidth = 2;
 
   const width = ctx.canvas.width;
-  let baseY = center.y - unitCircleRadius * 0;
+  let baseY = center.y - unitCircleRadius * 10;
 
   const sinY: number[] = [];
   const cosY: number[] = [];
@@ -85,14 +83,7 @@ export default function draw(canvas: _Canvas, ctx: CanvasRenderingContext2D) {
     arctanY.push(arctan(x));
   }
 
-  [
-    // sinY,
-    // cosY,
-    // tanY,
-    arcsinY,
-    // arccosY,
-    //  arctanY
-  ].forEach((y, i) => {
+  [sinY, cosY, tanY, arcsinY, arccosY, arctanY].forEach((y, i) => {
     ctx.strokeStyle = color[i];
     ctx.beginPath();
 

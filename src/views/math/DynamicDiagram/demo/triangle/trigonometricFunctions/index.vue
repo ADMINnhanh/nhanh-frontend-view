@@ -4,7 +4,7 @@ import { Settings } from "@/components/popups/components/Settings";
 import Card from "@/views/math/DynamicDiagram/components/Card.vue";
 import { _Canvas, _Utility_GenerateUUID } from "nhanh-pure-function";
 import draw from ".";
-import { NH6, NSpace, NText } from "naive-ui";
+import { NSpace, NText } from "naive-ui";
 
 const id = _Utility_GenerateUUID();
 let canvas = shallowRef<_Canvas>();
