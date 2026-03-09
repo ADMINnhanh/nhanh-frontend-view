@@ -129,6 +129,7 @@ const activeTransition = useLocalStorage(
   :deep(> .n-scrollbar) {
     width: 500px;
     height: auto;
+    flex-shrink: 0;
   }
   :deep(> .n-card) {
     width: 100px;

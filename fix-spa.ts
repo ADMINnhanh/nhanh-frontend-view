@@ -143,10 +143,9 @@ export default {
     });
 
     // 生成 sitemap.txt（修正路由路径拼接逻辑）
-    const sitemapContent = [
-      baseUrl + "/",
-      ...routes.map(([_, routePath]) => `${baseUrl}${routePath}`),
-    ].join("\n");
+    const sitemapContent = routes
+      .map(([_, routePath]) => `${baseUrl}${routePath}/`)
+      .join("\n");
 
     fs.writeFileSync(
       path.join(distPath, "sitemap.txt"),
@@ -158,7 +157,7 @@ export default {
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   ${routes
     .map(([_, routePath]) => {
-      const url = `${baseUrl}${routePath}`;
+      const url = `${baseUrl}${routePath}/`;
       return `
   <url>
     <loc>${url}</loc>

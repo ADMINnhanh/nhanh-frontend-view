@@ -19,6 +19,10 @@ export const dynamicDiagramCollection: Collection = [
     title: "三角形",
     children: [
       {
+        title: "三角函数",
+        component: "triangle/trigonometricFunctions",
+      },
+      {
         title: "垂直平分线",
         component: "triangle/perpendicularBisector",
       },
