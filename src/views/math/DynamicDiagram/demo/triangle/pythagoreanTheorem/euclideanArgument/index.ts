@@ -201,8 +201,8 @@ export function Tips() {
                 MyMath.rotatePoints(
                   MyMath.inverseTransform(oldV),
                   2,
-                  (r * Math.PI) / 180
-                )
+                  (r * Math.PI) / 180,
+                ),
               );
               if (r == 90) {
                 const startValue = ahb_polygon.value![1][1];
@@ -217,7 +217,7 @@ export function Tips() {
                       ahb_polygon.value = [...ahb_polygon.value!];
                       if (y == targetValue) isPlay.value = false;
                     },
-                    6
+                    6,
                   );
                 }, timeout);
               }
@@ -225,7 +225,7 @@ export function Tips() {
           }, timeout);
         }
       },
-      6
+      6,
     );
   }, timeout * 2);
 }

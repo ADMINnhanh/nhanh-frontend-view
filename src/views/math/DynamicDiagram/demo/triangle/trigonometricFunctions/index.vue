@@ -13,9 +13,9 @@ let canvas = shallowRef<_Canvas>();
 
 const functions = ref<FunctionName[]>([...FUNCTIONS]);
 const custom = new _Canvas.Custom({
-  value: [],
   draw: (ctx) => draw(canvas.value!, ctx, functions.value),
 });
+
 watch(functions, () => custom.notifyReload?.());
 onMounted(() => {
   canvas.value = new _Canvas({
@@ -46,4 +46,8 @@ onMounted(() => {
   </Card>
 </template>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+.n-checkbox-group {
+  margin-bottom: 10px;
+}
+</style>

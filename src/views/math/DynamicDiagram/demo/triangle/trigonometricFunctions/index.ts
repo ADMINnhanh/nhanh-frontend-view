@@ -68,7 +68,6 @@ function arctan(x: number) {
   return Math.atan(value) * unitCircleRadius;
 }
 
-// 函数映射表，消除重复的 if 判断
 const FUNCTION_MAP: Record<
   FunctionName,
   {
@@ -87,7 +86,7 @@ const FUNCTION_MAP: Record<
 export default function draw(
   canvas: _Canvas,
   ctx: CanvasRenderingContext2D,
-  functions: FunctionName[]
+  functions: FunctionName[],
 ) {
   const { percentage, axisConfig } = canvas;
   unitCircleRadius = (percentage * axisConfig.min) / axisConfig.count;
