@@ -1,6 +1,6 @@
 import type { _Canvas } from "nhanh-pure-function";
 
-const color = [
+export const color = [
   "#91cc75",
   "#fac858",
   "#ee6666",
@@ -11,6 +11,15 @@ const color = [
   "#ea7ccc",
   "#5470c6",
 ];
+export const FUNCTIONS = [
+  "sin",
+  "cos",
+  "tan",
+  "arcsin",
+  "arccos",
+  "arctan",
+] as const;
+export type FunctionName = (typeof FUNCTIONS)[number];
 
 /** 单位圆半径 */
 let unitCircleRadius = 1;
@@ -59,48 +68,74 @@ function arctan(x: number) {
   return Math.atan(value) * unitCircleRadius;
 }
 
-export default function draw(canvas: _Canvas, ctx: CanvasRenderingContext2D) {
+// 函数映射表，消除重复的 if 判断
+const FUNCTION_MAP: Record<
+  FunctionName,
+  {
+    compute: (x: number) => number | undefined;
+    colorIndex: number;
+  }
+> = {
+  sin: { compute: sin, colorIndex: 0 },
+  cos: { compute: cos, colorIndex: 1 },
+  tan: { compute: tan, colorIndex: 2 },
+  arcsin: { compute: arcsin, colorIndex: 3 },
+  arccos: { compute: arccos, colorIndex: 4 },
+  arctan: { compute: arctan, colorIndex: 5 },
+};
+
+export default function draw(
+  canvas: _Canvas,
+  ctx: CanvasRenderingContext2D,
+  functions: FunctionName[]
+) {
   const { percentage, axisConfig } = canvas;
   unitCircleRadius = (percentage * axisConfig.min) / axisConfig.count;
   center = canvas.center;
   ctx.lineWidth = 2;
 
   const width = ctx.canvas.width;
-  let baseY = center.y - unitCircleRadius * 10;
+  let baseY = center.y - unitCircleRadius * ((functions.length * 4) / 2 - 2);
 
-  const sinY: number[] = [];
-  const cosY: number[] = [];
-  const tanY: (number | undefined)[] = [];
-  const arcsinY: number[] = [];
-  const arccosY: number[] = [];
-  const arctanY: number[] = [];
-  for (let x = 0; x < width; x++) {
-    sinY.push(sin(x));
-    cosY.push(cos(x));
-    tanY.push(tan(x));
-    arcsinY.push(arcsin(x));
-    arccosY.push(arccos(x));
-    arctanY.push(arctan(x));
+  const list: Partial<
+    Record<FunctionName, { y: (number | undefined)[]; color: string }>
+  > = {};
+
+  for (const fnName of functions) {
+    list[fnName] = {
+      y: [],
+      color: color[FUNCTION_MAP[fnName].colorIndex],
+    };
   }
 
-  [sinY, cosY, tanY, arcsinY, arccosY, arctanY].forEach((y, i) => {
-    ctx.strokeStyle = color[i];
-    ctx.beginPath();
+  for (let x = 0; x < width; x++) {
+    for (const fnName of functions) {
+      const y = FUNCTION_MAP[fnName].compute(x);
+      list[fnName]?.y.push(y);
+    }
+  }
 
-    let drawing = false; // 是否正在绘制路径
+  for (const key in list) {
+    if (Object.prototype.hasOwnProperty.call(list, key)) {
+      const item = list[key as FunctionName]!;
+      ctx.strokeStyle = item.color;
+      ctx.beginPath();
 
-    y.forEach(function (y, x) {
-      if (y === undefined) {
-        drawing = false;
-      } else if (drawing) {
-        ctx.lineTo(x, baseY - y);
-      } else {
-        ctx.moveTo(x, baseY - y);
-        drawing = true;
-      }
-    });
+      let drawing = false; // 是否正在绘制路径
 
-    ctx.stroke();
-    baseY += unitCircleRadius * 4;
-  });
+      item.y.forEach(function (y, x) {
+        if (y === undefined) {
+          drawing = false;
+        } else if (drawing) {
+          ctx.lineTo(x, baseY - y);
+        } else {
+          ctx.moveTo(x, baseY - y);
+          drawing = true;
+        }
+      });
+
+      ctx.stroke();
+      baseY += unitCircleRadius * 4;
+    }
+  }
 }
